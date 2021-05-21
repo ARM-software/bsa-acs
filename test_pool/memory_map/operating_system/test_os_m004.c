@@ -1,0 +1,93 @@
+/** @file
+ * Copyright (c) 2016-2018, 2021 Arm Limited or its affiliates. All rights reserved.
+ * SPDX-License-Identifier : Apache-2.0
+
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+#include "val/include/bsa_acs_val.h"
+#include "val/include/val_interface.h"
+
+#include "val/include/bsa_acs_pcie.h"
+
+#define TEST_NUM   (ACS_MEMORY_MAP_TEST_BASE + 4)
+#define TEST_DESC  "B_MEM_03,B_MEM_04,B_MEM_06: Addressability  "
+
+static
+void
+payload (void)
+{
+  /* This test checks for the Addressability of Non-Secure Masters */
+  uint32_t index;
+  uint32_t count;
+  uint32_t data;
+  uint32_t dev_type;
+  uint32_t dev_bdf;
+
+  index = val_pe_get_index_mpid (val_pe_get_mpid());
+  count = val_peripheral_get_info (NUM_ALL, 0);
+
+  if (!count) {
+     val_print (ACS_PRINT_WARN, "\n       Skip as No peripherals detected   ", 0);
+     val_set_status (index, RESULT_SKIP (TEST_NUM, 1));
+     return;
+  }
+
+  while (count) {
+      count--;
+      dev_bdf = (uint32_t)val_peripheral_get_info (ANY_BDF, count);
+      dev_type = val_pcie_get_device_type(dev_bdf);
+      // 1: Normal PCIe device, 2: PCIe Host bridge, 3: PCIe bridge device, else: INVALID
+
+      if ((!dev_type) || (dev_type > 1)) {
+          //Skip this device, if we either got pdev as NULL or if it is a bridge
+          continue;
+      }
+
+      data = val_pcie_is_devicedma_64bit(dev_bdf);
+      if (data == 0) {
+          if (!val_pcie_is_device_behind_smmu(dev_bdf)) {
+              val_print (ACS_PRINT_ERR, "\n       WARNING:The device with bdf=0x%x", dev_bdf);
+              val_print (ACS_PRINT_ERR, "\n       doesn't support 64 bit addressing and is not", 0);
+              val_print (ACS_PRINT_ERR, "\n       behind SMMU. Please install driver for this", 0);
+              val_print (ACS_PRINT_ERR, "\n       device and test again. If driver is already", 0);
+              val_print (ACS_PRINT_ERR, "\n       installed, this test has failed.", 0);
+              val_print (ACS_PRINT_ERR, "\n       The device is of type = %d", dev_type);
+              val_set_status (index, RESULT_FAIL (TEST_NUM, 1));
+              return;
+          }
+      }
+
+  }
+
+  val_set_status (index, RESULT_PASS (TEST_NUM, 01));
+}
+
+uint32_t
+os_m004_entry (uint32_t num_pe)
+{
+  uint32_t status = ACS_STATUS_FAIL;
+
+  num_pe = 1;  //This test is run on single processor
+
+  status = val_initialize_test (TEST_NUM, TEST_DESC, num_pe);
+  if (status != ACS_STATUS_SKIP) {
+      val_run_test_payload (TEST_NUM, num_pe, payload, 0);
+  }
+
+  /* get the result from all PE and check for failure */
+  status = val_check_for_error (TEST_NUM, num_pe);
+
+  val_report_status (0, BSA_ACS_END (TEST_NUM));
+
+  return status;
+}
