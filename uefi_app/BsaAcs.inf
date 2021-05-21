@@ -1,0 +1,177 @@
+## @file
+#  Copyright (c) 2016-2021 Arm Limited or its affiliates. All rights reserved.
+#  SPDX-License-Identifier : Apache-2.0
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+##
+
+
+[Defines]
+  INF_VERSION                    = 0x00010006
+  BASE_NAME                      = Bsa
+  FILE_GUID                      = a912f198-7f0e-4803-b908-b757b806ec83
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 0.1
+  ENTRY_POINT                    = ShellCEntryLib
+
+#
+#  VALID_ARCHITECTURES           = AARCH64
+#
+
+[Sources.AARCH64]
+  ../
+  BsaAcsMain.c
+  ../test_pool/pe/operating_system/test_os_c001.c
+  ../test_pool/pe/operating_system/test_os_c002.c
+  ../test_pool/pe/operating_system/test_os_c003.c
+  ../test_pool/pe/operating_system/test_os_c004.c
+  ../test_pool/pe/operating_system/test_os_c005.c
+  ../test_pool/pe/operating_system/test_os_c006.c
+  ../test_pool/pe/operating_system/test_os_c007.c
+  ../test_pool/pe/operating_system/test_os_c008.c
+  ../test_pool/pe/operating_system/test_os_c009.c
+  ../test_pool/pe/operating_system/test_os_c010.c
+  ../test_pool/pe/operating_system/test_os_c011.c
+  ../test_pool/pe/operating_system/test_os_c012.c
+  ../test_pool/pe/operating_system/test_os_c013.c
+  ../test_pool/pe/operating_system/test_os_c014.c
+  ../test_pool/pe/operating_system/test_os_c015.c
+  ../test_pool/pe/operating_system/test_os_c016.c
+  ../test_pool/pe/operating_system/test_os_c017.c
+  ../test_pool/pe/operating_system/test_os_c018.c
+  ../test_pool/pe/operating_system/test_os_c019.c
+  ../test_pool/pe/operating_system/test_os_c020.c
+  ../test_pool/pe/hypervisor/test_hyp_c001.c
+  ../test_pool/pe/hypervisor/test_hyp_c002.c
+  ../test_pool/pe/hypervisor/test_hyp_c003.c
+  ../test_pool/pe/hypervisor/test_hyp_c004.c
+  ../test_pool/pe/hypervisor/test_hyp_c005.c
+  ../test_pool/pe/platform_security/test_ps_c001.c
+  ../test_pool/memory_map/operating_system/test_os_m001.c
+  ../test_pool/memory_map/operating_system/test_os_m002.c
+  ../test_pool/memory_map/operating_system/test_os_m003.c
+  ../test_pool/gic/operating_system/test_os_g001.c
+  ../test_pool/gic/operating_system/test_os_g002.c
+  ../test_pool/gic/operating_system/test_os_g003.c
+  ../test_pool/gic/operating_system/test_os_g004.c
+  ../test_pool/gic/operating_system/test_os_g005.c
+  ../test_pool/gic/operating_system/test_os_g006.c
+  ../test_pool/gic/hypervisor/test_hyp_g001.c
+  ../test_pool/gic_v2m/operating_system/test_os_v001.c
+  ../test_pool/gic_v2m/operating_system/test_os_v002.c
+  ../test_pool/gic_v2m/operating_system/test_os_v003.c
+  ../test_pool/gic_v2m/operating_system/test_os_v004.c
+  ../test_pool/timer/operating_system/test_os_t001.c
+  ../test_pool/timer/operating_system/test_os_t002.c
+  ../test_pool/timer/operating_system/test_os_t003.c
+  ../test_pool/timer/operating_system/test_os_t004.c
+  ../test_pool/timer/operating_system/test_os_t005.c
+  ../test_pool/watchdog/operating_system/test_os_w001.c
+  ../test_pool/watchdog/operating_system/test_os_w002.c
+  ../test_pool/pcie/operating_system/test_os_p001.c
+  ../test_pool/pcie/operating_system/test_os_p002.c
+  ../test_pool/pcie/operating_system/test_os_p020.c
+  ../test_pool/pcie/operating_system/test_os_p021.c
+  ../test_pool/pcie/operating_system/test_os_p022.c
+  ../test_pool/pcie/operating_system/test_os_p023.c
+  ../test_pool/pcie/operating_system/test_os_p024.c
+  ../test_pool/pcie/operating_system/test_os_p025.c
+  ../test_pool/pcie/operating_system/test_os_p026.c
+  ../test_pool/pcie/operating_system/test_os_p027.c
+  ../test_pool/pcie/operating_system/test_os_p028.c
+  ../test_pool/pcie/operating_system/test_os_p029.c
+  ../test_pool/pcie/operating_system/test_os_p030.c
+  ../test_pool/pcie/operating_system/test_os_p031.c
+  ../test_pool/pcie/operating_system/test_os_p032.c
+  ../test_pool/pcie/operating_system/test_os_p033.c
+  ../test_pool/pcie/operating_system/test_os_p034.c
+  ../test_pool/pcie/operating_system/test_os_p035.c
+  ../test_pool/pcie/operating_system/test_os_p036.c
+  ../test_pool/pcie/operating_system/test_os_p037.c
+  ../test_pool/pcie/operating_system/test_os_p038.c
+  ../test_pool/pcie/operating_system/test_os_p039.c
+  ../test_pool/pcie/operating_system/test_os_p041.c
+  ../test_pool/pcie/operating_system/test_os_p042.c
+  ../test_pool/pcie/operating_system/test_os_p044.c
+  ../test_pool/pcie/operating_system/test_os_p048.c
+  ../test_pool/pcie/operating_system/test_os_p050.c
+  ../test_pool/pcie/operating_system/test_os_p053.c
+  ../test_pool/pcie/operating_system/test_os_p051.c
+  ../test_pool/pcie/operating_system/test_os_p052.c
+  ../test_pool/pcie/operating_system/test_os_p054.c
+  ../test_pool/pcie/operating_system/test_os_p055.c
+  ../test_pool/pcie/operating_system/test_os_p056.c
+  ../test_pool/pcie/operating_system/test_os_p057.c
+  ../test_pool/pcie/operating_system/test_os_p058.c
+  ../test_pool/pcie/operating_system/test_os_p059.c
+  ../test_pool/pcie/operating_system/test_os_p060.c
+  ../test_pool/pcie/operating_system/test_os_p061.c
+  ../test_pool/pcie/operating_system/test_os_p062.c
+  ../test_pool/smmu/operating_system/test_os_i001.c
+  ../test_pool/smmu/operating_system/test_os_i002.c
+  ../test_pool/smmu/operating_system/test_os_i003.c
+  ../test_pool/smmu/operating_system/test_os_i004.c
+  ../test_pool/smmu/operating_system/test_os_i005.c
+  ../test_pool/smmu/operating_system/test_os_i006.c
+  ../test_pool/smmu/operating_system/test_os_i007.c
+  ../test_pool/smmu/operating_system/test_os_i008.c
+  ../test_pool/smmu/operating_system/test_os_i009.c
+  ../test_pool/smmu/hypervisor/test_hyp_i001.c
+  ../test_pool/smmu/hypervisor/test_hyp_i002.c
+  ../test_pool/smmu/hypervisor/test_hyp_i003.c
+  ../test_pool/smmu/hypervisor/test_hyp_i004.c
+  ../test_pool/smmu/hypervisor/test_hyp_i005.c
+  ../test_pool/power_wakeup/operating_system/test_os_u001.c
+  ../test_pool/power_wakeup/operating_system/test_os_u002.c
+  ../test_pool/peripherals/operating_system/test_os_d001.c
+  ../test_pool/peripherals/operating_system/test_os_d002.c
+  ../test_pool/peripherals/operating_system/test_os_d003.c
+  ../test_pool/exerciser/operating_system/test_os_e001.c
+  ../test_pool/exerciser/operating_system/test_os_e004.c
+  ../test_pool/exerciser/operating_system/test_os_e005.c
+  ../test_pool/exerciser/operating_system/test_os_e006.c
+  ../test_pool/exerciser/operating_system/test_os_e012.c
+  ../test_pool/exerciser/operating_system/test_os_e013.c
+  ../test_pool/exerciser/operating_system/test_os_e015.c
+
+[Packages]
+  StdLib/StdLib.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  ShellPkg/ShellPkg.dec
+
+[LibraryClasses]
+  BsaValLib
+  BsaPalLib
+  UefiLib
+  ShellLib
+  DebugLib
+  BaseMemoryLib
+  ShellCEntryLib
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+
+[Protocols]
+  gEfiAcpiTableProtocolGuid                     ## CONSUMES
+  gHardwareInterruptProtocolGuid                ## CONSUMES
+  gEfiCpuArchProtocolGuid                       ## CONSUMES
+  gEfiPciIoProtocolGuid                         ## CONSUMES
+  gEfiLoadedImageProtocolGuid                   ## CONSUMES
+
+[Guids]
+  gEfiAcpi20TableGuid
+  gEfiAcpiTableGuid
+
+[BuildOptions]
+  GCC:*_*_*_ASM_FLAGS  =  -march=armv8.1-a
