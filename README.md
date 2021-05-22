@@ -28,7 +28,6 @@ A few tests are executed by running the BSA ACS Linux application which in turn 
 
 ## Additional reading
   - For information on the test scenarios currently implemented for IR, see [Scenario Document](docs/Arm_Base_System_Architecture_Scenario_IR.pdf).
-  - For information on the test scenarios currently implemented for ES, see [Scenario Document](docs/Arm_Base_System_Architecture_Scenario_ES.pdf).
 
 ## ACS build steps - UEFI Shell application
 
@@ -44,18 +43,6 @@ Prebuilt images for each release are available in the prebuilt_images folder of 
 - Install GCC 7.5 or a later toolchain for Linux from [here](https://releases.linaro.org/components/toolchain/binaries/).
 - Install the build prerequisite packages to build EDK2.
 Note: The details of the packages are beyond the scope of this document.
-
-To start the ACS build for ES, perform the following steps:
-
-1.  cd local_edk2_path
-2.  git submodule update --init --recursive
-3.  git clone https://github.com/ARM-software/bsa-acs.git ShellPkg/Application/bsa-acs
-4.  Add the following to the [LibraryClasses.common] section in ShellPkg/ShellPkg.dsc
->          BsaValLib|ShellPkg/Application/bsa-acs/val/BsaValLib.inf
->          BsaPalLib|ShellPkg/Application/bsa-acs/platform/pal_uefi/BsaPalLib.inf
-
-5.  Add the following in the [components] section of ShellPkg/ShellPkg.dsc
->          ShellPkg/Application/bsa-acs/uefi_app/BsaAcs.inf
 
 To start the ACS build for IR, perform the following steps:
 
@@ -106,17 +93,23 @@ The execution of the compliance suite varies depending on the test environment. 
 >          +mGicNumInterrupts      = ARM_GIC_MAX_NUM_INTERRUPT;
 
 ### Silicon
-
 On a system where a USB port is available and functional, perform the following steps:
 
-1. Copy 'Bsa.efi' to a USB Flash drive.
-2. Plug in the USB flash drive to one of the functional USB ports on the system.
-3. Boot the system to UEFI shell.
-4. To determine the file system number of the plugged-in USB drive, execute 'map -r' command.
-5. Type 'fs<x>' where '<x>' is replaced by the number determined in step 4.
-6. To start the compliance tests, run the executable Bsa.efi with the appropriate parameters.
-7. Copy the UART console output to a log file for analysis and certification.
-
+#### For IR Systems:
+1. Copy 'Bsa.efi' and 'Shell.efi' to a USB Flash drive.
+2. Boot the system to U-Boot shell.
+3. Plug in the USB flash drive to one of the functional USB ports on the system.
+4. To determine the file system number of the plugged-in USB drive, execute command <br />
+   `usb start`
+5. Copy the 'Shell.efi' to memory location using the command <br />
+   `Syntax: fatload usb <dev_num> ${kernel_addr_r} Shell.efi` <br />
+   `Eg: fatload usb 0 ${kernel_addr_r} Shell.efi` <br />
+   This boots the system to UEFI Shell.
+6. To determine the file system number of the plugged-in USB drive, execute 'map -r' command.
+7. Type 'fs<x>' where '<x>' is replaced by the number determined in step 5.
+8. To start the compliance tests, run the executable Bsa.efi with the appropriate parameters.
+9. Copy the UART console output to a log file.
+Note: 'Shell.efi' is available in the [pebuilt_images/IR](prebuilt_images)
 
 ### Emulation environment with secondary storage
 On an emulation environment with secondary storage, perform the following steps:
