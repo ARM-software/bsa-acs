@@ -1,0 +1,8 @@
+v21.05_05_ALPHA
+
+* BSA: ACS framework implementation.
+* BSA: Implementation of architectural rules specified by the BSA v1.0 specification.
+* BSA: Provided platform support to run the ACS on UEFI and U-boot environment.
+* BSA: Provided documentations required to build and run BSA ACS on supported platforms.
+* BSA: Provided documentation on test scenarios. 
+
