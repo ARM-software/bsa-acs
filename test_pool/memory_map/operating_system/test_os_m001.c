@@ -23,7 +23,8 @@
 #include "val/include/bsa_acs_pe.h"
 
 #define TEST_NUM   (ACS_MEMORY_MAP_TEST_BASE + 1)
-#define TEST_DESC  "B_MEM_02: Memory Access to Un-Populated addr"
+#define TEST_RULE  "B_MEM_02"
+#define TEST_DESC  "Memory Access to Un-Populated addr    "
 
 #define LOOP_VAR   3          /* Number of Addresses to check */
 
@@ -112,14 +113,14 @@ os_m001_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  error_flag = val_check_for_error(TEST_NUM, num_pe);
+  error_flag = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
   if (!error_flag)
       status = ACS_STATUS_PASS;
   else
       status = ACS_STATUS_FAIL;
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

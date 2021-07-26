@@ -21,7 +21,8 @@
 #include "val/include/bsa_acs_pcie.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 34)
-#define TEST_DESC  "RE_BAR_3,IE_BAR_3: Check BAR mem space & Type rule "
+#define TEST_RULE  "RE_BAR_3"
+#define TEST_DESC  "Check BAR mem space & Type rule       "
 
 static
 void
@@ -53,8 +54,8 @@ payload(void)
       bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
       dp_type = val_pcie_device_port_type(bdf);
 
-      /* Check for RCiEP and iEP */
-      if (dp_type == RCiEP || dp_type == iEP_EP)
+      /* Check for RCiEP */
+      if (dp_type == RCiEP)
       {
           /* Extract Hdr Type */
           hdr_type = val_pcie_function_header_type(bdf);
@@ -125,9 +126,9 @@ os_p034_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

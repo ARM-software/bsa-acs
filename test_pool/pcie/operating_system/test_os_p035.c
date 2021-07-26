@@ -23,7 +23,8 @@
 #include "val/include/bsa_acs_memory.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 35)
-#define TEST_DESC  "RE_RST_1,IE_RST_1: Check Function level reset rule "
+#define TEST_RULE  "RE_RST_1, PCI_SM_02"
+#define TEST_DESC  "Check Function level reset            "
 
 uint32_t is_flr_failed(uint32_t bdf)
 {
@@ -93,8 +94,8 @@ payload(void)
       bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
       dp_type = val_pcie_device_port_type(bdf);
 
-      /* Check entry is  RCiEP or iEP endpoint or normal EP */
-      if ((dp_type == RCiEP) || (dp_type == iEP_EP) || (dp_type == EP))
+      /* Check entry is  RCiEP or normal EP */
+      if ((dp_type == RCiEP) || (dp_type == EP))
       {
           /* Read FLR capability bit value */
           val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &cap_base);
@@ -181,9 +182,9 @@ os_p035_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

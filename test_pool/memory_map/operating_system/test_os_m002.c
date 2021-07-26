@@ -23,7 +23,8 @@
 #include "val/include/bsa_acs_pe.h"
 
 #define TEST_NUM   (ACS_MEMORY_MAP_TEST_BASE + 2)
-#define TEST_DESC  "B_MEM_01: Mem Access Response in finite time"
+#define TEST_RULE  "B_MEM_01"
+#define TEST_DESC  "Mem Access Response in finite time    "
 
 #define LOOP_VAR   3          /* Number of Addresses to check */
 
@@ -65,7 +66,7 @@ payload()
       /* Get the address of device memory region */
       addr = val_memory_get_addr(MEMORY_TYPE_DEVICE, instance, &attr);
       if (!addr) {
-          val_print(ACS_PRINT_DEBUG, "\n      Error in obtaining device memory for"
+          val_print(ACS_PRINT_DEBUG, "\n       Error in obtaining dev mem for"
                                    " instance %d", instance);
           goto normal_mem_test;
       }
@@ -123,14 +124,14 @@ os_m002_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* Get the result from the PE and check for failure */
-  error_flag = val_check_for_error(TEST_NUM, num_pe);
+  error_flag = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
   if (!error_flag)
       status = ACS_STATUS_PASS;
   else
       status = ACS_STATUS_FAIL;
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

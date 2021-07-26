@@ -82,7 +82,7 @@ void val_gic_bsa_install_esr(uint32_t exception_type, void (*esr)(uint64_t, void
 
 uint32_t common_exception_handler(uint32_t exception_type)
 {
-  val_print(ACS_PRINT_DEBUG, "\n       GIC_INIT: In Exception Handler Type : %x", exception_type);
+  val_print(ACS_PRINT_INFO, "\n       GIC_INIT: In Exception Handler Type : %x", exception_type);
 
   /* Call Handler for exception, Handler would have
    * already been installed using install_esr call

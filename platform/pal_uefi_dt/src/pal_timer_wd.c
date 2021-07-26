@@ -309,7 +309,7 @@ pal_wd_create_info_table_dt(WD_INFO_TABLE *WdTable)
 
           interrupt_cell = fdt_interrupt_cells((const void *)dt_ptr, offset);
           bsa_print(ACS_PRINT_DEBUG, L" interrupt_cell  %d\n", interrupt_cell);
-          if (interrupt_cell < 1 || interrupt_cell > 3) {
+          if (interrupt_cell < INTERRUPT_CELLS_MIN || interrupt_cell > INTERRUPT_CELLS_MAX) {
               bsa_print(ACS_PRINT_ERR, L" Invalid interrupt cell : %d \n", interrupt_cell);
               return;
           }
@@ -330,7 +330,7 @@ pal_wd_create_info_table_dt(WD_INFO_TABLE *WdTable)
 
           }
           index = 0;
-          if (interrupt_cell == 3) {
+          if ((interrupt_cell == 3) || (interrupt_cell == 4)) {
               if (Pintr_val[index++])
                   WdEntry->wd_gsiv = fdt32_to_cpu(Pintr_val[index++]) + PPI_OFFSET;
               else
@@ -347,7 +347,7 @@ pal_wd_create_info_table_dt(WD_INFO_TABLE *WdTable)
           switch (intr_flg) /* Interrupt flag*/
           {
             case IRQ_TYPE_NONE:
-              bsa_print(ACS_PRINT_DEBUG, L"interrupt type none\n");
+              bsa_print(ACS_PRINT_DEBUG, L" interrupt type none\n");
               wd_mode = INTERRUPT_IS_LEVEL_TRIGGERED; /* Set default*/
               wd_polarity = INTERRUPT_IS_ACTIVE_HIGH;
               break;
@@ -368,7 +368,7 @@ pal_wd_create_info_table_dt(WD_INFO_TABLE *WdTable)
               wd_polarity = INTERRUPT_IS_ACTIVE_LOW;
               break;
             default:
-              bsa_print(ACS_PRINT_ERR, L"interrupt type invalid :%X \n",
+              bsa_print(ACS_PRINT_ERR, L" interrupt type invalid :%X \n",
                         fdt32_to_cpu(Pintr_val[2]));
               return;
           }
@@ -440,7 +440,7 @@ pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable)
   }
   interrupt_cell = fdt_interrupt_cells((const void *)dt_ptr, offset);
   bsa_print(ACS_PRINT_DEBUG, L" interrupt_cell  %d\n", interrupt_cell);
-  if (interrupt_cell < 1 || interrupt_cell > 3) {
+  if (interrupt_cell < INTERRUPT_CELLS_MIN || interrupt_cell > INTERRUPT_CELLS_MAX) {
       bsa_print(ACS_PRINT_ERR, L" Invalid interrupt cell : %d \n", interrupt_cell);
       return;
   }
@@ -452,19 +452,27 @@ pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable)
       return;
   }
 
-  if (interrupt_cell == 3) { /* Interrupt type available*/
+  if (interrupt_cell >= 3) { /* Interrupt type available*/
       if (fdt32_to_cpu(Pintr[index++]) == GIC_PPI)
         TimerTable->header.s_el1_timer_gsiv   = fdt32_to_cpu(Pintr[index++]) + PPI_OFFSET;
       index++; /* Skip interrupt flag*/
+      if (interrupt_cell == 4)
+         index++; /* Skip CPU affinity*/
       if (fdt32_to_cpu(Pintr[index++]) == GIC_PPI)
         TimerTable->header.ns_el1_timer_gsiv  = fdt32_to_cpu(Pintr[index++]) + PPI_OFFSET;
       index++; /* Skip interrupt flag*/
+      if (interrupt_cell == 4)
+         index++; /* Skip CPU affinity*/
       if (fdt32_to_cpu(Pintr[index++]) == GIC_PPI)
         TimerTable->header.virtual_timer_gsiv = fdt32_to_cpu(Pintr[index++]) + PPI_OFFSET;
       index++; /* Skip interrupt flag*/
+      if (interrupt_cell == 4)
+         index++; /* Skip CPU affinity*/
       if (fdt32_to_cpu(Pintr[index++]) == GIC_PPI)
         TimerTable->header.el2_timer_gsiv     = fdt32_to_cpu(Pintr[index++]) + PPI_OFFSET;
       index++; /* Skip interrupt flag*/
+      if (interrupt_cell == 4)
+         index++; /* Skip CPU affinity*/
   }
   else {
       TimerTable->header.s_el1_timer_gsiv   = fdt32_to_cpu(Pintr[index++]);
@@ -547,14 +555,14 @@ pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable)
   /* Get frame sub node*/
   subnode_offset = fdt_subnode_offset((const void *)dt_ptr, offset, "frame");
   if (subnode_offset < 0) {
-      bsa_print(ACS_PRINT_DEBUG, L"frame node offset not found %d \n", subnode_offset);
+      bsa_print(ACS_PRINT_DEBUG, L" frame node offset not found %d \n", subnode_offset);
       return;
   }
 
   while (subnode_offset != -FDT_ERR_NOTFOUND) {
       /* Get frame number*/
       frame_number = fdt_frame_number((const void *)dt_ptr, subnode_offset);
-      bsa_print(ACS_PRINT_DEBUG, L"Frame number is  %d \n", frame_number);
+      bsa_print(ACS_PRINT_DEBUG, L" Frame number is  %d \n", frame_number);
 
       /* Get reg property from frame to update GtCntBase */
       Preg = (UINT32 *)fdt_getprop_namelen((void *)dt_ptr, subnode_offset, "reg", 3, &prop_len);
@@ -574,7 +582,7 @@ pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable)
 
       interrupt_cell = fdt_interrupt_cells((const void *)dt_ptr, subnode_offset);
       bsa_print(ACS_PRINT_DEBUG, L" interrupt_cell for subnode  %d\n", interrupt_cell);
-      if (interrupt_cell < 1 || interrupt_cell > 3) {
+      if (interrupt_cell < INTERRUPT_CELLS_MIN || interrupt_cell > INTERRUPT_CELLS_MAX) {
           bsa_print(ACS_PRINT_ERR, L" Invalid interrupt cell subnode: %d \n", interrupt_cell);
           return;
       }
@@ -591,13 +599,15 @@ pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable)
       GtEntry->frame_num[GtEntry->timer_count] = frame_number;
 
       index = 0;
-      if (interrupt_cell == 3) {
+      if (interrupt_cell >= 3) {
           if (fdt32_to_cpu(Pintr[index++]) == GIC_SPI)
             GtEntry->gsiv[GtEntry->timer_count] = fdt32_to_cpu(Pintr[index++]) + SPI_OFFSET;
           else
             GtEntry->gsiv[GtEntry->timer_count] = 0; /* Invalid interrupt type*/
 
           index++; /* Skip interrupt flag*/
+          if (interrupt_cell == 4)
+             index++; /* Skip CPU affinity*/
           if ((prop_len/sizeof(UINT32)) > interrupt_cell) {/* virt_gsiv is optional*/
               if (fdt32_to_cpu(Pintr[index++]) == GIC_SPI)
                 GtEntry->virt_gsiv[GtEntry->timer_count] = fdt32_to_cpu(Pintr[index]) + SPI_OFFSET;

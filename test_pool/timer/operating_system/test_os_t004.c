@@ -22,7 +22,8 @@
 
 
 #define TEST_NUM   (ACS_TIMER_TEST_NUM_BASE + 4)
-#define TEST_DESC  "B_TIME_08: Generate Mem Mapped SYS Timer Intr "
+#define TEST_RULE  "B_TIME_08"
+#define TEST_DESC  "Generate Mem Mapped SYS Timer Intr    "
 
 static uint32_t intid;
 static uint64_t cnt_base_n;
@@ -52,7 +53,7 @@ payload()
   uint64_t timer_num = val_timer_get_info(TIMER_INFO_NUM_PLATFORM_TIMERS, 0);
 
   if (!timer_num) {
-      val_print(ACS_PRINT_WARN, "\n       No System timers are defined      ", 0);
+      val_print(ACS_PRINT_DEBUG, "\n       No System timers are defined  ", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
       return;
   }
@@ -125,9 +126,9 @@ os_t004_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

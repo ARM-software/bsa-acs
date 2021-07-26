@@ -20,6 +20,7 @@
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/ShellLib.h>
+#include <Library/PrintLib.h>
 #include <Library/DtPlatformDtbLoaderLib.h>
 
 #include <Include/libfdt.h>
@@ -30,14 +31,16 @@
 #include "include/pal_uefi.h"
 #include "include/pal_dt.h"
 /**
-  @brief   Checks if gic init and interrupt handlers ACS code is used
+  @brief   Checks if System information is passed using Device Tree (DT)
+           This api is also used to check if GIC/Interrupt Init ACS Code
+           is used or not. In case of DT, ACS Code is used for INIT
 
   @param  None
 
   @return True/False
 */
 UINT32
-pal_bsa_gic_imp()
+pal_target_is_dt()
 {
   return 1;
 }
@@ -159,4 +162,34 @@ int fdt_node_offset_by_prop_name(const void *fdt, int startoffset, const char *p
         return offset;
   }
   return offset;
+}
+
+/**
+  @brief  Dump DTB to file
+
+  @param  None
+
+  @return None
+**/
+VOID
+pal_dump_dtb()
+{
+  if (g_dtb_log_file_handle)
+  {
+    UINT64 dtb = pal_get_dt_ptr();
+    UINTN BufferSize;
+    EFI_STATUS Status;
+
+    if (!dtb)
+        return;
+
+    BufferSize = fdt_totalsize(dtb);
+    if (!BufferSize) {
+        bsa_print(ACS_PRINT_ERR, L"dtb size 0\n");
+        return;
+    }
+    Status = ShellWriteFile(g_dtb_log_file_handle, &BufferSize, (VOID *)dtb);
+    if (EFI_ERROR(Status))
+      bsa_print(ACS_PRINT_ERR, L"Error in writing to dtb log file\n");
+  }
 }

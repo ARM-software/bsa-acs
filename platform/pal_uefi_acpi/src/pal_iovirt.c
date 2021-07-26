@@ -53,16 +53,16 @@ dump_block(IOVIRT_BLOCK *block) {
   NODE_DATA_MAP *map = &block->data_map[0];
   switch(block->type) {
       case IOVIRT_NODE_ITS_GROUP:
-      bsa_print(ACS_PRINT_INFO, L"\nITS Group:\n Num ITS:%d\n", (*map).id[0]);
+      bsa_print(ACS_PRINT_INFO, L"\nITS Group:\n Num ITS : %d", block->data.its_count);
       for(i = 0; i < block->data.its_count; i++)
-          bsa_print(ACS_PRINT_INFO, L"%d ", (*map).id[i]);
+          bsa_print(ACS_PRINT_INFO, L"\n ITS ID : %d", (*map).id[i]);
       bsa_print(ACS_PRINT_INFO, L"\n");
       return;
       case IOVIRT_NODE_NAMED_COMPONENT:
       bsa_print(ACS_PRINT_INFO, L"\nNamed Component:\n Device Name:%a\n", block->data.name);
       break;
       case IOVIRT_NODE_PCI_ROOT_COMPLEX:
-      bsa_print(ACS_PRINT_INFO, L"\nRoot Complex:\n PCI segment number:%d\n", block->data.rc.segment);
+      bsa_print(ACS_PRINT_INFO, L"\nRoot Complex:\n Segment Num:%d\n", block->data.rc.segment);
       break;
       case IOVIRT_NODE_SMMU:
       case IOVIRT_NODE_SMMU_V3:
@@ -74,7 +74,7 @@ dump_block(IOVIRT_BLOCK *block) {
                  block->data.pmcg.base, block->data.pmcg.overflow_gsiv, block->data.pmcg.node_ref);
       break;
   }
-  bsa_print(ACS_PRINT_INFO, L"Number of ID Mappings:%d\n", block->num_data_map);
+  bsa_print(ACS_PRINT_INFO, L"\nNumber of ID Mappings:%d\n", block->num_data_map);
   for(i = 0; i < block->num_data_map; i++, map++) {
       bsa_print(ACS_PRINT_INFO, L"\n input_base:0x%x\n id_count:0x%x\n output_base:0x%x\n output ref:0x%x\n",
             (*map).map.input_base, (*map).map.id_count,

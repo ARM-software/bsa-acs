@@ -28,7 +28,6 @@
 
 #include "include/pal_uefi.h"
 #include "include/bsa_pcie_enum.h"
-#include "src_gic_its/bsa_gic_its.h"
 #include "include/pal_dt.h"
 #include "include/pal_dt_spec.h"
 
@@ -64,9 +63,6 @@ EFI_HARDWARE_INTERRUPT2_PROTOCOL *gInterrupt2 = NULL;
 UINT64
 pal_get_madt_ptr();
 
-GIC_INFO_ENTRY  *g_gic_entry = NULL;
-GIC_ITS_INFO    *g_gic_its_info;
-
 /**
   @brief  This API fills in the PE_INFO_TABLE  with information about GIC maintenance
           interrupt in the system. This is achieved by parsing the DT.
@@ -98,7 +94,7 @@ pal_pe_info_table_gmaint_gsiv_dt(PE_INFO_TABLE *PeTable)
       /* Search for GICv3 nodes*/
       offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, gicv3_dt_arr[i]);
       if (offset < 0) {
-        bsa_print(ACS_PRINT_DEBUG, L"GICv3 compatible value not found for index : %d\n", i);
+        bsa_print(ACS_PRINT_DEBUG, L" GICv3 compatible value not found for index : %d\n", i);
         continue; /* Search for next compatible item*/
       }
       else {
@@ -112,7 +108,7 @@ pal_pe_info_table_gmaint_gsiv_dt(PE_INFO_TABLE *PeTable)
           /* Search for GICv2 nodes*/
           offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, gicv2_dt_arr[i]);
           if (offset < 0) {
-              bsa_print(ACS_PRINT_DEBUG, L"GICv2 compatible value not found for index : %d\n", i);
+              bsa_print(ACS_PRINT_DEBUG, L" GICv2 compatible value not found for index : %d\n", i);
               continue; /* Search for next compatible item*/
           }
           else {
@@ -136,13 +132,13 @@ pal_pe_info_table_gmaint_gsiv_dt(PE_INFO_TABLE *PeTable)
 
   interrupt_cell = fdt_interrupt_cells((const void *)dt_ptr, offset);
   bsa_print(ACS_PRINT_DEBUG, L" interrupt_cell  %d\n", interrupt_cell);
-  if (interrupt_cell < 1 || interrupt_cell > 3) {
+  if (interrupt_cell < INTERRUPT_CELLS_MIN || interrupt_cell > INTERRUPT_CELLS_MAX) {
       bsa_print(ACS_PRINT_ERR, L" Invalid interrupt cell : %d \n", interrupt_cell);
       return;
   }
 
   for (i = 0; i < PeTable->header.num_of_pe; i++) {
-      if (interrupt_cell == 3) {
+      if ((interrupt_cell == 3) || (interrupt_cell == 4)) {
           if (Pintr[0])
               Ptr->gmain_gsiv = fdt32_to_cpu(Pintr[1]) + PPI_OFFSET;
           else
@@ -176,7 +172,6 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
   }
 
   GicEntry = GicTable->gic_info;
-  g_gic_entry = GicTable->gic_info;
   GicTable->header.gic_version = 0;
   GicTable->header.num_gicrd = 0;
   GicTable->header.num_gicd = 0;
@@ -205,7 +200,7 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
       if (Entry->PhysicalBaseAddress != 0) {
         GicEntry->type = ENTRY_TYPE_CPUIF;
         GicEntry->base = Entry->PhysicalBaseAddress;
-        bsa_print(ACS_PRINT_INFO, L"GIC CPUIF base %x \n", GicEntry->base);
+        bsa_print(ACS_PRINT_INFO, L" GIC CPUIF base %x \n", GicEntry->base);
         GicEntry++;
       }
 
@@ -213,7 +208,7 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
         GicEntry->type = ENTRY_TYPE_GICC_GICRD;
         GicEntry->base = Entry->GICRBaseAddress;
         GicEntry->length = 0;
-        bsa_print(ACS_PRINT_INFO, L"GIC RD base %x \n", GicEntry->base);
+        bsa_print(ACS_PRINT_INFO, L" GIC RD base %x \n", GicEntry->base);
         GicTable->header.num_gicrd++;
         GicEntry++;
       }
@@ -223,7 +218,7 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
         GicEntry->type = ENTRY_TYPE_GICD;
         GicEntry->base = ((EFI_ACPI_6_1_GIC_DISTRIBUTOR_STRUCTURE *)Entry)->PhysicalBaseAddress;
         GicTable->header.gic_version = ((EFI_ACPI_6_1_GIC_DISTRIBUTOR_STRUCTURE *)Entry)->GicVersion;
-        bsa_print(ACS_PRINT_INFO, L"GIC DIS base %x \n", GicEntry->base);
+        bsa_print(ACS_PRINT_INFO, L" GIC DIS base %x \n", GicEntry->base);
         GicTable->header.num_gicd++;
         GicEntry++;
     }
@@ -232,7 +227,7 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
         GicEntry->type = ENTRY_TYPE_GICR_GICRD;
         GicEntry->base = ((EFI_ACPI_6_1_GICR_STRUCTURE *)Entry)->DiscoveryRangeBaseAddress;
         GicEntry->length = ((EFI_ACPI_6_1_GICR_STRUCTURE *)Entry)->DiscoveryRangeLength;
-        bsa_print(ACS_PRINT_INFO, L"GIC RD base Structure %x \n", GicEntry->base);
+        bsa_print(ACS_PRINT_INFO, L" GIC RD base Structure %x \n", GicEntry->base);
         GicTable->header.num_gicrd++;
         GicEntry++;
     }
@@ -240,9 +235,9 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
     if (Entry->Type == EFI_ACPI_6_1_GIC_ITS) {
         GicEntry->type = ENTRY_TYPE_GICITS;
         GicEntry->base = ((EFI_ACPI_6_1_GIC_ITS_STRUCTURE *)Entry)->PhysicalBaseAddress;
-        GicEntry->its_id = ((EFI_ACPI_6_1_GIC_ITS_STRUCTURE *)Entry)->GicItsId;
-        bsa_print(ACS_PRINT_INFO, L"GIC ITS base %x \n", GicEntry->base);
-        bsa_print(ACS_PRINT_INFO, L"GIC ITS ID%x \n", GicEntry->its_id);
+        GicEntry->entry_id = ((EFI_ACPI_6_1_GIC_ITS_STRUCTURE *)Entry)->GicItsId;
+        bsa_print(ACS_PRINT_INFO, L" GIC ITS base %x \n", GicEntry->base);
+        bsa_print(ACS_PRINT_INFO, L" GIC ITS ID%x \n", GicEntry->entry_id);
         GicTable->header.num_its++;
         GicEntry++;
     }
@@ -374,174 +369,6 @@ pal_gic_free_irq (
 
 }
 
-UINT32
-pal_gic_its_configure (
-  )
-{
-  /*
-   * This function configure the gic to have support for LPIs,
-   * If supported in the system.
-  */
-  EFI_STATUS Status;
-
-  /* Allocate memory to store ITS info */
-  g_gic_its_info = (GIC_ITS_INFO *) pal_mem_alloc(1024);
-  if (!g_gic_its_info) {
-      bsa_print(ACS_PRINT_DEBUG, L"GIC : ITS table memory allocation failed\n", 0);
-      goto its_fail;
-  }
-
-  g_gic_its_info->GicNumIts = 0;
-  g_gic_its_info->GicRdBase = 0;
-  g_gic_its_info->GicDBase  = 0;
-
-  while (g_gic_entry->type != 0xFF)
-  {
-    if (g_gic_entry->type == ENTRY_TYPE_GICD)
-    {
-        g_gic_its_info->GicDBase = g_gic_entry->base;
-    }
-    else if ((g_gic_entry->type == ENTRY_TYPE_GICR_GICRD) || (g_gic_entry->type == ENTRY_TYPE_GICC_GICRD))
-    {
-        /* Calculate Current PE Redistributor Base Address */
-        if (g_gic_its_info->GicRdBase == 0)
-        {
-            if (g_gic_entry->type == ENTRY_TYPE_GICR_GICRD)
-                g_gic_its_info->GicRdBase = GetCurrentCpuRDBase(g_gic_entry->base, g_gic_entry->length);
-            else
-                g_gic_its_info->GicRdBase = GetCurrentCpuRDBase(g_gic_entry->base, 0);
-        }
-    }
-    else if (g_gic_entry->type == ENTRY_TYPE_GICITS)
-    {
-        g_gic_its_info->GicIts[g_gic_its_info->GicNumIts].Base = g_gic_entry->base;
-        g_gic_its_info->GicIts[g_gic_its_info->GicNumIts++].ID = g_gic_entry->its_id;
-    }
-    g_gic_entry++;
-  }
-
-  /* Return if no ITS */
-  if (g_gic_its_info->GicNumIts == 0)
-  {
-    bsa_print(ACS_PRINT_DEBUG, L"No ITS Found in the MADT.\n", 0);
-    goto its_fail;
-  }
-
-  /* Base Address Check. */
-  if ((g_gic_its_info->GicRdBase == 0) || (g_gic_its_info->GicDBase == 0))
-  {
-    bsa_print(ACS_PRINT_DEBUG, L"Could not get GICD/GICRD Base.\n", 0);
-    goto its_fail;
-  }
-
-  if (ArmGICDSupportsLPIs(g_gic_its_info->GicDBase) && ArmGICRSupportsLPIs(g_gic_its_info->GicRdBase))
-  {
-    Status = ArmGicItsConfiguration();
-    if (EFI_ERROR(Status))
-    {
-      bsa_print(ACS_PRINT_DEBUG, L"Could Not Configure ITS.\n", 0);
-      goto its_fail;
-    }
-  }
-  else
-  {
-    bsa_print(ACS_PRINT_DEBUG, L"LPIs not supported in the system.\n", 0);
-    goto its_fail;
-  }
-
-  return 0;
-
-its_fail:
-  bsa_print(ACS_PRINT_DEBUG, L"GIC ITS Initialization Failed.\n", 0);
-  bsa_print(ACS_PRINT_DEBUG, L"LPI Interrupt related test may not pass.\n", 0);
-  return 0xFFFFFFFF;
-}
-
-UINT32
-pal_gic_get_max_lpi_id (
-  )
-{
-  return ArmGicItsGetMaxLpiID();
-}
-
-UINT32
-getItsIndex (
-  IN UINT32   ItsID
-  )
-{
-  UINT32  index;
-
-  for (index=0; index<g_gic_its_info->GicNumIts; index++)
-  {
-    if (ItsID == g_gic_its_info->GicIts[index].ID)
-      return index;
-  }
-  return 0xFFFFFFFF;
-}
-
-UINT32
-pal_gic_request_msi (
-  UINT32    ItsID,
-  UINT32    DevID,
-  UINT32    IntID,
-  UINT32    msi_index,
-  UINT32    *msi_addr,
-  UINT32    *msi_data
-  )
-{
-  UINT32  ItsIndex;
-
-  if ((g_gic_its_info == NULL) || (g_gic_its_info->GicNumIts == 0))
-    return 0xFFFFFFFF;
-
-  ItsIndex = getItsIndex(ItsID);
-  if (ItsIndex > g_gic_its_info->GicNumIts) {
-    bsa_print(ACS_PRINT_ERR, L"\n       Could not find ITS block in MADT", 0);
-    return 0xFFFFFFFF;
-  }
-
-  if ((g_gic_its_info->GicRdBase == 0) || (g_gic_its_info->GicDBase == 0))
-  {
-    bsa_print(ACS_PRINT_DEBUG, L"GICD/GICRD Base Invalid value.\n", 0);
-    return 0xFFFFFFFF;
-  }
-
-  ArmGicItsCreateLpiMap(ItsIndex, DevID, IntID, LPI_PRIORITY1);
-
-  *msi_addr = ArmGicItsGetGITSTranslatorAddress(ItsIndex);
-  *msi_data = IntID;
-
-  return 0;
-}
-
-VOID
-pal_gic_free_msi (
-  UINT32    ItsID,
-  UINT32    DevID,
-  UINT32    IntID,
-  UINT32    msi_index
-  )
-{
-  UINT32  ItsIndex;
-
-  if ((g_gic_its_info == NULL) || (g_gic_its_info->GicNumIts == 0))
-    return;
-
-  ItsIndex = getItsIndex(ItsID);
-  if (ItsIndex > g_gic_its_info->GicNumIts)
-  {
-    bsa_print(ACS_PRINT_ERR, L"\n       Could not find ITS block in MADT", 0);
-    return;
-  }
-  if ((g_gic_its_info->GicRdBase == 0) || (g_gic_its_info->GicDBase == 0))
-  {
-    bsa_print(ACS_PRINT_DEBUG, L"GICD/GICRD Base Invalid value.\n", 0);
-    return;
-  }
-
-  ArmGicItsClearLpiMappings(ItsIndex, DevID, IntID);
-}
-
 /**
   @brief  This API fills in the GIC_INFO Table with information about the GIC in the
           system. This is achieved by parsing the DT blob.
@@ -572,7 +399,7 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
       /* Search for GICv3 nodes*/
       offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, gicv3_dt_arr[i]);
       if (offset < 0) {
-        bsa_print(ACS_PRINT_DEBUG, L"GICv3 compatible value not found for index : %d\n", i);
+        bsa_print(ACS_PRINT_DEBUG, L" GICv3 compatible value not found for index : %d\n", i);
         continue; /* Search for next compatible item*/
       }
       else {
@@ -583,12 +410,12 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
   }
 
   if (offset < 0) {
-      bsa_print(ACS_PRINT_DEBUG, L"GIC v3 compatible node not found\n");
+      bsa_print(ACS_PRINT_DEBUG, L" GIC v3 compatible node not found\n");
       for (i = 0; i < (sizeof(gicv2_dt_arr)/GIC_COMPATIBLE_STR_LEN); i++) {
           /* Search for GICv2 nodes*/
           offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, gicv2_dt_arr[i]);
           if (offset < 0) {
-            bsa_print(ACS_PRINT_DEBUG, L"GICv2 compatible value not found for index : %d\n", i);
+            bsa_print(ACS_PRINT_DEBUG, L" GICv2 compatible value not found for index : %d\n", i);
             continue; /* Search for next compatible item*/
           }
           else {
@@ -600,7 +427,7 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
   }
 
   if (offset < 0) {
-      bsa_print(ACS_PRINT_DEBUG, L"GIC v2 compatible node not found\n");
+      bsa_print(ACS_PRINT_DEBUG, L" GIC v2 compatible node not found\n");
       return;
   }
 

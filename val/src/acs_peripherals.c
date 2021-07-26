@@ -46,11 +46,14 @@ val_peripheral_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   }
 
   if (g_sw_view[G_SW_OS]) {
-      val_print(ACS_PRINT_ERR, "\nOperating System:\n", 0);
+      val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
 #ifndef TARGET_LINUX
-      status |= os_d001_entry(num_pe);
-      status |= os_d002_entry(num_pe);
+      if (!pal_target_is_dt()) {
+        status |= os_d001_entry(num_pe);
+        status |= os_d002_entry(num_pe);
+      }
       status |= os_d003_entry(num_pe);
+      status |= os_d005_entry(num_pe);
 #else
       status |= os_d004_entry(num_pe);
 #endif
@@ -179,6 +182,16 @@ val_peripheral_get_info(PERIPHERAL_INFO_e info_type, uint32_t instance)
           i = val_peripheral_get_entry_index(PERIPHERAL_TYPE_UART, instance);
           if (i != 0xFFFF)
               return g_peripheral_info_table->info[i].flags;
+          break;
+      case UART_BAUDRATE:
+          i = val_peripheral_get_entry_index(PERIPHERAL_TYPE_UART, instance);
+          if (i != 0xFFFF)
+              return g_peripheral_info_table->info[i].baud_rate;
+          break;
+      case UART_INTERFACE_TYPE:
+          i = val_peripheral_get_entry_index(PERIPHERAL_TYPE_UART, instance);
+          if (i != 0xFFFF)
+              return g_peripheral_info_table->info[i].interface_type;
           break;
       case ANY_FLAGS:
           i = val_peripheral_get_entry_index (PERIPHERAL_TYPE_NONE, instance);

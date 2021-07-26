@@ -58,7 +58,10 @@ static char sata_dt_compatible[][SATA_COMPATIBLE_STR_LEN] = {
 
 static char uart_dt_compatible[][UART_COMPATIBLE_STR_LEN] = {
     "arm,sbsa-uart",
-    "arm,pl011"
+    "arm,pl011",
+    "ns16550",
+    "ns16550a",
+    "ns8250",
 };
 
 /**
@@ -96,7 +99,7 @@ pal_peripheral_usb_create_info_table_dt(PERIPHERAL_INFO_TABLE *peripheralInfoTab
       /* Search for USB nodes*/
       offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, usb_dt_compatible[i]);
       if (offset < 0) {
-          bsa_print(ACS_PRINT_DEBUG, L"USB compatible value not found for index:%d\n", i);
+          bsa_print(ACS_PRINT_DEBUG, L" USB compatible value not found for index:%d\n", i);
           continue; /* Search for next compatible item*/
       }
 
@@ -139,7 +142,7 @@ pal_peripheral_usb_create_info_table_dt(PERIPHERAL_INFO_TABLE *peripheralInfoTab
 
           interrupt_cell = fdt_interrupt_cells((const void *)dt_ptr, offset);
           bsa_print(ACS_PRINT_DEBUG, L" interrupt_cell  %d\n", interrupt_cell);
-          if (interrupt_cell < 1 || interrupt_cell > 3) {
+          if (interrupt_cell < INTERRUPT_CELLS_MIN || interrupt_cell > INTERRUPT_CELLS_MAX) {
               bsa_print(ACS_PRINT_ERR, L" Invalid interrupt cell : %d \n", interrupt_cell);
               return;
           }
@@ -154,7 +157,7 @@ pal_peripheral_usb_create_info_table_dt(PERIPHERAL_INFO_TABLE *peripheralInfoTab
             per_info->base0 = fdt32_to_cpu(Preg[index]);
 
           index = 0;
-          if (interrupt_cell == 3) {
+          if ((interrupt_cell == 3) || (interrupt_cell == 4)) {
               if (fdt32_to_cpu(Pintr[index++]) == GIC_SPI)
                 per_info->irq = fdt32_to_cpu(Pintr[index++]);
               else
@@ -208,7 +211,7 @@ pal_peripheral_sata_create_info_table_dt(PERIPHERAL_INFO_TABLE *peripheralInfoTa
       /* Search for sata node*/
       offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, sata_dt_compatible[i]);
       if (offset < 0) {
-          bsa_print(ACS_PRINT_DEBUG, L"SATA compatible value not found for index:%d\n", i);
+          bsa_print(ACS_PRINT_DEBUG, L" SATA compatible value not found for index:%d\n", i);
           continue; /* Search for next compatible item*/
       }
 
@@ -251,7 +254,7 @@ pal_peripheral_sata_create_info_table_dt(PERIPHERAL_INFO_TABLE *peripheralInfoTa
 
           interrupt_cell = fdt_interrupt_cells((const void *)dt_ptr, offset);
           bsa_print(ACS_PRINT_DEBUG, L" interrupt_cell  %d\n", interrupt_cell);
-          if (interrupt_cell < 1 || interrupt_cell > 3) {
+          if (interrupt_cell < INTERRUPT_CELLS_MIN || interrupt_cell > INTERRUPT_CELLS_MAX) {
               bsa_print(ACS_PRINT_ERR, L" Invalid interrupt cell : %d \n", interrupt_cell);
               return;
           }
@@ -266,7 +269,7 @@ pal_peripheral_sata_create_info_table_dt(PERIPHERAL_INFO_TABLE *peripheralInfoTa
             per_info->base1 = fdt32_to_cpu(Preg[index]);
 
           index = 0;
-          if (interrupt_cell == 3) {
+          if ((interrupt_cell == 3) || (interrupt_cell == 4)) {
               if (fdt32_to_cpu(Pintr[index++]) == GIC_SPI)
                 per_info->irq = fdt32_to_cpu(Pintr[index++]);
               else
@@ -323,12 +326,12 @@ pal_peripheral_uart_create_info_table_dt(PERIPHERAL_INFO_TABLE *peripheralInfoTa
 
   peripheralInfoTable->header.num_uart = 0;
 
-  for (i = 0; i < (sizeof(uart_dt_compatible)/UART_COMPATIBLE_STR_LEN); i++) {
+  for (i = 0; i < (sizeof(uart_dt_compatible) / UART_COMPATIBLE_STR_LEN); i++) {
 
       /* Search for uart nodes*/
       offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, uart_dt_compatible[i]);
       if (offset < 0) {
-          bsa_print(ACS_PRINT_DEBUG, L"UART compatible value not found for index:%d\n", i);
+          bsa_print(ACS_PRINT_DEBUG, L" UART compatible value not found for index:%d\n", i);
           continue; /* Search for next compatible item*/
       }
 
@@ -469,7 +472,7 @@ pal_peripheral_uart_create_info_table_dt(PERIPHERAL_INFO_TABLE *peripheralInfoTa
 
           interrupt_cell = fdt_interrupt_cells((const void *)dt_ptr, offset);
           bsa_print(ACS_PRINT_DEBUG, L" interrupt_cell  %d\n", interrupt_cell);
-          if (interrupt_cell < 1 || interrupt_cell > 3) {
+          if (interrupt_cell < INTERRUPT_CELLS_MIN || interrupt_cell > INTERRUPT_CELLS_MAX) {
               bsa_print(ACS_PRINT_ERR, L" Invalid interrupt cell : %d \n", interrupt_cell);
               return;
           }
@@ -477,7 +480,7 @@ pal_peripheral_uart_create_info_table_dt(PERIPHERAL_INFO_TABLE *peripheralInfoTa
           per_info->type  = PERIPHERAL_TYPE_UART;
 
           index = 0;
-          if (interrupt_cell == 3) {
+          if ((interrupt_cell == 3) || (interrupt_cell == 4)) {
               if (fdt32_to_cpu(Pintr[index++]) == GIC_SPI)
                 per_info->irq = fdt32_to_cpu(Pintr[index++]) + SPI_OFFSET;
               else
@@ -485,8 +488,17 @@ pal_peripheral_uart_create_info_table_dt(PERIPHERAL_INFO_TABLE *peripheralInfoTa
           } else
               per_info->irq = fdt32_to_cpu(Pintr[index++]) + SPI_OFFSET;
 
+          if (!(pal_strncmp(uart_dt_compatible[i], "ns16550", sizeof("ns16550")))
+              || !(pal_strncmp(uart_dt_compatible[i], "ns16550a", sizeof("ns16550a")))
+              || !(pal_strncmp(uart_dt_compatible[i], "ns8250", sizeof("ns8250a"))))
+          {
+              per_info->interface_type = COMPATIBLE_FULL_16550;
+          } else
+              per_info->interface_type = ARM_PL011_UART;
+
           per_info->bdf   = 0; /* NA in DT*/
           per_info->flags = 0; /* NA in DT*/
+          per_info->baud_rate = 0; /* NA in DT*/
           peripheralInfoTable->header.num_uart++;
           per_info++;
           offset =
@@ -737,6 +749,10 @@ pal_memory_create_info_table(MEMORY_INFO_TABLE *memoryInfoTable)
       memoryInfoTable->info[i].virt_addr = MemoryMapPtr->VirtualStart;
       memoryInfoTable->info[i].size      = (MemoryMapPtr->NumberOfPages * EFI_PAGE_SIZE);
       i++;
+      if (i >= MEM_INFO_TBL_MAX_ENTRY) {
+        bsa_print(ACS_PRINT_DEBUG, L"Memory Info tbl limit exceeded, Skipping remaining\n", 0);
+        break;
+      }
 
       MemoryMapPtr = (EFI_MEMORY_DESCRIPTOR*)((UINTN)MemoryMapPtr + DescriptorSize);
     }

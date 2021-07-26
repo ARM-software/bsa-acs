@@ -20,7 +20,8 @@
 #include "val/include/bsa_acs_val.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 20)
-#define TEST_DESC  "RE_REC_1,RE_REC_2: Check Type 0/1 common config rule"
+#define TEST_RULE  "RE_REG_1, RE_REC_1, RE_REC_2"
+#define TEST_DESC  "Type 0/1 common config rule           "
 
 static
 void
@@ -58,9 +59,9 @@ os_p020_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

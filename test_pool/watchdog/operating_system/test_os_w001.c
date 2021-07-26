@@ -21,7 +21,8 @@
 #include "val/include/bsa_acs_wd.h"
 
 #define TEST_NUM   (ACS_WD_TEST_NUM_BASE + 1)
-#define TEST_DESC  "B_WD_01,B_WD_02: NS Watchdog Access         "
+#define TEST_RULE  "B_WD_01-02"
+#define TEST_DESC  "Non Secure Watchdog Access            "
 
 static
 void
@@ -37,7 +38,6 @@ payload()
   val_print(ACS_PRINT_DEBUG, "\n       Found %d watchdogs in table ", wd_num);
 
   if (wd_num == 0) {
-      val_print(ACS_PRINT_WARN, "\n       No Watchdogs reported          %d  ", wd_num);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
       return;
   }
@@ -90,22 +90,19 @@ uint32_t
 os_w001_entry(uint32_t num_pe)
 {
 
-  uint32_t error_flag = 0;
   uint32_t status = ACS_STATUS_FAIL;
 
   num_pe = 1;  //This Timer test is run on single processor
 
-  val_initialize_test(TEST_NUM, TEST_DESC, num_pe);
+  status = val_initialize_test(TEST_NUM, TEST_DESC, num_pe);
 
-  val_run_test_payload(TEST_NUM, num_pe, payload, 0);
+  if (status != ACS_STATUS_SKIP)
+    val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  error_flag = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  if (!error_flag)
-      status = ACS_STATUS_PASS;
-
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
   return status;
 
 }

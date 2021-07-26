@@ -53,11 +53,16 @@ uint32_t val_exerciser_execute_tests(uint32_t *g_sw_view);
 uint32_t val_exerciser_get_bdf(uint32_t instance);
 
 uint32_t os_e001_entry(void);
+uint32_t os_e002_entry(void);
+uint32_t os_e003_entry(void);
 uint32_t os_e004_entry(void);
 uint32_t os_e005_entry(void);
 uint32_t os_e006_entry(void);
+uint32_t os_e007_entry(void);
+uint32_t os_e008_entry(void);
+uint32_t os_e009_entry(void);
+uint32_t os_e010_entry(void);
+uint32_t os_e011_entry(void);
 uint32_t os_e012_entry(void);
-uint32_t os_e013_entry(void);
-uint32_t os_e015_entry(void);
 
 #endif

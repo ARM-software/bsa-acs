@@ -278,13 +278,7 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   }
 
   if (g_sw_view[G_SW_OS]) {
-      val_print(ACS_PRINT_ERR, "\n       PCI_IN_06: PCIe HB must recognise tranx from PE     ", 0);
-      val_print(ACS_PRINT_ERR, "    : Result:  PASS", 0);
-      val_print(ACS_PRINT_ERR, "\n       PCI_iEP_1: PCIe spec follow SW visible spec         ", 0);
-      val_print(ACS_PRINT_ERR, "    : Result:  PASS", 0);
-      val_print(ACS_PRINT_ERR, "\n       RE_CFG_1: Recognise RW request in ECAM reg          ", 0);
-      val_print(ACS_PRINT_ERR, "    : Result:  PASS", 0);
-      val_print(ACS_PRINT_ERR, "\nOperating System:\n", 0);
+      val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
 
       status |= os_p001_entry(num_pe);
       if (status != ACS_STATUS_PASS) {
@@ -300,14 +294,30 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   if (g_sw_view[G_SW_OS]) {
 #ifdef TARGET_LINUX
-      status |= os_p005_entry(num_pe);
-      status |= os_p006_entry(num_pe);
-      status |= os_p007_entry(num_pe);
-      status |= os_p011_entry(num_pe);
-      status |= os_p012_entry(num_pe);
-      status |= os_p016_entry(num_pe);
+      status |= os_p061_entry(num_pe);
+      status |= os_p062_entry(num_pe);
+      status |= os_p063_entry(num_pe);
+      status |= os_p064_entry(num_pe);
+      status |= os_p065_entry(num_pe);
+      status |= os_p066_entry(num_pe);
 #else
       status |= os_p002_entry(num_pe);
+      status |= os_p003_entry(num_pe);
+      status |= os_p004_entry(num_pe);
+      status |= os_p005_entry(num_pe);
+      status |= os_p006_entry(num_pe);
+      status |= os_p008_entry(num_pe);
+      status |= os_p009_entry(num_pe);
+      status |= os_p010_entry(num_pe);
+      status |= os_p011_entry(num_pe);
+      status |= os_p012_entry(num_pe);
+      status |= os_p013_entry(num_pe);
+      status |= os_p014_entry(num_pe);
+      status |= os_p015_entry(num_pe);
+      status |= os_p016_entry(num_pe);
+      status |= os_p017_entry(num_pe);
+      status |= os_p018_entry(num_pe);
+      status |= os_p019_entry(num_pe);
       status |= os_p020_entry(num_pe);
       status |= os_p021_entry(num_pe);
       status |= os_p022_entry(num_pe);
@@ -325,26 +335,6 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       status |= os_p034_entry(num_pe);
       status |= os_p035_entry(num_pe);
       status |= os_p036_entry(num_pe);
-      status |= os_p037_entry(num_pe);
-      status |= os_p038_entry(num_pe);
-      status |= os_p039_entry(num_pe);
-      status |= os_p041_entry(num_pe);
-      status |= os_p042_entry(num_pe);
-      status |= os_p044_entry(num_pe);
-      status |= os_p048_entry(num_pe);
-      status |= os_p050_entry(num_pe);
-      status |= os_p051_entry(num_pe);
-      status |= os_p052_entry(num_pe);
-      status |= os_p053_entry(num_pe);
-      status |= os_p054_entry(num_pe);
-      status |= os_p055_entry(num_pe);
-      status |= os_p056_entry(num_pe);
-      status |= os_p057_entry(num_pe);
-      status |= os_p058_entry(num_pe);
-      status |= os_p059_entry(num_pe);
-      status |= os_p060_entry(num_pe);
-      status |= os_p061_entry(num_pe);
-      status |= os_p062_entry(num_pe);
 
 #endif
 
@@ -365,7 +355,9 @@ val_pcie_print_device_info(void)
   uint32_t dp_type;
   uint32_t tbl_index;
   uint32_t ecam_index;
-  uint32_t ecam_base;
+  uint64_t ecam_base;
+  uint32_t ecam_start_bus;
+  uint32_t ecam_end_bus;
   pcie_device_bdf_table *bdf_tbl_ptr;
   uint32_t num_rciep = 0, num_rcec = 0;
   uint32_t num_iep = 0, num_irp = 0;
@@ -407,21 +399,29 @@ val_pcie_print_device_info(void)
   while (ecam_index < val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0))
   {
       ecam_base = val_pcie_get_info(PCIE_INFO_ECAM, ecam_index);
+      ecam_start_bus = val_pcie_get_info(PCIE_INFO_START_BUS, ecam_index);
+      ecam_end_bus = val_pcie_get_info(PCIE_INFO_END_BUS, ecam_index);
       tbl_index = 0;
 
-      val_print(ACS_PRINT_INFO, "PCIE_INFO: ECAM Regions \n", ecam_index);
-      val_print(ACS_PRINT_INFO, "        ECAM %d:\n", ecam_index);
+      val_print(ACS_PRINT_INFO, "PCIE_INFO: \nECAM %d:\n", ecam_index);
+      val_print(ACS_PRINT_INFO, "  ECAM Base 0x%llx\n", ecam_base);
 
       while (tbl_index < bdf_tbl_ptr->num_entries)
       {
-          uint32_t bus_id;
+          uint32_t seg_num;
+          uint32_t bus_num;
+          uint32_t dev_num;
+          uint32_t func_num;
           uint32_t device_id;
           uint32_t vendor_id;
           uint32_t reg_value;
-          uint32_t dev_ecam_base;
+          uint64_t dev_ecam_base;
 
           bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
-          bus_id = PCIE_EXTRACT_BDF_BUS(bdf);
+          seg_num  = PCIE_EXTRACT_BDF_SEG(bdf);
+          bus_num  = PCIE_EXTRACT_BDF_BUS(bdf);
+          dev_num  = PCIE_EXTRACT_BDF_DEV(bdf);
+          func_num = PCIE_EXTRACT_BDF_FUNC(bdf);
 
           val_pcie_read_cfg(bdf, TYPE01_VIDR, &reg_value);
           device_id = (reg_value >> TYPE01_DIDR_SHIFT) & TYPE01_DIDR_MASK;
@@ -429,9 +429,13 @@ val_pcie_print_device_info(void)
 
           dev_ecam_base = val_pcie_get_ecam_base(bdf);
 
-          if (ecam_base == dev_ecam_base)
+          if ((ecam_base == dev_ecam_base) && (bus_num >= ecam_start_bus)
+              && (bus_num <= ecam_end_bus))
           {
-              val_print(ACS_PRINT_INFO, "              Bus ID: 0x%x, ", bus_id);
+              val_print(ACS_PRINT_INFO, "  Seg: 0x%x, ", seg_num);
+              val_print(ACS_PRINT_INFO, "Bus: 0x%x, ", bus_num);
+              val_print(ACS_PRINT_INFO, "Dev: 0x%x, ", dev_num);
+              val_print(ACS_PRINT_INFO, "Func: 0x%x, ", func_num);
               val_print(ACS_PRINT_INFO, "Dev ID: 0x%x, ", device_id);
               val_print(ACS_PRINT_INFO, "Vendor ID: 0x%x\n", vendor_id);
           }

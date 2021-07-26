@@ -18,6 +18,8 @@
 #ifndef __PAL_DT_H__
 #define __PAL_DT_H__
 
+extern VOID *g_dtb_log_file_handle;
+
 UINT64
 pal_get_dt_ptr();
 

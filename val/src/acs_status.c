@@ -29,27 +29,41 @@
   @return  none
  **/
 void
-val_report_status(uint32_t index, uint32_t status)
+val_report_status(uint32_t index, uint32_t status, char8_t *ruleid)
 {
 
   if (IS_TEST_FAIL(status)) {
-      val_print(ACS_PRINT_ERR, "\n       Failed on PE - %4d                        ", index);
+      val_print(ACS_PRINT_ERR, "\n       Failed on PE - %4d", index);
   }
 
   if (IS_TEST_PASS(status))
-    val_print(ACS_PRINT_TEST, ": Result:  PASS \n", status);
+    val_print(ACS_PRINT_TEST, "     : Result:  PASS \n", status);
   else
-    if (IS_TEST_FAIL(status))
-      val_print(ACS_PRINT_ERR, ": Result:  --FAIL-- %x \n", status & STATUS_MASK);
+    if (IS_TEST_FAIL(status)) {
+        if (ruleid) {
+            val_print(ACS_PRINT_ERR, "\n       ", 0);
+            val_print(ACS_PRINT_ERR, ruleid, 0);
+            val_print(ACS_PRINT_ERR, "\n       Checkpoint -- %2d                      ",
+                                                         status & STATUS_MASK);
+        }
+        val_print(ACS_PRINT_ERR, "     : Result:  FAIL \n", 0);
+    }
     else
-      if (IS_TEST_SKIP(status))
-        val_print(ACS_PRINT_WARN, ": Result:  -SKIPPED- %x \n", status & STATUS_MASK);
+      if (IS_TEST_SKIP(status)) {
+          if (ruleid) {
+              val_print(ACS_PRINT_WARN, "\n       ", 0);
+              val_print(ACS_PRINT_WARN, ruleid, 0);
+              val_print(ACS_PRINT_WARN, "\n       Checkpoint -- %2d                      ",
+                                                         status & STATUS_MASK);
+          }
+          val_print(ACS_PRINT_WARN, "     : Result:  SKIPPED \n", 0);
+      }
       else
         if (IS_TEST_START(status))
-          val_print(ACS_PRINT_INFO, "         START  ", status);
+          val_print(ACS_PRINT_INFO, "         START\n", status);
         else
           if (IS_TEST_END(status))
-            val_print(ACS_PRINT_INFO, "         END  \n\n", status);
+            val_print(ACS_PRINT_INFO, "         END\n\n", status);
           else
             val_print(ACS_PRINT_ERR, ": Result:  %8x  \n", status);
 

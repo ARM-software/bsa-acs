@@ -27,7 +27,8 @@
 #include "val/include/bsa_acs_exerciser.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 5)
-#define TEST_DESC  "RE_SMU_4,IE_SMU_3: Generate PASID PCIe transactions   "
+#define TEST_RULE  "PCI_PAS_1, RE_SMU_4"
+#define TEST_DESC  "Generate PASID transactions           "
 
 #define TEST_DATA_NUM_PAGES  2
 #define TEST_DATA 0xDE
@@ -400,9 +401,9 @@ os_e005_entry(void)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* Get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

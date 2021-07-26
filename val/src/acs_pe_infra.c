@@ -122,8 +122,8 @@ val_pe_get_mpid_index(uint32_t index)
   PE_INFO_ENTRY *entry;
 
   if (index > g_pe_info_table->header.num_of_pe) {
-        val_report_status(index, RESULT_FAIL(0, 0xFF));
-	return 0xFFFFFF;
+        val_report_status(index, RESULT_FAIL(0, 0xFF), NULL);
+        return 0xFFFFFF;
   }
 
   entry = g_pe_info_table->pe_info;
@@ -203,7 +203,7 @@ val_execute_on_pe(uint32_t index, void (*payload)(void), uint64_t test_input)
   int timeout = TIMEOUT_LARGE;
   if (index > g_pe_info_table->header.num_of_pe) {
       val_print(ACS_PRINT_ERR, "Input Index exceeds Num of PE %x \n", index);
-      val_report_status(index, RESULT_FAIL(0, 0xFF));
+      val_report_status(index, RESULT_FAIL(0, 0xFF), NULL);
       return;
   }
 
@@ -251,7 +251,7 @@ val_pe_install_esr(uint32_t exception_type, void (*esr)(uint64_t, void *))
       return ACS_STATUS_ERR;
   }
 #ifndef TARGET_LINUX
-  if (pal_bsa_gic_imp())
+  if (pal_target_is_dt())
       val_gic_bsa_install_esr(exception_type, esr);
   else
       pal_pe_install_esr(exception_type, esr);
@@ -301,7 +301,7 @@ val_pe_default_esr(uint64_t interrupt_type, void *context)
     val_print(ACS_PRINT_WARN, "\n        Unexpected exception occured", 0);
 
 #ifndef TARGET_LINUX
-    if (pal_bsa_gic_imp()) {
+    if (pal_target_is_dt()) {
       val_print(ACS_PRINT_WARN, "\n        FAR reported = 0x%llx", bsa_gic_get_far());
       val_print(ACS_PRINT_WARN, "\n        ESR reported = 0x%llx", bsa_gic_get_esr());
     } else {

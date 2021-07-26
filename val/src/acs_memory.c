@@ -46,9 +46,9 @@ val_memory_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   status = ACS_STATUS_PASS;
 
   if (g_sw_view[G_SW_OS]) {
-      val_print(ACS_PRINT_ERR, "\nOperating System:\n", 0);
+      val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
 #ifndef TARGET_LINUX
-      status |= os_m001_entry(num_pe);
+//    status |= os_m001_entry(num_pe);
       status |= os_m002_entry(num_pe);
       status |= os_m003_entry(num_pe);
 #else
@@ -299,4 +299,33 @@ void
 val_memory_free_pages(void *addr, uint32_t num_pages)
 {
     pal_mem_free_pages(addr, num_pages);
+}
+
+/**
+  @brief  Allocates memory with the given alignment.
+
+  @param  Alignment   Specifies the alignment.
+  @param  Size        Requested memory allocation size.
+
+  @return Pointer to the allocated memory with requested alignment.
+**/
+void
+*val_aligned_alloc(uint32_t alignment, uint32_t size)
+{
+  void *Mem = NULL;
+  void *Aligned_Ptr = NULL;
+
+  /* Generate mask for the Alignment parameter*/
+  uint64_t Mask = ~(uint64_t)(alignment - 1);
+
+  /* Allocate memory with extra bytes, so we can return an aligned address*/
+  Mem = (void *)pal_mem_alloc(size + alignment);
+
+  if (Mem == NULL)
+    return 0;
+
+  /* Add the alignment to allocated memory address and align it to target alignment*/
+  Aligned_Ptr = (void *)(((uint64_t) Mem + alignment-1) & Mask);
+
+  return Aligned_Ptr;
 }

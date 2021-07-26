@@ -18,8 +18,9 @@
 #include "val/include/bsa_acs_val.h"
 #include "val/include/bsa_acs_pe.h"
 
-#define TEST_NUM    (ACS_PE_TEST_NUM_BASE  +  1)
-#define TEST_DESC  "B_PE_01:  Check Arch symmetry across PE    "
+#define TEST_NUM   (ACS_PE_TEST_NUM_BASE  +  1)
+#define TEST_RULE  "B_PE_01"
+#define TEST_DESC  "Check Arch symmetry across PE         "
 
 #define NUM_OF_REGISTERS  32
 
@@ -194,7 +195,7 @@ payload(uint32_t num_pe)
   uint64_t reg_read_data, debug_data=0, array_index=0;
 
   if (num_pe == 1) {
-      val_print(ACS_PRINT_WARN, "\n       Skipping as num of PE is 1        ", 0);
+      val_print(ACS_PRINT_DEBUG, "\n       Skipping as num of PE is 1    ", 0);
       val_set_status(my_index, RESULT_SKIP(TEST_NUM, 01));
       return;
   }
@@ -258,9 +259,9 @@ os_c001_entry(uint32_t num_pe)
       payload(num_pe);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

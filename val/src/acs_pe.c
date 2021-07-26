@@ -53,7 +53,7 @@ val_pe_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   status = ACS_STATUS_PASS;
 
   if (g_sw_view[G_SW_OS]) {
-      val_print(ACS_PRINT_ERR, "\nOperating System:\n", 0);
+      val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
       status |= os_c001_entry(num_pe);
       status |= os_c002_entry(num_pe);
       status |= os_c003_entry(num_pe);
@@ -77,7 +77,7 @@ val_pe_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   }
 
   if (g_sw_view[G_SW_HYP]) {
-      val_print(ACS_PRINT_ERR, "\nHypervisor:\n", 0);
+      val_print(ACS_PRINT_ERR, "\nHypervisor View:\n", 0);
       status |= hyp_c001_entry(num_pe);
       status |= hyp_c002_entry(num_pe);
       status |= hyp_c003_entry(num_pe);
@@ -86,7 +86,7 @@ val_pe_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   }
 
   if (g_sw_view[G_SW_PS]) {
-      val_print(ACS_PRINT_ERR, "\nPlatform Security:\n", 0);
+      val_print(ACS_PRINT_ERR, "\nPlatform Security View:\n", 0);
       status |= ps_c001_entry(num_pe);
   }
 
@@ -264,7 +264,8 @@ val_pe_reg_read(uint32_t reg_id)
       case DBGBCR15_EL1:
           return AA64ReadDbgbcr15El1();
       default:
-           val_report_status(val_pe_get_index_mpid(val_pe_get_mpid()), RESULT_FAIL(0, 0x78));
+           val_report_status(val_pe_get_index_mpid(val_pe_get_mpid()),
+                                                 RESULT_FAIL(0, 0x78), NULL);
            break;
   }
 
@@ -324,7 +325,8 @@ val_pe_reg_write(uint32_t reg_id, uint64_t write_data)
           AA64WritePmblimitr(write_data);
           break;
       default:
-           val_report_status(val_pe_get_index_mpid(val_pe_get_mpid()), RESULT_FAIL(0, 0x78));
+           val_report_status(val_pe_get_index_mpid(val_pe_get_mpid()),
+                                                  RESULT_FAIL(0, 0x78), NULL);
   }
 
 }
@@ -377,7 +379,7 @@ val_pe_get_pmu_gsiv(uint32_t index)
   PE_INFO_ENTRY *entry;
 
   if (index > g_pe_info_table->header.num_of_pe) {
-        val_report_status(index, RESULT_FAIL(0, 0xFF));
+        val_report_status(index, RESULT_FAIL(0, 0xFF), NULL);
         return 0xFFFFFF;
   }
 
@@ -401,7 +403,7 @@ val_pe_get_gmain_gsiv(uint32_t index)
   PE_INFO_ENTRY *entry;
 
   if (index > g_pe_info_table->header.num_of_pe) {
-        val_report_status(index, RESULT_FAIL(0, 0xFF));
+        val_report_status(index, RESULT_FAIL(0, 0xFF), NULL);
         return 0xFFFFFF;
   }
 

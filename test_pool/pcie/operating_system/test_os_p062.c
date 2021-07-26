@@ -1,6 +1,7 @@
 /** @file
- * Copyright (c) 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018,2021 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
+
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,135 +14,87 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-
 #include "val/include/bsa_acs_val.h"
 #include "val/include/val_interface.h"
 
-#include "val/include/bsa_acs_pcie.h"
-#include "val/include/bsa_acs_pe.h"
+#include "val/include/bsa_acs_dma.h"
+#include "val/include/bsa_acs_smmu.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 62)
-#define TEST_DESC  "RE_BAR_1: Read and write to RCiEP BAR reg          "
+#define TEST_RULE  "PCI_MM_05-07"
+#define TEST_DESC  "No extra address translation          "
 
-#define TEST_DATA_1  0xDEADDAED
-#define TEST_DATA_2  0xABABABAB
 
+/* For all DMA masters populated in the Info table, which are behind an SMMU,
+   verify there are no additional translations before address is given to SMMU */
 static
 void
 payload(void)
 {
-  uint32_t bdf, offset;
-  uint32_t bar_value;
-  uint32_t bar_value_1;
-  uint32_t bar_reg_value;
-  uint32_t base_lower;
-  uint32_t base_upper;
-  uint32_t dp_type;
-  uint32_t pe_index;
-  uint32_t tbl_index;
-  uint32_t fail_cnt;
-  uint32_t test_skip = 1;
-  pcie_device_bdf_table *bdf_tbl_ptr;
-  uint64_t bar_orig;
-  uint64_t bar_new;
-  uint64_t bar_upper_bits;
 
-  bdf_tbl_ptr = val_pcie_bdf_table_ptr();
-  pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
+  uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
+  uint32_t target_dev_index;
+  addr_t   dma_addr = 0;
+  uint32_t dma_len = 0;
+  void *buffer;
+  uint32_t status;
+  uint32_t iommu_flag = 0;
 
-  fail_cnt = 0;
-  tbl_index = 0;
+  target_dev_index = val_dma_get_info(DMA_NUM_CTRL, 0);
 
-  while (tbl_index < bdf_tbl_ptr->num_entries)
+  if (!target_dev_index) {
+      val_print(ACS_PRINT_TEST, "\n       No DMA controllers detected...    ", 0);
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
+      return;
+  }
+
+  while (target_dev_index)
   {
-      bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
-      dp_type = val_pcie_device_port_type(bdf);
-      if (dp_type == RCiEP) {
-          /* If test runs for atleast an endpoint */
-          test_skip = 0;
-          offset = BAR0_OFFSET;
+      target_dev_index--; //index is zero based
 
-           while (offset <= TYPE1_BAR_MAX_OFFSET) {
-              val_pcie_read_cfg(bdf, offset, &bar_value);
-              val_print(ACS_PRINT_DEBUG, "\n The BAR value of bdf %x", bdf);
-              val_print(ACS_PRINT_DEBUG, " is %x ", bar_value);
-              bar_orig = 0;
-              bar_new = 0;
-
-              if (bar_value == 0)
-              {
-                  /** This BAR is not implemented **/
-                 offset = offset + 4;
-                 continue;
-              }
-
-              if (BAR_REG(bar_value) == BAR_64_BIT)
-              {
-                  val_print(ACS_PRINT_INFO, "The BAR supports 64-bit address capability \n", 0);
-                  val_pcie_read_cfg(bdf, offset+4, &bar_value_1);
-                  base_upper = bar_value_1;
-
-                 /* BAR supports 64-bit address therefore, write all 1's
-                  * to BARn and BARn+1 and identify the size requested
-                  */
-                 val_pcie_read_cfg(bdf, offset, &bar_reg_value);
-                 bar_value = bar_reg_value;
-                 base_lower = bar_reg_value;
-                 val_pcie_read_cfg(bdf, offset + 4, &bar_reg_value);
-                 bar_upper_bits = bar_reg_value;
-                 base_upper = bar_reg_value;
-                 bar_orig = (bar_upper_bits << 32) | bar_value;
-                 val_pcie_write_cfg(bdf, offset, TEST_DATA_1);
-                 val_pcie_write_cfg(bdf, offset + 4, TEST_DATA_2);
-                 val_pcie_read_cfg(bdf, offset, &bar_reg_value);
-                 bar_value = bar_reg_value;
-                 val_pcie_read_cfg(bdf, offset + 4, &bar_reg_value);
-                 bar_upper_bits = bar_reg_value;
-                 bar_new = (bar_upper_bits << 32) | bar_value;
-                if (bar_orig == bar_new) {
-                    val_print(ACS_PRINT_TEST, "Read write to BAR reg not supported bdf %x\n", bdf);
-                    fail_cnt++;
-                }
-
-                 /* Restore the original BAR value */
-                 val_pcie_write_cfg(bdf, offset + 4, base_upper);
-                 val_pcie_write_cfg(bdf, offset, base_lower);
-                 offset = offset+8;
-              }
-
-             else {
-                 val_print(ACS_PRINT_INFO, "The BAR supports 32-bit address capability\n", 0);
-
-                 /* BAR supports 32-bit address. Write all 1's
-                  * to BARn and identify the size requested
-                  */
-                 val_pcie_read_cfg(bdf, offset, &bar_reg_value);
-                 bar_orig = bar_reg_value;
-                 base_lower = bar_reg_value;
-                 val_pcie_write_cfg(bdf, offset, TEST_DATA_1);
-                 val_pcie_read_cfg(bdf, offset, &bar_reg_value);
-                 bar_new = bar_reg_value;
-                 if (bar_orig == bar_new) {
-                    val_print(ACS_PRINT_TEST, "Read write to BAR reg not supported bdf %x\n", bdf);
-                    fail_cnt++;
-                 }
-
-                 /* Restore the original BAR value */
-                 val_pcie_write_cfg(bdf, offset, base_lower);
-                 offset = offset+4;
-              }
+      /* Check there were no additional translations between Device and SMMU */
+      if (val_dma_get_info(DMA_HOST_IOMMU_ATTACHED, target_dev_index)) {
+          iommu_flag++;
+          val_dma_device_get_dma_addr(target_dev_index, &dma_addr, &dma_len);
+          status = val_smmu_ops(SMMU_CHECK_DEVICE_IOVA, 0, &target_dev_index, &dma_addr);
+          if (status) {
+              val_print(ACS_PRINT_ERR, "\n   The DMA address %lx used by device ", dma_addr);
+              val_print(ACS_PRINT_ERR, "\n       is not present in the SMMU IOVA table \n", 0);
+              val_set_status(index, RESULT_FAIL(TEST_NUM, target_dev_index));
+              return;
           }
       }
+  }
 
+  target_dev_index = val_dma_get_info(DMA_NUM_CTRL, 0);
 
-  if (test_skip == 1)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
-  else if (fail_cnt)
-      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, fail_cnt));
-  else
-      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
+  /* Check if IOMMU ops is properly integrated for this device by making the standard OS
+     DMA API call and verifying the DMA address is part of the IOVA translation table */
+  while (target_dev_index)
+  {
+      target_dev_index--;
+      if (val_dma_get_info(DMA_HOST_IOMMU_ATTACHED, target_dev_index)) {
+          /* Allocate DMA-able memory region in DDR */
+          dma_addr = val_dma_mem_alloc(&buffer, 512, target_dev_index, DMA_COHERENT);
+          status = val_smmu_ops(SMMU_CHECK_DEVICE_IOVA, 0, &target_dev_index, &dma_addr);
+          if (status) {
+              val_print(ACS_PRINT_ERR, "\n The DMA addr allocated to device %d ", target_dev_index);
+              val_print(ACS_PRINT_ERR, "\n       is not present in the SMMU IOVA table \n", 0);
+              val_set_status(index, RESULT_FAIL(TEST_NUM, target_dev_index));
+              return;
+          }
+          /* Free the allocated memory here */
+          val_dma_mem_free(buffer, dma_addr, 512, target_dev_index, DMA_COHERENT);
       }
+  }
+
+  if (iommu_flag)
+      val_set_status(index, RESULT_PASS(TEST_NUM, 02));
+  else
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
+
 }
+
 
 uint32_t
 os_p062_entry(uint32_t num_pe)
@@ -155,10 +108,10 @@ os_p062_entry(uint32_t num_pe)
   if (status != ACS_STATUS_SKIP)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
-  /* get the result from the PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  /* get the result from all PE and check for failure */
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

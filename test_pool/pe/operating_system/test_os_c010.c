@@ -20,7 +20,8 @@
 
 
 #define TEST_NUM   (ACS_PE_TEST_NUM_BASE  +  10)
-#define TEST_DESC  "B_PE_10:  Check PMU Overflow signal        "
+#define TEST_RULE  "B_PE_10"
+#define TEST_DESC  "Check PMU Overflow signal             "
 
 static uint32_t int_id;
 static void *branch_to_test;
@@ -89,16 +90,21 @@ payload()
       return;
   }
 
-  val_pe_install_esr(EXCEPT_AARCH64_SYNCHRONOUS_EXCEPTIONS, esr);
-  val_pe_install_esr(EXCEPT_AARCH64_SERROR, esr);
-
-  int_id = val_pe_get_pmu_gsiv(index); //This is currently set to zero
+  int_id = val_pe_get_pmu_gsiv(index);
+  if (int_id == 0) {
+      /* PMU interrupt number not updated */
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
+      return;
+  }
 
   if (val_gic_install_isr(int_id, isr)) {
       val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
       val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
       return;
   }
+
+  val_pe_install_esr(EXCEPT_AARCH64_SYNCHRONOUS_EXCEPTIONS, esr);
+  val_pe_install_esr(EXCEPT_AARCH64_SERROR, esr);
 
   branch_to_test = &&exception_taken;
 
@@ -130,9 +136,9 @@ os_c010_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

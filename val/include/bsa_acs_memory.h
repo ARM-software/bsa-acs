@@ -33,6 +33,7 @@ uint32_t val_memory_page_size(void);
 void *val_memory_alloc_pages(uint32_t num_pages);
 void val_memory_free_pages(void *page_base, uint32_t num_pages);
 addr_t val_memory_get_addr(MEMORY_INFO_e mem_type, uint32_t instance, uint64_t *attr);
+void *val_aligned_alloc(uint32_t alignment, uint32_t size);
 
 uint32_t os_m001_entry(uint32_t num_pe);
 uint32_t os_m002_entry(uint32_t num_pe);

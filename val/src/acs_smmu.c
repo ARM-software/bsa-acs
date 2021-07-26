@@ -73,7 +73,7 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   }
 
   if (g_sw_view[G_SW_OS]) {
-       val_print(ACS_PRINT_ERR, "\nOperating System:\n", 0);
+       val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
        status |= os_i001_entry(num_pe);
        status |= os_i002_entry(num_pe);
        status |= os_i003_entry(num_pe);
@@ -82,19 +82,19 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
        status |= os_i006_entry(num_pe);
        status |= os_i007_entry(num_pe);
        status |= os_i008_entry(num_pe);
-  }
-
-  if (g_sw_view[G_SW_OS] || g_sw_view[G_SW_HYP]) {
        status |= os_i009_entry(num_pe);
   }
 
   if (g_sw_view[G_SW_HYP]) {
-       val_print(ACS_PRINT_ERR, "\nHypervisor:\n", 0);
+       val_print(ACS_PRINT_ERR, "\nHypervisor View:\n", 0);
        status |= hyp_i001_entry(num_pe);
        status |= hyp_i002_entry(num_pe);
        status |= hyp_i003_entry(num_pe);
        status |= hyp_i004_entry(num_pe);
        status |= hyp_i005_entry(num_pe);
+  /* if OS view is not enabled run below test as part of hyp view, else skip */
+       if (!g_sw_view[G_SW_OS])
+            status |= os_i009_entry(num_pe);
   }
 
 

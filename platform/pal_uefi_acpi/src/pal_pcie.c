@@ -109,6 +109,11 @@ pal_pcie_create_info_table(PCIE_INFO_TABLE *PcieTable)
       PcieTable->block[i].segment_num   = Entry->PciSegmentGroupNumber;
       PcieTable->block[i].start_bus_num = Entry->StartBusNumber;
       PcieTable->block[i].end_bus_num   = Entry->EndBusNumber;
+      bsa_print(ACS_PRINT_INFO, L"\nEcam Index = %d", i);
+      bsa_print(ACS_PRINT_INFO, L"\n Base Address = 0x%llx", Entry->BaseAddress);
+      bsa_print(ACS_PRINT_INFO, L"\n Segment   = 0x%llx", Entry->PciSegmentGroupNumber);
+      bsa_print(ACS_PRINT_INFO, L"\n Start Bus = 0x%llx", Entry->StartBusNumber);
+      bsa_print(ACS_PRINT_INFO, L"\n End Bus   = 0x%llx", Entry->EndBusNumber);
       length += sizeof(EFI_ACPI_MEMORY_MAPPED_ENHANCED_CONFIGURATION_SPACE_BASE_ADDRESS_ALLOCATION_STRUCTURE);
       Entry++;
       i++;
@@ -294,7 +299,7 @@ pal_pcie_get_legacy_irq_map (
   PERIPHERAL_IRQ_MAP *IrqMap
   )
 {
-  return 1;
+  return 1; /* not implemented */
 }
 
 /* Place holder function. Need to be

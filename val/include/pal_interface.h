@@ -49,6 +49,8 @@
 #define PCIE_CAP_NOT_FOUND      0x10000010  /* The specified capability was not found */
 #define PCIE_UNKNOWN_RESPONSE   0xFFFFFFFF  /* Function not found or UR response from completer */
 
+void pal_dump_dtb(void);
+
 /**  PE Test related Definitions **/
 
 /**
@@ -160,17 +162,28 @@ typedef struct {
   GIC_INFO_ENTRY gic_info[];  ///< Array of Information blocks - instantiated for each GIC type
 }GIC_INFO_TABLE;
 
+typedef struct {
+ uint32_t     ID;
+ uint64_t     Base;
+ uint64_t     CommandQBase;
+ uint32_t     IDBits;
+ uint64_t     ITTBase;
+} GIC_ITS_BLOCK;
+
+typedef struct {
+ uint64_t         GicDBase;
+ uint64_t         GicRdBase;
+ uint32_t         GicNumIts;
+ GIC_ITS_BLOCK    GicIts[];
+} GIC_ITS_INFO;
+
 void     pal_gic_create_info_table(GIC_INFO_TABLE *gic_info_table);
 uint32_t pal_gic_install_isr(uint32_t int_id, void (*isr)(void));
 void pal_gic_end_of_interrupt(uint32_t int_id);
 uint32_t pal_gic_request_irq(unsigned int irq_num, unsigned int mapped_irq_num, void *isr);
 void pal_gic_free_irq(unsigned int irq_num, unsigned int mapped_irq_num);
 uint32_t pal_gic_set_intr_trigger(uint32_t int_id, INTR_TRIGGER_INFO_TYPE_e trigger_type);
-uint32_t pal_gic_its_configure(void);
-uint32_t pal_gic_request_msi(uint32_t its_id, uint32_t DevID, uint32_t IntID, uint32_t msi_index, uint32_t *msi_addr, uint32_t *msi_data);
-void pal_gic_free_msi(uint32_t its_id, uint32_t DevID, uint32_t IntID, uint32_t msi_index);
-uint32_t pal_gic_get_max_lpi_id(void);
-uint32_t pal_bsa_gic_imp(void);
+uint32_t pal_target_is_dt(void);
 
 /** Timer tests related definitions **/
 
@@ -447,6 +460,8 @@ typedef struct {
   uint32_t         msi;   ///< MSI Enabled
   uint32_t         msix;  ///< MSIX Enabled
   uint32_t         max_pasids;
+  uint32_t         baud_rate;
+  uint32_t         interface_type;
 }PERIPHERAL_INFO_BLOCK;
 
 /**
@@ -608,6 +623,8 @@ void     pal_mmio_write16(uint64_t addr, uint16_t data);
 void     pal_mmio_write(uint64_t addr, uint32_t data);
 void     pal_mmio_write64(uint64_t addr, uint64_t data);
 
+void     pal_mem_set(void *Buf, uint32_t Size, uint8_t Value);
+
 void     pal_pe_update_elr(void *context, uint64_t offset);
 uint64_t pal_pe_get_esr(void *context);
 uint64_t pal_pe_get_far(void *context);
@@ -738,12 +755,17 @@ typedef enum {
 } EXERCISER_DATA_TYPE;
 
 uint32_t pal_is_bdf_exerciser(uint32_t bdf);
-uint32_t pal_exerciser_set_param(EXERCISER_PARAM_TYPE type, uint64_t value1, uint64_t value2, uint32_t bdf);
-uint32_t pal_exerciser_get_param(EXERCISER_PARAM_TYPE type, uint64_t *value1, uint64_t *value2, uint32_t bdf);
-uint32_t pal_exerciser_set_state(EXERCISER_STATE state, uint64_t *value, uint32_t bdf);
+uint32_t pal_exerciser_set_param(EXERCISER_PARAM_TYPE type, uint64_t value1,
+                                 uint64_t value2, uint32_t bdf, uint64_t ecam);
+uint32_t pal_exerciser_get_param(EXERCISER_PARAM_TYPE type, uint64_t *value1,
+                                uint64_t *value2, uint32_t bdf, uint64_t ecam);
+uint32_t pal_exerciser_set_state(EXERCISER_STATE state, uint64_t *value,
+                                                                 uint32_t bdf);
 uint32_t pal_exerciser_get_state(EXERCISER_STATE *state, uint32_t bdf);
-uint32_t pal_exerciser_ops(EXERCISER_OPS ops, uint64_t param, uint32_t instance);
-uint32_t pal_exerciser_get_data(EXERCISER_DATA_TYPE type, exerciser_data_t *data, uint32_t bdf, uint64_t ecam);
+uint32_t pal_exerciser_ops(EXERCISER_OPS ops, uint64_t param,
+                                             uint32_t instance, uint64_t ecam);
+uint32_t pal_exerciser_get_data(EXERCISER_DATA_TYPE type,
+                          exerciser_data_t *data, uint32_t bdf, uint64_t ecam);
 
 #endif
 

@@ -143,11 +143,11 @@ main (int argc, char **argv)
         return 0;
     }
 
-    printf("\n      *** Starting Peripherals tests ***  \n");
-    execute_tests_peripheral(1, g_print_level);
-
     printf("\n      *** Starting Memory Map tests ***  \n");
     execute_tests_memory(1, g_print_level);
+
+    printf("\n      *** Starting Peripherals tests ***  \n");
+    execute_tests_peripheral(1, g_print_level);
 
     if (run_exerciser) {
         printf("\n      *** PCIe Exerciser tests only runs on UEFI ***  \n");

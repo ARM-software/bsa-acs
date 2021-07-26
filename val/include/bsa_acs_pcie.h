@@ -197,12 +197,22 @@ val_pcie_is_cache_present(uint32_t bdf);
 
 uint32_t os_p001_entry(uint32_t num_pe);
 uint32_t os_p002_entry(uint32_t num_pe);
+uint32_t os_p003_entry(uint32_t num_pe);
+uint32_t os_p004_entry(uint32_t num_pe);
 uint32_t os_p005_entry(uint32_t num_pe);
 uint32_t os_p006_entry(uint32_t num_pe);
-uint32_t os_p007_entry(uint32_t num_pe);
+uint32_t os_p008_entry(uint32_t num_pe);
+uint32_t os_p009_entry(uint32_t num_pe);
+uint32_t os_p010_entry(uint32_t num_pe);
 uint32_t os_p011_entry(uint32_t num_pe);
 uint32_t os_p012_entry(uint32_t num_pe);
+uint32_t os_p013_entry(uint32_t num_pe);
+uint32_t os_p014_entry(uint32_t num_pe);
+uint32_t os_p015_entry(uint32_t num_pe);
 uint32_t os_p016_entry(uint32_t num_pe);
+uint32_t os_p017_entry(uint32_t num_pe);
+uint32_t os_p018_entry(uint32_t num_pe);
+uint32_t os_p019_entry(uint32_t num_pe);
 uint32_t os_p020_entry(uint32_t num_pe);
 uint32_t os_p021_entry(uint32_t num_pe);
 uint32_t os_p022_entry(uint32_t num_pe);
@@ -220,25 +230,13 @@ uint32_t os_p033_entry(uint32_t num_pe);
 uint32_t os_p034_entry(uint32_t num_pe);
 uint32_t os_p035_entry(uint32_t num_pe);
 uint32_t os_p036_entry(uint32_t num_pe);
-uint32_t os_p037_entry(uint32_t num_pe);
-uint32_t os_p038_entry(uint32_t num_pe);
-uint32_t os_p039_entry(uint32_t num_pe);
-uint32_t os_p041_entry(uint32_t num_pe);
-uint32_t os_p042_entry(uint32_t num_pe);
-uint32_t os_p044_entry(uint32_t num_pe);
-uint32_t os_p048_entry(uint32_t num_pe);
-uint32_t os_p050_entry(uint32_t num_pe);
-uint32_t os_p051_entry(uint32_t num_pe);
-uint32_t os_p052_entry(uint32_t num_pe);
-uint32_t os_p053_entry(uint32_t num_pe);
-uint32_t os_p054_entry(uint32_t num_pe);
-uint32_t os_p055_entry(uint32_t num_pe);
-uint32_t os_p056_entry(uint32_t num_pe);
-uint32_t os_p057_entry(uint32_t num_pe);
-uint32_t os_p058_entry(uint32_t num_pe);
-uint32_t os_p059_entry(uint32_t num_pe);
-uint32_t os_p060_entry(uint32_t num_pe);
+
+/* Linux test */
 uint32_t os_p061_entry(uint32_t num_pe);
 uint32_t os_p062_entry(uint32_t num_pe);
+uint32_t os_p063_entry(uint32_t num_pe);
+uint32_t os_p064_entry(uint32_t num_pe);
+uint32_t os_p065_entry(uint32_t num_pe);
+uint32_t os_p066_entry(uint32_t num_pe);
 
 #endif
