@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2020 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2020, 2021 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,15 +26,24 @@
 #include "Include/IndustryStandard/Acpi61.h"
 
 #include "include/pal_uefi.h"
+
+VOID
+pal_dump_dtb()
+{
+  bsa_print(ACS_PRINT_ERR, L"DTB dump not available for platform initialized"
+                                " with ACPI table \n");
+}
 /**
-  @brief   Checks if gic init and interrupt handlers ACS code is used
+  @brief   Checks if System information is passed using Device Tree (DT)
+           This api is also used to check if GIC/Interrupt Init ACS Code
+           is used or not. In case of DT, ACS Code is used for INIT
 
   @param  None
 
   @return True/False
 */
 UINT32
-pal_bsa_gic_imp()
+pal_target_is_dt()
 {
   return 0;
 }

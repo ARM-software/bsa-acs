@@ -296,7 +296,7 @@ pal_pcie_get_legacy_irq_map (
   PERIPHERAL_IRQ_MAP *IrqMap
   )
 {
-  return 1;
+  return 1; /* not implemented */
 }
 
 /* Place holder function. Need to be

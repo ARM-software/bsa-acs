@@ -22,7 +22,8 @@
 #include "val/include/bsa_acs_pcie.h"
 
 #define TEST_NUM   (ACS_PER_TEST_NUM_BASE + 1)
-#define TEST_DESC  "B_PER_01,B_PER_02: USB CTRL Interface (PCIe)"
+#define TEST_RULE  "B_PER_01, B_PER_02"
+#define TEST_DESC  "USB CTRL Interface (PCIe)             "
 
 static
 void
@@ -46,7 +47,8 @@ payload()
       interface = (interface >> 8) & 0xFF;
       if (ret == PCIE_NO_MAPPING || (interface < 0x20) || (interface == 0xFF)) {
           val_print(ACS_PRINT_WARN, "\n       WARN: USB CTRL ECAM access failed 0x%x  ", interface);
-          val_print(ACS_PRINT_WARN, "\n       Re-checking USB CTRL using PciIo protocol       ", 0);
+          val_print(ACS_PRINT_WARN, "\n       Re-checking using PCIIO protocol",
+                                                                            0);
           ret = val_pcie_io_read_cfg(bdf, 0x8, &interface);
           if (ret == PCIE_NO_MAPPING) {
               val_print(ACS_PRINT_ERR, "\n       Reading device class code using PciIo protocol failed ", 0);
@@ -84,9 +86,9 @@ os_d001_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

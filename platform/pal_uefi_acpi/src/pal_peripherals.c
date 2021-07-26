@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2020 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2020-2021 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,6 +37,7 @@
 #define BAR1            1
 #define BAR2            2
 
+UINT32 spcr_baudrate_id[] = {0, 0, 0, 9600, 19200, 0, 57600, 115200};
 UINT64
 pal_get_spcr_ptr();
 
@@ -109,6 +110,13 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
     per_info->base0 = spcr->BaseAddress.Address;
     per_info->irq   = spcr->GlobalSystemInterrupt;
     per_info->type  = PERIPHERAL_TYPE_UART;
+
+    if (spcr->BaudRate < 8)
+        per_info->baud_rate = spcr_baudrate_id[spcr->BaudRate];
+    else
+         per_info->baud_rate = 0;
+
+    per_info->interface_type = spcr->InterfaceType;
     per_info++;
   }
 
@@ -268,6 +276,10 @@ pal_memory_create_info_table(MEMORY_INFO_TABLE *memoryInfoTable)
       memoryInfoTable->info[i].virt_addr = MemoryMapPtr->VirtualStart;
       memoryInfoTable->info[i].size      = (MemoryMapPtr->NumberOfPages * EFI_PAGE_SIZE);
       i++;
+      if (i >= MEM_INFO_TBL_MAX_ENTRY) {
+        bsa_print(ACS_PRINT_DEBUG, L"Memory Info tbl limit exceeded, Skipping remaining\n", 0);
+        break;
+      }
 
       MemoryMapPtr = (EFI_MEMORY_DESCRIPTOR*)((UINTN)MemoryMapPtr + DescriptorSize);
     }

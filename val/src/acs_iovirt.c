@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -138,6 +138,98 @@ val_iovirt_get_pcie_rc_info(PCIE_RC_INFO_e type, uint32_t index)
 
 }
 
+/**
+  @brief   This API is a single point of entry to retrieve
+           ITS information stored in the IoVirt Info table
+           1. Prerequisite -  val_iovirt_create_info_table
+  @param   type           : The type of information being requested
+  @param   group_index    : ITS group index
+  @param   param          : value to be passed based on use-case
+  @param   return_value   : return data
+  @return  Status
+**/
+int
+val_iovirt_get_its_info(
+  uint32_t type, uint32_t group_index, uint32_t param, uint32_t *return_value)
+{
+  uint32_t i = 0;
+  uint32_t j = 0;
+  uint32_t it = 0;
+  IOVIRT_BLOCK *block;
+
+
+  if (g_iovirt_info_table == NULL) {
+    val_print(ACS_PRINT_ERR, "GET_ITS_INFO: iovirt info table is not created \n", 0);
+    return ACS_STATUS_ERR;
+  }
+  if (!return_value) {
+      val_print(ACS_PRINT_ERR, "GET_ITS_INFO: Return pointer is NULL \n", 0);
+      return ACS_STATUS_ERR;
+  }
+
+  if (type == ITS_NUM_GROUPS) {
+      *return_value = g_iovirt_info_table->num_its_groups;
+      return ACS_STATUS_PASS;
+   }
+
+  /* Go through the table return the relevant field value for the ITS block */
+  /* at the index position */
+  block = &g_iovirt_info_table->blocks[0];
+
+  for (i = 0; i < g_iovirt_info_table->num_blocks; i++, block = IOVIRT_NEXT_BLOCK(block))
+  {
+      if (block->type == IOVIRT_NODE_ITS_GROUP) {
+          if (type == ITS_GET_GRP_INDEX_FOR_ID) {
+              /* Return the ITS Group Index for ITS_ID = param */
+              for (it = 0; it < block->data.its_count; it++) {
+                if (block->data_map[0].id[it] == param) {
+                  *return_value = j;
+                  return ACS_STATUS_PASS;
+                }
+              }
+              j++;
+              continue;
+          }
+          if (group_index == j) {
+              switch (type)
+              {
+                case ITS_GROUP_NUM_BLOCKS: /* Return Number of ITS blocks in this group */
+                  *return_value = block->data.its_count;
+                  return ACS_STATUS_PASS;
+                case ITS_GET_ID_FOR_BLK_INDEX:
+                  /* Get ITS Block ID for index = param in this current ITS Group */
+                  for (it = 0; it < block->data.its_count; it++) {
+                      if (it == param) {
+                          *return_value = block->data_map[0].id[it];
+                          return ACS_STATUS_PASS;
+                      }
+                  }
+                  /* Return Error if block not found */
+                  return ACS_INVALID_INDEX;
+                case ITS_GET_BLK_INDEX_FOR_ID:
+                  /* Get ITS Block index for ITS_ID = param in ITS Group = group_index */
+                  for (it = 0; it < block->data.its_count; it++) {
+                      if (block->data_map[0].id[it] == param) {
+                        *return_value = it;
+                        return ACS_STATUS_PASS;
+                      }
+                  }
+                  /* ITS_ID not found in current group, return error */
+                  return ACS_INVALID_INDEX;
+                default:
+                  val_print(ACS_PRINT_ERR, "This ITS info option not supported %d \n", type);
+                  return ACS_STATUS_ERR;
+              }
+              break;
+          }
+          j++;
+      }
+  }
+
+  val_print(ACS_PRINT_ERR, "GET_ITS_INFO: ITS Group not found %d\n", group_index);
+  return ACS_INVALID_INDEX;
+}
+
 uint32_t
 val_iovirt_unique_rid_strid_map(uint32_t rc_index)
 {
@@ -167,11 +259,11 @@ val_iovirt_get_device_info(uint32_t rid, uint32_t segment, uint32_t *device_id,
   NODE_DATA_MAP *map;
   if (g_iovirt_info_table == NULL)
   {
-      val_print(ACS_PRINT_ERR, "GET_DEVICE_ID: iovirt info table is not created \n", 0);
+      val_print(ACS_PRINT_ERR, "\n       GET_DEVICE_ID: iovirt info table is not created", 0);
       return ACS_STATUS_ERR;
   }
   if (!device_id) {
-      val_print(ACS_PRINT_ERR, "GET_DEVICE_ID: Invalid parameters\n", 0);
+      val_print(ACS_PRINT_ERR, "\n       GET_DEVICE_ID: Invalid parameters", 0);
       return ACS_STATUS_ERR;
   }
 
@@ -199,7 +291,7 @@ val_iovirt_get_device_info(uint32_t rid, uint32_t segment, uint32_t *device_id,
   }
   if (!mapping_found) {
       val_print(ACS_PRINT_ERR,
-               "GET_DEVICE_ID: Requestor ID to Stream ID/Device ID mapping not found\n", 0);
+             "\n       GET_DEVICE_ID: RID to Stream/Dev ID mapping not found", 0);
       return ACS_STATUS_ERR;
   }
   /* If output reference node is to ITS group, 'id' is device id */
@@ -235,12 +327,13 @@ val_iovirt_get_device_info(uint32_t rid, uint32_t segment, uint32_t *device_id,
   }
   else
   {
-    val_print(ACS_PRINT_ERR, "GET_DEVICE_ID: Invalid mapping for RC in IORT\n", 0);
+    val_print(ACS_PRINT_ERR, "\n       GET_DEVICE_ID: Invalid mapping for RC in IORT", 0);
     return ACS_STATUS_ERR;
   }
   if (!mapping_found)
   {
-    val_print(ACS_PRINT_ERR, "GET_DEVICE_ID: Stream ID to Device ID mapping not found\n", 0);
+    val_print(ACS_PRINT_ERR,
+                        "\n       GET_DEVICE_ID: Stream ID to Device ID mapping not found", 0);
     return ACS_STATUS_ERR;
   }
 

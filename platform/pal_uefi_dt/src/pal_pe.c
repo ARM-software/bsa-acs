@@ -35,6 +35,11 @@ static UINT32 g_num_pe;
 
 static char pmu_dt_arr[][PMU_COMPATIBLE_STR_LEN] = {
     "arm,armv8-pmuv3",
+    "arm,cortex-a73-pmu",
+    "arm,cortex-a72-pmu",
+    "arm,cortex-a57-pmu",
+    "arm,cortex-a53-pmu",
+    "arm,cortex-a35-pmu",
     "arm,cortex-a17-pmu",
     "arm,cortex-a15-pmu",
     "arm,cortex-a12-pmu",
@@ -363,7 +368,8 @@ pal_pe_info_table_pmu_gsiv_dt(PE_INFO_TABLE *PeTable)
   int index = 0;
   int interrupt_cell, interrupt_frame_count;
   PE_INFO_ENTRY *Ptr = NULL;
-
+  int intr_type = 0;
+  int curr_pmu_intr_num = 0, prev_pmu_intr_num = 0;
 
   if (PeTable == NULL)
     return;
@@ -381,7 +387,7 @@ pal_pe_info_table_pmu_gsiv_dt(PE_INFO_TABLE *PeTable)
       /* Search for pmu nodes*/
       offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, pmu_dt_arr[i]);
       if (offset < 0) {
-          bsa_print(ACS_PRINT_DEBUG, L"PMU compatible value not found for index:%d\n", i);
+          bsa_print(ACS_PRINT_DEBUG, L" PMU compatible value not found for index:%d\n", i);
           continue; /* Search for next compatible item*/
       }
 
@@ -397,7 +403,7 @@ pal_pe_info_table_pmu_gsiv_dt(PE_INFO_TABLE *PeTable)
 
           interrupt_cell = fdt_interrupt_cells((const void *)dt_ptr, offset);
           bsa_print(ACS_PRINT_DEBUG, L" interrupt_cell  %d\n", interrupt_cell);
-          if (interrupt_cell < 1 || interrupt_cell > 3) {
+          if (interrupt_cell < INTERRUPT_CELLS_MIN || interrupt_cell > INTERRUPT_CELLS_MAX) {
               bsa_print(ACS_PRINT_ERR, L" Invalid interrupt cell : %d \n", interrupt_cell);
               return;
           }
@@ -409,40 +415,56 @@ pal_pe_info_table_pmu_gsiv_dt(PE_INFO_TABLE *PeTable)
               bsa_print(ACS_PRINT_ERR, L" interrupt_frame_count is invalid\n");
               return;
           }
-          /* Handle Single PMU node with Single PPI or SPI */
-          if (interrupt_frame_count == 1) {
-              for (i = 0; i < PeTable->header.num_of_pe; i++) {
-                  if (interrupt_cell == 3) {
-                      if (Pintr[0])
-                          Ptr->pmu_gsiv = fdt32_to_cpu(Pintr[1]) + PPI_OFFSET;
-                      else
-                          Ptr->pmu_gsiv = fdt32_to_cpu(Pintr[1]) + SPI_OFFSET;
-                  }
-                  else
-                    Ptr->pmu_gsiv = fdt32_to_cpu(Pintr[0]);
-                  Ptr++;
-              }
-              return;
-          }
 
-          /* Handle Multiple PMU node with multiple SPI frames
+          index = 0;
+          /* Handle PMU node with multiple/single SPI/PPI frames
            * the pmu_gsiv should be in same order of CPU nodes */
           for (i = 0; i < interrupt_frame_count; i++) {
-              if (interrupt_cell == 3) {
-                  if (Pintr[index++])
-                      Ptr->pmu_gsiv = fdt32_to_cpu(Pintr[index++]) + PPI_OFFSET;
-                  else
-                      Ptr->pmu_gsiv = fdt32_to_cpu(Pintr[index++]) + SPI_OFFSET;
-                  index++; /*Skip flag*/
-              } else if (interrupt_cell == 2) {
-                  Ptr->pmu_gsiv = fdt32_to_cpu(Pintr[index++]);
-                  index++; /*Skip flag*/
-              } else
-                Ptr->pmu_gsiv = fdt32_to_cpu(Pintr[index++]);
+              if ((interrupt_cell == 3) || (interrupt_cell == 4)) {
+                intr_type = fdt32_to_cpu(Pintr[index++]);
+                curr_pmu_intr_num = fdt32_to_cpu(Pintr[index++]);
+                index++; /*Skip flag*/
+                if (interrupt_cell == 4)
+                  index++; /*Skip CPU affinity */
+              } else {
+                /* Skip PMU node , if interrupt type not mentioned*/
+                Ptr = PeTable->pe_info;
+                for (i = 0; i < PeTable->header.num_of_pe; i++) {
+                    Ptr->pmu_gsiv = 0; /* Set to zero*/
+                    Ptr++;
+                }
+                bsa_print(ACS_PRINT_WARN, L" PMU interrupt type not mentioned\n");
+                return;
+              }
 
-              Ptr++;
+              bsa_print(ACS_PRINT_DEBUG, L" intr_type    : %d \n", intr_type);
+              bsa_print(ACS_PRINT_DEBUG, L" pmu_intr_num : %d \n", curr_pmu_intr_num);
+
+              if (intr_type == INTERRUPT_TYPE_PPI) {
+                curr_pmu_intr_num += PPI_OFFSET;
+                if ((prev_pmu_intr_num != 0) && (curr_pmu_intr_num != prev_pmu_intr_num)) {
+                    Ptr = PeTable->pe_info;
+                    for (i = 0; i < PeTable->header.num_of_pe; i++) {
+                      Ptr->pmu_gsiv = 0; /* Set to zero*/
+                      Ptr++;
+                    }
+                    bsa_print(ACS_PRINT_WARN, L" PMU interrupt number mismatch found\n");
+                    return;
+                }
+                if (prev_pmu_intr_num == 0) { /* Update table first time with same id*/
+                    for (i = 0; i < PeTable->header.num_of_pe; i++) {
+                      Ptr->pmu_gsiv = curr_pmu_intr_num;
+                      Ptr++;
+                    }
+                }
+                prev_pmu_intr_num = curr_pmu_intr_num;
+              }
+              else {
+                curr_pmu_intr_num += SPI_OFFSET;
+                Ptr->pmu_gsiv = curr_pmu_intr_num;
+                Ptr++;
+              }
           }
-
           offset =
               fdt_node_offset_by_compatible((const void *)dt_ptr, offset, pmu_dt_arr[i]);
       }

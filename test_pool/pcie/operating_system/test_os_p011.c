@@ -1,7 +1,6 @@
 /** @file
- * Copyright (c) 2016-2018,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020-2021 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
-
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,41 +17,135 @@
 #include "val/include/bsa_acs_val.h"
 #include "val/include/val_interface.h"
 
-#include "val/include/bsa_acs_iovirt.h"
+#include "val/include/bsa_acs_pcie.h"
+#include "val/include/bsa_acs_pe.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 11)
-#define TEST_DESC  "PCI_IC_02: PCIe RC, PE - Same Inn SH Dom.          "
+#define TEST_RULE  "PCI_IN_18"
+#define TEST_DESC  "Check RP Byte Enable Rules            "
 
-#define INNER_SHAREABLE 1
-
-static void
+static
+void
 payload(void)
 {
-  uint32_t num_pcie_rc;
-  uint32_t mem_attr;
-  uint32_t index = val_pe_get_index_mpid (val_pe_get_mpid());
 
-  num_pcie_rc = val_iovirt_get_pcie_rc_info(NUM_PCIE_RC, 0);
+  int8_t   i;
+  uint32_t bdf;
+  uint32_t dp_type;
+  uint32_t pe_index;
+  uint32_t tbl_index;
+  uint32_t test_skip = 1;
+  uint32_t ecam_cr, ecam_cr_8, ecam_cr_16, ecam_cr_new;
+  uint32_t write_value = 0;
+  uint32_t command_reg_offset;
+  addr_t ecam_base;
+  pcie_device_bdf_table *bdf_tbl_ptr;
 
-  if (!num_pcie_rc) {
-     val_print(ACS_PRINT_WARN, "\n       Skip because no PCIe RC detected  ", 0);
-     val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
-     return;
-  }
+  tbl_index = 0;
+  ecam_cr = 0;
+  ecam_cr_8 = 0;
+  ecam_cr_16 = 0;
+  ecam_cr_new = 0;
 
-  while (num_pcie_rc) {
-      num_pcie_rc--;   // Index is one lesser than the component number being accessed
-      mem_attr = val_iovirt_get_pcie_rc_info(RC_MEM_ATTRIBUTE, num_pcie_rc);
+  bdf_tbl_ptr = val_pcie_bdf_table_ptr();
+  pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
 
-      if (mem_attr == INNER_SHAREABLE)
-         val_set_status(index, RESULT_PASS(TEST_NUM, 01));
-      else {
-         val_print(ACS_PRINT_ERR, "\n    Failed mem attribute check for PCIe RC %d", num_pcie_rc);
-         val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
-         return;
+  while (tbl_index < bdf_tbl_ptr->num_entries)
+  {
+      bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
+      dp_type = val_pcie_device_port_type(bdf);
+
+      if ((dp_type == RP) || (dp_type == iEP_RP)) {
+
+        /* If test runs for atleast an endpoint */
+        test_skip = 0;
+
+        ecam_base = val_pcie_get_ecam_base(bdf);
+        command_reg_offset = PCIE_EXTRACT_BDF_BUS(bdf) *
+                             PCIE_MAX_DEV * PCIE_MAX_FUNC * PCIE_CFG_SIZE +
+                             PCIE_EXTRACT_BDF_DEV(bdf) * PCIE_MAX_FUNC * PCIE_CFG_SIZE +
+                             PCIE_EXTRACT_BDF_FUNC(bdf) * PCIE_CFG_SIZE +
+                             TYPE01_CR;
+
+        /* Read Command Register of RP with 8 Bit, 16 Bit, 32 Bit and compare it */
+        ecam_cr = val_mmio_read(ecam_base + command_reg_offset);
+        for (i = 3; i >= 0; i--) {
+          ecam_cr_8 = ecam_cr_8 << 8;
+          ecam_cr_8 |= val_mmio_read8(ecam_base + command_reg_offset + i);
+        }
+        for (i = 1; i >= 0; i--) {
+          ecam_cr_16 = ecam_cr_16 << 16;
+          ecam_cr_16 |= val_mmio_read16(ecam_base + command_reg_offset + i*2);
+        }
+
+        if ((ecam_cr != ecam_cr_8) || (ecam_cr_8 != ecam_cr_16))
+        {
+          val_print(ACS_PRINT_ERR, "\n        Byte Enable Read Failed", 0);
+          val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 01));
+          return;
+        }
+
+        /* Check Read-Write-Read Behaviour for each 8 Bit */
+        ecam_cr = val_mmio_read8(ecam_base + command_reg_offset);
+
+        /* Change BME & MSE Bit Value */
+        write_value = ecam_cr ^ ((1 << CR_MSE_SHIFT) | (1 << CR_BME_SHIFT));
+        val_mmio_write8(ecam_base + command_reg_offset, write_value);
+
+        ecam_cr_new = val_mmio_read8(ecam_base + command_reg_offset);
+        if (write_value != ecam_cr_new)
+        {
+          val_print(ACS_PRINT_ERR, "\n        8 Bit Write Failed", 0);
+          val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
+          return;
+        }
+
+        /* Restore the value */
+        val_mmio_write8(ecam_base + command_reg_offset, ecam_cr);
+
+        /* Check Read-Write-Read Behaviour for each 16 Bit */
+        ecam_cr = val_mmio_read16(ecam_base + command_reg_offset);
+
+        /* Change BME & MSE Bit Value */
+        write_value = ecam_cr ^ ((1 << CR_MSE_SHIFT) | (1 << CR_BME_SHIFT));
+        val_mmio_write16(ecam_base + command_reg_offset, write_value);
+
+        ecam_cr_new = val_mmio_read16(ecam_base + command_reg_offset);
+        if (write_value != ecam_cr_new)
+        {
+          val_print(ACS_PRINT_ERR, "\n        16 Bit Write Failed", 0);
+          val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 03));
+          return;
+        }
+
+        /* Restore the value */
+        val_mmio_write16(ecam_base + command_reg_offset, ecam_cr);
+
+        /* Check Read-Write-Read Behaviour for 32 Bit */
+        ecam_cr = val_mmio_read(ecam_base + command_reg_offset);
+
+        /* Change BME & MSE Bit Value */
+        write_value = ecam_cr ^ ((1 << CR_MSE_SHIFT) | (1 << CR_BME_SHIFT));
+        val_mmio_write(ecam_base + command_reg_offset, write_value);
+
+        ecam_cr_new = val_mmio_read(ecam_base + command_reg_offset);
+        if (write_value != ecam_cr_new)
+        {
+          val_print(ACS_PRINT_ERR, "\n        32 Bit Write Failed", 0);
+          val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 04));
+          return;
+        }
+
+        /* Restore the value */
+        val_mmio_write(ecam_base + command_reg_offset, ecam_cr);
+
       }
   }
 
+  if (test_skip == 1)
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+  else
+      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
 }
 
 uint32_t
@@ -68,9 +161,9 @@ os_p011_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

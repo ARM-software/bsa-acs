@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,83 +17,100 @@
 #include "val/include/bsa_acs_val.h"
 #include "val/include/val_interface.h"
 
-#include "val/include/bsa_acs_dma.h"
-#include "val/include/bsa_acs_smmu.h"
+#include "val/include/bsa_acs_pe.h"
+#include "val/include/bsa_acs_pcie.h"
+#include "val/include/bsa_acs_gic.h"
+#include "val/include/bsa_acs_memory.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 6)
-#define TEST_DESC  "PCI_MM_05, PCI_MM_06: No extra addr trans          "
+#define TEST_RULE  "PCI_LI_01, PCI_LI_03"
+#define TEST_DESC  "Legacy int must be SPI & lvl-sensitive"
 
-
-/* For all DMA masters populated in the Info table, which are behind an SMMU,
-   verify there are no additional translations before address is given to SMMU */
 static
 void
 payload(void)
 {
-
-  uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
-  uint32_t target_dev_index;
-  addr_t   dma_addr = 0;
-  uint32_t dma_len = 0;
-  void *buffer;
   uint32_t status;
-  uint32_t iommu_flag = 0;
+  uint32_t bdf;
+  uint32_t pe_index;
+  uint32_t tbl_index;
+  uint32_t reg_value;
+  uint32_t test_skip = 1;
+  uint32_t intr_pin, intr_line;
+  PERIPHERAL_IRQ_MAP *intr_map;
+  pcie_device_bdf_table *bdf_tbl_ptr;
+  INTR_TRIGGER_INFO_TYPE_e trigger_type;
 
-  target_dev_index = val_dma_get_info(DMA_NUM_CTRL, 0);
+  pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
 
-  if (!target_dev_index) {
-      val_print(ACS_PRINT_TEST, "\n       No DMA controllers detected...    ", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
-      return;
+  /* Allocate memory for interrupt mappings */
+  intr_map = val_memory_alloc(sizeof(PERIPHERAL_IRQ_MAP));
+  if (!intr_map) {
+    val_print (ACS_PRINT_ERR, "\n       Memory allocation error", 0);
+    val_set_status(pe_index, RESULT_FAIL (TEST_NUM, 01));
+    return;
   }
 
-  while (target_dev_index)
-  {
-      target_dev_index--; //index is zero based
+  tbl_index = 0;
+  bdf_tbl_ptr = val_pcie_bdf_table_ptr();
 
-      /* Check there were no additional translations between Device and SMMU */
-      if (val_dma_get_info(DMA_HOST_IOMMU_ATTACHED, target_dev_index)) {
-          iommu_flag++;
-          val_dma_device_get_dma_addr(target_dev_index, &dma_addr, &dma_len);
-          status = val_smmu_ops(SMMU_CHECK_DEVICE_IOVA, 0, &target_dev_index, &dma_addr);
-          if (status) {
-              val_print(ACS_PRINT_ERR, "\n   The DMA address %lx used by device ", dma_addr);
-              val_print(ACS_PRINT_ERR, "\n       is not present in the SMMU IOVA table \n", 0);
-              val_set_status(index, RESULT_FAIL(TEST_NUM, target_dev_index));
-              return;
-          }
+  while (tbl_index < bdf_tbl_ptr->num_entries)
+  {
+      bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
+
+      /* Read Interrupt Line Register */
+      val_pcie_read_cfg(bdf, TYPE01_ILR, &reg_value);
+
+      intr_pin = (reg_value >> TYPE01_IPR_SHIFT) & TYPE01_IPR_MASK;
+      if ((intr_pin == 0) || (intr_pin > 0x4))
+        continue;
+
+      status = val_pci_get_legacy_irq_map(bdf, intr_map);
+      if (status) {
+        // Skip the test if the Legacy IRQ map does not exist
+        val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 02));
+        return;
+      }
+
+      /* If test runs for atleast an endpoint */
+      test_skip = 0;
+
+      intr_line = intr_map->legacy_irq_map[intr_pin-1].irq_list[0];
+
+      /* Check if the int falls in SPI range */
+      if ((intr_line >= 32 && intr_line <= 1019) ||
+          (val_gic_espi_supported() && (intr_line >= 4096 &&
+                            intr_line <= val_gic_max_espi_val())))  {
+          val_print(ACS_PRINT_INFO, "\n Int is SPI", 0);
+      }
+      else {
+          val_print(ACS_PRINT_ERR, "\n Int id %d is not SPI", intr_line);
+          val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 03));
+          return;
+      }
+
+      /* Read GICD_ICFGR/ICFGR-E register to Check for Level/Edge Sensitive. */
+      if (intr_line >= 32 && intr_line <= 1019)
+          status = val_gic_get_intr_trigger_type(intr_line, &trigger_type);
+      else
+          status = val_gic_get_espi_intr_trigger_type(intr_line, &trigger_type);
+
+      if (status) {
+        val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 04));
+        return;
+      }
+
+      if (trigger_type != INTR_TRIGGER_INFO_LEVEL_HIGH) {
+        val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 05));
+        return;
       }
   }
 
-  target_dev_index = val_dma_get_info(DMA_NUM_CTRL, 0);
-
-  /* Check if IOMMU ops is properly integrated for this device by making the standard OS
-     DMA API call and verifying the DMA address is part of the IOVA translation table */
-  while (target_dev_index)
-  {
-      target_dev_index--;
-      if (val_dma_get_info(DMA_HOST_IOMMU_ATTACHED, target_dev_index)) {
-          /* Allocate DMA-able memory region in DDR */
-          dma_addr = val_dma_mem_alloc(&buffer, 512, target_dev_index, DMA_COHERENT);
-          status = val_smmu_ops(SMMU_CHECK_DEVICE_IOVA, 0, &target_dev_index, &dma_addr);
-          if (status) {
-              val_print(ACS_PRINT_ERR, "\n The DMA addr allocated to device %d ", target_dev_index);
-              val_print(ACS_PRINT_ERR, "\n       is not present in the SMMU IOVA table \n", 0);
-              val_set_status(index, RESULT_FAIL(TEST_NUM, target_dev_index));
-              return;
-          }
-          /* Free the allocated memory here */
-          val_dma_mem_free(buffer, dma_addr, 512, target_dev_index, DMA_COHERENT);
-      }
-  }
-
-  if (iommu_flag)
-      val_set_status(index, RESULT_PASS(TEST_NUM, 02));
+  if (test_skip == 1)
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
   else
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
-
+      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
 }
-
 
 uint32_t
 os_p006_entry(uint32_t num_pe)
@@ -108,9 +125,9 @@ os_p006_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

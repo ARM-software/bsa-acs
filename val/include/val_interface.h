@@ -46,7 +46,7 @@ void val_set_test_data(uint32_t index, uint64_t addr, uint64_t test_data);
 void val_get_test_data(uint32_t index, uint64_t *data0, uint64_t *data1);
 uint32_t val_strncmp(char8_t *str1, char8_t *str2, uint32_t len);
 void    *val_memcpy(void *dest_buffer, void *src_buffer, uint32_t len);
-
+void val_dump_dtb(void);
 uint64_t val_time_delay_ms(uint64_t time_ms);
 
 /* VAL PE APIs */
@@ -62,7 +62,7 @@ uint32_t val_pe_get_index_mpid(uint64_t mpid);
 uint32_t val_pe_install_esr(uint32_t exception_type, void (*esr)(uint64_t, void *));
 
 void     val_execute_on_pe(uint32_t index, void (*payload)(void), uint64_t args);
-void     val_suspend_pe(uint32_t power_state, uint64_t entry, uint32_t context_id);
+int      val_suspend_pe(uint64_t entry, uint32_t context_id);
 
 /* GIC VAL APIs */
 uint32_t    val_gic_create_info_table(uint64_t *gic_info_table);
@@ -96,9 +96,13 @@ uint32_t val_gic_request_irq(uint32_t irq_num, uint32_t mapped_irq_num, void *is
 void val_gic_free_irq(uint32_t irq_num, uint32_t mapped_irq_num);
 void val_gic_set_intr_trigger(uint32_t int_id, INTR_TRIGGER_INFO_TYPE_e trigger_type);
 uint32_t val_gic_get_intr_trigger_type(uint32_t int_id, INTR_TRIGGER_INFO_TYPE_e *trigger_type);
+uint32_t val_gic_get_espi_intr_trigger_type(uint32_t int_id,
+                                                          INTR_TRIGGER_INFO_TYPE_e *trigger_type);
 uint32_t val_gic_its_configure(void);
-uint32_t val_gic_request_msi(uint32_t bdf, uint32_t IntID, uint32_t msi_index);
-void val_gic_free_msi(uint32_t bdf, uint32_t IntID, uint32_t msi_index);
+uint32_t val_gic_request_msi(uint32_t bdf, uint32_t device_id, uint32_t its_id,
+                             uint32_t int_id, uint32_t msi_index);
+void val_gic_free_msi(uint32_t bdf, uint32_t device_id, uint32_t its_id,
+                      uint32_t int_id, uint32_t msi_index);
 
 /* GICv2m APIs */
 typedef enum {
@@ -147,6 +151,7 @@ void     val_timer_disable_system_timer(addr_t cnt_base_n);
 uint32_t val_timer_skip_if_cntbase_access_not_allowed(uint64_t index);
 void val_platform_timer_get_entry_index(uint64_t instance, uint32_t *block, uint32_t *index);
 uint64_t val_get_phy_el2_timer_count(void);
+uint64_t val_get_phy_el1_timer_count(void);
 
 /* Watchdog VAL APIs */
 typedef enum {
@@ -237,6 +242,14 @@ typedef enum {
   RC_IOVIRT_BLOCK
 }PCIE_RC_INFO_e;
 
+typedef enum {
+  ITS_NUM_GROUPS = 1,
+  ITS_GROUP_NUM_BLOCKS,
+  ITS_GET_ID_FOR_BLK_INDEX,
+  ITS_GET_GRP_INDEX_FOR_ID,
+  ITS_GET_BLK_INDEX_FOR_ID
+} ITS_INFO_e;
+
 void     val_iovirt_create_info_table(uint64_t *iovirt_info_table);
 void     val_iovirt_free_info_table(void);
 uint32_t val_iovirt_get_rc_smmu_index(uint32_t rc_seg_num);
@@ -297,8 +310,11 @@ typedef enum {
   SATA_GSIV,
   SATA_BDF,
   UART_BASE0,
+  UART_BASE1,
   UART_GSIV,
   UART_FLAGS,
+  UART_BAUDRATE,
+  UART_INTERFACE_TYPE,
   ANY_FLAGS,
   ANY_GSIV,
   ANY_BDF,

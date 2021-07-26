@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2020, 2021 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -346,7 +346,6 @@ pal_mem_alloc_cacheable (
   )
 {
   EFI_PHYSICAL_ADDRESS      Address;
-  EFI_CPU_ARCH_PROTOCOL     *Cpu;
   EFI_STATUS                Status;
 
   Status = gBS->AllocatePages (AllocateAnyPages,
@@ -358,23 +357,7 @@ pal_mem_alloc_cacheable (
     return NULL;
   }
 
-  /* Check Whether Cpu architectural protocol is installed */
-  Status = gBS->LocateProtocol ( &gEfiCpuArchProtocolGuid, NULL, (VOID **)&Cpu);
-  if (EFI_ERROR(Status)) {
-    bsa_print(ACS_PRINT_ERR, L"Could not get Cpu Arch Protocol %x \n", Status);
-    return NULL;
-  }
-
-  /* Set Memory Attributes */
-  Status = Cpu->SetMemoryAttributes (Cpu,
-                                     Address,
-                                     Size,
-                                     EFI_MEMORY_WB);
-  if (EFI_ERROR (Status)) {
-    bsa_print(ACS_PRINT_ERR, L"Could not Set Memory Attribute %x \n", Status);
-    return NULL;
-  }
-
+  /* As per EBBR spec, the memory allocated is cacheable */
   *Pa = (VOID *)Address;
   return (VOID *)Address;
 }

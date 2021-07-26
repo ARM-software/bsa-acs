@@ -17,10 +17,17 @@
 #ifndef __GIC_V3_H__
 #define __GIC_V3_H__
 
+#define GICD_TYPER_ESPI_SHIFT       8
+#define GICD_TYPER_ESPI_MASK        0x01
+
+#define GICD_TYPER_ESPI_RANGE_SHIFT 27
+#define GICD_TYPER_ESPI_RANGE_MASK  0x1F
+
 void v3_Init(void);
 void v3_EnableInterruptSource(uint32_t);
 void v3_DisableInterruptSource(uint32_t);
 uint32_t v3_AcknowledgeInterrupt(void);
 void v3_EndofInterrupt(uint32_t int_id);
+uint32_t v3_read_gicdTyper(void);
 
 #endif /*__GIC_V3_H__ */

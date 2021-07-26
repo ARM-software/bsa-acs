@@ -20,7 +20,8 @@
 #include "val/include/val_interface.h"
 
 #define TEST_NUM   (ACS_PE_TEST_NUM_BASE  +  18)
-#define TEST_DESC  "B_SEC_03: Check PEs Impl CSDB,SSBB,PSSBB   "
+#define TEST_RULE  "B_SEC_03"
+#define TEST_DESC  "Check PEs Impl CSDB,SSBB,PSSBB        "
 
 static
 void
@@ -49,8 +50,8 @@ os_c018_entry(uint32_t num_pe)
         val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
     /* get the result from all PE and check for failure */
-    status = val_check_for_error(TEST_NUM, num_pe);
-    val_report_status(0, BSA_ACS_END(TEST_NUM));
+    status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
+    val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
     return status;
 }

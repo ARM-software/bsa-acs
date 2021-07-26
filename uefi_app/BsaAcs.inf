@@ -66,11 +66,13 @@
   ../test_pool/gic/operating_system/test_os_g004.c
   ../test_pool/gic/operating_system/test_os_g005.c
   ../test_pool/gic/operating_system/test_os_g006.c
+  ../test_pool/gic/operating_system/test_os_v2m001.c
+  ../test_pool/gic/operating_system/test_os_v2m002.c
+  ../test_pool/gic/operating_system/test_os_v2m003.c
+  ../test_pool/gic/operating_system/test_os_v2m004.c
+  ../test_pool/gic/operating_system/test_os_its001.c
+  ../test_pool/gic/operating_system/test_os_its002.c
   ../test_pool/gic/hypervisor/test_hyp_g001.c
-  ../test_pool/gic_v2m/operating_system/test_os_v001.c
-  ../test_pool/gic_v2m/operating_system/test_os_v002.c
-  ../test_pool/gic_v2m/operating_system/test_os_v003.c
-  ../test_pool/gic_v2m/operating_system/test_os_v004.c
   ../test_pool/timer/operating_system/test_os_t001.c
   ../test_pool/timer/operating_system/test_os_t002.c
   ../test_pool/timer/operating_system/test_os_t003.c
@@ -80,6 +82,22 @@
   ../test_pool/watchdog/operating_system/test_os_w002.c
   ../test_pool/pcie/operating_system/test_os_p001.c
   ../test_pool/pcie/operating_system/test_os_p002.c
+  ../test_pool/pcie/operating_system/test_os_p003.c
+  ../test_pool/pcie/operating_system/test_os_p004.c
+  ../test_pool/pcie/operating_system/test_os_p005.c
+  ../test_pool/pcie/operating_system/test_os_p006.c
+  ../test_pool/pcie/operating_system/test_os_p008.c
+  ../test_pool/pcie/operating_system/test_os_p009.c
+  ../test_pool/pcie/operating_system/test_os_p010.c
+  ../test_pool/pcie/operating_system/test_os_p011.c
+  ../test_pool/pcie/operating_system/test_os_p012.c
+  ../test_pool/pcie/operating_system/test_os_p013.c
+  ../test_pool/pcie/operating_system/test_os_p014.c
+  ../test_pool/pcie/operating_system/test_os_p015.c
+  ../test_pool/pcie/operating_system/test_os_p016.c
+  ../test_pool/pcie/operating_system/test_os_p017.c
+  ../test_pool/pcie/operating_system/test_os_p018.c
+  ../test_pool/pcie/operating_system/test_os_p019.c
   ../test_pool/pcie/operating_system/test_os_p020.c
   ../test_pool/pcie/operating_system/test_os_p021.c
   ../test_pool/pcie/operating_system/test_os_p022.c
@@ -97,26 +115,6 @@
   ../test_pool/pcie/operating_system/test_os_p034.c
   ../test_pool/pcie/operating_system/test_os_p035.c
   ../test_pool/pcie/operating_system/test_os_p036.c
-  ../test_pool/pcie/operating_system/test_os_p037.c
-  ../test_pool/pcie/operating_system/test_os_p038.c
-  ../test_pool/pcie/operating_system/test_os_p039.c
-  ../test_pool/pcie/operating_system/test_os_p041.c
-  ../test_pool/pcie/operating_system/test_os_p042.c
-  ../test_pool/pcie/operating_system/test_os_p044.c
-  ../test_pool/pcie/operating_system/test_os_p048.c
-  ../test_pool/pcie/operating_system/test_os_p050.c
-  ../test_pool/pcie/operating_system/test_os_p053.c
-  ../test_pool/pcie/operating_system/test_os_p051.c
-  ../test_pool/pcie/operating_system/test_os_p052.c
-  ../test_pool/pcie/operating_system/test_os_p054.c
-  ../test_pool/pcie/operating_system/test_os_p055.c
-  ../test_pool/pcie/operating_system/test_os_p056.c
-  ../test_pool/pcie/operating_system/test_os_p057.c
-  ../test_pool/pcie/operating_system/test_os_p058.c
-  ../test_pool/pcie/operating_system/test_os_p059.c
-  ../test_pool/pcie/operating_system/test_os_p060.c
-  ../test_pool/pcie/operating_system/test_os_p061.c
-  ../test_pool/pcie/operating_system/test_os_p062.c
   ../test_pool/smmu/operating_system/test_os_i001.c
   ../test_pool/smmu/operating_system/test_os_i002.c
   ../test_pool/smmu/operating_system/test_os_i003.c
@@ -136,13 +134,19 @@
   ../test_pool/peripherals/operating_system/test_os_d001.c
   ../test_pool/peripherals/operating_system/test_os_d002.c
   ../test_pool/peripherals/operating_system/test_os_d003.c
+  ../test_pool/peripherals/operating_system/test_os_d005.c
   ../test_pool/exerciser/operating_system/test_os_e001.c
+  ../test_pool/exerciser/operating_system/test_os_e002.c
+  ../test_pool/exerciser/operating_system/test_os_e003.c
   ../test_pool/exerciser/operating_system/test_os_e004.c
   ../test_pool/exerciser/operating_system/test_os_e005.c
   ../test_pool/exerciser/operating_system/test_os_e006.c
+  ../test_pool/exerciser/operating_system/test_os_e007.c
+  ../test_pool/exerciser/operating_system/test_os_e008.c
+  ../test_pool/exerciser/operating_system/test_os_e009.c
+  ../test_pool/exerciser/operating_system/test_os_e010.c
+  ../test_pool/exerciser/operating_system/test_os_e011.c
   ../test_pool/exerciser/operating_system/test_os_e012.c
-  ../test_pool/exerciser/operating_system/test_os_e013.c
-  ../test_pool/exerciser/operating_system/test_os_e015.c
 
 [Packages]
   StdLib/StdLib.dec

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +22,12 @@
 #include "include/bsa_acs_pcie.h"
 #include "include/bsa_acs_iovirt.h"
 #include "sys_arch_src/gic/bsa_exception.h"
+#include "sys_arch_src/gic/its/bsa_gic_its.h"
+#include "sys_arch_src/gic/gic.h"
+
+extern GIC_INFO_TABLE  *g_gic_info_table;
+GIC_INFO_ENTRY  *g_gic_entry = NULL;
+GIC_ITS_INFO    *g_gic_its_info;
 
 #ifndef TARGET_LINUX
 /**
@@ -44,7 +50,8 @@ val_gic_reg_read(uint32_t reg_id)
       case ICH_MISR_EL2:
           return GicReadIchMisr();
       default:
-           val_report_status(val_pe_get_index_mpid(val_pe_get_mpid()), RESULT_FAIL(0, 0x78));
+           val_report_status(val_pe_get_index_mpid(val_pe_get_mpid()),
+                                                  RESULT_FAIL(0, 0x78), NULL);
   }
 
   return 0x0;
@@ -80,7 +87,8 @@ val_gic_reg_write(uint32_t reg_id, uint64_t write_data)
           GicWriteIccPmr(write_data);
           break;
       default:
-           val_report_status(val_pe_get_index_mpid(val_pe_get_mpid()), RESULT_FAIL(0, 0x78));
+           val_report_status(val_pe_get_index_mpid(val_pe_get_mpid()),
+                                                  RESULT_FAIL(0, 0x78), NULL);
   }
 
 }
@@ -91,7 +99,7 @@ val_gic_is_valid_lpi(uint32_t int_id)
 {
   uint32_t max_lpi_id = 0;
 
-  max_lpi_id = pal_gic_get_max_lpi_id();
+  max_lpi_id = val_its_get_max_lpi();
 
   if ((int_id < LPI_MIN_ID) || (int_id > max_lpi_id)) {
     /* Not Vaild LPI */
@@ -124,7 +132,7 @@ val_gic_install_isr(uint32_t int_id, void (*isr)(void))
   }
 #endif
 
-  if (pal_bsa_gic_imp())
+  if (pal_target_is_dt())
       return val_gic_bsa_install_isr(int_id, isr);
   else
       ret_val = pal_gic_install_isr(int_id, isr);
@@ -136,6 +144,7 @@ val_gic_install_isr(uint32_t int_id, void (*isr)(void))
       val_mmio_write(val_get_gicd_base() + GICD_ISENABLER + (4 * reg_offset), 1 << reg_shift);
   }
 #endif
+
   return ret_val;
 }
 
@@ -172,18 +181,104 @@ void val_gic_free_irq(uint32_t irq_num, uint32_t mapped_irq_num)
 **/
 uint32_t val_gic_end_of_interrupt(uint32_t int_id)
 {
-  pal_gic_end_of_interrupt(int_id);
+  if (pal_target_is_dt())
+      val_bsa_gic_endofInterrupt(int_id);
+  else
+      pal_gic_end_of_interrupt(int_id);
 
   return 0;
 }
 
 uint32_t val_gic_its_configure()
 {
-  uint32_t status;
+  uint32_t Status;
 
-  status = pal_gic_its_configure();
+  if (pal_target_is_dt())
+    return ACS_STATUS_SKIP;
 
-  return status;
+  g_gic_entry = g_gic_info_table->gic_info;
+
+  if (g_gic_entry == NULL)
+    goto its_fail;
+
+  /* Allocate memory to store ITS info */
+  g_gic_its_info = (GIC_ITS_INFO *) val_memory_alloc(1024);
+  if (!g_gic_its_info) {
+      val_print(ACS_PRINT_ERR, "GIC : ITS table memory allocation failed\n", 0);
+      return ACS_STATUS_ERR;
+  }
+
+  g_gic_its_info->GicNumIts = 0;
+  g_gic_its_info->GicRdBase = 0;
+  g_gic_its_info->GicDBase  = 0;
+
+  while (g_gic_entry->type != 0xFF)
+  {
+    if (g_gic_entry->type == ENTRY_TYPE_GICD)
+      g_gic_its_info->GicDBase = g_gic_entry->base;
+    else if ((g_gic_entry->type == ENTRY_TYPE_GICR_GICRD)
+             || (g_gic_entry->type == ENTRY_TYPE_GICC_GICRD)) {
+      /* Calculate Current PE Redistributor Base Address */
+      if (g_gic_its_info->GicRdBase == 0) {
+        if (g_gic_entry->type == ENTRY_TYPE_GICR_GICRD)
+          g_gic_its_info->GicRdBase = val_its_get_curr_rdbase(g_gic_entry->base,
+                                                              g_gic_entry->length);
+        else
+          g_gic_its_info->GicRdBase = val_its_get_curr_rdbase(g_gic_entry->base, 0);
+      }
+    } else if (g_gic_entry->type == ENTRY_TYPE_GICITS) {
+      g_gic_its_info->GicIts[g_gic_its_info->GicNumIts].Base = g_gic_entry->base;
+      g_gic_its_info->GicIts[g_gic_its_info->GicNumIts++].ID = g_gic_entry->entry_id;
+    }
+
+    g_gic_entry++;
+  }
+
+  /* Return if no ITS */
+  if (g_gic_its_info->GicNumIts == 0) {
+    val_print(ACS_PRINT_DEBUG, "\n      ITS Configure : No ITS Found", 0);
+    goto its_fail;
+  }
+
+  /* Base Address Check. */
+  if ((g_gic_its_info->GicRdBase == 0) || (g_gic_its_info->GicDBase == 0)) {
+    val_print(ACS_PRINT_DEBUG, "\n      ITS Configure : Could not get GICD/GICRD Base", 0);
+    goto its_fail;
+  }
+
+  if (val_its_gicd_lpi_support(g_gic_its_info->GicDBase)
+      && val_its_gicr_lpi_support(g_gic_its_info->GicRdBase)) {
+    Status = val_its_init();
+    if ((Status)) {
+      val_print(ACS_PRINT_DEBUG, "\n      ITS Configure : val_its_init failed", 0);
+      goto its_fail;
+    }
+  } else {
+    val_print(ACS_PRINT_DEBUG, "\n      LPIs not supported in the system", 0);
+    goto its_fail;
+  }
+
+  return 0;
+
+its_fail:
+
+  val_print(ACS_PRINT_DEBUG, "\n      GIC ITS Initialization Failed", 0);
+  val_print(ACS_PRINT_DEBUG, "\n      LPI Interrupt related test may not pass", 0);
+  val_memory_free((void *)g_gic_its_info);
+
+  return ACS_STATUS_ERR;
+}
+
+uint32_t get_its_index(uint32_t its_id)
+{
+  uint32_t  index;
+
+  for (index = 0; index < g_gic_its_info->GicNumIts; index++)
+  {
+    if (its_id == g_gic_its_info->GicIts[index].ID)
+      return index;
+  }
+  return ACS_INVALID_INDEX;
 }
 
 void clear_msi_x_table(uint32_t bdf, uint32_t msi_index)
@@ -194,7 +289,8 @@ void clear_msi_x_table(uint32_t bdf, uint32_t msi_index)
   uint32_t read_value;
 
   /* Get MSI Capability Offset */
-  val_pcie_find_capability(bdf, PCIE_CAP, CID_MSIX, &msi_cap_offset);
+  if (val_pcie_find_capability(bdf, PCIE_CAP, CID_MSIX, &msi_cap_offset))
+    return;
 
   /* Disable MSI-X in MSI-X Capability */
   val_pcie_read_cfg(bdf, msi_cap_offset, &read_value);
@@ -211,7 +307,7 @@ void clear_msi_x_table(uint32_t bdf, uint32_t msi_index)
   val_mmio_write(table_address + msi_index*MSI_X_ENTRY_SIZE + MSI_X_MSG_TBL_MVC_OFFSET, 0x1);
 }
 
-void fill_msi_x_table(uint32_t bdf, uint32_t msi_index, uint32_t msi_addr, uint32_t msi_data)
+uint32_t fill_msi_x_table(uint32_t bdf, uint32_t msi_index, uint32_t msi_addr, uint32_t msi_data)
 {
 
   uint32_t msi_cap_offset, msi_table_bar_index;
@@ -223,7 +319,8 @@ void fill_msi_x_table(uint32_t bdf, uint32_t msi_index, uint32_t msi_addr, uint3
   val_pcie_write_cfg(bdf, TYPE01_CR, (command_data | (1 << CR_MSE_SHIFT) | (1 << CR_BME_SHIFT)));
 
   /* Get MSI Capability Offset */
-  val_pcie_find_capability(bdf, PCIE_CAP, CID_MSIX, &msi_cap_offset);
+  if (val_pcie_find_capability(bdf, PCIE_CAP, CID_MSIX, &msi_cap_offset))
+    return ACS_STATUS_SKIP;
 
   /* Enable MSI-X in MSI-X Capability */
   val_pcie_read_cfg(bdf, msi_cap_offset, &read_value);
@@ -238,35 +335,38 @@ void fill_msi_x_table(uint32_t bdf, uint32_t msi_index, uint32_t msi_addr, uint3
   val_mmio_write(table_address + msi_index*MSI_X_ENTRY_SIZE + MSI_X_MSG_TBL_ADDR_OFFSET, msi_addr);
   val_mmio_write(table_address + msi_index*MSI_X_ENTRY_SIZE + MSI_X_MSG_TBL_DATA_OFFSET, msi_data);
   val_mmio_write(table_address + msi_index*MSI_X_ENTRY_SIZE + MSI_X_MSG_TBL_MVC_OFFSET, 0x0);
+
+  return ACS_STATUS_PASS;
 }
 
 /**
   @brief   This function clear the MSI related mappings.
 
   @param   bdf          B:D:F for the device
-  @param   IntID        Interrupt ID
+  @param   int_id       Interrupt ID
   @param   msi_index    msi index in the table
 
   @return  status
 **/
-void val_gic_free_msi(uint32_t bdf, uint32_t IntID, uint32_t msi_index)
+void val_gic_free_msi(uint32_t bdf, uint32_t device_id, uint32_t its_id,
+                      uint32_t int_id, uint32_t msi_index)
 {
-  uint32_t status;
-  uint32_t device_id, stream_id, its_id;
-  uint32_t req_id;
-  uint32_t bus = PCIE_EXTRACT_BDF_BUS(bdf);
-  uint32_t dev = PCIE_EXTRACT_BDF_DEV(bdf);
-  uint32_t func = PCIE_EXTRACT_BDF_FUNC(bdf);
+  uint32_t its_index;
 
-  req_id = GET_DEVICE_ID(bus, dev, func);
-
-  status = val_iovirt_get_device_info(req_id, PCIE_EXTRACT_BDF_SEG(bdf), &device_id, &stream_id, &its_id);
-  if (status) { /* Use Requester-Id if val_iovirt_get_device_info fails.*/
-    device_id = req_id;
+  its_index = get_its_index(its_id);
+  if (its_index >= g_gic_its_info->GicNumIts)
+  {
+    val_print(ACS_PRINT_ERR, "\n       Could not find ITS ID [%x]", its_id);
+    return;
   }
 
-  pal_gic_free_msi(its_id, device_id, IntID, msi_index);
+  if ((g_gic_its_info->GicRdBase == 0) || (g_gic_its_info->GicDBase == 0))
+  {
+    val_print(ACS_PRINT_ERR, "\n       GICD/GICRD Base Invalid value", 0);
+    return;
+  }
 
+  val_its_clear_lpi_map(its_index, device_id, int_id);
   clear_msi_x_table(bdf, msi_index);
 }
 
@@ -274,35 +374,43 @@ void val_gic_free_msi(uint32_t bdf, uint32_t IntID, uint32_t msi_index)
   @brief   This function creates the MSI mappings, and programs the MSI Table.
 
   @param   bdf          B:D:F for the device
-  @param   IntID        Interrupt ID
+  @param   device_id    Device ID
+  @param   its_id       ITS ID
+  @param   int_id       Interrupt ID
   @param   msi_index    msi index in the table
 
   @return  status
 **/
-uint32_t val_gic_request_msi(uint32_t bdf, uint32_t IntID, uint32_t msi_index)
+uint32_t val_gic_request_msi(uint32_t bdf, uint32_t device_id, uint32_t its_id,
+                             uint32_t int_id, uint32_t msi_index)
 {
   uint32_t status;
   uint32_t msi_addr, msi_data;
-  uint32_t device_id, stream_id, its_id;
-  uint32_t req_id;
-  uint32_t bus = PCIE_EXTRACT_BDF_BUS(bdf);
-  uint32_t dev = PCIE_EXTRACT_BDF_DEV(bdf);
-  uint32_t func = PCIE_EXTRACT_BDF_FUNC(bdf);
+  uint32_t its_index;
 
-  req_id = GET_DEVICE_ID(bus, dev, func);
+   if ((g_gic_its_info == NULL) || (g_gic_its_info->GicNumIts == 0))
+    return ACS_STATUS_ERR;
 
-  status = val_iovirt_get_device_info(req_id, PCIE_EXTRACT_BDF_SEG(bdf), &device_id, &stream_id, &its_id);
-  if (status) { /* Use Requester-Id if val_iovirt_get_device_info fails.*/
-    device_id = req_id;
+  its_index = get_its_index(its_id);
+
+  if (its_index >= g_gic_its_info->GicNumIts) {
+    val_print(ACS_PRINT_ERR, "\n       Could not find ITS ID [%x]", its_id);
+    return ACS_STATUS_ERR;
   }
 
-  status = pal_gic_request_msi(its_id, device_id, IntID, msi_index, &msi_addr, &msi_data);
-  if (status) {
-    /* MSI Assignment Failed. */
-    return status;
+  if ((g_gic_its_info->GicRdBase == 0) || (g_gic_its_info->GicDBase == 0))
+  {
+    val_print(ACS_PRINT_DEBUG, "\n       GICD/GICRD Base Invalid value", 0);
+    return ACS_STATUS_ERR;
   }
 
-  fill_msi_x_table(bdf, msi_index, msi_addr, msi_data);
+  val_its_create_lpi_map(its_index, device_id, int_id, LPI_PRIORITY1);
+
+  msi_addr = val_its_get_translator_addr(its_index);
+  msi_data = int_id;
+
+
+  status = fill_msi_x_table(bdf, msi_index, msi_addr, msi_data);
 
   return status;
 }

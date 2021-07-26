@@ -47,7 +47,7 @@ val_gic_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   status = ACS_STATUS_PASS;
 
   if (g_sw_view[G_SW_OS]) {
-      val_print(ACS_PRINT_ERR, "\nOperating System:\n", 0);
+      val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
       status |= os_g001_entry(num_pe);
       status |= os_g002_entry(num_pe);
       status |= os_g003_entry(num_pe);
@@ -57,7 +57,7 @@ val_gic_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   }
 
   if (g_sw_view[G_SW_HYP]) {
-      val_print(ACS_PRINT_ERR, "\nHypervisor:\n", 0);
+      val_print(ACS_PRINT_ERR, "\nHypervisor View:\n", 0);
       status |= hyp_g001_entry(num_pe);
   }
 
@@ -67,21 +67,33 @@ val_gic_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   if ((gic_version != 2) || (num_msi_frame == 0)) {
       val_print(ACS_PRINT_TEST, "\n      No GICv2m, Skipping all GICv2m tests \n", 0);
-      goto test_done;
+      goto its_test;
   }
 
   if (val_gic_v2m_parse_info()) {
       val_print(ACS_PRINT_TEST, "\n     GICv2m info mismatch, Skipping all GICv2m tests \n", 0);
-      goto test_done;
+      goto its_test;
   }
 
   val_print(ACS_PRINT_ERR, "\n      *** Starting GICv2m tests ***\n", 0);
   if (g_sw_view[G_SW_OS]) {
-      val_print(ACS_PRINT_ERR, "\nOperating System:\n", 0);
-      status |= os_v001_entry(num_pe);
-      status |= os_v002_entry(num_pe);
-      status |= os_v003_entry(num_pe);
-      status |= os_v004_entry(num_pe);
+      val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
+      status |= os_v2m001_entry(num_pe);
+      status |= os_v2m002_entry(num_pe);
+      status |= os_v2m003_entry(num_pe);
+      status |= os_v2m004_entry(num_pe);
+  }
+
+its_test:
+  if ((val_gic_get_info(GIC_INFO_NUM_ITS) == 0) || (pal_target_is_dt())) {
+      val_print(ACS_PRINT_TEST, "\n      No ITS, Skipping all ITS tests \n", 0);
+      goto test_done;
+  }
+  val_print(ACS_PRINT_ERR, "\n      *** Starting ITS tests ***\n", 0);
+  if (g_sw_view[G_SW_OS]) {
+      val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
+      status |= os_its001_entry(num_pe);
+      status |= os_its002_entry(num_pe);
   }
 
 test_done:
@@ -124,7 +136,7 @@ val_gic_create_info_table(uint64_t *gic_info_table)
       return ACS_STATUS_ERR;
   }
 
-  if (pal_bsa_gic_imp())
+  if (pal_target_is_dt())
       val_bsa_gic_init();
   return ACS_STATUS_PASS;
 }
@@ -345,9 +357,11 @@ val_get_max_intid(void)
 **/
 uint32_t val_gic_route_interrupt_to_pe(uint32_t int_id, uint64_t mpidr)
 {
+  uint64_t cpuaffinity;
+
   if (int_id > 31) {
-      mpidr &= 0xF80FFFFFF;
-      val_mmio_write64(val_get_gicd_base() + GICD_IROUTER + (8 * int_id), mpidr);
+      cpuaffinity = mpidr & (PE_AFF0 | PE_AFF1 | PE_AFF2 | PE_AFF3);
+      val_mmio_write64(val_get_gicd_base() + GICD_IROUTER + (8 * int_id), cpuaffinity);
   }
   else{
       val_print(ACS_PRINT_ERR, "\n    Only SPIs can be routed, interrupt with INTID = %d cannot be routed", int_id);
@@ -443,6 +457,39 @@ uint32_t val_gic_get_intr_trigger_type(uint32_t int_id, INTR_TRIGGER_INFO_TYPE_e
 }
 
 /**
+  @brief   This function will Get the trigger type Edge/Level for extended SPI int
+           1. Caller       -  Test Suite
+           2. Prerequisite -  val_gic_create_info_table
+  @param   int_id Interrupt ID
+  @return  Status
+**/
+uint32_t val_gic_get_espi_intr_trigger_type(uint32_t int_id,
+                                                           INTR_TRIGGER_INFO_TYPE_e *trigger_type)
+{
+  uint32_t reg_value;
+  uint32_t reg_offset;
+  uint32_t config_bit_shift;
+
+  if (!(int_id >= 4096 && int_id <= val_gic_max_espi_val())) {
+    val_print(ACS_PRINT_ERR, "\n       Invalid Extended Int ID number 0x%x ", int_id);
+    return ACS_STATUS_ERR;
+  }
+
+  /* 4096 is starting value of extended SPI int */
+  reg_offset = (int_id - 4096) / GICD_ICFGR_INTR_STRIDE;
+  config_bit_shift  = GICD_ICFGR_INTR_CONFIG1(int_id - 4096);
+
+  reg_value = val_mmio_read(val_get_gicd_base() + GICD_ICFGRE + (4 * reg_offset));
+
+  if ((reg_value & (1 << config_bit_shift)) == 0)
+    *trigger_type = INTR_TRIGGER_INFO_LEVEL_HIGH;
+  else
+    *trigger_type = INTR_TRIGGER_INFO_EDGE_RISING;
+
+  return 0;
+}
+
+/**
   @brief   This function will Set the trigger type Edge/Level based on the GTDT table
            1. Caller       -  Test Suite
            2. Prerequisite -  val_gic_create_info_table
@@ -459,4 +506,36 @@ void val_gic_set_intr_trigger(uint32_t int_id, INTR_TRIGGER_INFO_TYPE_e trigger_
 
   if (status)
     val_print(ACS_PRINT_ERR, "\n    Error Could Not Configure Trigger Type", 0);
+}
+
+/**
+  @brief   This API returns if extended SPI supported in system
+  @param   None
+  @return  0 not supported, 1 supported
+**/
+uint32_t
+val_gic_espi_supported(void)
+{
+  uint32_t espi_support;
+
+  espi_support = val_bsa_gic_espi_support();
+
+  val_print(ACS_PRINT_INFO, "\n    ESPI supported %d  ", espi_support);
+  return espi_support;
+}
+
+/**
+  @brief   This API returns max extended SPI interrupt value
+  @param   None
+  @return  max extended spi int value
+**/
+uint32_t
+val_gic_max_espi_val(void)
+{
+  uint32_t max_espi_val;
+
+  max_espi_val = val_bsa_gic_max_espi_val();
+
+  val_print(ACS_PRINT_INFO, "\n    max ESPI value %d  ", max_espi_val);
+  return max_espi_val;
 }

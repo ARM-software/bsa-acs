@@ -21,7 +21,8 @@
 #include "val/include/bsa_acs_gic.h"
 
 #define TEST_NUM   (ACS_GIC_TEST_NUM_BASE + 4)
-#define TEST_DESC  "B_GIC_04: Check GICv3 Security States       "
+#define TEST_RULE  "B_GIC_04"
+#define TEST_DESC  "Check GICv3 Security States           "
 
 static
 void
@@ -60,9 +61,9 @@ os_g004_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

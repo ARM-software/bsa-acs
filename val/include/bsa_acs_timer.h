@@ -41,9 +41,10 @@
 #define CNTACR           0x40
 
 /* CNTBaseN register offset*/
-#define CNTPCT           0
-#define CNTP_CVAL_LOW    0x20
-#define CNTP_CVAL_HIGH   0x24
+#define CNTPCT_LOWER     0x00
+#define CNTPCT_HIGHER    0x04
+#define CNTP_CVAL_LOWER  0x20
+#define CNTP_CVAL_HIGHER 0x24
 #define CNTP_TVAL        0x28
 #define CNTP_CTL         0x2C
 #define COUNTER_ID       0xFD0

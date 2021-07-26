@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2020, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,19 @@
 #ifndef __BSA_GIC_ITS_H
 #define __BSA_GIC_ITS_H
 
-#include <Library/ArmGicArchLib.h>
+
+#include "include/val_interface.h"
+#include "include/bsa_acs_common.h"
+#include "include/bsa_acs_memory.h"
+
+#define SIZE_4KB    0x00001000
+#define SIZE_64KB   0x00010000
+
+#define PAGE_MASK   0xFFF
+#define PAGE_SHIFT   12
+
+#define SIZE_TO_PAGES(Size)   (((Size) >> PAGE_SHIFT) + (((Size) & PAGE_MASK) ? 1 : 0))
+#define PAGES_TO_SIZE(Pages)   ((Pages) << PAGE_SHIFT)
 
 #define ARM_LPI_MINID       8192
 #define ARM_LPI_MIN_IDBITS  14
@@ -41,6 +53,13 @@
 #define ARM_GICR_PENDBASER      0x0078  /* Redistributor Pending base Register */
 
 #define ARM_GICR_CTLR_ENABLE_LPIS   (1 << 0)
+
+#define ARM_GICR_TYPER          0x0008  // Redistributor Type Register
+
+
+// GIC Redistributor
+#define ARM_GICR_CTLR_FRAME_SIZE    SIZE_64KB
+#define ARM_GICR_SGI_PPI_FRAME_SIZE SIZE_64KB
 
 /* GICR_TYPER Bits */
 #define NEXT_DW_OFFSET          0x4         /* Used to read Upper 4 Bytes of GICR_TYPER */
@@ -106,6 +125,14 @@
 #define ITT_PAR_LEN                     44
 #define ITT_PAR_MASK                    (((1ul << ITT_PAR_LEN) - 1) << ITT_PAR_SHIFT)
 
+//
+// ARM MP Core IDs
+//
+#define ARM_CORE_AFF0         0xFF
+#define ARM_CORE_AFF1         (0xFF << 8)
+#define ARM_CORE_AFF2         (0xFF << 16)
+#define ARM_CORE_AFF3         (0xFFULL << 32)
+
 #define GET_CONFIG_TABLE_SIZE_BY_BITS(gicd_idbits, gicr_idbits)  ((gicd_idbits < gicr_idbits)?((1 << (gicd_idbits+1)) - 8192):((1 << (gicr_idbits+1)) - 8192))
 #define GET_MIN(a,b)    ((a<b)?a:b)
 #define GET_PENDING_TABLE_SIZE_BY_BITS(gicd_idbits, gicr_idbits)  ((gicd_idbits < gicr_idbits)?((1 << (gicd_idbits+1))/8):((1 << (gicr_idbits+1))/8))
@@ -137,96 +164,23 @@
 #define ITS_NEXT_CMD_PTR    4
 #define NUM_BYTES_IN_DW     8
 
-EFIAPI
-EFI_STATUS
-ArmGicRedistributorConfigurationForLPI (
-  IN  UINT64    GicDistributorBase,
-  IN  UINT64    GicRedistributorBase
-  );
+uint32_t ArmGicRedistributorConfigurationForLPI(uint64_t gicd_base, uint64_t rd_base);
 
-EFIAPI
-VOID
-ClearConfigTable (
-  IN  UINT32    IntID
-  );
+void ClearConfigTable(uint32_t int_id);
+void SetConfigTable(uint32_t int_id, uint32_t Priority);
 
-EFIAPI
-VOID
-SetConfigTable (
-  IN  UINT32    IntID,
-  IN  UINT32    Priority
-  );
+uint32_t val_its_gicd_lpi_support(uint64_t gicd_base);
+uint32_t val_its_gicr_lpi_support(uint64_t rd_base);
 
-EFIAPI
-UINT32
-ArmGICDSupportsLPIs (
-  IN  UINT64    GicDistributorBase
-  );
 
-EFIAPI
-UINT32
-ArmGICRSupportsLPIs (
-  IN  UINT64    GicRedistributorBase
-  );
+void EnableLPIsRD(uint64_t rd_base);
+void val_its_create_lpi_map(uint32_t its_index, uint32_t device_id,
+                            uint32_t int_id, uint32_t Priority);
+void val_its_clear_lpi_map(uint32_t its_index, uint32_t device_id, uint32_t int_id);
 
-EFIAPI
-VOID
-ArmGicItsClearLpiMappings (
-  IN UINT32     ItsIndex,
-  IN UINT32     DevID,
-  IN UINT32     IntID
-  );
-
-EFIAPI
-VOID
-ArmGicItsCreateLpiMap (
-  IN UINT32     ItsIndex,
-  IN UINT32     DevID,
-  IN UINT32     IntID,
-  IN UINT32     Priority
-  );
-
-EFIAPI
-UINT64
-ArmGicItsGetGITSTranslatorAddress (
-  IN UINT32     ItsIndex
-  );
-
-EFIAPI
-UINT32
-ArmGicItsGetMaxLpiID (
-  );
-
-EFIAPI
-EFI_STATUS
-ArmGicItsConfiguration (
-  );
-
-UINT64
-GetCurrentCpuRDBase (
-  UINT64    mGicRedistributorBase,
-  UINT32    length
-  );
-
-EFIAPI
-VOID
-EnableLPIsRD (
-  IN  UINT64    GicRedistributorBase
-  );
-
-typedef struct {
- UINT32     ID;
- UINT64     Base;
- UINT64     CommandQBase;
- UINT32     IDBits;
- UINT64     ITTBase;
-} GIC_ITS_BLOCK;
-
-typedef struct {
- UINT64         GicDBase;
- UINT64         GicRdBase;
- UINT32         GicNumIts;
- GIC_ITS_BLOCK  GicIts[];
-} GIC_ITS_INFO;
+uint64_t val_its_get_translator_addr(uint32_t its_index);
+uint32_t val_its_get_max_lpi(void);
+uint32_t val_its_init(void);
+uint64_t val_its_get_curr_rdbase(uint64_t rd_base, uint32_t length);
 
 #endif

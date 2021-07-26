@@ -21,6 +21,12 @@
 #define PPI_OFFSET 16
 #define SPI_OFFSET 32
 
+#define INTERRUPT_CELLS_MAX 4
+#define INTERRUPT_CELLS_MIN 1
+
+#define INTERRUPT_TYPE_SPI  0
+#define INTERRUPT_TYPE_PPI  1
+
 /*  PE related */
 #define PROPERTY_MASK_PE_AFF3  0xFF  /* Affinity bits 3 mask MPIDR_EL1[39:32] */
 #define PROPERTY_MASK_PE_AFF0_AFF2  0xFFFFFF  /* Affinity bits 0, 1, 2 mask MPIDR_EL1[23:0] */
@@ -67,5 +73,12 @@
 
 /* PCI related */
 #define PCI_COMPATIBLE_STR_LEN  26
+
+/* Peripheral Related */
+#define COMPATIBLE_FULL_16550     0x0
+#define COMPATIBLE_SUBSET_16550   0x1
+#define ARM_PL011_UART            0x3
+#define ARM_SBSA_GENERIC_UART     0xE
+#define COMPATIBLE_GENERIC_16550  0x12
 
 #endif

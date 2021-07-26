@@ -23,7 +23,8 @@
 #include "val/include/bsa_acs_exerciser.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 6)
-#define TEST_DESC  "PCI_LI_02: Generate PCIe legacy interrupt             "
+#define TEST_RULE  "PCI_LI_02"
+#define TEST_DESC  "Generate PCIe legacy interrupt        "
 
 #define LEGACY_INTR_PIN_COUNT 1
 
@@ -142,9 +143,9 @@ os_e006_entry (void)
   }
 
   /* Get the result from all PE and check for failure */
-  status = val_check_for_error (TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status (0, BSA_ACS_END (TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

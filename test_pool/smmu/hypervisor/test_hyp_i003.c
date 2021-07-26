@@ -21,7 +21,8 @@
 #include "val/include/bsa_acs_iovirt.h"
 
 #define TEST_NUM   (ACS_SMMU_HYP_TEST_NUM_BASE + 3)
-#define TEST_DESC  "B_SMMU_19: SMMUv2 unique intr per ctxt bank         "
+#define TEST_RULE  "B_SMMU_19"
+#define TEST_DESC  "SMMUv2 unique intr per ctxt bank      "
 
 static
 void
@@ -34,14 +35,14 @@ payload()
 
   num_smmu = val_smmu_get_info(SMMU_NUM_CTRL, 0);
   if (num_smmu == 0) {
-      val_print(ACS_PRINT_ERR, "\n       No SMMU Controllers are discovered ", 0);
+      val_print(ACS_PRINT_DEBUG, "\n       No SMMU Controllers are discovered ", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
       return;
   }
 
   while (num_smmu--) {
       if (val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) == 3) {
-          val_print(ACS_PRINT_WARN, "\n       Not valid for SMMU v3             ", 0);
+          val_print(ACS_PRINT_DEBUG, "\n       Not valid for SMMU v3             ", 0);
           val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
           return;
       }
@@ -70,9 +71,9 @@ hyp_i003_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

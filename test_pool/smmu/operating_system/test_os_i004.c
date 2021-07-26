@@ -22,7 +22,8 @@
 #include "val/include/bsa_acs_pe.h"
 
 #define TEST_NUM   (ACS_SMMU_TEST_NUM_BASE + 4)
-#define TEST_DESC  "B_SMMU_04,B_SMMU_05: Check TLB Range Invalidation   "
+#define TEST_RULE  "B_SMMU_04, B_SMMU_05"
+#define TEST_DESC  "Check TLB Range Invalidation          "
 
 static
 void
@@ -37,7 +38,7 @@ payload()
 
   data_pe_tlb = VAL_EXTRACT_BITS(val_pe_reg_read(ID_AA64ISAR0_EL1), 56, 59);
   if (data_pe_tlb != 0x2) {
-      val_print(ACS_PRINT_WARN, "\n       TLB Range Invalid Not "
+      val_print(ACS_PRINT_DEBUG, "\n       TLB Range Invalid Not "
                                 "Supported For PE              ", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
       return;
@@ -45,14 +46,16 @@ payload()
 
   num_smmu = val_smmu_get_info(SMMU_NUM_CTRL, 0);
   if (num_smmu == 0) {
-    val_print(ACS_PRINT_ERR, "\n       No SMMU Controllers are discovered                  ", 0);
+    val_print(ACS_PRINT_DEBUG, "\n       No SMMU Controllers are discovered"
+                                 "                  ", 0);
     val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
     return;
   }
 
   while (num_smmu--) {
     if (val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) < 3) {
-      val_print(ACS_PRINT_WARN, "\n       Not valid for SMMUv2 or older version               ", 0);
+      val_print(ACS_PRINT_DEBUG, "\n       Not valid for SMMUv2 or older"
+                                    "version               ", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 03));
       return;
     }
@@ -87,9 +90,9 @@ os_i004_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

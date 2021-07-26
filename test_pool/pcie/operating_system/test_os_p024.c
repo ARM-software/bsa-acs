@@ -21,7 +21,8 @@
 #include "test_os_p024_data.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 24)
-#define TEST_DESC  "RE_REC_1,2: Check Device capabilities reg rules    "
+#define TEST_RULE  "RE_REG_3, RE_REC_1, RE_REC_2"
+#define TEST_DESC  "Device capabilities reg rule          "
 
 static
 void
@@ -59,9 +60,9 @@ os_p024_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

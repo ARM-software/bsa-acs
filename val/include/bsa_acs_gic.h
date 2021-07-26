@@ -41,6 +41,7 @@
 #define GICD_ICPENDR0       0x280
 #define GICD_ICACTIVER0     0x380
 #define GICD_ICFGR          0xC00
+#define GICD_ICFGRE         0x3000
 #define GICD_IROUTER        0x6000
 #define GICD_PIDR2          0xFFE8
 
@@ -102,9 +103,19 @@ val_get_gich_base(void);
 addr_t
 val_get_cpuif_base(void);
 
-uint32_t os_v001_entry(uint32_t num_pe);
-uint32_t os_v002_entry(uint32_t num_pe);
-uint32_t os_v003_entry(uint32_t num_pe);
-uint32_t os_v004_entry(uint32_t num_pe);
+uint32_t
+val_gic_espi_supported(void);
+
+uint32_t
+val_gic_max_espi_val(void);
+
+uint32_t os_v2m001_entry(uint32_t num_pe);
+uint32_t os_v2m002_entry(uint32_t num_pe);
+uint32_t os_v2m003_entry(uint32_t num_pe);
+uint32_t os_v2m004_entry(uint32_t num_pe);
+
+/* ITS tests */
+uint32_t os_its001_entry(uint32_t num_pe);
+uint32_t os_its002_entry(uint32_t num_pe);
 
 #endif

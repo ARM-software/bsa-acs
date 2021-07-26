@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019-2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,10 +20,10 @@
 
 #include "val/include/bsa_acs_pcie.h"
 #include "val/include/bsa_acs_pe.h"
-#include "val/include/bsa_acs_memory.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 36)
-#define TEST_DESC  "IE_REG_2: Check ARI forwarding support rule        "
+#define TEST_RULE  "PCI_IN_17"
+#define TEST_DESC  "Check ARI forwarding enable rule      "
 
 static
 void
@@ -31,15 +31,19 @@ payload(void)
 {
 
   uint32_t bdf;
-  uint32_t rp_bdf;
   uint32_t pe_index;
   uint32_t tbl_index;
-  uint32_t reg_value;
   uint32_t dp_type;
   uint32_t cap_base;
-  uint32_t ari_frwd_support;
+  uint32_t ari_frwd_enable;
+  uint32_t seg_num;
+  uint32_t dev_num;
+  uint32_t dev_bdf;
+  uint32_t sec_bus;
+  uint32_t sub_bus;
   uint32_t test_fails;
   uint32_t test_skip = 1;
+  uint32_t reg_value;
   pcie_device_bdf_table *bdf_tbl_ptr;
 
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
@@ -53,29 +57,47 @@ payload(void)
       bdf = bdf_tbl_ptr->device[tbl_index].bdf;
       dp_type = val_pcie_device_port_type(bdf);
 
-      /* Check entry is iEP */
-      if (dp_type == iEP_EP)
+      /* Check entry is Downstream port or RP */
+      if ((dp_type == DP) || (dp_type == iEP_RP) || (dp_type == RP))
       {
-          /* Check ARI capability support */
-          if (val_pcie_find_capability(bdf, PCIE_ECAP, ECID_ARICS, &cap_base) ==
-              PCIE_CAP_NOT_FOUND)
+          /* Read the ARI forwarding enable bit */
+          val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &cap_base);
+          val_pcie_read_cfg(bdf, cap_base + DCTL2R_OFFSET, &reg_value);
+          ari_frwd_enable = (reg_value >> DCTL2R_AFE_SHIFT) & DCTL2R_AFE_MASK;
+
+          /* If ARI forwarding enable set, skip the entry */
+          if (ari_frwd_enable != 0)
               continue;
 
-          /* Get the rootport of ARI device */
-          rp_bdf = bdf_tbl_ptr->device[tbl_index].rp_bdf;
+          val_pcie_read_cfg(bdf, TYPE1_PBN, &reg_value);
+          sec_bus = ((reg_value >> SECBN_SHIFT) & SECBN_MASK);
+          sub_bus = ((reg_value >> SUBBN_SHIFT) & SUBBN_MASK);
 
-          /* Read the ARI forwarding bit */
-          val_pcie_find_capability(rp_bdf, PCIE_CAP, CID_PCIECS, &cap_base);
-          val_pcie_read_cfg(rp_bdf, cap_base + DCAP2R_OFFSET, &reg_value);
-          ari_frwd_support = (reg_value >> DCAP2R_AFS_SHIFT) & DCAP2R_AFS_MASK;
+          /* Skip the port, if switch is present below it */
+          if (sec_bus != sub_bus)
+              continue;
 
           /* If test runs for atleast an endpoint */
           test_skip = 0;
 
-          /* If root port not support ARI forwarding, fail the test */
-          if (!ari_frwd_support)
-              test_fails++;
+          /* Configuration Requests specifying Device Numbers (1-31) must be terminated by the
+           * Downstream Port or the Root Port with an Unsupported Request Completion Status
+           */
 
+          for (dev_num = 1; dev_num < PCIE_MAX_DEV; dev_num++)
+          {
+              seg_num = PCIE_EXTRACT_BDF_SEG(bdf);
+
+              /* Create bdf for Dev 1 to 31 below the RP */
+              dev_bdf = PCIE_CREATE_BDF(seg_num, sec_bus, dev_num, 0);
+              val_pcie_read_cfg(dev_bdf, TYPE01_VIDR, &reg_value);
+              if (reg_value != PCIE_UNKNOWN_RESPONSE)
+              {
+                  test_fails++;
+                  val_print(ACS_PRINT_ERR, "\n    Dev 0x%x found under", dev_bdf);
+                  val_print(ACS_PRINT_ERR, " RP bdf 0x%x", bdf);
+              }
+          }
       }
   }
 
@@ -100,9 +122,9 @@ os_p036_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

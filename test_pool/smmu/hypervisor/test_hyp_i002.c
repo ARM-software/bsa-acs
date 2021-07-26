@@ -23,7 +23,8 @@
 #include "val/include/bsa_acs_pcie.h"
 
 #define TEST_NUM   (ACS_SMMU_HYP_TEST_NUM_BASE + 2)
-#define TEST_DESC  "B_SMMU_18,B_SMMU_20: SMMU Revision,S-EL2 support Hyp"
+#define TEST_RULE  "B_SMMU_18, B_SMMU_20"
+#define TEST_DESC  "SMMU Revision,S-EL2 support Hyp       "
 
 static
 void
@@ -97,9 +98,9 @@ hyp_i002_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

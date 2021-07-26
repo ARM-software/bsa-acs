@@ -20,7 +20,8 @@
 #include "val/include/val_interface.h"
 
 #define TEST_NUM   (ACS_PE_TEST_NUM_BASE  +  16)
-#define TEST_DESC  "B_SEC_01: Check Speculation Restriction    "
+#define TEST_RULE  "B_SEC_01"
+#define TEST_DESC  "Check Speculation Restriction         "
 
 static
 void
@@ -54,8 +55,8 @@ os_c016_entry(uint32_t num_pe)
         val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
     /* get the result from all PE and check for failure */
-    status = val_check_for_error(TEST_NUM, num_pe);
-    val_report_status(0, BSA_ACS_END(TEST_NUM));
+    status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
+    val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
     return status;
 }

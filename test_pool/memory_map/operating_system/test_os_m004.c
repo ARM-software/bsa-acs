@@ -20,7 +20,8 @@
 #include "val/include/bsa_acs_pcie.h"
 
 #define TEST_NUM   (ACS_MEMORY_MAP_TEST_BASE + 4)
-#define TEST_DESC  "B_MEM_03,B_MEM_04,B_MEM_06: Addressability  "
+#define TEST_RULE  "B_MEM_03-04, B_MEM_06"
+#define TEST_DESC  "Addressability                        "
 
 static
 void
@@ -37,7 +38,7 @@ payload (void)
   count = val_peripheral_get_info (NUM_ALL, 0);
 
   if (!count) {
-     val_print (ACS_PRINT_WARN, "\n       Skip as No peripherals detected   ", 0);
+     val_print (ACS_PRINT_DEBUG, "\n       Skip as No peripherals detected   ", 0);
      val_set_status (index, RESULT_SKIP (TEST_NUM, 1));
      return;
   }
@@ -85,9 +86,9 @@ os_m004_entry (uint32_t num_pe)
   }
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error (TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status (0, BSA_ACS_END (TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

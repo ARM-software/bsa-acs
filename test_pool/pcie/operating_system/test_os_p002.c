@@ -20,7 +20,8 @@
 #include "val/include/bsa_acs_pcie.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 2)
-#define TEST_DESC  "PCI_IN_02: PE - ECAM Region accessiblity check     "
+#define TEST_RULE  "PCI_IN_02"
+#define TEST_DESC  "PE - ECAM Region accessiblity check   "
 
 #define PCIE_VENDOR_ID_REG_OFFSET 0x0
 #define PCIE_CACHE_LINE_SIZE_REG_OFFSET 0xC
@@ -46,7 +47,7 @@ payload(void)
 
   num_ecam = val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
   if (num_ecam == 0) {
-      val_print(ACS_PRINT_ERR, "\n       No ECAM in MCFG                   ", 0);
+      val_print(ACS_PRINT_DEBUG, "\n       No ECAM in MCFG                   ", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
       return;
   }
@@ -54,7 +55,7 @@ payload(void)
   while (num_ecam--) {
       ecam_base = val_pcie_get_info(PCIE_INFO_ECAM, num_ecam);
       if (ecam_base == 0) {
-          val_print(ACS_PRINT_ERR, "\n       ECAM Base in MCFG is 0            ", 0);
+          val_print(ACS_PRINT_DEBUG, "\n       ECAM Base in MCFG is 0            ", 0);
           val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
           return;
       }
@@ -134,9 +135,9 @@ os_p002_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

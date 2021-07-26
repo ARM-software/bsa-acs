@@ -21,20 +21,24 @@
 
 #include "val/include/bsa_acs_wakeup.h"
 
-#define TEST_DESC   "       TEST Wakeup from Power Semantic B  \n"
-#define TEST_NUM1   (ACS_WAKEUP_TEST_NUM_BASE + 1)
-#define TEST_RULES "B_WAK_01,B_WAK_03,B_WAK_04,B_WAK_05,B_WAK_06,B_WAK_07,B_WAK_10,B_WAK_11 \n"
-#define TEST_DESC1  "Wake from Watchdog WS0 Interrupt  "
+#define TEST_NUM1  (ACS_WAKEUP_TEST_NUM_BASE + 1)
+#define TEST_RULE1 "B_WAK_01, B_WAK_02-07, B_WAK_10-11"
+#define TEST_DESC1 "Wake from Watchdog WS0 Int            "
 #define TEST_NUM2  (ACS_WAKEUP_TEST_NUM_BASE + 2)
-#define TEST_DESC2  "Wake from System Timer Interrupt  "
+#define TEST_RULE2 "B_WAK_01, B_WAK_02-07, B_WAK_10-11"
+#define TEST_DESC2 "Wake from System Timer Int            "
 #define TEST_NUM3  (ACS_WAKEUP_TEST_NUM_BASE + 3)
-#define TEST_DESC3  "Wake from EL0 PHY Timer Interrupt "
+#define TEST_RULE3 "B_WAK_01, B_WAK_02-07, B_WAK_10-11"
+#define TEST_DESC3 "Wake from EL0 PHY Timer Int           "
 #define TEST_NUM4  (ACS_WAKEUP_TEST_NUM_BASE + 4)
-#define TEST_DESC4  "Wake from EL0 VIRT Timer Interrupt"
+#define TEST_RULE4 "B_WAK_01, B_WAK_02-07, B_WAK_10-11"
+#define TEST_DESC4 "Wake from EL0 VIR Timer Int           "
 #define TEST_NUM5  (ACS_WAKEUP_TEST_NUM_BASE + 5)
-#define TEST_DESC5  "Wake from EL2 PHY Timer Interrupt "
+#define TEST_RULE5 "B_WAK_01, B_WAK_02-07, B_WAK_10-11"
+#define TEST_DESC5 "Wake from EL2 PHY Timer Int           "
 
 static uint32_t intid;
+static uint32_t failsafe_test_num;
 uint64_t timer_num;
 
 static
@@ -70,7 +74,7 @@ isr_failsafe()
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
   val_timer_set_phy_el1(0);
   val_print(ACS_PRINT_ERR, "       Received Failsafe interrupt      \n", 0);
-  val_set_status(index, RESULT_FAIL(TEST_NUM3, 01));
+  val_set_status(index, RESULT_FAIL(failsafe_test_num, 01));
   intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
   val_gic_end_of_interrupt(intid);
 }
@@ -140,7 +144,7 @@ payload1()
 
   timer_num = val_wd_get_info(0, WD_INFO_COUNT);
   if(!timer_num){
-      val_print(ACS_PRINT_DEBUG, "       No watchdog implemented           \n", 0);
+      val_print(ACS_PRINT_DEBUG, "\n       No watchdog implemented      ", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM1, 01));
       return;
   }
@@ -153,6 +157,7 @@ payload1()
       intid = val_wd_get_info(timer_num, WD_INFO_GSIV);
       status = val_gic_install_isr(intid, isr1);
       if (status == 0) {
+          failsafe_test_num = TEST_NUM1;
           wakeup_set_failsafe();
           status = val_wd_set_ws0(timer_num, timer_expire_val);
           if (status) {
@@ -169,7 +174,7 @@ payload1()
   }
 
   if(!ns_wdg){
-      val_print(ACS_PRINT_WARN, "       No non-secure watchdog implemented   \n", 0);
+      val_print(ACS_PRINT_DEBUG, "       No non-secure watchdog implemented   \n", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM1, 02));
       return;
   }
@@ -187,7 +192,7 @@ payload2()
 
   timer_num = val_timer_get_info(TIMER_INFO_NUM_PLATFORM_TIMERS, 0);
   if(!timer_num){
-      val_print(ACS_PRINT_WARN, "       No system timers implemented      \n", 0);
+      val_print(ACS_PRINT_DEBUG, "       No system timers implemented      \n", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM2, 01));
       return;
   }
@@ -218,6 +223,7 @@ payload2()
       status = val_gic_install_isr(intid, isr2);
 
       if(status == 0) {
+          failsafe_test_num = TEST_NUM2;
           wakeup_set_failsafe();
           /* enable System timer */
           val_timer_set_system_timer((addr_t)cnt_base_n, timer_expire_val);
@@ -271,10 +277,12 @@ payload4()
     val_set_status(index, RESULT_FAIL(TEST_NUM4, 02));
     return;
   }
+  failsafe_test_num = TEST_NUM4;
   wakeup_set_failsafe();
   val_timer_set_vir_el1(timer_expire_val);
   val_power_enter_semantic(BSA_POWER_SEM_B);
   wakeup_clear_failsafe();
+
   return;
 }
 
@@ -292,10 +300,12 @@ payload5()
     val_set_status(index, RESULT_FAIL(TEST_NUM5, 02));
     return;
   }
+  failsafe_test_num = TEST_NUM5;
   wakeup_set_failsafe();
   val_timer_set_phy_el2(timer_expire_val);
   val_power_enter_semantic(BSA_POWER_SEM_B);
   wakeup_clear_failsafe();
+
   return;
 }
 uint32_t
@@ -306,41 +316,35 @@ os_u001_entry(uint32_t num_pe)
 
   num_pe = 1;  //This Timer test is run on single processor
 
-  val_print(ACS_PRINT_TEST, TEST_DESC, 0);
-  val_print(ACS_PRINT_DEBUG, TEST_RULES, 0);
   status_test = val_initialize_test(TEST_NUM1, TEST_DESC1, num_pe);
   if (status_test != ACS_STATUS_SKIP)
       val_run_test_payload(TEST_NUM1, num_pe, payload1, 0);
-  status = val_check_for_error(TEST_NUM1, num_pe);
+  status = val_check_for_error(TEST_NUM1, num_pe, TEST_RULE1);
 
-  val_print(ACS_PRINT_DEBUG, TEST_RULES, 0);
   status_test = val_initialize_test(TEST_NUM2, TEST_DESC2, num_pe);
   if (status_test != ACS_STATUS_SKIP)
       val_run_test_payload(TEST_NUM2, num_pe, payload2, 0);
-  status |= val_check_for_error(TEST_NUM2, num_pe);
+  status |= val_check_for_error(TEST_NUM2, num_pe, TEST_RULE2);
 
-  val_print(ACS_PRINT_DEBUG, TEST_RULES, 0);
   status_test = val_initialize_test(TEST_NUM3, TEST_DESC3, num_pe);
   if (status_test != ACS_STATUS_SKIP)
       val_run_test_payload(TEST_NUM3, num_pe, payload3, 0);
-  status |= val_check_for_error(TEST_NUM3, num_pe);
+  status |= val_check_for_error(TEST_NUM3, num_pe, TEST_RULE3);
 
-  val_print(ACS_PRINT_DEBUG, TEST_RULES, 0);
   status_test = val_initialize_test(TEST_NUM4, TEST_DESC4, num_pe);
   if (status_test != ACS_STATUS_SKIP)
       val_run_test_payload(TEST_NUM4, num_pe, payload4, 0);
-  status |= val_check_for_error(TEST_NUM4, num_pe);
+  status |= val_check_for_error(TEST_NUM4, num_pe, TEST_RULE4);
 
   /* Run this test if current exception level is EL2 */
   if (val_pe_reg_read(CurrentEL) == AARCH64_EL2) {
-      val_print(ACS_PRINT_DEBUG, TEST_RULES, 0);
       status_test = val_initialize_test(TEST_NUM5, TEST_DESC5, num_pe);
       if (status_test != ACS_STATUS_SKIP)
           val_run_test_payload(TEST_NUM5, num_pe, payload5, 0);
-      status |= val_check_for_error(TEST_NUM5, num_pe);
+      status |= val_check_for_error(TEST_NUM5, num_pe, TEST_RULE5);
   }
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM1));
+  val_report_status(0, BSA_ACS_END(TEST_NUM1), NULL);
 
   return status;
 }

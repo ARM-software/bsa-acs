@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -105,7 +105,7 @@ typedef enum {
 typedef struct {
   UINT32 type;
   UINT64 base;
-  UINT32 its_id;  /* This its_id is only used in case of ITS Type entry */
+  UINT32 entry_id;  /* This entry_id is only used in case of ITS Type entry */
   UINT64 length;  /* This length is only used in case of Re-Distributor Range Address length */
   UINT32 flags;
   UINT32 spi_count;
@@ -317,6 +317,8 @@ typedef struct {
   UINT32         msi;   ///< MSI Enabled
   UINT32         msix;  ///< MSIX Enabled
   UINT32         max_pasids;
+  UINT32         baud_rate;
+  UINT32         interface_type;
 }PERIPHERAL_INFO_BLOCK;
 
 /**
@@ -365,6 +367,9 @@ UINT32 pal_pcie_get_root_port_bdf(UINT32 *seg, UINT32 *bus, UINT32 *dev, UINT32 
 UINT32 pal_pcie_max_pasid_bits(UINT32 bdf);
 
 /* Memory INFO table */
+
+#define MEM_INFO_TBL_MAX_ENTRY  500 /* Maximum entries to be added in Mem info table*/
+
 typedef enum {
   MEMORY_TYPE_DEVICE = 0x1000,
   MEMORY_TYPE_NORMAL,

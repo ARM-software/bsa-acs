@@ -104,3 +104,41 @@ val_bsa_gic_endofInterrupt(uint32_t int_id)
   else
       v2_EndofInterrupt(int_id);
 }
+
+/**
+  @brief  API used to find extended SPI support in system.
+  @param  none
+  @return 0 if not supported, 1 supported
+**/
+uint32_t
+val_bsa_gic_espi_support(void)
+{
+  uint32_t gic_version;
+
+  gic_version = val_gic_get_info(GIC_INFO_VERSION);
+  if (gic_version >= 3)
+      return (v3_read_gicdTyper() >> GICD_TYPER_ESPI_SHIFT) & GICD_TYPER_ESPI_MASK;
+  else
+      return 0;
+}
+
+/**
+  @brief  API used to find  max espi value
+  @param  none
+  @return max espi value
+**/
+uint32_t
+val_bsa_gic_max_espi_val(void)
+{
+  uint32_t gic_version;
+  uint32_t espi_range;
+
+  gic_version = val_gic_get_info(GIC_INFO_VERSION);
+  if (gic_version >= 3) {
+      espi_range = (v3_read_gicdTyper() >> GICD_TYPER_ESPI_RANGE_SHIFT) &
+                                                                    GICD_TYPER_ESPI_RANGE_MASK;
+      return (32 * (espi_range + 1) + 4095);
+  }
+  else
+      return 0;
+}

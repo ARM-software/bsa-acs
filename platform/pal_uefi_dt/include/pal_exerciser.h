@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -200,11 +200,16 @@ typedef enum {
     EXERCISER_DATA_BAR0_SPACE = 0x2,
 } EXERCISER_DATA_TYPE;
 
-UINT32 pal_exerciser_set_param(EXERCISER_PARAM_TYPE Type, UINT64 Value1, UINT64 Value2, UINT32 Bdf);
-UINT32 pal_exerciser_get_param(EXERCISER_PARAM_TYPE Type, UINT64 *Value1, UINT64 *Value2, UINT32 Bdf);
-UINT32 pal_exerciser_set_state(EXERCISER_STATE State, UINT64 *Value, UINT32 Bdf);
+UINT32 pal_exerciser_set_param(EXERCISER_PARAM_TYPE Type, UINT64 Value1,
+                                       UINT64 Value2, UINT32 Bdf, UINT64 Ecam);
+UINT32 pal_exerciser_get_param(EXERCISER_PARAM_TYPE Type, UINT64 *Value1,
+                                      UINT64 *Value2, UINT32 Bdf, UINT64 Ecam);
+UINT32 pal_exerciser_set_state(EXERCISER_STATE State, UINT64 *Value,
+                                                                   UINT32 Bdf);
 UINT32 pal_exerciser_get_state(EXERCISER_STATE *State, UINT32 Bdf);
-UINT32 pal_exerciser_ops(EXERCISER_OPS Ops, UINT64 Param, UINT32 Bdf);
-UINT32 pal_exerciser_get_data(EXERCISER_DATA_TYPE Type, exerciser_data_t *Data, UINT32 Bdf, UINT64 Ecam);
+UINT32 pal_exerciser_ops(EXERCISER_OPS Ops, UINT64 Param, UINT32 Bdf,
+                                                                  UINT64 Ecam);
+UINT32 pal_exerciser_get_data(EXERCISER_DATA_TYPE Type, exerciser_data_t *Data,
+                                                      UINT32 Bdf, UINT64 Ecam);
 
 #endif

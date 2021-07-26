@@ -34,8 +34,9 @@
 #define ACS_PE_PS_TEST_NUM_BASE      (ACS_PE_HYP_TEST_NUM_BASE + 25)
 #define ACS_MEMORY_MAP_TEST_BASE     100
 #define ACS_GIC_TEST_NUM_BASE        200
-#define ACS_GIC_HYP_TEST_NUM_BASE    (ACS_GIC_TEST_NUM_BASE + 50)
-#define ACS_GIC_V2M_TEST_NUM_BASE    (ACS_GIC_TEST_NUM_BASE + 80)
+#define ACS_GIC_HYP_TEST_NUM_BASE    (ACS_GIC_TEST_NUM_BASE + 25)
+#define ACS_GIC_V2M_TEST_NUM_BASE    (ACS_GIC_HYP_TEST_NUM_BASE + 25)
+#define ACS_GIC_ITS_TEST_NUM_BASE    (ACS_GIC_V2M_TEST_NUM_BASE + 25)
 #define ACS_SMMU_TEST_NUM_BASE       300
 #define ACS_SMMU_HYP_TEST_NUM_BASE   (ACS_SMMU_TEST_NUM_BASE + 50)
 #define ACS_TIMER_TEST_NUM_BASE      400
@@ -119,7 +120,7 @@ uint32_t
 val_initialize_test(uint32_t test_num, char8_t * desc, uint32_t num_pe);
 
 uint32_t
-val_check_for_error(uint32_t test_num, uint32_t num_pe);
+val_check_for_error(uint32_t test_num, uint32_t num_pe, char8_t *ruleid);
 
 void
 val_run_test_payload(uint32_t test_num, uint32_t num_pe, void (*payload)(void), uint64_t test_input);

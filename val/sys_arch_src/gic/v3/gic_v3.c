@@ -38,6 +38,17 @@ IsSpi(uint32_t int_id)
 }
 
 /**
+  @brief  Retruns GICD_TYPER value
+  @param  none
+  @return gicd typer value
+**/
+uint32_t
+v3_read_gicdTyper(void)
+{
+  return val_mmio_read(val_get_gicd_base() + GICD_TYPER);
+}
+
+/**
   @brief  derives current pe rd base
   @param  rd base
   @param  rd base length
@@ -252,8 +263,8 @@ v3_Init(void)
   /* Get the max interrupt */
   max_num_interrupts = val_get_max_intid();
 
-  val_print(ACS_PRINT_DEBUG, " \nGIC_INIT: D base %x\n", gicd_base);
-  val_print(ACS_PRINT_DEBUG, " \nGIC_INIT: Interrupts %d\n", max_num_interrupts);
+  val_print(ACS_PRINT_DEBUG, " \n GIC_INIT: D base %x\n", gicd_base);
+  val_print(ACS_PRINT_DEBUG, " \n GIC_INIT: Interrupts %d\n", max_num_interrupts);
 
   /* Disable all interrupt */
   for (index = 0; index < max_num_interrupts; index++) {
@@ -278,7 +289,7 @@ v3_Init(void)
   /* Set ARI bits for v3 mode */
   val_mmio_write(gicd_base + GICD_CTLR, val_mmio_read(gicd_base + GICD_CTLR) | GIC_ARE_ENABLE);
   val_mmio_write(gicd_base + GICD_CTLR, val_mmio_read(gicd_base + GICD_CTLR) | 0x2);
-  val_print(ACS_PRINT_DEBUG, " \nGIC_INIT: GICD_CTLR value 0x%08x\n",
+  val_print(ACS_PRINT_DEBUG, " \n GIC_INIT: GICD_CTLR value 0x%08x\n",
                              val_mmio_read(gicd_base + GICD_CTLR));
 
   WakeUpRD();

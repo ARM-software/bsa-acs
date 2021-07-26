@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -224,7 +224,7 @@ val_initialize_test(uint32_t test_num, char8_t *desc, uint32_t num_pe)
 
   val_print(ACS_PRINT_ERR, "%4d : ", test_num); //Always print this
   val_print(ACS_PRINT_TEST, desc, 0);
-  val_report_status(0, BSA_ACS_START(test_num));
+  val_report_status(0, BSA_ACS_START(test_num), NULL);
   val_pe_initialize_default_exception_handler(val_pe_default_esr);
 
   g_bsa_tests_total++;
@@ -425,7 +425,7 @@ val_run_test_payload(uint32_t test_num, uint32_t num_pe, void (*payload)(void), 
   @return     Success or on failure - status of the last failed PE
  **/
 uint32_t
-val_check_for_error(uint32_t test_num, uint32_t num_pe)
+val_check_for_error(uint32_t test_num, uint32_t num_pe, char8_t *ruleid)
 {
   uint32_t i;
   uint32_t status = 0;
@@ -436,7 +436,7 @@ val_check_for_error(uint32_t test_num, uint32_t num_pe)
      of pe_info_table but num_pe is 1 for SOC tests */
   if (num_pe == 1) {
       status = val_get_status(my_index);
-      val_report_status(my_index, status);
+      val_report_status(my_index, status, ruleid);
       if (IS_TEST_PASS(status)) {
           g_bsa_tests_pass++;
           return ACS_STATUS_PASS;
@@ -452,14 +452,14 @@ val_check_for_error(uint32_t test_num, uint32_t num_pe)
       status = val_get_status(i);
       //val_print(ACS_PRINT_ERR, "Status %4x \n", status);
       if (IS_TEST_FAIL_SKIP(status)) {
-          val_report_status(i, status);
+          val_report_status(i, status, ruleid);
           error_flag += 1;
           break;
       }
   }
 
   if (!error_flag)
-      val_report_status(my_index, status);
+      val_report_status(my_index, status, ruleid);
 
   if (IS_TEST_PASS(status)) {
       g_bsa_tests_pass++;
@@ -489,7 +489,7 @@ val_data_cache_ops_by_va(addr_t addr, uint32_t type)
 void
 val_pe_update_elr(void *context, uint64_t offset)
 {
-    if (pal_bsa_gic_imp()) {
+    if (pal_target_is_dt()) {
 #ifndef TARGET_LINUX
         bsa_gic_update_elr(offset);
 #endif
@@ -569,4 +569,18 @@ uint64_t
 val_time_delay_ms(uint64_t timer_ms)
 {
   return pal_time_delay_ms(timer_ms);
+}
+
+/**
+   Calls pal API to dump dtb
+
+   @param none
+
+   @return none
+
+**/
+void
+val_dump_dtb(void)
+{
+  pal_dump_dtb();
 }

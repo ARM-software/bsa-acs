@@ -24,7 +24,8 @@
 #include "val/include/bsa_acs_gic_support.h"
 
 #define TEST_NUM   (ACS_GIC_HYP_TEST_NUM_BASE + 1)
-#define TEST_DESC  "B_PPI_02: Check PPI Assignments Hypervisor  "
+#define TEST_RULE  "B_PPI_02"
+#define TEST_DESC  "Check PPI Assignments Hypervisor      "
 
 static uint32_t intid;
 
@@ -89,7 +90,8 @@ payload()
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
   if (val_pe_reg_read(CurrentEL) == AARCH64_EL1) {
-      val_print(ACS_PRINT_WARN, "\n       Skipping. Test accesses EL2 Registers       ", 0);
+      val_print(ACS_PRINT_DEBUG, "\n       Skipping. Test accesses EL2"
+                                    " Registers       ", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
       return;
   }
@@ -118,20 +120,20 @@ payload()
 
         if (timeout == 0) {
             val_print(ACS_PRINT_ERR,
-                "\n       EL2-Virtual timer interrupt not received on INTID: %d   ", intid);
+                "\n       EL2-Virtual timer interrupt %d not received", intid);
             val_set_status(index, RESULT_FAIL(TEST_NUM, 03));
         }
     } else
-        val_print(ACS_PRINT_WARN,
-          "\n       EL2-Virtual timer not mapped to PPI base range, INTID: %d   ", intid);
+        val_print(ACS_PRINT_DEBUG,
+          "\n       EL2-Virtual timer interrupt not mapped to PPI", intid);
   } else
-        val_print(ACS_PRINT_WARN, "\n       v8.1 VHE not supported on this PE ", 0);
+        val_print(ACS_PRINT_DEBUG, "\n       v8.1 VHE not supported on this PE ", 0);
 
   // Check non-secure EL2 physical timer
   val_set_status(index, RESULT_PENDING(TEST_NUM));
   intid = val_timer_get_info(TIMER_INFO_PHY_EL2_INTID, 0);
   if (intid < 16 || intid > 31) {
-      val_print(ACS_PRINT_WARN,
+      val_print(ACS_PRINT_DEBUG,
           "\n       EL2-Phy timer not mapped to PPI base range, INTID: %d   ", intid);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 03));
       return;
@@ -159,7 +161,7 @@ payload()
   val_set_status(index, RESULT_PENDING(TEST_NUM));
   intid = val_pe_get_gmain_gsiv(index);
   if (intid < 16 || intid > 31) {
-      val_print(ACS_PRINT_WARN,
+      val_print(ACS_PRINT_DEBUG,
           "\n       GIC Maintenance interrupt not mapped to PPI base range, INTID: %d   ", intid);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 05));
       return;
@@ -201,9 +203,9 @@ hyp_g001_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

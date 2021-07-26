@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,6 +40,7 @@ UINT64  g_stack_pointer;
 UINT64  g_exception_ret_addr;
 UINT64  g_ret_addr;
 SHELL_FILE_HANDLE g_bsa_log_file_handle;
+SHELL_FILE_HANDLE g_dtb_log_file_handle;
 
 STATIC VOID FlushImage (VOID)
 {
@@ -259,19 +260,21 @@ HelpMsg (
          "-os     Enable the execution of operating system tests\n"
          "-hyp    Enable the execution of hypervisor tests\n"
          "-ps     Enable the execution of platform security tests\n"
+         "-dtb    Enable the execution of dtb dump\n"
   );
 }
 
 STATIC CONST SHELL_PARAM_ITEM ParamList[] = {
-  {L"-v"    , TypeValue},    // -v    # Verbosity of the Prints. 1 shows all prints, 5 shows Errors
-  {L"-f"    , TypeValue},    // -f    # Name of the log file to record the test results in.
-  {L"-skip" , TypeValue},    // -skip # test(s) to skip execution
-  {L"-help" , TypeFlag},     // -help # help : info about commands
-  {L"-h"    , TypeFlag},     // -h    # help : info about commands
-  {L"-os"   , TypeFlag},     // -os   # Binary Flag to enable the execution of operating system tests.
-  {L"-hyp"  , TypeFlag},     // -hyp  # Binary Flag to enable the execution of hypervisor tests.
-  {L"-ps"   , TypeFlag},     // -ps   # Binary Flag to enable the execution of platform security tests.
-  {NULL     , TypeMax}
+  {L"-v", TypeValue},    // -v    # Verbosity of the Prints. 1 shows all prints, 5 shows Errors
+  {L"-f", TypeValue},    // -f    # Name of the log file to record the test results in.
+  {L"-skip", TypeValue}, // -skip # test(s) to skip execution
+  {L"-help", TypeFlag},  // -help # help : info about commands
+  {L"-h", TypeFlag},     // -h    # help : info about commands
+  {L"-os", TypeFlag},    // -os   # Binary Flag to enable the execution of operating system tests.
+  {L"-hyp", TypeFlag},   // -hyp  # Binary Flag to enable the execution of hypervisor tests.
+  {L"-ps", TypeFlag},    // -ps   # Binary Flag to enable the execution of platform security tests.
+  {L"-dtb", TypeValue},  // -dtb  # Binary Flag to enable dtb dump
+  {NULL, TypeMax}
   };
 
 /***
@@ -313,11 +316,15 @@ ShellAppMain (
   // Options with Values
   if (ShellCommandLineGetFlag (ParamPackage, L"-skip")) {
       CmdLineArg  = ShellCommandLineGetValue (ParamPackage, L"-skip");
-      for (i=0 ; i < StrLen(CmdLineArg) ; i++){
-        g_skip_test_num[0] = StrDecimalToUintn((CONST CHAR16 *)(CmdLineArg+0));
-          if(*(CmdLineArg+i) == L','){
+      if (CmdLineArg == NULL) {
+        Print(L" No valid test number or module number specified for -skip\n");
+      } else {
+        for (i = 0 ; i < StrLen(CmdLineArg) ; i++) {
+          g_skip_test_num[0] = StrDecimalToUintn((CONST CHAR16 *)(CmdLineArg+0));
+            if (*(CmdLineArg+i) == L',') {
               g_skip_test_num[++j] = StrDecimalToUintn((CONST CHAR16 *)(CmdLineArg+i+1));
           }
+        }
       }
   }
 
@@ -363,6 +370,20 @@ ShellAppMain (
     }
   }
 
+    // If user has pass dtb flag, then dump the dtb in file
+  CmdLineArg  = ShellCommandLineGetValue(ParamPackage, L"-dtb");
+  if (CmdLineArg == NULL) {
+    g_dtb_log_file_handle = NULL;
+  } else {
+    Status = ShellOpenFileByName(CmdLineArg, &g_dtb_log_file_handle,
+             EFI_FILE_MODE_WRITE | EFI_FILE_MODE_READ | EFI_FILE_MODE_CREATE, 0x0);
+    if (EFI_ERROR(Status)) {
+         Print(L"Failed to open file for dtb dump %s\n", CmdLineArg);
+         g_dtb_log_file_handle = NULL;
+    } else {
+        val_dump_dtb();
+    }
+  }
 
   // Options with Flags
   if ((ShellCommandLineGetFlag (ParamPackage, L"-help")) || (ShellCommandLineGetFlag (ParamPackage, L"-h"))){
@@ -454,8 +475,12 @@ print_test_status:
 
   freeBsaAcsMem();
 
-  if(g_bsa_log_file_handle) {
+  if (g_bsa_log_file_handle) {
     ShellCloseFile(&g_bsa_log_file_handle);
+  }
+
+  if (g_dtb_log_file_handle) {
+    ShellCloseFile(&g_dtb_log_file_handle);
   }
 
   Print(L"\n      *** BSA tests complete. Reset the system. *** \n\n");

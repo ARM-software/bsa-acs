@@ -22,7 +22,8 @@
 #include "val/include/bsa_acs_pe.h"
 
 #define TEST_NUM   (ACS_SMMU_TEST_NUM_BASE + 3)
-#define TEST_DESC  "B_SMMU_03: Check Large Virtual Addr Support         "
+#define TEST_RULE  "B_SMMU_03"
+#define TEST_DESC  "Check Large Virtual Addr Support      "
 
 static
 void
@@ -37,7 +38,7 @@ payload()
 
   data_va_range = VAL_EXTRACT_BITS(val_pe_reg_read(ID_AA64MMFR2_EL1), 16, 19);
   if (data_va_range == 0) {
-    val_print(ACS_PRINT_WARN, "\n       Large VA Not Supported by PE                        ", 0);
+    val_print(ACS_PRINT_DEBUG, "\n       Large VA Not Supported by PE                        ", 0);
     val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
     return;
   }
@@ -85,9 +86,9 @@ os_i003_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

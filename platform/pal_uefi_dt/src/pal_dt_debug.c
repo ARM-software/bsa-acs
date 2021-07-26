@@ -77,7 +77,7 @@ dt_dump_gic_table(GIC_INFO_TABLE *GicTable)
     bsa_print(ACS_PRINT_DEBUG, L" GIC TYPE     :%x\n", GicTable->gic_info[Index].type);
     bsa_print(ACS_PRINT_DEBUG, L"     BASE     :%x\n", GicTable->gic_info[Index].base);
     bsa_print(ACS_PRINT_DEBUG, L"     LEN      :%x\n", GicTable->gic_info[Index].length);
-//    bsa_print(ACS_PRINT_DEBUG, L"     ITS ID   :%x\n", GicTable->gic_info[Index].its_id);
+//    bsa_print(ACS_PRINT_DEBUG, L"     ITS ID   :%x\n", GicTable->gic_info[Index].entry_id);
     Index++;
   }
   bsa_print(ACS_PRINT_DEBUG, L"************************************* \n\n");

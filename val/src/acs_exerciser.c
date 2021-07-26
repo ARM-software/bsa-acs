@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,10 +60,10 @@ void val_exerciser_create_info_table(void)
       {
           g_exercier_info_table.e_info[g_exercier_info_table.num_exerciser].bdf = Bdf;
           g_exercier_info_table.e_info[g_exercier_info_table.num_exerciser++].initialized = 0;
-          val_print(ACS_PRINT_DEBUG, "    exerciser Bdf %x\n", Bdf);
+          val_print(ACS_PRINT_INFO, "\n       exerciser Bdf %x", Bdf);
       }
   }
-  val_print(ACS_PRINT_DEBUG, "    exerciser cards in the system %x \n",
+  val_print(ACS_PRINT_INFO, "\n       exerciser cards in the system %x \n",
             g_exercier_info_table.num_exerciser);
 }
 
@@ -92,11 +92,13 @@ uint32_t val_exerciser_get_info(EXERCISER_INFO_TYPE type, uint32_t instance)
   @param   instance     - Stimulus hardware instance number
   @return  status       - SUCCESS if the input paramter type is successfully written
 **/
-uint32_t val_exerciser_set_param(EXERCISER_PARAM_TYPE type, uint64_t value1, uint64_t value2,
-                                 uint32_t instance)
+uint32_t val_exerciser_set_param(EXERCISER_PARAM_TYPE type, uint64_t value1,
+                                           uint64_t value2, uint32_t instance)
 {
-    return pal_exerciser_set_param(type, value1, value2,
-                                   g_exercier_info_table.e_info[instance].bdf);
+    uint32_t bdf = g_exercier_info_table.e_info[instance].bdf;
+    uint64_t ecam = val_pcie_get_ecam_base(bdf);
+
+    return pal_exerciser_set_param(type, value1, value2, bdf, ecam);
 }
 
 uint32_t val_exerciser_get_bdf(uint32_t instance)
@@ -111,11 +113,13 @@ uint32_t val_exerciser_get_bdf(uint32_t instance)
   @param   instance     - Stimulus hardware instance number
   @return  status       - SUCCESS if the requested paramter type is successfully read
 **/
-uint32_t val_exerciser_get_param(EXERCISER_PARAM_TYPE type, uint64_t *value1, uint64_t *value2,
-                                 uint32_t instance)
+uint32_t val_exerciser_get_param(EXERCISER_PARAM_TYPE type, uint64_t *value1,
+                                        uint64_t *value2, uint32_t instance)
 {
-    return pal_exerciser_get_param(type, value1, value2,
-                                   g_exercier_info_table.e_info[instance].bdf);
+    uint32_t bdf = g_exercier_info_table.e_info[instance].bdf;
+    uint64_t ecam = val_pcie_get_ecam_base(bdf);
+
+    return pal_exerciser_get_param(type, value1, value2, bdf, ecam);
 
 }
 
@@ -150,7 +154,7 @@ uint32_t val_exerciser_get_state(EXERCISER_STATE *state, uint32_t instance)
 uint32_t val_exerciser_init(uint32_t instance)
 {
   uint32_t Bdf;
-  uint32_t Ecam;
+  uint64_t Ecam;
   uint64_t cfg_addr;
   EXERCISER_STATE state;
 
@@ -176,7 +180,8 @@ uint32_t val_exerciser_init(uint32_t instance)
       g_exercier_info_table.e_info[instance].initialized = 1;
   }
   else
-           val_print(ACS_PRINT_DEBUG, "\n  Already initialized %d", instance);
+           val_print(ACS_PRINT_DEBUG, "\n       Already initialized %d",
+                                                                    instance);
   return 0;
 }
 /**
@@ -188,7 +193,10 @@ uint32_t val_exerciser_init(uint32_t instance)
 **/
 uint32_t val_exerciser_ops(EXERCISER_OPS ops, uint64_t param, uint32_t instance)
 {
-    return pal_exerciser_ops(ops, param, g_exercier_info_table.e_info[instance].bdf);
+    uint32_t bdf = g_exercier_info_table.e_info[instance].bdf;
+    uint64_t ecam = val_pcie_get_ecam_base(bdf);
+
+    return pal_exerciser_ops(ops, param, bdf, ecam);
 }
 
 /**
@@ -203,6 +211,7 @@ uint32_t val_exerciser_get_data(EXERCISER_DATA_TYPE type, exerciser_data_t *data
 {
     uint32_t bdf = g_exercier_info_table.e_info[instance].bdf;
     uint64_t ecam = val_pcie_get_ecam_base(bdf);
+
     return pal_exerciser_get_data(type, data, bdf, ecam);
 }
 
@@ -241,15 +250,23 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
   }
 
   if (g_sw_view[G_SW_OS]) {
-     val_print(ACS_PRINT_ERR, "\nOperating System:\n", 0);
+     val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
 
      status |= os_e001_entry();
+     status |= os_e002_entry();
+     status |= os_e003_entry();
      status |= os_e004_entry();
      status |= os_e005_entry();
      status |= os_e006_entry();
-     status |= os_e012_entry();
-     status |= os_e013_entry();
-     status |= os_e015_entry();
+     status |= os_e007_entry();
+     status |= os_e008_entry();
+     status |= os_e009_entry();
+     status |= os_e010_entry();
+
+     if (!pal_target_is_dt()) {
+       status |= os_e011_entry();
+       status |= os_e012_entry();
+     }
 
   }
 

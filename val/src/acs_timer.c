@@ -46,7 +46,7 @@ val_timer_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   }
 
   if (g_sw_view[G_SW_OS]) {
-      val_print(ACS_PRINT_ERR, "\nOperating System:\n", 0);
+      val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
       status |= os_t001_entry(num_pe);
       status |= os_t002_entry(num_pe);
       status |= os_t003_entry(num_pe);
@@ -196,6 +196,20 @@ uint64_t
 val_get_phy_el2_timer_count(void)
 {
   return  ArmArchTimerReadReg(CnthpTval);
+}
+
+/**
+  @brief   This API to get the el1 phy timer count.
+           1. Caller       -  Test Suite
+           2. Prerequisite -  None
+  @param   None
+
+  @return  Current timer count
+**/
+uint64_t
+val_get_phy_el1_timer_count(void)
+{
+  return  ArmArchTimerReadReg(CntpTval);
 }
 
 /**

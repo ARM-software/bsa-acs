@@ -25,10 +25,12 @@
 #include "val/include/bsa_acs_exerciser.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 4)
-#define TEST_DESC  "PCI_MSI_2: MSI(-X) triggers interrupt with unique ID  "
+#define TEST_RULE  "PCI_MSI_2"
+#define TEST_DESC  "MSI(-X) triggers intr with unique ID  "
 
 static uint32_t irq_pending;
 static uint32_t lpi_int_id = 0x204C;
+static uint32_t instance;
 
 static
 void
@@ -37,8 +39,8 @@ intr_handler(void)
   /* Clear the interrupt pending state */
   irq_pending = 0;
 
-  val_print(ACS_PRINT_INFO, "\n       Received MSI interrupt %x       ", lpi_int_id);
-  val_gic_end_of_interrupt(lpi_int_id);
+  val_print(ACS_PRINT_INFO, "\n       Received MSI interrupt %x       ", lpi_int_id + instance);
+  val_gic_end_of_interrupt(lpi_int_id + instance);
   return;
 }
 
@@ -51,12 +53,24 @@ payload (void)
   uint32_t e_bdf = 0;
   uint32_t timeout;
   uint32_t status;
-  uint32_t instance;
   uint32_t num_cards;
   uint32_t num_smmus;
+  uint32_t test_skip = 1;
   uint32_t msi_index = 0;
+  uint32_t msi_cap_offset = 0;
+
+  uint32_t req_id = 0;
+  uint32_t device_id = 0;
+  uint32_t stream_id = 0;
+  uint32_t its_id = 0;
 
   index = val_pe_get_index_mpid (val_pe_get_mpid());
+
+  if (val_gic_get_info(GIC_INFO_NUM_ITS) == 0) {
+      val_print(ACS_PRINT_DEBUG, "\n      No ITS, Skipping Test.\n", 0);
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+      return;
+  }
 
   /* Read the number of excerciser cards */
   num_cards = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
@@ -76,21 +90,42 @@ payload (void)
     /* Get the exerciser BDF */
     e_bdf = val_exerciser_get_bdf(instance);
 
-    status = val_gic_request_msi(e_bdf, lpi_int_id, msi_index);
+    /* Search for MSI-X Capability */
+    if (val_pcie_find_capability(e_bdf, PCIE_CAP, CID_MSIX, &msi_cap_offset)) {
+      val_print(ACS_PRINT_INFO, "\n       No MSI-X Capability, Skipping for 0x%x", e_bdf);
+      continue;
+    }
 
+    test_skip = 0;
+
+    /* Get DeviceID & ITS_ID for this device */
+    req_id = GET_DEVICE_ID(PCIE_EXTRACT_BDF_BUS(e_bdf),
+                           PCIE_EXTRACT_BDF_DEV(e_bdf),
+                           PCIE_EXTRACT_BDF_FUNC(e_bdf));
+
+    status = val_iovirt_get_device_info(req_id, PCIE_EXTRACT_BDF_SEG(e_bdf), &device_id,
+                                        &stream_id, &its_id);
     if (status) {
         val_print(ACS_PRINT_ERR,
-            "\n       MSI Assignment failed for bdf : 0x%x", e_bdf);
+            "\n       Could not get device info for BDF : 0x%x", e_bdf);
         val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
         return;
     }
 
-    status = val_gic_install_isr(lpi_int_id, intr_handler);
+    status = val_gic_request_msi(e_bdf, device_id, its_id, lpi_int_id + instance, msi_index);
+    if (status) {
+        val_print(ACS_PRINT_ERR,
+            "\n       MSI Assignment failed for bdf : 0x%x", e_bdf);
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+        return;
+    }
+
+    status = val_gic_install_isr(lpi_int_id + instance, intr_handler);
 
     if (status) {
         val_print(ACS_PRINT_ERR,
-            "\n       Intr handler registration failed for Interrupt : 0x%x", lpi_int_id);
-        val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+            "\n       Intr handler registration failed Interrupt : 0x%x", lpi_int_id + instance);
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 03));
         return;
     }
 
@@ -107,17 +142,22 @@ payload (void)
 
     if (timeout == 0) {
         val_print(ACS_PRINT_ERR,
-            "\n       Interrupt trigger failed for : 0x%x, ", lpi_int_id);
+            "\n       Interrupt trigger failed for : 0x%x, ", lpi_int_id + instance);
         val_print(ACS_PRINT_ERR,
             "BDF : 0x%x   ", e_bdf);
-        val_set_status(index, RESULT_FAIL(TEST_NUM, 03));
-        val_gic_free_msi(e_bdf, lpi_int_id, msi_index);
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 04));
+        val_gic_free_msi(e_bdf, device_id, its_id, lpi_int_id + instance, msi_index);
         return;
     }
 
     /* Clear Interrupt and Mappings */
-    val_gic_free_msi(e_bdf, lpi_int_id, msi_index);
+    val_gic_free_msi(e_bdf, device_id, its_id, lpi_int_id + instance, msi_index);
 
+  }
+
+  if (test_skip) {
+    val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
+    return;
   }
 
   /* Pass Test */
@@ -138,9 +178,9 @@ os_e004_entry(void)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

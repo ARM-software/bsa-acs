@@ -23,13 +23,16 @@
 #include "val/include/bsa_acs_gic.h"
 
 #define TEST_NUM   (ACS_PER_TEST_NUM_BASE + 3)
-#define TEST_DESC  "B_PER_05: Check BSA UART register offsets   "
-#define TEST_NUM2  (ACS_PER_TEST_NUM_BASE + 4)
-#define TEST_DESC1 "B_PER_06: Check GENERIC UART Interrupt      "
+#define TEST_RULE  "B_PER_05"
+#define TEST_DESC  "Check Arm BSA UART register offsets   "
+#define TEST_NUM1  (ACS_PER_TEST_NUM_BASE + 4)
+#define TEST_RULE1 "B_PER_06, B_PER_07"
+#define TEST_DESC1 "Check Arm GENERIC UART Interrupt      "
 
 uint64_t l_uart_base;
 static uint32_t int_id;
 static void *branch_to_test;
+static uint32_t test_pass, test_fail;
 
 static
 void
@@ -113,7 +116,8 @@ isr()
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
   uart_disable_txintr();
-  val_print(ACS_PRINT_DEBUG, "\n      Received interrupt      ", 0);
+  test_pass++;
+  val_print(ACS_PRINT_DEBUG, "\n      Received interrupt on %d     ", int_id);
   val_set_status(index, RESULT_PASS(TEST_NUM, 0x01));
   val_gic_end_of_interrupt(int_id);
 }
@@ -164,48 +168,54 @@ payload()
   uint32_t count = val_peripheral_get_info(NUM_UART, 0);
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
   uint32_t data;
+  uint32_t interface_type;
 
   val_pe_install_esr(EXCEPT_AARCH64_SYNCHRONOUS_EXCEPTIONS, esr);
   val_pe_install_esr(EXCEPT_AARCH64_SERROR, esr);
 
   branch_to_test = &&exception_taken;
 
+  val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
   if (count == 0) {
       val_print(ACS_PRINT_WARN, "\n        No UART defined by Platform      ", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
       return;
   }
 
   while (count != 0) {
+      interface_type = val_peripheral_get_info(UART_INTERFACE_TYPE, count - 1);
+      if (interface_type != COMPATIBLE_FULL_16550
+           && interface_type != COMPATIBLE_SUBSET_16550
+           && interface_type != COMPATIBLE_GENERIC_16550)
+      {
+          l_uart_base = val_peripheral_get_info(UART_BASE0, count - 1);
+          if (l_uart_base == 0) {
+              val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
+              return;
+          }
 
-      l_uart_base = val_peripheral_get_info(UART_BASE0, count - 1);
-      if (l_uart_base == 0) {
-          val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
-          return;
+          uart_setup();
+
+          if (validate_register_readonly(BSA_UARTFR, WIDTH_BIT8 | WIDTH_BIT16 | WIDTH_BIT32))
+              return;
+
+          if (validate_register_readonly(BSA_UARTRIS, WIDTH_BIT16 | WIDTH_BIT32))
+              return;
+
+          if (validate_register_readonly(BSA_UARTMIS, WIDTH_BIT16 | WIDTH_BIT32))
+              return;
+
+          /* Check bits 11:8 in the UARTDR reg are read-only */
+          data = uart_reg_read(BSA_UARTDR, WIDTH_BIT32);
+          uart_reg_write(BSA_UARTDR, WIDTH_BIT32, data | 0x0F00);
+          data = (data >> 8) & 0x0F;
+          if (data != ((uart_reg_read(BSA_UARTDR, WIDTH_BIT32)>>8) & 0x0F)) {
+              val_print(ACS_PRINT_ERR, "\n     UARTDR Bits 11:8 are not Read Only", 0);
+              val_set_status(index, RESULT_FAIL(TEST_NUM, BSA_UARTDR));
+              return;
+          }
+
+          val_set_status(index, RESULT_PASS(TEST_NUM, 01));
       }
-
-      uart_setup();
-
-      if (validate_register_readonly(BSA_UARTFR, WIDTH_BIT8 | WIDTH_BIT16 | WIDTH_BIT32))
-          return;
-
-      if (validate_register_readonly(BSA_UARTRIS, WIDTH_BIT16 | WIDTH_BIT32))
-          return;
-
-      if (validate_register_readonly(BSA_UARTMIS, WIDTH_BIT16 | WIDTH_BIT32))
-          return;
-
-      /* Check bits 11:8 in the UARTDR reg are read-only */
-      data = uart_reg_read(BSA_UARTDR, WIDTH_BIT32);
-      uart_reg_write(BSA_UARTDR, WIDTH_BIT32, data | 0x0F00);
-      data = (data >> 8) & 0x0F;
-      if (data != ((uart_reg_read(BSA_UARTDR, WIDTH_BIT32)>>8) & 0x0F)) {
-          val_print(ACS_PRINT_ERR, "\n     UARTDR Bits 11:8 are not Read Only", 0);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, BSA_UARTDR));
-          return;
-      }
-
-      val_set_status(index, RESULT_PASS(TEST_NUM, 01));
 
       count--;
   }
@@ -220,44 +230,56 @@ payload1()
   uint32_t count = val_peripheral_get_info(NUM_UART, 0);
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
   uint32_t timeout = TIMEOUT_MEDIUM;
+  uint32_t interface_type;
 
   if (count == 0) {
-      val_set_status(index, RESULT_SKIP(TEST_NUM2, 01));
+      val_set_status(index, RESULT_SKIP(TEST_NUM1, 01));
       return;
   }
 
+  val_set_status(index, RESULT_FAIL(TEST_NUM1, 01));
+
   while (count != 0) {
-
+      timeout = TIMEOUT_MEDIUM;
       int_id    = val_peripheral_get_info(UART_GSIV, count - 1);
+      interface_type = val_peripheral_get_info(UART_INTERFACE_TYPE, count - 1);
+      if (interface_type != COMPATIBLE_FULL_16550
+           && interface_type != COMPATIBLE_SUBSET_16550
+           && interface_type != COMPATIBLE_GENERIC_16550) {
 
-      /* If Interrupt ID is available, check for interrupt generation */
-      if (int_id != 0x0) {
-          /* PASS will be set from ISR */
-          val_set_status(index, RESULT_PENDING(TEST_NUM2));
+          /* If Interrupt ID is available, check for interrupt generation */
+          if (int_id != 0x0) {
+              /* PASS will be set from ISR */
+              val_set_status(index, RESULT_PENDING(TEST_NUM1));
 
-          if (val_gic_install_isr(int_id, isr)) {
-             val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
-             val_set_status(index, RESULT_FAIL(TEST_NUM2, 01));
-             return;
+              if (val_gic_install_isr(int_id, isr)) {
+                 val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
+                 val_set_status(index, RESULT_FAIL(TEST_NUM1, 02));
+                 return;
+              }
+
+              uart_enable_txintr();
+              val_print_raw(g_print_level, "\nTest Message    ", 0);
+
+              while ((--timeout > 0) && (IS_RESULT_PENDING(val_get_status(index)))) {
+              };
+
+              if (timeout == 0) {
+                  val_print(ACS_PRINT_ERR, "\n     Did not receive UART interrupt on %d  ", int_id);
+                  test_fail++;
+              }
+          } else {
+              val_set_status(index, RESULT_SKIP(TEST_NUM1, 02));
           }
-
-          uart_enable_txintr();
-          val_print_raw(g_print_level, "\nTest Message    ", 0);
-
-          while ((--timeout > 0) && (IS_RESULT_PENDING(val_get_status(index)))) {
-          };
-
-          if (timeout == 0) {
-              val_print(ACS_PRINT_ERR, "\n     Did not receive UART interrupt on %d  ", int_id);
-              val_set_status(index, RESULT_FAIL(TEST_NUM2, 02));
-              return;
-          }
-      } else {
-          val_set_status(index, RESULT_SKIP(TEST_NUM2, 03));
       }
-
       count--;
   }
+
+  if (test_pass)
+    val_set_status(index, RESULT_PASS(TEST_NUM1, 02));
+  else if (test_fail)
+    val_set_status(index, RESULT_FAIL(TEST_NUM1, 03));
+
   return;
 }
 
@@ -279,18 +301,18 @@ os_d003_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
   if (!status) {
-      status = val_initialize_test(TEST_NUM2, TEST_DESC1, val_pe_get_num());
+      status = val_initialize_test(TEST_NUM1, TEST_DESC1, val_pe_get_num());
       if (status != ACS_STATUS_SKIP)
-          val_run_test_payload(TEST_NUM2, num_pe, payload1, 0);
+          val_run_test_payload(TEST_NUM1, num_pe, payload1, 0);
 
       /* get the result from all PE and check for failure */
-      status = val_check_for_error(TEST_NUM2, num_pe);
+      status = val_check_for_error(TEST_NUM1, num_pe, TEST_RULE1);
   }
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

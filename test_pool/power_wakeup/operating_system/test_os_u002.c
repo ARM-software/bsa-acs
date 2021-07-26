@@ -23,8 +23,8 @@
 #include "val/include/bsa_std_smc.h"
 
 #define TEST_NUM   (ACS_WAKEUP_TEST_NUM_BASE + 6)
-#define TEST_RULES "B_WAK_02,B_WAK_07,B_WAK_09,B_WAK_10,B_WAK_11 \n"
-#define TEST_DESC   "Test No-Wake from Power Semantic F"
+#define TEST_RULE  "B_WAK_02,B_WAK_09-10"
+#define TEST_DESC  "Test No-Wake from Power Semantic F    "
 
 static uint32_t intid, wakeup_event, cnt_base_n;
 static uint64_t timer_num, wd_num;
@@ -105,7 +105,7 @@ payload_target_pe()
   val_pe_reg_write(VBAR_EL2, data2);
 
   val_gic_cpuif_init();
-  val_suspend_pe(0, 0, 0);
+  val_suspend_pe(0, 0);
   // Set the status to indicate that target PE has resumed execution from sleep mode
   val_set_status(index, RESULT_PASS(TEST_NUM, 01));
 }
@@ -138,7 +138,7 @@ payload()
   //        if none of these are present in a platform, skip the test
   wakeup_event = wakeup_event_for_semantic_f();
   if (wakeup_event == 0) {
-      val_print(ACS_PRINT_WARN, "\n       No Watchdogs and system timers present", 0);
+      val_print(ACS_PRINT_DEBUG, "\n       No Watchdogs and system timers present", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
       return;
   }
@@ -280,14 +280,13 @@ os_u002_entry(uint32_t num_pe)
 
   num_pe = 1;  //This test is run on single processor, which will start and trigger interrupt to
                // target PE.
-  val_print(ACS_PRINT_DEBUG, TEST_RULES, 0);
   status_test = val_initialize_test(TEST_NUM, TEST_DESC, num_pe);
   if (status_test != ACS_STATUS_SKIP)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

@@ -23,7 +23,8 @@
 #include "val/include/bsa_acs_pe.h"
 
 #define TEST_NUM   (ACS_MEMORY_MAP_TEST_BASE + 3)
-#define TEST_DESC  "B_MEM_05: PE must access all NS addr space  "
+#define TEST_RULE  "B_MEM_05"
+#define TEST_DESC  "PE must access all NS addr space      "
 
 static uint64_t check_number_of_bits(uint32_t index, uint64_t data)
 {
@@ -89,9 +90,9 @@ os_m003_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

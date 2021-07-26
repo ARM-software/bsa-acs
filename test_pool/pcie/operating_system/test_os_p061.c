@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2020-2021 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,98 +18,151 @@
 #include "val/include/val_interface.h"
 
 #include "val/include/bsa_acs_pcie.h"
+#include "val/include/bsa_acs_memory.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 61)
-#define TEST_DESC  "PCI_IN_20: Vendor specific data are PCIe compliant "
+#define TEST_RULE  "PCI_MM_01-02, RE_BAR_2"
+#define TEST_DESC  "PCIe Unaligned access                 "
 
-// Valid PCIe CapID ranges (PCIe 5.0 - v1.0)
-#define PCIE_CAP_ID_END     0x15
-#define PCIE_ECAP_ID_END    0x29
-
-// Check if vendor specific data are presented as non-PCIe compliant capabilities
-// in either the regular or extended PCIe spaces
-// returns: 0 - No violations present    1 - One or more violations present
-static
-uint32_t
-check_pcie_cfg_space(uint32_t bdf)
-{
-    uint32_t reg_value;
-    uint32_t next_cap;
-    uint32_t err = 0;
-    uint32_t cid;
-
-    // Search through regular PCIe cfg space first (start at first implemented cap)
-    val_pcie_read_cfg(bdf, TYPE01_CPR, &reg_value);
-    // DWORD aligned: next_cap[1:0] are hardwired to '0'
-    next_cap = VAL_EXTRACT_BITS(reg_value, 2, 7) << 2;
-
-    while (next_cap) {
-
-        val_pcie_read_cfg(bdf, next_cap, &reg_value);
-        next_cap = VAL_EXTRACT_BITS(reg_value, 7, 15);
-        cid = VAL_EXTRACT_BITS(reg_value, 0, 7);
-
-        // Check PCIe Cap IDs are in range
-        if (cid > PCIE_CAP_ID_END) {
-            val_print(ACS_PRINT_ERR,
-                "\n       Invalid Cap ID: 0x%x found in regular cfg space", cid);
-            err = 1;
-        }
-    }
-
-    // Search through extended PCIe cfg space next
-    next_cap = PCIE_ECAP_START;
-
-    while (next_cap) {
-
-        val_pcie_read_cfg(bdf, next_cap, &reg_value);
-        next_cap = VAL_EXTRACT_BITS(reg_value, 20, 31);
-        cid = VAL_EXTRACT_BITS(reg_value, 0, 15);
-
-        // Check PCIe Ext Cap IDs are in range
-        if (cid > PCIE_ECAP_ID_END) {
-            val_print(ACS_PRINT_ERR,
-                "\n       Invalid Cap ID: 0x%x found in extended cfg space", cid);
-            err = 1;
-        }
-    }
-
-    return err;
-}
+#define DATA 0xC0DECAFE
 
 static
 void
 payload(void)
 {
-    uint32_t pe_index;
-    uint32_t tbl_index;
-    uint32_t bdf;
-    uint32_t dp_type;
-    pcie_device_bdf_table *bdf_tbl_ptr;
+  uint32_t count = 0;
+  uint32_t data;
+  uint32_t bdf;
+  uint32_t bar_reg_value;
+  uint64_t bar_upper_bits;
+  uint32_t bar_value;
+  uint32_t bar_value_1;
+  uint64_t bar_size;
+  char    *baseptr;
+  uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
+  uint32_t test_skip = 1;
+  uint32_t test_fail = 0;
+  uint64_t offset;
+  uint64_t base;
 
-    pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
-    bdf_tbl_ptr = val_pcie_bdf_table_ptr();
+  count = val_peripheral_get_info(NUM_SATA, 0);
 
-    tbl_index = 0;
+  while (count--) {
+next_bdf:
+      bdf = val_peripheral_get_info(SATA_BDF, count);
+      offset = BAR0_OFFSET;
 
-    while (tbl_index < bdf_tbl_ptr->num_entries) {
+      while (offset <= BAR_MAX_OFFSET) {
+          val_pcie_read_cfg(bdf, offset, &bar_value);
+          val_print(ACS_PRINT_DEBUG, "\n       The BAR value of bdf %x", bdf);
+          val_print(ACS_PRINT_DEBUG, " is %x ", bar_value);
+          base = 0;
 
-        bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
-        dp_type = val_pcie_device_port_type(bdf);
+          if (bar_value == 0)
+          {
+              /** This BAR is not implemented **/
+              count--;
+              goto next_bdf;
+          }
 
-        // Only check for Root Ports
-        if (dp_type == RP) {
-            if (check_pcie_cfg_space(bdf)) {
-                val_print(ACS_PRINT_ERR,
-                    "\n       Invalid PCIe capability found on dev: %d", tbl_index);
-                val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
-                return;
-            }
-        }
-    }
+          /* Skip for IO address space */
+          if (bar_value & 0x1) {
+              count--;
+              goto next_bdf;
+          }
 
-    val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
-    return;
+          if (BAR_REG(bar_value) == BAR_64_BIT)
+          {
+              val_print(ACS_PRINT_INFO, "BAR supports 64-bit address decoding capability \n", 0);
+              val_pcie_read_cfg(bdf, offset+4, &bar_value_1);
+              base = bar_value_1;
+
+              /* BAR supports 64-bit address therefore, write all 1's
+               * to BARn and BARn+1 and identify the size requested
+               */
+              val_pcie_write_cfg(bdf, offset, 0xFFFFFFF0);
+              val_pcie_write_cfg(bdf, offset + 4, 0xFFFFFFFF);
+              val_pcie_read_cfg(bdf, offset, &bar_reg_value);
+              bar_size = bar_reg_value & 0xFFFFFFF0;
+              val_pcie_read_cfg(bdf, offset + 4, &bar_reg_value);
+              bar_upper_bits = bar_reg_value;
+              bar_size = bar_size | (bar_upper_bits << 32);
+              bar_size = ~bar_size + 1;
+
+              /* Restore the original BAR value */
+              val_pcie_write_cfg(bdf, offset + 4, bar_value_1);
+              val_pcie_write_cfg(bdf, offset, bar_value);
+              base = (base << 32) | bar_value;
+          }
+
+          else {
+              val_print(ACS_PRINT_INFO, "The BAR supports 32-bit address decoding capability\n", 0);
+
+              /* BAR supports 32-bit address. Write all 1's
+               * to BARn and identify the size requested
+               */
+              val_pcie_write_cfg(bdf, offset, 0xFFFFFFF0);
+              val_pcie_read_cfg(bdf, offset, &bar_reg_value);
+              bar_reg_value = bar_reg_value & 0xFFFFFFF0;
+              bar_size = ~bar_reg_value + 1;
+
+              /* Restore the original BAR value */
+              val_pcie_write_cfg(bdf, offset, bar_value);
+              base = bar_value;
+          }
+
+          val_print(ACS_PRINT_DEBUG, "\n BAR size is %x", bar_size);
+
+          /* Check if bar supports the remap size */
+          if (bar_size < 1024) {
+              val_print(ACS_PRINT_ERR, "Bar size less than remap requested size", 0);
+              goto next_bar;
+          }
+
+          test_skip = 0;
+
+          /* Map SATA Controller BARs to a NORMAL memory attribute. check unaligned access */
+          baseptr = (char *)val_memory_ioremap((void *)base, 1024, NORMAL_NC);
+
+          /* Check for unaligned access */
+          *(uint32_t *)(baseptr) = DATA;
+          data = *(char *)(baseptr+3);
+
+          val_memory_unmap(baseptr);
+
+          if (data != (DATA >> 24)) {
+              val_print(ACS_PRINT_ERR, "Unaligned data mismatch", 0);
+              test_fail++;
+          }
+
+          /* Map SATA Controller BARs to a DEVICE memory attribute and check transaction */
+          baseptr = (char *)val_memory_ioremap((void *)base, 1024, DEVICE_nGnRnE);
+
+          *(uint32_t *)(baseptr) = DATA;
+          data = *(uint32_t *)(baseptr);
+
+          val_memory_unmap(baseptr);
+
+          if (data != DATA) {
+              val_print(ACS_PRINT_ERR, "Data value mismatch", 0);
+              test_fail++;
+          }
+
+next_bar:
+          if (BAR_REG(bar_reg_value) == BAR_32_BIT)
+              offset = offset + 4;
+
+          if (BAR_REG(bar_reg_value) == BAR_64_BIT)
+              offset = offset + 8;
+      }
+  }
+
+  if (test_skip)
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 0));
+  else if (test_fail)
+      val_set_status(index, RESULT_FAIL(TEST_NUM, test_fail));
+  else
+      val_set_status(index, RESULT_PASS(TEST_NUM, 0));
 
 }
 
@@ -126,9 +179,9 @@ os_p061_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

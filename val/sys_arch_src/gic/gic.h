@@ -48,14 +48,17 @@
 #define GIC_ICCEIOR         0x10
 
 #define PE_AFF0   0xFF
-#define PE_AFF1   (0xFF < 8)
-#define PE_AFF2   (0xFF < 16)
-#define PE_AFF3   (0xFFULL < 32)
+#define PE_AFF1   (0xFF << 8)
+#define PE_AFF2   (0xFF << 16)
+#define PE_AFF3   (0xFFULL << 32)
+
 
 void val_bsa_gic_init(void);
 void val_bsa_gic_disableInterruptSource(uint32_t int_id);
 void val_bsa_gic_enableInterruptSource(uint32_t int_id);
 uint32_t val_bsa_gic_acknowledgeInterrupt(void);
 void val_bsa_gic_endofInterrupt(uint32_t int_id);
+uint32_t val_bsa_gic_espi_support(void);
+uint32_t val_bsa_gic_max_espi_val(void);
 
 #endif /*__GIC_H__ */

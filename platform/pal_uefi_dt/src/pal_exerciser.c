@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018-2020, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,11 +71,11 @@ pal_increment_bus_dev(
 **/
 UINT64
 pal_exerciser_get_ecsr_base (
-  UINT32 Bdf,
+  UINT64 EcsrBase,
   UINT32 BarIndex
   )
 {
-  return palPcieGetBase(Bdf, BarIndex);
+  return pal_mmio_read(EcsrBase + BAR0_OFFSET + (BarIndex * 4));
 }
 
 UINT64
@@ -96,7 +96,7 @@ pal_exerciser_get_pcie_config_offset(UINT32 Bdf)
 UINT32
 pal_is_bdf_exerciser(UINT32 bdf)
 {
-  UINT32 Ecam;
+  UINT64 Ecam;
   UINT32 vendor_dev_id;
   Ecam = pal_pcie_get_mcfg_ecam();
 
@@ -151,7 +151,7 @@ pal_exerciser_find_pcie_capability (
   UINT64 NxtPtr;
   UINT32 Data;
   UINT32 TempId;
-  UINT32 Ecam;
+  UINT64 Ecam;
   UINT32 IdMask;
   UINT32 PtrMask;
   UINT32 PtrOffset;
@@ -196,14 +196,18 @@ UINT32 pal_exerciser_set_param (
   EXERCISER_PARAM_TYPE Type,
   UINT64 Value1,
   UINT64 Value2,
-  UINT32 Bdf
+  UINT32 Bdf,
+  UINT64 Ecam
   )
 {
   UINT32 Status;
   UINT32 Data;
   UINT64 Base;
+  UINT64 EcsrBase; /* Exerciser Base */
 
-  Base = pal_exerciser_get_ecsr_base(Bdf,0);
+  EcsrBase = (Ecam + pal_exerciser_get_pcie_config_offset(Bdf));
+  Base = pal_exerciser_get_ecsr_base(EcsrBase, 0); /* BAR0 address */
+
   switch (Type) {
 
       case SNOOP_ATTRIBUTES:
@@ -263,14 +267,18 @@ pal_exerciser_get_param (
   EXERCISER_PARAM_TYPE Type,
   UINT64 *Value1,
   UINT64 *Value2,
-  UINT32 Bdf
+  UINT32 Bdf,
+  UINT64 Ecam
   )
 {
   UINT32 Status;
   UINT32 Temp;
   UINT64 Base;
+  UINT64 EcsrBase; /* Exerciser Base */
 
-  Base = pal_exerciser_get_ecsr_base(Bdf,0);
+  EcsrBase = (Ecam + pal_exerciser_get_pcie_config_offset(Bdf));
+  Base = pal_exerciser_get_ecsr_base(EcsrBase, 0); /*BAR0 address */
+
   switch (Type) {
 
       case SNOOP_ATTRIBUTES:
@@ -341,16 +349,18 @@ UINT32
 pal_exerciser_ops (
   EXERCISER_OPS Ops,
   UINT64 Param,
-  UINT32 Bdf
+  UINT32 Bdf,
+  UINT64 Ecam
   )
 {
   UINT64 Base;
-  UINT32 Ecam;
   UINT32 CapabilityOffset;
   UINT32 data;
+  UINT64 EcsrBase; /* Exerciser Base */
 
-  Base = pal_exerciser_get_ecsr_base(Bdf,0);
-  Ecam = pal_pcie_get_mcfg_ecam(); // Getting the ECAM address
+  EcsrBase = (Ecam + pal_exerciser_get_pcie_config_offset(Bdf));
+  Base = pal_exerciser_get_ecsr_base(EcsrBase, 0); /*BAR 0 address */
+
   switch(Ops){
 
     case START_DMA:
@@ -441,10 +451,11 @@ pal_exerciser_get_data (
   )
 {
   UINT32 Index;
-  UINT64 EcamBase;
-  UINT64 EcamBAR0;
+  UINT64 Base;
+  UINT64 EcsrBase; /* Exerciser Base */
 
-  EcamBase = (Ecam + pal_exerciser_get_pcie_config_offset(Bdf));
+  EcsrBase = (Ecam + pal_exerciser_get_pcie_config_offset(Bdf));
+  Base = pal_exerciser_get_ecsr_base(EcsrBase, 0); /* BAR0 address */
 
   //In the Latest version of BSA 6.0 this part of the test is obsolete hence filling the reg with same data
   UINT32 offset_table[TEST_REG_COUNT] = {0x00,0x08,0x00,0x08,0x00,0x08,0x00,0x08,0x00,0x08};
@@ -456,13 +467,13 @@ pal_exerciser_get_data (
           for (Index = 0; Index < TEST_REG_COUNT; Index++) {
               Data->cfg_space.reg[Index].offset = (offset_table[Index] + pal_exerciser_get_pcie_config_offset (Bdf));
               Data->cfg_space.reg[Index].attribute = attr_table[Index];
-              Data->cfg_space.reg[Index].value = pal_mmio_read(EcamBase +  offset_table[Index]);
+              Data->cfg_space.reg[Index].value =
+                                pal_mmio_read(EcsrBase +  offset_table[Index]);
           }
           return 0;
       case EXERCISER_DATA_BAR0_SPACE:
-          EcamBAR0 = pal_exerciser_get_ecsr_base(Bdf, 0);
-          Data->bar_space.base_addr = (void *)EcamBAR0;
-          if (((pal_exerciser_get_ecsr_base(Bdf,0) >> PREFETCHABLE_BIT_SHIFT) & MASK_BIT) == 0x1)
+          Data->bar_space.base_addr = (void *)Base;
+          if (((Base >> PREFETCHABLE_BIT_SHIFT) & MASK_BIT) == 0x1)
               Data->bar_space.type = MMIO_PREFETCHABLE;
           else
               Data->bar_space.type = MMIO_NON_PREFETCHABLE;
