@@ -41,7 +41,8 @@
 void val_allocate_shared_mem(void);
 void val_free_shared_mem(void);
 void val_print(uint32_t level, char8_t *string, uint64_t data);
-void val_print_raw(uint32_t level, char8_t *string, uint64_t data);
+void val_print_raw(uint64_t uart_addr, uint32_t level, char8_t *string,
+                                                                uint64_t data);
 void val_set_test_data(uint32_t index, uint64_t addr, uint64_t test_data);
 void val_get_test_data(uint32_t index, uint64_t *data0, uint64_t *data1);
 uint32_t val_strncmp(char8_t *str1, char8_t *str2, uint32_t len);
@@ -99,6 +100,7 @@ uint32_t val_gic_get_intr_trigger_type(uint32_t int_id, INTR_TRIGGER_INFO_TYPE_e
 uint32_t val_gic_get_espi_intr_trigger_type(uint32_t int_id,
                                                           INTR_TRIGGER_INFO_TYPE_e *trigger_type);
 uint32_t val_gic_its_configure(void);
+uint32_t val_gic_its_get_base(uint32_t its_id, uint64_t *its_base);
 uint32_t val_gic_request_msi(uint32_t bdf, uint32_t device_id, uint32_t its_id,
                              uint32_t int_id, uint32_t msi_index);
 void val_gic_free_msi(uint32_t bdf, uint32_t device_id, uint32_t its_id,
@@ -252,7 +254,7 @@ typedef enum {
 
 void     val_iovirt_create_info_table(uint64_t *iovirt_info_table);
 void     val_iovirt_free_info_table(void);
-uint32_t val_iovirt_get_rc_smmu_index(uint32_t rc_seg_num);
+uint32_t val_iovirt_get_rc_smmu_index(uint32_t rc_seg_num, uint32_t rid);
 uint32_t val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view);
 uint64_t val_smmu_get_info(SMMU_INFO_e, uint32_t index);
 
@@ -304,11 +306,15 @@ typedef enum {
   USB_FLAGS,
   USB_GSIV,
   USB_BDF,
+  USB_INTERFACE_TYPE,
+  USB_PLATFORM_TYPE,
   SATA_BASE0,
   SATA_BASE1,
   SATA_FLAGS,
   SATA_GSIV,
   SATA_BDF,
+  SATA_INTERFACE_TYPE,
+  SATA_PLATFORM_TYPE,
   UART_BASE0,
   UART_BASE1,
   UART_GSIV,

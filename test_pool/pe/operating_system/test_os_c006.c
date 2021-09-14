@@ -33,9 +33,9 @@ payload()
 
   //bits 7:4, 11:8, 15:12 must be non-zero
   if (((data >> 4) & 0xF) && ((data >> 8) & 0xF) && ((data >> 12) & 0xF))
-        val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+        val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   else
-        val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
 
   return;
 

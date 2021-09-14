@@ -38,7 +38,7 @@ isr_vir()
   /* We received our interrupt, so disable timer from generating further interrupts */
   val_timer_set_vir_el2(0);
   val_print(ACS_PRINT_INFO, "\n       Received interrupt    ", 0);
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   val_gic_end_of_interrupt(intid);
 }
 
@@ -51,7 +51,7 @@ isr_phy()
   /* We received our interrupt, so disable timer from generating further interrupts */
   val_timer_set_phy_el2(0);
   val_print(ACS_PRINT_INFO, "\n       Received interrupt     ", 0);
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   val_gic_end_of_interrupt(intid);
 }
 
@@ -68,7 +68,7 @@ isr_mnt()
   data &= ~0x7;
   val_gic_reg_write(ICH_HCR_EL2, data);
 
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   val_print(ACS_PRINT_INFO, "\n       Received GIC maintenance interrupt ", 0);
   val_gic_end_of_interrupt(intid);
 
@@ -92,7 +92,7 @@ payload()
   if (val_pe_reg_read(CurrentEL) == AARCH64_EL1) {
       val_print(ACS_PRINT_DEBUG, "\n       Skipping. Test accesses EL2"
                                     " Registers       ", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
@@ -105,10 +105,10 @@ payload()
   /* Check for EL2 virtual timer interrupt, if PE supports 8.1 or greater */
   if ((data >> 8) & 0xF) {
     intid = val_timer_get_info(TIMER_INFO_VIR_EL2_INTID, 0);
-    if (intid > 15 && intid < 32) {
+    if ((intid > 15 && intid < 32) || val_gic_is_valid_eppi(intid)) {
         if (val_gic_install_isr(intid, isr_vir)) {
             val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
-            val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+            val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
             return;
         }
 
@@ -121,27 +121,28 @@ payload()
         if (timeout == 0) {
             val_print(ACS_PRINT_ERR,
                 "\n       EL2-Virtual timer interrupt %d not received", intid);
-            val_set_status(index, RESULT_FAIL(TEST_NUM, 03));
+            val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
         }
     } else
         val_print(ACS_PRINT_DEBUG,
-          "\n       EL2-Virtual timer interrupt not mapped to PPI", intid);
+          "\n       EL2-Virtual timer interrupt not mapped"
+          "\n       to PPI                                ", intid);
   } else
         val_print(ACS_PRINT_DEBUG, "\n       v8.1 VHE not supported on this PE ", 0);
 
   // Check non-secure EL2 physical timer
   val_set_status(index, RESULT_PENDING(TEST_NUM));
   intid = val_timer_get_info(TIMER_INFO_PHY_EL2_INTID, 0);
-  if (intid < 16 || intid > 31) {
+  if ((intid < 16 || intid > 31) && (!val_gic_is_valid_eppi(intid))) {
       val_print(ACS_PRINT_DEBUG,
           "\n       EL2-Phy timer not mapped to PPI base range, INTID: %d   ", intid);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 03));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
       return;
   }
 
   if (val_gic_install_isr(intid, isr_phy)) {
      val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
-     val_set_status(index, RESULT_FAIL(TEST_NUM, 04));
+     val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
      return;
   }
 
@@ -154,22 +155,23 @@ payload()
   if (timeout == 0) {
     val_print(ACS_PRINT_ERR,
         "\n       EL2-Phy timer interrupt not received on INTID: %d   ", intid);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 05));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 5));
   }
 
   // Check maintenance interrupt
   val_set_status(index, RESULT_PENDING(TEST_NUM));
   intid = val_pe_get_gmain_gsiv(index);
-  if (intid < 16 || intid > 31) {
+  if ((intid < 16 || intid > 31) && (!val_gic_is_valid_eppi(intid))) {
       val_print(ACS_PRINT_DEBUG,
-          "\n       GIC Maintenance interrupt not mapped to PPI base range, INTID: %d   ", intid);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 05));
+          "\n       GIC Maintenance interrupt not mapped to PPI base range,"
+          "\n       INTID: %d   ", intid);
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 5));
       return;
   }
 
   if (val_gic_install_isr(intid, isr_mnt)) {
      val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
-     val_set_status(index, RESULT_FAIL(TEST_NUM, 06));
+     val_set_status(index, RESULT_FAIL(TEST_NUM, 6));
      return;
   }
 
@@ -184,7 +186,7 @@ payload()
 
   if (timeout == 0) {
       val_print(ACS_PRINT_ERR, "\n       Interrupt not received within timeout", 0);
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 07));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 7));
       return;
   }
   return;

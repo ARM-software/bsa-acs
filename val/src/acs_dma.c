@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018,2021, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,9 +24,12 @@ DMA_INFO_TABLE  *g_dma_info_table;
 /**
   @brief  Allocate memory which is to be used for DMA
 
-  @param  None
+  @param  *buffer    - Address of the Memory Bufffer to be returned
+  @param  size       - Memory size to be allocated
+  @param  dev_index  - DMA Controller Index
+  @param  flags      - Flags to determine if DMA is Coherent
 
-  @result None
+  @result Start Address of the Allocated memory
 **/
 addr_t
 val_dma_mem_alloc(void **buffer, uint32_t size, uint32_t dev_index, uint32_t flags)
@@ -42,7 +45,11 @@ val_dma_mem_alloc(void **buffer, uint32_t size, uint32_t dev_index, uint32_t fla
 /**
   @brief  free memory which is to used for DMA
 
-  @param  None
+  @param  *buffer    - Address of the Memory Bufffer to free
+  @param  mem_dma    - DMA handle of the memory to free
+  @param  size       - Memory size to be allocated
+  @param  dev_index  - DMA Controller Index
+  @param  flags      - Flags to determine if DMA is Coherent
 
   @result None
 **/
@@ -57,12 +64,28 @@ val_dma_mem_free(void *buffer, dma_addr_t mem_dma, uint32_t size, uint32_t dev_i
 
 }
 
+/**
+  @brief  free memory of DMA info table
+
+  @param  None
+
+  @result None
+**/
 void
 val_dma_free_info_table(void)
 {
   pal_mem_free((void *)g_dma_info_table);
 }
 
+/**
+  @brief  Perform the DMA operation for the device
+
+  @param  *Buffer - Memory Buffer
+  @param  length - Length of the buffer
+  @param  ctrl_index - Index of DMA Controller
+
+  @result None
+**/
 uint32_t
 val_dma_start_from_device(void *buffer, uint32_t length, uint32_t ctrl_index)
 {
@@ -100,7 +123,13 @@ val_dma_start_to_device(void *buffer, uint32_t length, uint32_t ctrl_index)
 }
 
 
-/* Pre-requisite - val_peripheral_create_info_table */
+/**
+  @brief  API to keep all DMA Controller related information.
+
+  @param  dma_info_ptr - DMA Info table pointer
+
+  @return None
+**/
 void
 val_dma_create_info_table(uint64_t *dma_info_ptr)
 {
@@ -189,6 +218,15 @@ val_dma_device_get_dma_addr(uint32_t ctrl_index, void *dma_addr, uint32_t *cpu_l
 
 }
 
+/**
+  @brief  Get Memory attributes of the Memory Buffer
+
+  @param  buf - Memory buffer for which we want to get the attributes
+  @param  *attr - Memory attributes to return
+  @param  *sh - Sharability
+
+  @result Status
+**/
 int
 val_dma_mem_get_attrs(void *buf, uint32_t *attr, uint32_t *sh)
 {

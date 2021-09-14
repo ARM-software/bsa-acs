@@ -41,7 +41,7 @@ payload()
   data = val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
   if (data == 0) {
     val_print(ACS_PRINT_WARN, "\n       PCIe Subsystem not discovered                       ", 0);
-    val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
+    val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
     return;
   }
 
@@ -49,7 +49,7 @@ payload()
 
   if (num_smmu == 0) {
     val_print(ACS_PRINT_ERR, "\n       No SMMU Controllers are discovered                  ", 0);
-    val_set_status(index, RESULT_SKIP(TEST_NUM, 03));
+    val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
     return;
   }
 
@@ -63,7 +63,7 @@ payload()
   while (num_smmu--) {
       if (val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) == 2) {
           val_print(ACS_PRINT_WARN, "\n       Not valid for SMMU v2           ", 0);
-          val_set_status(index, RESULT_SKIP(TEST_NUM, 04));
+          val_set_status(index, RESULT_SKIP(TEST_NUM, 4));
           return;
       }
 
@@ -71,20 +71,20 @@ payload()
 
       if ((data_pe_endian == 1) && ((data == 1) || (data == 2))) {
           /* If PE supports big endian */
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
           val_print(ACS_PRINT_ERR, "\n       PE supports big endian, "
                                    "but SMMU %x does not", num_smmu);
           return;
       } else if ((data_pe_endian == 0) && ((data == 1) || (data == 3))) {
           /* If PE supports little endian */
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
           val_print(ACS_PRINT_ERR, "\n       PE supports little endian, "
                                    "but SMMU %x does not", num_smmu);
           return;
       }
   }
 
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

@@ -40,7 +40,7 @@ payload()
   if (data_pa_range != 0x6) {
    val_print(ACS_PRINT_DEBUG, "\n       Large PA Not Supported by PE        "
                                       "                  ", 0);
-    val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+    val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
     return;
   }
 
@@ -48,7 +48,7 @@ payload()
   if (num_smmu == 0) {
     val_print(ACS_PRINT_DEBUG, "\n       No SMMU Controllers are discovered "
                                     "                   ", 0);
-    val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
+    val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
     return;
   }
 
@@ -56,7 +56,7 @@ payload()
       if (val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) == 2) {
           val_print(ACS_PRINT_ERR, "\n       Large PA Not Supported in"
                                     " SMMUv2", 0);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
           return;
       }
 
@@ -66,13 +66,13 @@ payload()
       if (data_pa_range == 0x6) {
           if (data_oas != 0x6) {
               val_print(ACS_PRINT_WARN, "\n       Large PA Not Supported in SMMU %x", num_smmu);
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
               return;
           }
       }
   }
 
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

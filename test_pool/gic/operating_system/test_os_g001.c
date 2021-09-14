@@ -37,11 +37,11 @@ payload()
 
   if (gic_version < 2) {
       val_print(ACS_PRINT_ERR, "\n       GIC version is %x                 ", gic_version);
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
       return;
   }
 
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 
 }
 

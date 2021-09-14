@@ -43,6 +43,9 @@
 #define DMA_BUS_ADDR 0x010
 #define DMA_LEN      0x018
 #define DMASTATUS    0x01C
+#define PASID_VAL    0x020
+#define ATSCTL       0x024
+#define ATS_ADDR     0x028
 #define PCI_MAX_BUS     255
 #define PCI_MAX_DEVICE  31
 
@@ -65,6 +68,7 @@
 #define PASID_VAL_SHIFT     12
 #define PASID_LEN_SHIFT     7
 #define PASID_LEN_MASK      0x7ul
+#define PASID_EN_SHIFT      6
 #define DMA_TO_DEVICE_MASK  0xFFFFFFEF
 
 /* shift_bit */
@@ -85,7 +89,13 @@
 #define PCIE_CAP_DIS_MASK 0xFFFEFFFF
 #define PCIE_CAP_EN_MASK (1 << 16)
 #define PASID_EN_MASK    (1 << 6)
-
+#define RID_CTL_REG    0x3C
+#define RID_VALUE_MASK 0xFFFF
+#define RID_VALID_MASK (1ul << 31)
+#define RID_VALID      1
+#define RID_NOT_VALID  0
+#define ATS_TRIGGER    1
+#define ATS_STATUS     (1ul << 7)
 
 typedef enum {
     TYPE0 = 0x0,
@@ -106,21 +116,22 @@ typedef enum {
 } EXERCISER_DMA_ATTR;
 
 typedef enum {
-    SNOOP_ATTRIBUTES = 0x1,
-    LEGACY_IRQ       = 0x2,
-    MSIX_ATTRIBUTES  = 0x3,
-    DMA_ATTRIBUTES   = 0x4,
-    P2P_ATTRIBUTES   = 0x5,
-    PASID_ATTRIBUTES = 0x6,
+    SNOOP_ATTRIBUTES   = 0x1,
+    LEGACY_IRQ         = 0x2,
+    MSIX_ATTRIBUTES    = 0x3,
+    DMA_ATTRIBUTES     = 0x4,
+    P2P_ATTRIBUTES     = 0x5,
+    PASID_ATTRIBUTES   = 0x6,
     CFG_TXN_ATTRIBUTES = 0x7,
     ATS_RES_ATTRIBUTES = 0x8,
-    TRANSACTION_TYPE  = 0x9,
-    NUM_TRANSACTIONS  = 0xA
+    TRANSACTION_TYPE   = 0x9,
+    NUM_TRANSACTIONS   = 0xA
 } EXERCISER_PARAM_TYPE;
 
 typedef enum {
-    TXN_REQ_ID     = 0x0,
-    TXN_ADDR_TYPE  = 0x1,
+    TXN_REQ_ID       = 0x0,
+    TXN_ADDR_TYPE    = 0x1,
+    TXN_REQ_ID_VALID = 0x2,
 } EXERCISER_TXN_ATTR;
 
 typedef enum {

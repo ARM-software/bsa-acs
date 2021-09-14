@@ -98,7 +98,7 @@ payload(void)
               /* Check BAR should be MMIO */
               if (reg_value & BAR_MIT_MASK)
               {
-                 val_print(ACS_PRINT_ERR, "\n        BDF 0x%x Not MMIO", 0);
+                 val_print(ACS_PRINT_ERR, "\n       BDF 0x%x Not MMIO", 0);
                  test_fails++;
               }
            }
@@ -106,11 +106,11 @@ payload(void)
   }
 
   if (test_skip == 1)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
   else if (test_fails)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, test_fails));
   else
-      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

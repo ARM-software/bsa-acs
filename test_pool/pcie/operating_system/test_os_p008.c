@@ -76,7 +76,7 @@ payload(void)
       /* Get the maximum bus value from PCIe info table */
       end_bus = val_pcie_get_info(PCIE_INFO_END_BUS, ecam_index);
       segment = val_pcie_get_info(PCIE_INFO_SEGMENT, ecam_index);
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
 
       /* Get the highest BDF value for that segment */
       bdf = get_max_bdf(segment, end_bus);
@@ -88,8 +88,9 @@ payload(void)
 
       /* Bus value should not exceed 255 */
       if (bus_index > end_bus) {
-          val_print(ACS_PRINT_ERR, "\n Bus index exceeded END_BUS Number", 0);
-          val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 02));
+          val_print(ACS_PRINT_ERR, "\n       Bus index exceeded END_BUS Number",
+                                                                            0);
+          val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
           return;
       }
 
@@ -108,7 +109,7 @@ payload(void)
 
               if (ecam_base == 0) {
                   val_print(ACS_PRINT_ERR, "\n       ECAM Base is zero ", 0);
-                  val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 01));
+                  val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 1));
                   return;
               }
 
@@ -122,11 +123,11 @@ payload(void)
               if (reg_value != PCIE_UNKNOWN_RESPONSE)
               {
                   val_print(ACS_PRINT_ERR, "\n       Failed for BDF: 0x%x", bdf);
-                  val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
+                  val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
                   return;
               }
 
-              val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
+              val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
           }
       }
   }

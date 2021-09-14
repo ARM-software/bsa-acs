@@ -52,8 +52,8 @@ payload()
 
   // Distributor must forward NS Group 1 interrupt
   if (!enable_grp1ns) {
-    val_print(ACS_PRINT_ERR, "\n      Non-secure SGIs not forwarded", 0);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+    val_print(ACS_PRINT_ERR, "\n       Non-secure SGIs not forwarded", 0);
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
     return;
   }
   else {
@@ -64,15 +64,15 @@ payload()
         val_mmio_write(val_get_gicr_base(&rdbase_len) + RD_FRAME_SIZE + GICR_ISENABLER, data);
         data = VAL_EXTRACT_BITS(val_gic_get_info(GIC_INFO_SGI_NON_SECURE), 0, 7);
         if (data == 0xFF) {
-            val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+            val_set_status(index, RESULT_PASS(TEST_NUM, 1));
             return;
         }
         else {
             val_print(ACS_PRINT_DEBUG,
-                "\n      GICR_ISENABLER0: %X\n ", data);
+                "\n       GICR_ISENABLER0: %X\n ", data);
             val_print(ACS_PRINT_ERR,
-                "\n      INTID 0 - 7 not implemented as non-secure SGIs", 0);
-            val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+                "\n       INTID 0 - 7 not implemented as non-secure SGIs", 0);
+            val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
             return;
         }
     }
@@ -82,15 +82,15 @@ payload()
         val_mmio_write((val_get_gicd_base() + GICD_ISENABLER), data);
         data = VAL_EXTRACT_BITS(val_gic_get_info(GIC_INFO_SGI_NON_SECURE_LEGACY), 0, 7);
         if (data == 0xFF) {
-            val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+            val_set_status(index, RESULT_PASS(TEST_NUM, 1));
             return;
         }
         else {
             val_print(ACS_PRINT_DEBUG,
-                "\n      GICD_IENABLER<n>: %X\n ", data);
+                "\n       GICD_IENABLER<n>: %X\n ", data);
             val_print(ACS_PRINT_ERR,
-                "\n      INTID 0 - 7 not implemented as non-secure SGIs", 0);
-            val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+                "\n       INTID 0 - 7 not implemented as non-secure SGIs", 0);
+            val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
             return;
         }
     }

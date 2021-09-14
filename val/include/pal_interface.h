@@ -383,7 +383,7 @@ typedef struct {
 void pal_iovirt_create_info_table(IOVIRT_INFO_TABLE *iovirt);
 uint32_t pal_iovirt_check_unique_ctx_intid(uint64_t smmu_block);
 uint32_t pal_iovirt_unique_rid_strid_map(uint64_t rc_block);
-uint64_t pal_iovirt_get_rc_smmu_base(IOVIRT_INFO_TABLE *iovirt, uint32_t rc_seg_num);
+uint64_t pal_iovirt_get_rc_smmu_base(IOVIRT_INFO_TABLE *iovirt, uint32_t rc_seg_num, uint32_t rid);
 
 /**
   @brief SMMU Info Table
@@ -462,7 +462,11 @@ typedef struct {
   uint32_t         max_pasids;
   uint32_t         baud_rate;
   uint32_t         interface_type;
+  uint32_t         platform_type;
 }PERIPHERAL_INFO_BLOCK;
+
+#define PLATFORM_TYPE_ACPI   0x0
+#define PLATFORM_TYPE_DT     0x1
 
 /**
   @brief Peripheral Info Structure
@@ -638,6 +642,8 @@ void     pal_pe_data_cache_ops_by_va(uint64_t addr, uint32_t type);
 #define MAX_ARRAY_SIZE 32
 #define TEST_REG_COUNT 10
 #define TEST_DDR_REGION_CNT 16
+#define RID_VALID      1
+#define RID_NOT_VALID  0
 
 #define EXERCISER_ID   0xED0113B5 //device id + vendor id
 
@@ -675,6 +681,7 @@ typedef enum {
 typedef enum {
     TXN_REQ_ID     = 0x0,
     TXN_ADDR_TYPE  = 0x1,
+    TXN_REQ_ID_VALID    = 0x2,
 } EXERCISER_TXN_ATTR;
 
 typedef enum {

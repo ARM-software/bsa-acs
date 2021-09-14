@@ -42,28 +42,28 @@ payload()
   num_smmu = val_smmu_get_info(SMMU_NUM_CTRL, 0);
   if (num_smmu == 0) {
       val_print(ACS_PRINT_ERR, "\n       No SMMU Controllers are discovered ", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 03));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
       return;
   }
 
   while (num_smmu--) {
       if (val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) == 2) {
           val_print(ACS_PRINT_WARN, "\n       Not valid for SMMU v2           ", 0);
-          val_set_status(index, RESULT_SKIP(TEST_NUM, 04));
+          val_set_status(index, RESULT_SKIP(TEST_NUM, 4));
           return;
       }
 
       data = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_IDR0, num_smmu), 18, 18);
 
       if (!data && pe_vmid) {
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
           val_print(ACS_PRINT_ERR, "\n       16 bit VMID not "
                                    "supported for SMMU %x", num_smmu);
           return;
       }
   }
 
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

@@ -21,7 +21,7 @@
 #include "val/include/bsa_acs_pcie.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 65)
-#define TEST_RULE  "PCI_LI_01"
+#define TEST_RULE  "PCI_LI_02"
 #define TEST_DESC  "PCI legacy intr SPI ID unique         "
 
 static inline char pin_name(int pin)
@@ -53,14 +53,14 @@ payload (void)
   count = val_peripheral_get_info (NUM_ALL, 0);
 
   if (!count) {
-     val_set_status (index, RESULT_SKIP (TEST_NUM, 01));
+     val_set_status(index, RESULT_SKIP (TEST_NUM, 1));
      return;
   }
 
   irq_map = val_memory_alloc(sizeof(PERIPHERAL_IRQ_MAP));
   if (!irq_map) {
-    val_print (ACS_PRINT_ERR, "\n       Memory allocation error", 0);
-    val_set_status (index, RESULT_FAIL (TEST_NUM, 01));
+    val_print(ACS_PRINT_ERR, "\n       Memory allocation error", 0);
+    val_set_status(index, RESULT_FAIL (TEST_NUM, 1));
     return;
   }
 
@@ -75,31 +75,31 @@ payload (void)
       case 0:
         break;
       case 1:
-        val_print (ACS_PRINT_WARN, "\n       Unable to access PCI bridge device", 0);
+        val_print(ACS_PRINT_WARN, "\n       Unable to access PCI bridge device", 0);
         break;
       case 2:
-        val_print (ACS_PRINT_WARN, "\n       Unable to fetch _PRT ACPI handle", 0);
+        val_print(ACS_PRINT_WARN, "\n       Unable to fetch _PRT ACPI handle", 0);
         /* Not a fatal error, just skip this device */
         status = 0;
         continue;
       case 3:
-        val_print (ACS_PRINT_WARN, "\n       Unable to access _PRT ACPI object", 0);
+        val_print(ACS_PRINT_WARN, "\n       Unable to access _PRT ACPI object", 0);
         /* Not a fatal error, just skip this device */
         status = 0;
         continue;
       case 4:
-        val_print (ACS_PRINT_WARN, "\n       Interrupt hard-wire error", 0);
+        val_print(ACS_PRINT_WARN, "\n       Interrupt hard-wire error", 0);
         /* Not a fatal error, just skip this device */
         status = 0;
         continue;
       case 5:
-        val_print (ACS_PRINT_ERR, "\n       Legacy interrupt out of range", 0);
+        val_print(ACS_PRINT_ERR, "\n       Legacy interrupt out of range", 0);
         break;
       case 6:
-        val_print (ACS_PRINT_ERR, "\n       Maximum number of interrupts has been reached", 0);
+        val_print(ACS_PRINT_ERR, "\n       Maximum number of interrupts has been reached", 0);
         break;
       default:
-        val_print (ACS_PRINT_ERR, "\n       Unknown error", 0);
+        val_print(ACS_PRINT_ERR, "\n       Unknown error", 0);
         break;
       }
     }
@@ -117,9 +117,9 @@ payload (void)
               if (irq_map->legacy_irq_map[current_irq_pin].irq_list[ccnt] ==
                   irq_map->legacy_irq_map[next_irq_pin].irq_list[ncnt]) {
                 status = 7;
-                val_print (ACS_PRINT_ERR, "\n       Legacy interrupt %c routing",
+                val_print(ACS_PRINT_ERR, "\n       Legacy interrupt %c routing",
                                                             pin_name(current_irq_pin));
-                val_print (ACS_PRINT_ERR, "\n       is the same as %c routing",
+                val_print(ACS_PRINT_ERR, "\n       is the same as %c routing",
                                                             pin_name(next_irq_pin));
               }
             }
@@ -137,14 +137,14 @@ payload (void)
 
 
   if (test_skip) {
-    val_set_status (index, RESULT_SKIP (TEST_NUM, 02));
+    val_set_status(index, RESULT_SKIP (TEST_NUM, 2));
     return;
   }
 
   if (!status) {
-    val_set_status (index, RESULT_PASS (TEST_NUM, 01));
+    val_set_status(index, RESULT_PASS (TEST_NUM, 1));
   } else {
-    val_set_status (index, RESULT_FAIL (TEST_NUM, status));
+    val_set_status(index, RESULT_FAIL (TEST_NUM, status));
   }
 }
 

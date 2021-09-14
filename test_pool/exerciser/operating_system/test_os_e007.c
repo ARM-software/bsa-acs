@@ -42,7 +42,7 @@
 #include "val/include/bsa_acs_pcie_enumeration.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 7)
-#define TEST_RULE  "PCI_IC_01, PCI_IC_03, PCI_IC_06-08"
+#define TEST_RULE  "PCI_IC_01, PCI_IC_03, PCI_IC_06, PCI_IC_07, PCI_IC_08"
 #define TEST_DESC  "Check PCIe I/O Coherency              "
 
 #define TEST_DATA_BLK_SIZE  (4*1024)
@@ -73,14 +73,14 @@ test_sequence2(void *dram_buf1_virt, void *dram_buf1_phys, uint32_t e_bdf, uint3
   /* Perform DMA OUT to copy contents of dram_buf2 to exerciser memory */
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf2_phys, dma_len, instance);
   if (val_exerciser_ops(START_DMA, EDMA_TO_DEVICE, instance)) {
-      val_print(ACS_PRINT_ERR, "\n      DMA write failure to exerciser %4x", instance);
+      val_print(ACS_PRINT_ERR, "\n       DMA write failure to exerciser %4x", instance);
       return 1;
   }
 
   /* Perform DMA IN to copy content back from exerciser memory to dram_buf1 */
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf1_phys, dma_len, instance);
   if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, instance)) {
-      val_print(ACS_PRINT_ERR, "\n      DMA read failure from exerciser %4x", instance);
+      val_print(ACS_PRINT_ERR, "\n       DMA read failure from exerciser %4x", instance);
       return 1;
   }
 
@@ -118,14 +118,14 @@ test_sequence1(void *dram_buf1_virt, void *dram_buf1_phys, uint32_t e_bdf, uint3
   /* Perform DMA OUT to copy contents of dram_buf1 to exerciser memory */
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf1_phys, dma_len, instance);
   if (val_exerciser_ops(START_DMA, EDMA_TO_DEVICE, instance)) {
-      val_print(ACS_PRINT_ERR, "\n      DMA write failure to exerciser %4x", instance);
+      val_print(ACS_PRINT_ERR, "\n       DMA write failure to exerciser %4x", instance);
       return 1;
   }
 
   /* Perform DMA IN to copy the content from exerciser memory to dram_buf1 */
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf1_phys, dma_len, instance);
   if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, instance)) {
-      val_print(ACS_PRINT_ERR, "\n      DMA read failure from exerciser %4x", instance);
+      val_print(ACS_PRINT_ERR, "\n       DMA read failure from exerciser %4x", instance);
       return 1;
   }
 
@@ -176,7 +176,8 @@ payload (void)
     e_bdf = val_exerciser_get_bdf(instance);
 
     /* Find SMMU node index for this exerciser instance */
-    smmu_index = val_iovirt_get_rc_smmu_index(PCIE_EXTRACT_BDF_SEG(e_bdf));
+    smmu_index = val_iovirt_get_rc_smmu_index(PCIE_EXTRACT_BDF_SEG(e_bdf),
+                                              PCIE_CREATE_BDF_PACKED(e_bdf));
 
     /* Disable SMMU globally so that the transaction passes
      * through the SMMU without any address modification.
@@ -188,7 +189,7 @@ payload (void)
     if (smmu_index != ACS_INVALID_INDEX) {
         if (val_smmu_disable(smmu_index)) {
             val_print(ACS_PRINT_ERR, "\n       Exerciser %x smmu disable error", instance);
-            val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
+            val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
             return;
         }
     }
@@ -196,8 +197,8 @@ payload (void)
     /* Get a WB, outer shareable DDR Buffer of size TEST_DATA_BLK_SIZE */
     dram_buf1_virt = val_memory_alloc_cacheable(e_bdf, TEST_DATA_BLK_SIZE, &dram_buf1_phys);
     if (!dram_buf1_virt) {
-      val_print(ACS_PRINT_ERR, "\n       WB and OSH mem alloc failure %x", 02);
-      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
+      val_print(ACS_PRINT_ERR, "\n       WB and OSH mem alloc failure %x", 2);
+      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
       return;
     }
 
@@ -223,7 +224,7 @@ payload (void)
   return;
 
 test_fail:
-  val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
+  val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
   val_memory_free_cacheable(e_bdf, TEST_DATA_BLK_SIZE, dram_buf1_virt, dram_buf1_phys);
   return;
 }

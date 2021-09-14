@@ -72,6 +72,8 @@
   ../test_pool/gic/operating_system/test_os_v2m004.c
   ../test_pool/gic/operating_system/test_os_its001.c
   ../test_pool/gic/operating_system/test_os_its002.c
+  ../test_pool/gic/operating_system/test_os_its003.c
+  ../test_pool/gic/operating_system/test_os_its004.c
   ../test_pool/gic/hypervisor/test_hyp_g001.c
   ../test_pool/timer/operating_system/test_os_t001.c
   ../test_pool/timer/operating_system/test_os_t002.c
@@ -147,6 +149,9 @@
   ../test_pool/exerciser/operating_system/test_os_e010.c
   ../test_pool/exerciser/operating_system/test_os_e011.c
   ../test_pool/exerciser/operating_system/test_os_e012.c
+  ../test_pool/exerciser/operating_system/test_os_e013.c
+  ../test_pool/exerciser/operating_system/test_os_e014.c
+  ../test_pool/exerciser/operating_system/test_os_e015.c
 
 [Packages]
   StdLib/StdLib.dec

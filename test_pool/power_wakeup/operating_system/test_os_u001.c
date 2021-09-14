@@ -22,19 +22,24 @@
 #include "val/include/bsa_acs_wakeup.h"
 
 #define TEST_NUM1  (ACS_WAKEUP_TEST_NUM_BASE + 1)
-#define TEST_RULE1 "B_WAK_01, B_WAK_02-07, B_WAK_10-11"
+#define TEST_RULE1 "B_WAK_01, B_WAK_02, B_WAK_03, B_WAK_04, B_WAK_05 \
+                    \n       B_WAK_06, B_WAK_07, B_WAK_10, B_WAK_11"
 #define TEST_DESC1 "Wake from Watchdog WS0 Int            "
 #define TEST_NUM2  (ACS_WAKEUP_TEST_NUM_BASE + 2)
-#define TEST_RULE2 "B_WAK_01, B_WAK_02-07, B_WAK_10-11"
+#define TEST_RULE2 "B_WAK_01, B_WAK_02, B_WAK_03, B_WAK_04, B_WAK_05 \
+                    \n       B_WAK_06, B_WAK_07, B_WAK_10, B_WAK_11"
 #define TEST_DESC2 "Wake from System Timer Int            "
 #define TEST_NUM3  (ACS_WAKEUP_TEST_NUM_BASE + 3)
-#define TEST_RULE3 "B_WAK_01, B_WAK_02-07, B_WAK_10-11"
+#define TEST_RULE3 "B_WAK_01, B_WAK_02, B_WAK_03, B_WAK_04, B_WAK_05 \
+                    \n       B_WAK_06, B_WAK_07, B_WAK_10, B_WAK_11"
 #define TEST_DESC3 "Wake from EL0 PHY Timer Int           "
 #define TEST_NUM4  (ACS_WAKEUP_TEST_NUM_BASE + 4)
-#define TEST_RULE4 "B_WAK_01, B_WAK_02-07, B_WAK_10-11"
+#define TEST_RULE4 "B_WAK_01, B_WAK_02, B_WAK_03, B_WAK_04, B_WAK_05 \
+                    \n       B_WAK_06, B_WAK_07, B_WAK_10, B_WAK_11"
 #define TEST_DESC4 "Wake from EL0 VIR Timer Int           "
 #define TEST_NUM5  (ACS_WAKEUP_TEST_NUM_BASE + 5)
-#define TEST_RULE5 "B_WAK_01, B_WAK_02-07, B_WAK_10-11"
+#define TEST_RULE5 "B_WAK_01, B_WAK_02, B_WAK_03, B_WAK_04, B_WAK_05 \
+                    \n       B_WAK_06, B_WAK_07, B_WAK_10, B_WAK_11"
 #define TEST_DESC5 "Wake from EL2 PHY Timer Int           "
 
 static uint32_t intid;
@@ -48,7 +53,7 @@ isr1()
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
   val_wd_set_ws0(timer_num, 0);
   val_print(ACS_PRINT_INFO, "       Received WS0 interrupt          \n", 0);
-  val_set_status(index, RESULT_PASS(TEST_NUM1, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM1, 1));
   intid = val_wd_get_info(timer_num, WD_INFO_GSIV);
   val_gic_end_of_interrupt(intid);
 }
@@ -61,7 +66,7 @@ isr2()
   uint64_t cnt_base_n = val_timer_get_info(TIMER_INFO_SYS_CNT_BASE_N, timer_num);
   val_timer_disable_system_timer((addr_t)cnt_base_n);
   val_print(ACS_PRINT_INFO, "       Received Sys timer interrupt   \n", 0);
-  val_set_status(index, RESULT_PASS(TEST_NUM2, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM2, 1));
   intid = val_timer_get_info(TIMER_INFO_SYS_INTID, timer_num);
   val_gic_end_of_interrupt(intid);
 }
@@ -74,7 +79,7 @@ isr_failsafe()
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
   val_timer_set_phy_el1(0);
   val_print(ACS_PRINT_ERR, "       Received Failsafe interrupt      \n", 0);
-  val_set_status(index, RESULT_FAIL(failsafe_test_num, 01));
+  val_set_status(index, RESULT_FAIL(failsafe_test_num, 1));
   intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
   val_gic_end_of_interrupt(intid);
 }
@@ -86,7 +91,7 @@ isr3()
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
   val_timer_set_phy_el1(0);
   val_print(ACS_PRINT_INFO, "       Received EL1 PHY interrupt       \n", 0);
-  val_set_status(index, RESULT_PASS(TEST_NUM3, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM3, 1));
   intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
   val_gic_end_of_interrupt(intid);
 }
@@ -99,7 +104,7 @@ isr4()
   /* We received our interrupt, so disable timer from generating further interrupts */
   val_timer_set_vir_el1(0);
   val_print(ACS_PRINT_INFO, "       Received EL1 VIRT interrupt      \n", 0);
-  val_set_status(index, RESULT_PASS(TEST_NUM4, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM4, 1));
   intid = val_timer_get_info(TIMER_INFO_VIR_EL1_INTID, 0);
   val_gic_end_of_interrupt(intid);
 }
@@ -112,7 +117,7 @@ isr5()
   /* We received our interrupt, so disable timer from generating further interrupts */
   val_timer_set_phy_el2(0);
   val_print(ACS_PRINT_INFO, "       Received EL2 Physical interrupt  \n", 0);
-  val_set_status(index, RESULT_PASS(TEST_NUM5, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM5, 1));
   intid = val_timer_get_info(TIMER_INFO_PHY_EL2_INTID, 0);
   val_gic_end_of_interrupt(intid);
 }
@@ -145,7 +150,7 @@ payload1()
   timer_num = val_wd_get_info(0, WD_INFO_COUNT);
   if(!timer_num){
       val_print(ACS_PRINT_DEBUG, "\n       No watchdog implemented      ", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM1, 01));
+      val_set_status(index, RESULT_SKIP(TEST_NUM1, 1));
       return;
   }
 
@@ -162,20 +167,20 @@ payload1()
           status = val_wd_set_ws0(timer_num, timer_expire_val);
           if (status) {
               val_print(ACS_PRINT_ERR, "\n       Setting watchdog timeout failed", 0);
-              val_set_status(index, RESULT_FAIL(TEST_NUM1, 02));
+              val_set_status(index, RESULT_FAIL(TEST_NUM1, 2));
               return;
           }
           val_power_enter_semantic(BSA_POWER_SEM_B);
           wakeup_clear_failsafe();
       } else {
           val_print(ACS_PRINT_WARN, "\n       GIC Install Handler Failed...", 0);
-          val_set_status(index, RESULT_FAIL(TEST_NUM1, 01));
+          val_set_status(index, RESULT_FAIL(TEST_NUM1, 1));
       }
   }
 
   if(!ns_wdg){
       val_print(ACS_PRINT_DEBUG, "       No non-secure watchdog implemented   \n", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM1, 02));
+      val_set_status(index, RESULT_SKIP(TEST_NUM1, 2));
       return;
   }
 
@@ -192,8 +197,8 @@ payload2()
 
   timer_num = val_timer_get_info(TIMER_INFO_NUM_PLATFORM_TIMERS, 0);
   if(!timer_num){
-      val_print(ACS_PRINT_DEBUG, "       No system timers implemented      \n", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM2, 01));
+      val_print(ACS_PRINT_DEBUG, "\n       No system timers implemented", 0);
+      val_set_status(index, RESULT_SKIP(TEST_NUM2, 1));
       return;
   }
 
@@ -208,14 +213,14 @@ payload2()
       status = val_timer_skip_if_cntbase_access_not_allowed(timer_num);
       if(status == ACS_STATUS_SKIP){
           val_print(ACS_PRINT_DEBUG, "       Timer cntbase can't accessed\n", 0);
-          val_set_status(index, RESULT_SKIP(TEST_NUM2, 03));
+          val_set_status(index, RESULT_SKIP(TEST_NUM2, 3));
           return;
       }
 
       cnt_base_n = val_timer_get_info(TIMER_INFO_SYS_CNT_BASE_N, timer_num);
       if(cnt_base_n == 0){
           val_print(ACS_PRINT_DEBUG, "       Timer cntbase is invalid\n", 0);
-          val_set_status(index, RESULT_SKIP(TEST_NUM2, 04));
+          val_set_status(index, RESULT_SKIP(TEST_NUM2, 4));
           return;
       }
 
@@ -231,14 +236,14 @@ payload2()
           wakeup_clear_failsafe();
       } else{
           val_print(ACS_PRINT_WARN, "\n       GIC Install Handler Failed...", 0);
-          val_set_status(index, RESULT_FAIL(TEST_NUM2, 01));
+          val_set_status(index, RESULT_FAIL(TEST_NUM2, 1));
           return;
       }
   }
 
   if(!ns_timer){
       val_print(ACS_PRINT_WARN, "       No non-secure systimer implemented   \n", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM2, 03));
+      val_set_status(index, RESULT_SKIP(TEST_NUM2, 3));
       return;
   }
 }
@@ -250,12 +255,12 @@ payload3()
   uint64_t timer_expire_val = TIMEOUT_SMALL;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
-  val_set_status(index, RESULT_FAIL(TEST_NUM3, 01));
+  val_set_status(index, RESULT_FAIL(TEST_NUM3, 1));
 
   intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
   if (val_gic_install_isr(intid, isr3)) {
     val_print(ACS_PRINT_WARN, "\n       GIC Install Handler Failed...", 0);
-    val_set_status(index, RESULT_FAIL(TEST_NUM3, 02));
+    val_set_status(index, RESULT_FAIL(TEST_NUM3, 2));
     return;
   }
   val_timer_set_phy_el1(timer_expire_val);
@@ -270,11 +275,11 @@ payload4()
   uint64_t timer_expire_val = TIMEOUT_SMALL;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
-  val_set_status(index, RESULT_FAIL(TEST_NUM4, 01));
+  val_set_status(index, RESULT_FAIL(TEST_NUM4, 1));
   intid = val_timer_get_info(TIMER_INFO_VIR_EL1_INTID, 0);
   if (val_gic_install_isr(intid, isr4)) {
     val_print(ACS_PRINT_WARN, "\n       GIC Install Handler Failed...", 0);
-    val_set_status(index, RESULT_FAIL(TEST_NUM4, 02));
+    val_set_status(index, RESULT_FAIL(TEST_NUM4, 2));
     return;
   }
   failsafe_test_num = TEST_NUM4;
@@ -293,11 +298,11 @@ payload5()
   uint64_t timer_expire_val = TIMEOUT_SMALL;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
-  val_set_status(index, RESULT_FAIL(TEST_NUM5, 01));
+  val_set_status(index, RESULT_FAIL(TEST_NUM5, 1));
   intid = val_timer_get_info(TIMER_INFO_PHY_EL2_INTID, 0);
   if (val_gic_install_isr(intid, isr5)) {
     val_print(ACS_PRINT_WARN, "\n       GIC Install Handler Failed...", 0);
-    val_set_status(index, RESULT_FAIL(TEST_NUM5, 02));
+    val_set_status(index, RESULT_FAIL(TEST_NUM5, 2));
     return;
   }
   failsafe_test_num = TEST_NUM5;
@@ -320,21 +325,25 @@ os_u001_entry(uint32_t num_pe)
   if (status_test != ACS_STATUS_SKIP)
       val_run_test_payload(TEST_NUM1, num_pe, payload1, 0);
   status = val_check_for_error(TEST_NUM1, num_pe, TEST_RULE1);
+  val_report_status(0, BSA_ACS_END(TEST_NUM1), NULL);
 
   status_test = val_initialize_test(TEST_NUM2, TEST_DESC2, num_pe);
   if (status_test != ACS_STATUS_SKIP)
       val_run_test_payload(TEST_NUM2, num_pe, payload2, 0);
   status |= val_check_for_error(TEST_NUM2, num_pe, TEST_RULE2);
+  val_report_status(0, BSA_ACS_END(TEST_NUM2), NULL);
 
   status_test = val_initialize_test(TEST_NUM3, TEST_DESC3, num_pe);
   if (status_test != ACS_STATUS_SKIP)
       val_run_test_payload(TEST_NUM3, num_pe, payload3, 0);
   status |= val_check_for_error(TEST_NUM3, num_pe, TEST_RULE3);
+  val_report_status(0, BSA_ACS_END(TEST_NUM3), NULL);
 
   status_test = val_initialize_test(TEST_NUM4, TEST_DESC4, num_pe);
   if (status_test != ACS_STATUS_SKIP)
       val_run_test_payload(TEST_NUM4, num_pe, payload4, 0);
   status |= val_check_for_error(TEST_NUM4, num_pe, TEST_RULE4);
+  val_report_status(0, BSA_ACS_END(TEST_NUM4), NULL);
 
   /* Run this test if current exception level is EL2 */
   if (val_pe_reg_read(CurrentEL) == AARCH64_EL2) {
@@ -342,9 +351,8 @@ os_u001_entry(uint32_t num_pe)
       if (status_test != ACS_STATUS_SKIP)
           val_run_test_payload(TEST_NUM5, num_pe, payload5, 0);
       status |= val_check_for_error(TEST_NUM5, num_pe, TEST_RULE5);
+      val_report_status(0, BSA_ACS_END(TEST_NUM5), NULL);
   }
-
-  val_report_status(0, BSA_ACS_END(TEST_NUM1), NULL);
 
   return status;
 }

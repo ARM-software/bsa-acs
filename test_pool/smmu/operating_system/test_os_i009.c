@@ -47,13 +47,13 @@ payload()
   num_smmu = val_smmu_get_info(SMMU_NUM_CTRL, 0);
   if (num_smmu == 0) {
     val_print(ACS_PRINT_DEBUG, "\n       No SMMU Controllers are discovered                 ", 0);
-    val_set_status(index, RESULT_SKIP(TEST_NUM, 03));
+    val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
     return;
   }
 
   if (!(pe_mpam || frac)) {
     val_print(ACS_PRINT_DEBUG, "\n       No MPAM controlled resources present               ", 0);
-    val_set_status(index, RESULT_SKIP(TEST_NUM, 03));
+    val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
     return;
   }
 
@@ -62,7 +62,7 @@ payload()
         if (smmu_rev < 3) {
                 // MPAM support not required for SMMUv2 and below
                 val_print(ACS_PRINT_DEBUG, "\n       SMMU revision v2 or lower detected  ", 0);
-                val_set_status(index, RESULT_SKIP(TEST_NUM, 04));
+                val_set_status(index, RESULT_SKIP(TEST_NUM, 4));
                 return;
         }
         else {
@@ -78,7 +78,7 @@ payload()
                         if (!(mpam && max_id)) {
                                 val_print(ACS_PRINT_ERR,
                                           "\n       SMMU without MPAM support detected  ", 0);
-                                val_set_status(index, RESULT_FAIL(TEST_NUM, 04));
+                                val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
                                 return;
                         }
                 }
@@ -86,13 +86,13 @@ payload()
                         // MPAM support not required for SMMUv3.0/3.1
                         val_print(ACS_PRINT_WARN,
                               "\n       SMMU revision v3.0/3.1 detected  ", 0);
-                        val_set_status(index, RESULT_SKIP(TEST_NUM, 04));
+                        val_set_status(index, RESULT_SKIP(TEST_NUM, 4));
                         return;
                 }
         }
   }
 
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

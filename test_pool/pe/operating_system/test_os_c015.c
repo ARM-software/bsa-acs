@@ -36,7 +36,7 @@ payload()
 
     if (data == 0) {
        /* SVE Not Implemented Skip the test */
-        val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+        val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
         return;
     }
 
@@ -45,13 +45,13 @@ payload()
 
     if (data == 0) {
         /*SPE Not Implemented Skip the test */
-        val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
+        val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
         return;
     }
     else if (data != 2)
-        val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
     else
-        val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+        val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 
 }
 

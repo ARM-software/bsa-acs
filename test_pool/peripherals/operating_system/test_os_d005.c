@@ -1,3 +1,4 @@
+
 /** @file
  * Copyright (c) 2016-2019, 2021 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
@@ -80,8 +81,8 @@ payload()
   uint32_t test_fail = 0;
 
   if (count == 0) {
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
-      val_print(ACS_PRINT_DEBUG, "\n        No UART defined by Platform      ", 0);
+      val_print(ACS_PRINT_ERR, "\n       No UART defined by Platform      ", 0);
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
       return;
   }
 
@@ -92,7 +93,9 @@ payload()
            || interface_type == COMPATIBLE_GENERIC_16550)
       {
           skip_test = 1;
-          val_print(ACS_PRINT_DEBUG, "\n         UART 16550 found with instance: %x", count - 1);
+          val_print(ACS_PRINT_DEBUG,
+              "\n         UART 16550 found with instance: %x",
+              count - 1);
 
           /* Check the I/O base address */
           uart_base = val_peripheral_get_info(UART_BASE0, count - 1);
@@ -100,7 +103,7 @@ payload()
           {
               val_print(ACS_PRINT_ERR, "\n         UART base must be specified"
                                        " for instance: %x", count - 1);
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
               return;
           }
 
@@ -129,7 +132,9 @@ payload()
           baud_rate = counter_freq / (16 * divisor);
           if (baud_rate < BAUDRATE_1200 || baud_rate > BAUDRATE_115200)
           {
-              val_print(ACS_PRINT_ERR, "\n        Baud rate %d outside supported range", baud_rate);
+              val_print(ACS_PRINT_ERR,
+              "\n        Baud rate %d outside supported range",
+              baud_rate);
               val_print(ACS_PRINT_ERR, " for instance %x", count - 1);
               test_fail = 1;
           }
@@ -179,11 +184,11 @@ payload()
   }
 
   if (!skip_test)
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
   else if (test_fail)
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
   else
-      val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 
   return;
 }

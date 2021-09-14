@@ -23,8 +23,9 @@
   @brief  Parse the input status and print the appropriate information to console
           1. Caller       - Application layer
           2. Prerequisite - None
-  @param  index  - index of the PE who is reporting this status.
-  @param status  - 32-bit value concatenated from state, level, error value
+  @param  index   - index of the PE who is reporting this status.
+  @param  status  - 32-bit value concatenated from state, level, error value
+  @param  *ruleid - Rule ID in the test to print
 
   @return  none
  **/
@@ -41,8 +42,8 @@ val_report_status(uint32_t index, uint32_t status, char8_t *ruleid)
   else
     if (IS_TEST_FAIL(status)) {
         if (ruleid) {
-            val_print(ACS_PRINT_ERR, "\n       ", 0);
-            val_print(ACS_PRINT_ERR, ruleid, 0);
+            val_print(ACS_PRINT_DEBUG, "\n       ", 0);
+            val_print(ACS_PRINT_DEBUG, ruleid, 0);
             val_print(ACS_PRINT_ERR, "\n       Checkpoint -- %2d                      ",
                                                          status & STATUS_MASK);
         }
@@ -51,8 +52,8 @@ val_report_status(uint32_t index, uint32_t status, char8_t *ruleid)
     else
       if (IS_TEST_SKIP(status)) {
           if (ruleid) {
-              val_print(ACS_PRINT_WARN, "\n       ", 0);
-              val_print(ACS_PRINT_WARN, ruleid, 0);
+              val_print(ACS_PRINT_DEBUG, "\n       ", 0);
+              val_print(ACS_PRINT_DEBUG, ruleid, 0);
               val_print(ACS_PRINT_WARN, "\n       Checkpoint -- %2d                      ",
                                                          status & STATUS_MASK);
           }

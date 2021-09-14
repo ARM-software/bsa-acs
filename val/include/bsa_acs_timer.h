@@ -43,6 +43,9 @@
 /* CNTBaseN register offset*/
 #define CNTPCT_LOWER     0x00
 #define CNTPCT_HIGHER    0x04
+#define CNTVCT_LOWER     0x08
+#define CNTVCT_HIGHER    0x0C
+#define CNTBaseN_CNTFRQ  0x10
 #define CNTP_CVAL_LOWER  0x20
 #define CNTP_CVAL_HIGHER 0x24
 #define CNTP_TVAL        0x28

@@ -67,4 +67,10 @@ uint32_t os_d005_entry(uint32_t num_pe);
 #define ARM_SBSA_GENERIC_UART     0xE
 #define COMPATIBLE_GENERIC_16550  0x12
 
+#define USB_TYPE_OHCI             0x1
+#define USB_TYPE_EHCI             0x2
+#define USB_TYPE_XHCI             0x3
+
+#define SATA_TYPE_AHCI            0x1
+
 #endif // __BSA_ACS_PERIPHERAL_H__

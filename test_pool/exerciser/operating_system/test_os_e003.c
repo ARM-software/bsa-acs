@@ -293,7 +293,7 @@ barspace_transactions_order_check(void)
 
     if (!baseptr) {
         val_print(ACS_PRINT_ERR, "\n       Failed in BAR ioremap for instance %x", instance);
-        continue;;
+        continue;
     }
 
     /* Test Scenario 1 : Transactions on incremental aligned address */
@@ -322,14 +322,14 @@ payload(void)
   barspace_transactions_order_check();
 
   if (!run_flag) {
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
   if (fail_cnt)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, fail_cnt));
   else
-      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

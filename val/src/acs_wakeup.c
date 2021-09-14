@@ -27,6 +27,7 @@
            1. Caller       -  Application layer.
            2. Prerequisite -  None
   @param   num_pe - the number of PE to run these tests on.
+  @param   g_sw_view - Keeps the information about which view tests to be run
   @return  Consolidated status of all the tests run.
 **/
 uint32_t
@@ -38,7 +39,7 @@ val_wakeup_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   for (i=0 ; i<MAX_TEST_SKIP_NUM ; i++){
       if (g_skip_test_num[i] == ACS_WAKEUP_TEST_NUM_BASE) {
-          val_print(ACS_PRINT_TEST, "\n      USER Override - Skipping all Wakeup tests \n", 0);
+          val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all Wakeup tests \n", 0);
           return ACS_STATUS_SKIP;
       }
   }
@@ -53,13 +54,20 @@ val_wakeup_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   if (status != ACS_STATUS_PASS)
     val_print(ACS_PRINT_TEST, "\n      *** One or more tests have Failed/Skipped.*** \n", 0);
   else
-    val_print(ACS_PRINT_TEST, "\n      All Wakeup tests passed!! \n", 0);
+    val_print(ACS_PRINT_TEST, "\n       All Wakeup tests passed!! \n", 0);
 
   return status;
 
 }
 
-uint32_t val_get_pcsi_ver(void)
+/**
+  @brief  This API is used to get PSCI Version
+
+  @param  None
+
+  @return PSCI Version
+**/
+uint32_t val_get_psci_ver(void)
 {
   ARM_SMC_ARGS smc_args;
 
@@ -72,13 +80,19 @@ uint32_t val_get_pcsi_ver(void)
   return smc_args.Arg0;
 }
 
+/**
+  @brief  This API is used to get PSCI features
 
-uint32_t val_get_pcsi_features(uint64_t pcsi_func_id)
+  @param  psci_func_id  Function ID
+
+  @return PSCI features
+**/
+uint32_t val_get_psci_features(uint64_t psci_func_id)
 {
   ARM_SMC_ARGS smc_args;
 
   smc_args.Arg0 = ARM_SMC_ID_PSCI_FEATURES;
-  smc_args.Arg1 = pcsi_func_id;
+  smc_args.Arg1 = psci_func_id;
 
   pal_pe_call_smc(&smc_args);
 
@@ -101,13 +115,13 @@ val_suspend_pe(uint64_t entry, uint32_t context_id)
   int psci_major_ver, pwr_state_fmt;
   uint32_t power_state;
 
-  psci_major_ver = (val_get_pcsi_ver() >> 16);
+  psci_major_ver = (val_get_psci_ver() >> 16);
   val_print(ACS_PRINT_DEBUG, "\n       PSCI MAJOR VERSION = %X", psci_major_ver);
   if (psci_major_ver < 1)
     power_state = 0;
   else {
-      pwr_state_fmt = (val_get_pcsi_features(ARM_SMC_ID_PSCI_CPU_SUSPEND_AARCH64) >> 1);
-      val_print(ACS_PRINT_DEBUG, "\n       PSCI PWR_STATE_FMT = %d          ",
+      pwr_state_fmt = (val_get_psci_features(ARM_SMC_ID_PSCI_CPU_SUSPEND_AARCH64) >> 1);
+      val_print(ACS_PRINT_DEBUG, "\n       PSCI PWR_STATE_FMT = %d                ",
                                                                 pwr_state_fmt);
       if (pwr_state_fmt == ARM_SMC_ID_PSCI_POWER_STATE_FMT_ORIGINAL)
         power_state = 0;

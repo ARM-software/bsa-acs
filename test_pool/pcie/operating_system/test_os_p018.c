@@ -45,7 +45,7 @@ payload(void)
   /* Check If PCIe Hierarchy supports P2P */
   if (val_pcie_p2p_support())
   {
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
@@ -66,25 +66,27 @@ payload(void)
 
           /* It ACS Not Supported, Fail. */
           if (val_pcie_find_capability(bdf, PCIE_ECAP, ECID_ACS, &cap_base) != PCIE_SUCCESS) {
-              val_print(ACS_PRINT_ERR, "\n       ACS Capability not supported, Bdf : 0x%x", bdf);
+              val_print(ACS_PRINT_ERR, "\n       BDF 0x%x: ACS Cap unsupported",
+                                                                bdf);
               test_fails++;
               continue;
           }
 
           /* If AER Not Supported, Fail. */
           if (val_pcie_find_capability(bdf, PCIE_ECAP, ECID_AER, &cap_base) != PCIE_SUCCESS) {
-              val_print(ACS_PRINT_DEBUG, "\n       AER Capability not supported, Bdf : 0x%x", bdf);
+              val_print(ACS_PRINT_DEBUG, "\n       BDF 0x%x: AER Cap "
+                                                        "unsupported", bdf);
               test_fails++;
           }
       }
   }
 
   if (test_skip == 1)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 02));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
   else if (test_fails)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, test_fails));
   else
-      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

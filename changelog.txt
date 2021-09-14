@@ -12,3 +12,11 @@ v21.07_0.9_BETA
 * BSA: Initial ITS tests for systems presenting firmware which is SBBR complaint
 * BSA: Renamed pal_uefi to pal_uefi_acpi
 * BSA: Bug Fixes on Alpha release
+
+v21.09_1.0
+
+* BSA: Added test for PCIe Rules PCI_PP_02, PCI_PP_08 and RE_ORD_4.
+* BSA : Added test for ITS Rules ITS_DEV_2,ITS_DEV_7 and ITS_DEV_8 for systems presenting firmware which is SBBR complaint.
+* BSA: Added test for Peripherals Rules PER_01,PER_02 and PER_03 for systems presenting firmware which is EBBR complaint.
+* BSA: Bug Fixes on BETA release
+

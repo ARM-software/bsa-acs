@@ -35,12 +35,12 @@ payload()
   counter_freq = val_timer_get_info(TIMER_INFO_CNTFREQ, 0);
 
   if (counter_freq > 10*1000*1000) {
-      val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(index, RESULT_PASS(TEST_NUM, 1));
       return;
   }
 
-  val_print(ACS_PRINT_ERR, "\n      Counter frequency is %x     ", counter_freq);
-  val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+  val_print(ACS_PRINT_ERR, "\n       Counter frequency is %x     ", counter_freq);
+  val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
 
 }
 

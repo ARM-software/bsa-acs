@@ -81,7 +81,7 @@ payload(void)
         if ((ecam_cr != ecam_cr_8) || (ecam_cr_8 != ecam_cr_16))
         {
           val_print(ACS_PRINT_ERR, "\n        Byte Enable Read Failed", 0);
-          val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 01));
+          val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 1));
           return;
         }
 
@@ -96,7 +96,7 @@ payload(void)
         if (write_value != ecam_cr_new)
         {
           val_print(ACS_PRINT_ERR, "\n        8 Bit Write Failed", 0);
-          val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
+          val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
           return;
         }
 
@@ -114,7 +114,7 @@ payload(void)
         if (write_value != ecam_cr_new)
         {
           val_print(ACS_PRINT_ERR, "\n        16 Bit Write Failed", 0);
-          val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 03));
+          val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 3));
           return;
         }
 
@@ -132,7 +132,7 @@ payload(void)
         if (write_value != ecam_cr_new)
         {
           val_print(ACS_PRINT_ERR, "\n        32 Bit Write Failed", 0);
-          val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 04));
+          val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 4));
           return;
         }
 
@@ -143,9 +143,9 @@ payload(void)
   }
 
   if (test_skip == 1)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
   else
-      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

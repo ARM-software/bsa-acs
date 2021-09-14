@@ -32,9 +32,9 @@ payload()
   data = val_pe_reg_read(ID_AA64ISAR0_EL1);
 
   if ((data >> 16) & 0xF) //bits 19:16 are CRC32 and should not be zero
-        val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+        val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   else
-        val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
 
   return;
 

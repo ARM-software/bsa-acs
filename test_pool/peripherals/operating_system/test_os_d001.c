@@ -23,7 +23,7 @@
 
 #define TEST_NUM   (ACS_PER_TEST_NUM_BASE + 1)
 #define TEST_RULE  "B_PER_01, B_PER_02"
-#define TEST_DESC  "USB CTRL Interface (PCIe)             "
+#define TEST_DESC  "USB CTRL Interface                    "
 
 static
 void
@@ -37,34 +37,48 @@ payload()
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
   if (count == 0) {
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
   while (count != 0) {
-      bdf = val_peripheral_get_info(USB_BDF, count - 1);
-      ret = val_pcie_read_cfg(bdf, 0x8, &interface);
-      interface = (interface >> 8) & 0xFF;
-      if (ret == PCIE_NO_MAPPING || (interface < 0x20) || (interface == 0xFF)) {
-          val_print(ACS_PRINT_WARN, "\n       WARN: USB CTRL ECAM access failed 0x%x  ", interface);
-          val_print(ACS_PRINT_WARN, "\n       Re-checking using PCIIO protocol",
-                                                                            0);
-          ret = val_pcie_io_read_cfg(bdf, 0x8, &interface);
-          if (ret == PCIE_NO_MAPPING) {
-              val_print(ACS_PRINT_ERR, "\n       Reading device class code using PciIo protocol failed ", 0);
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+      if (val_peripheral_get_info(USB_PLATFORM_TYPE, count - 1) == PLATFORM_TYPE_DT) {
+          interface = val_peripheral_get_info(USB_INTERFACE_TYPE, count - 1);
+          if ((interface != USB_TYPE_EHCI) && (interface != USB_TYPE_XHCI)) {
+              val_print(ACS_PRINT_DEBUG, "\n       Detected USB CTRL not EHCI/XHCI 0x%x  ",
+                        interface);
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
               return;
           }
+      }
+      else {
+          bdf = val_peripheral_get_info(USB_BDF, count - 1);
+          ret = val_pcie_read_cfg(bdf, 0x8, &interface);
           interface = (interface >> 8) & 0xFF;
-          if ((interface < 0x20) || (interface == 0xFF)) {
-              val_print(ACS_PRINT_ERR, "\n       Detected USB CTRL not EHCI/XHCI 0x%x  ", interface);
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
-              return;
+          if (ret == PCIE_NO_MAPPING || (interface < 0x20) || (interface == 0xFF)) {
+              val_print(ACS_PRINT_INFO, "\n       WARN: USB CTRL ECAM access failed 0x%x  ",
+                        interface);
+              val_print(ACS_PRINT_INFO, "\n       Re-checking using PCIIO protocol",
+                        0);
+              ret = val_pcie_io_read_cfg(bdf, 0x8, &interface);
+              if (ret == PCIE_NO_MAPPING) {
+                  val_print(ACS_PRINT_DEBUG,
+                            "\n       Reading device class code using PciIo protocol failed ", 0);
+                  val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+                  return;
+              }
+              interface = (interface >> 8) & 0xFF;
+              if ((interface < 0x20) || (interface == 0xFF)) {
+                  val_print(ACS_PRINT_DEBUG, "\n       Detected USB CTRL not EHCI/XHCI 0x%x  ",
+                            interface);
+                  val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+                  return;
+              }
           }
       }
       count--;
   }
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   return;
 }
 

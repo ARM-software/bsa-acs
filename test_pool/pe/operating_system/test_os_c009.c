@@ -36,12 +36,12 @@ payload()
     /* PMCR_EL0 Bits 15:11 for Number of counters. */
     data = VAL_EXTRACT_BITS(val_pe_reg_read(PMCR_EL0), 11, 15);
     if (data > 3)
-        val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+        val_set_status(index, RESULT_PASS(TEST_NUM, 1));
     else
-        val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
 
   } else {
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
   }
 
   return;

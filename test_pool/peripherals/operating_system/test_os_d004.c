@@ -45,7 +45,7 @@ payload(void)
   if (!target_dev_index)
   {
       val_print(ACS_PRINT_TEST, "\n       No DMA controllers detected...    ", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 03));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
       return;
   }
 
@@ -58,16 +58,19 @@ payload(void)
           ret = val_dma_mem_get_attrs(buffer, &attr, &sh);
           if (ret)
           {
-              val_print(ACS_PRINT_ERR, "\n     DMA controller %d: Failed to get"
-                                       " memory attributes\n", target_dev_index);
+              val_print(ACS_PRINT_ERR,
+                        "\n       DMA controller %d: Failed to get  memory attributes\n",
+                        target_dev_index);
               status = 1;
               continue;
           }
           if (!(MEM_NORMAL_WB_IN_OUT(attr) && MEM_SH_INNER(sh)))
           {
-              val_print(ACS_PRINT_INFO, "\n    DMA controler %d: IO Coherent DMA memory should"
-                       " be inner/outer writeback, inner shareable\n", target_dev_index);
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+              val_print(ACS_PRINT_INFO,
+                       "\n       DMA controler %d: IO Coherent DMA memory should"
+                       " be inner/outer writeback, inner shareable\n",
+                       target_dev_index);
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
               status = 1;
           }
       } else {
@@ -75,8 +78,10 @@ payload(void)
           ret = val_dma_mem_get_attrs(buffer, &attr, &sh);
           if (ret)
           {
-              val_print(ACS_PRINT_ERR, "\n     DMA controller %d: Failed to get"
-                                       " memory attributes\n", target_dev_index);
+              val_print(ACS_PRINT_ERR,
+                        "\n       DMA controller %d: Failed to get"
+                        " memory attributes\n",
+                        target_dev_index);
               status = 1;
               continue;
           }
@@ -86,9 +91,10 @@ payload(void)
                 MEM_DEVICE(attr)))
           {
               val_print(ACS_PRINT_INFO,
-              "\n     DMA controler %d: DMA memory should be inner/outer writeback inner shareable, inner/outer non-cacheable, or device type\n",
+              "\n       DMA controler %d: DMA memory should be inner/outer writeback inner "
+              "shareable, inner/outer non-cacheable, or device type\n",
               target_dev_index);
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
               status = 1;
           }
       }

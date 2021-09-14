@@ -32,9 +32,9 @@ payload()
   data = val_pe_reg_read(ID_AA64DFR0_EL1);
 
   if (((data >> 20) & 0xF) > 2) //bits 23:20 for Number of watchpoints - 1
-        val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+        val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   else
-        val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
 
   return;
 

@@ -25,7 +25,7 @@
 #include "val/include/bsa_acs_exerciser.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 11)
-#define TEST_RULE  "ITS_03, ITS_04"
+#define TEST_RULE  "ITS_03,ITS_04,ITS_06,ITS_07,ITS_08,ITS_DEV_1,ITS_DEV_5"
 #define TEST_DESC  "MSI to Any ITS Blk in assigned group  "
 
 static uint32_t irq_pending;
@@ -58,7 +58,6 @@ payload (void)
   uint32_t msi_index = 0;
   uint32_t msi_cap_offset = 0;
 
-  uint32_t req_id = 0;
   uint32_t device_id = 0;
   uint32_t stream_id = 0;
   uint32_t its_id = 0;
@@ -67,7 +66,7 @@ payload (void)
 
   if (val_gic_get_info(GIC_INFO_NUM_ITS) < 2) {
       val_print(ACS_PRINT_DEBUG, "\n       Skipping Test as multiple ITS not available", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
@@ -96,16 +95,13 @@ payload (void)
     }
 
     /* Get DeviceID & ITS_ID for this device */
-    req_id = GET_DEVICE_ID(PCIE_EXTRACT_BDF_BUS(e_bdf),
-                           PCIE_EXTRACT_BDF_DEV(e_bdf),
-                           PCIE_EXTRACT_BDF_FUNC(e_bdf));
-
-    status = val_iovirt_get_device_info(req_id, PCIE_EXTRACT_BDF_SEG(e_bdf), &device_id,
+    status = val_iovirt_get_device_info(PCIE_CREATE_BDF_PACKED(e_bdf),
+                                        PCIE_EXTRACT_BDF_SEG(e_bdf), &device_id,
                                         &stream_id, &its_id);
     if (status) {
         val_print(ACS_PRINT_ERR,
             "\n       Could not get device info for BDF : 0x%x", e_bdf);
-        val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
         return;
     }
 
@@ -134,12 +130,13 @@ payload (void)
           continue;
       }
 
-      val_print(ACS_PRINT_DEBUG, "\n       ITS Check for ITS ID : %x", its_id);
+      val_print(ACS_PRINT_DEBUG, "\n       ITS Check for ITS ID : %x        "
+                                    "      ", its_id);
       status = val_gic_request_msi(e_bdf, device_id, its_id, base_lpi_id + instance, msi_index);
       if (status) {
           val_print(ACS_PRINT_ERR,
               "\n       MSI Assignment failed for bdf : 0x%x", e_bdf);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
           return;
       }
 
@@ -148,7 +145,7 @@ payload (void)
       if (status) {
           val_print(ACS_PRINT_ERR,
               "\n       Intr handler registration fail, Interrupt : 0x%x", base_lpi_id + instance);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 03));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
           return;
       }
 
@@ -171,7 +168,7 @@ payload (void)
               "\n       BDF : 0x%x, ", e_bdf);
           val_print(ACS_PRINT_ERR,
               "its_id : 0x%x", its_id);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 04));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
           val_gic_free_msi(e_bdf, device_id, its_id, base_lpi_id + instance, msi_index);
           return;
       }
@@ -183,12 +180,12 @@ payload (void)
   }
 
   if (test_skip) {
-    val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
+    val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
     return;
   }
 
   /* Pass Test */
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 
 }
 

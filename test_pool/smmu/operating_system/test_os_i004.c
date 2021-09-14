@@ -40,7 +40,7 @@ payload()
   if (data_pe_tlb != 0x2) {
       val_print(ACS_PRINT_DEBUG, "\n       TLB Range Invalid Not "
                                 "Supported For PE              ", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
@@ -48,7 +48,7 @@ payload()
   if (num_smmu == 0) {
     val_print(ACS_PRINT_DEBUG, "\n       No SMMU Controllers are discovered"
                                  "                  ", 0);
-    val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
+    val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
     return;
   }
 
@@ -56,7 +56,7 @@ payload()
     if (val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) < 3) {
       val_print(ACS_PRINT_DEBUG, "\n       Not valid for SMMUv2 or older"
                                     "version               ", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 03));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
       return;
     }
 
@@ -65,15 +65,15 @@ payload()
     /* If PE TLB Range Invalidation then SMMU_IDR3.RIL = 0b1 */
     if (data_pe_tlb == 0x2) {
         if (data_ril != 0x1) {
-            val_print(ACS_PRINT_ERR, "\n       Range Invalidation not "
-                                     "supported for SMMU %x", num_smmu);
-            val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+            val_print(ACS_PRINT_ERR, "\n       Range Invalidation unsupported "
+                                     "for SMMU %x", num_smmu);
+            val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
             return;
         }
     }
   }
 
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

@@ -61,7 +61,7 @@ pal_get_dt_ptr()
   for (Index = 0; Index < gST->NumberOfTableEntries; Index++) {
     if (CompareGuid (&gFdtTableGuid, &(gST->ConfigurationTable[Index].VendorGuid))) {
       DTB = gST->ConfigurationTable[Index].VendorTable;
-      bsa_print(ACS_PRINT_DEBUG, L" Platform DTB PTR %x \n", DTB);
+      bsa_print(ACS_PRINT_DEBUG, L"  Platform DTB PTR %x \n", DTB);
       break;
     }
   }
@@ -72,7 +72,7 @@ pal_get_dt_ptr()
   }
 
   if (fdt_check_header(DTB)) {
-    bsa_print(ACS_PRINT_ERR, L"fdt hdr check failed \n");
+    bsa_print(ACS_PRINT_ERR, L" fdt hdr check failed \n");
     return 0;
   }
 
@@ -131,7 +131,7 @@ int fdt_interrupt_cells(const void *fdt, int nodeoffset)
   } while (nodeoffset >= 0);
 
   if (nodeoffset < 0) {
-      bsa_print(ACS_PRINT_DEBUG, L"No interrupt cell found \n");
+      bsa_print(ACS_PRINT_DEBUG, L"  No interrupt cell found \n");
       return 3; /* default value 3*/
   }
 
@@ -185,11 +185,11 @@ pal_dump_dtb()
 
     BufferSize = fdt_totalsize(dtb);
     if (!BufferSize) {
-        bsa_print(ACS_PRINT_ERR, L"dtb size 0\n");
+        bsa_print(ACS_PRINT_ERR, L" dtb size 0\n");
         return;
     }
     Status = ShellWriteFile(g_dtb_log_file_handle, &BufferSize, (VOID *)dtb);
     if (EFI_ERROR(Status))
-      bsa_print(ACS_PRINT_ERR, L"Error in writing to dtb log file\n");
+      bsa_print(ACS_PRINT_ERR, L" Error in writing to dtb log file\n");
   }
 }

@@ -132,7 +132,8 @@ create_va_pa_mapping (uint64_t txn_va, uint64_t txn_pa,
      val_smmu_enable(instance);
 
   /* Get SMMU node index for this exerciser instance */
-  master.smmu_index = val_iovirt_get_rc_smmu_index(PCIE_EXTRACT_BDF_SEG(e_bdf));
+  master.smmu_index = val_iovirt_get_rc_smmu_index(PCIE_EXTRACT_BDF_SEG(e_bdf),
+                                                    PCIE_CREATE_BDF_PACKED(e_bdf));
 
   if (master.smmu_index != ACS_INVALID_INDEX &&
       val_iovirt_get_smmu_info(SMMU_CTRL_ARCH_MAJOR_REV, master.smmu_index) == 3) {
@@ -167,7 +168,7 @@ create_va_pa_mapping (uint64_t txn_va, uint64_t txn_pa,
       /* Configure SMMU tables for this exerciser to use this page table for VA to PA translations*/
       if (val_smmu_map(master, pgt_desc))
       {
-          val_print(ACS_PRINT_DEBUG, "\n      SMMU mapping failed (%x)     ", e_bdf);
+          val_print(ACS_PRINT_DEBUG, "\n       SMMU mapping failed (%x)     ", e_bdf);
           return ACS_STATUS_FAIL;
       }
       return ACS_STATUS_PASS;
@@ -330,7 +331,7 @@ payload(void)
   /* Check If PCIe Hierarchy supports P2P. */
   if (val_pcie_p2p_support())
   {
-    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
     return;
   }
 
@@ -367,9 +368,9 @@ payload(void)
       }
 
       /* Find another exerciser on other rootport,
-         Break from the test if no such exerciser if found */
+         Skip the current exerciser if no such exerciser if found */
       if (get_target_exer_bdf(req_rp_bdf, &tgt_e_bdf, &tgt_rp_bdf, &bar_base))
-          break;
+          continue;
 
       /* If Both RP's Supports ACS Then Only Run Otherwise Skip the EP */
       test_skip = 0;
@@ -387,11 +388,11 @@ payload(void)
   }
 
   if (test_skip == 1)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
   else if (fail_cnt)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, fail_cnt));
   else
-      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 
   return;
 

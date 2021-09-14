@@ -38,11 +38,11 @@ payload(void)
   ret = val_pcie_register_bitfields_check((void *)&bf_info_table21, table_entries);
 
   if (ret == ACS_STATUS_SKIP)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
   else if (ret)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, ret));
   else
-      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 
 }
 

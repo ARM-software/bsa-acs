@@ -36,10 +36,10 @@ payload(void)
   num_ecam = val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
   if (num_ecam == 0) {
       val_print(ACS_PRINT_ERR, "\n       No ECAMs discovered              ", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 
 }
 

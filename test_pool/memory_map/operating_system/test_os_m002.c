@@ -58,7 +58,7 @@ payload()
 
   val_pe_install_esr(EXCEPT_AARCH64_SYNCHRONOUS_EXCEPTIONS, esr);
   val_pe_install_esr(EXCEPT_AARCH64_SERROR, esr);
-  val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+  val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
 
   branch_to_test = &&exception_taken_d;
   while (loop_var) {
@@ -66,8 +66,8 @@ payload()
       /* Get the address of device memory region */
       addr = val_memory_get_addr(MEMORY_TYPE_DEVICE, instance, &attr);
       if (!addr) {
-          val_print(ACS_PRINT_DEBUG, "\n       Error in obtaining dev mem for"
-                                   " instance %d", instance);
+          val_print(ACS_PRINT_DEBUG, "\n       Error in getting dev mem for"
+                                   " index %d  ", instance);
           goto normal_mem_test;
       }
 
@@ -78,7 +78,7 @@ payload()
           {};
 
 exception_taken_d:
-      val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(index, RESULT_PASS(TEST_NUM, 1));
       loop_var--;
       instance++;
   }
@@ -92,7 +92,7 @@ normal_mem_test:
       /* Get the address of normal memory region */
       addr = val_memory_get_addr(MEMORY_TYPE_NORMAL, instance, &attr);
       if (!addr) {
-          val_print(ACS_PRINT_DEBUG, "\n      Error in obtaining normal memory for"
+          val_print(ACS_PRINT_DEBUG, "\n       Error in obtaining normal memory for"
                                    " instance %d", instance);
           return;
       }
@@ -104,7 +104,7 @@ normal_mem_test:
           {};
 
 exception_taken_n:
-      val_set_status(index, RESULT_PASS(TEST_NUM, 02));
+      val_set_status(index, RESULT_PASS(TEST_NUM, 2));
       loop_var--;
       instance++;
   }

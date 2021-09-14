@@ -44,7 +44,7 @@ payload()
   num_smmu = val_smmu_get_info(SMMU_NUM_CTRL, 0);
   if (num_smmu == 0) {
     val_print(ACS_PRINT_ERR, "\n       No SMMU Controllers are discovered                  ", 0);
-    val_set_status(index, RESULT_SKIP(TEST_NUM, 03));
+    val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
     return;
   }
 
@@ -58,7 +58,7 @@ payload()
                 if (s1ts) {
                     val_print(ACS_PRINT_ERR,
                         "\n       SMMUv2 detected: revision must be v3.2 or higher  ", 0);
-                    val_set_status(index, RESULT_FAIL(TEST_NUM, 04));
+                    val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
                     return;
                 }
             }
@@ -69,7 +69,7 @@ payload()
                 if ((minor < 2) && s1p) {
                     val_print(ACS_PRINT_ERR,
                         "\n       SMMUv3.%d detected: revision must be v3.2 or higher  ", minor);
-                    val_set_status(index, RESULT_FAIL(TEST_NUM, 04));
+                    val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
                     return;
                 }
             }
@@ -77,12 +77,12 @@ payload()
       if (smmu_rev < 2) {
             val_print(ACS_PRINT_ERR,
                 "\n       SMMU revision must be at least v2  ", 0);
-            val_set_status(index, RESULT_FAIL(TEST_NUM, 04));
+            val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
             return;
       }
   }
 
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

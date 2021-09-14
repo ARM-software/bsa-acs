@@ -28,6 +28,7 @@ WD_INFO_TABLE  *g_wd_info_table;
            1. Caller       -  Application layer.
            2. Prerequisite -  val_wd_create_info_table
   @param   num_pe - the number of PE to run these tests on.
+  @param   g_sw_view - Keeps the information about which view tests to be run
   @return  Consolidated status of all the tests run.
 **/
 uint32_t
@@ -39,9 +40,15 @@ val_wd_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   for (i=0 ; i<MAX_TEST_SKIP_NUM ; i++){
       if (g_skip_test_num[i] == ACS_WD_TEST_NUM_BASE) {
-          val_print(ACS_PRINT_TEST, "\n      USER Override - Skipping all Watchdog tests \n", 0);
+          val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all Watchdog tests \n", 0);
           return ACS_STATUS_SKIP;
       }
+  }
+
+  if (val_wd_get_info(0, WD_INFO_COUNT) == 0) {
+    val_print(ACS_PRINT_WARN, "\n       No Watchdog Found, Skipping Watchdog "
+                                                    "tests...\n", 0);
+    return ACS_STATUS_SKIP;
   }
 
   if (g_sw_view[G_SW_OS]) {
@@ -53,7 +60,7 @@ val_wd_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   if (status != ACS_STATUS_PASS)
     val_print(ACS_PRINT_TEST, "\n      *** One or more tests have Failed/Skipped.*** \n", 0);
   else
-    val_print(ACS_PRINT_TEST, "\n      All Watchdog tests passed!! \n", 0);
+    val_print(ACS_PRINT_TEST, "\n       All Watchdog tests passed!! \n", 0);
 
   return status;
 }
@@ -63,6 +70,7 @@ val_wd_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
            information stored in the WD Info table
            1. Caller       -  Test Suite
            2. Prerequisite -  val_wd_create_info_table
+  @param   index  watchdog index in the table
   @param   type   the type of information being requested
   @return  64-bit data
 **/
@@ -107,6 +115,7 @@ val_wd_create_info_table(uint64_t *wd_info_table)
       val_print(ACS_PRINT_ERR, "Input for Create Info table cannot be NULL \n", 0);
       return;
   }
+  val_print(ACS_PRINT_INFO, " Creating WATCHDOG INFO table\n", 0);
 
   g_wd_info_table = (WD_INFO_TABLE *)wd_info_table;
 
@@ -117,6 +126,10 @@ val_wd_create_info_table(uint64_t *wd_info_table)
 
 /**
   @brief  Free the memory allocated for the Watchdog information table
+
+  @param  None
+
+  @return None
 **/
 void
 val_wd_free_info_table()

@@ -36,9 +36,9 @@ payload()
    */
 
   if (VAL_EXTRACT_BITS(data, 28, 31) == 0)
-    val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+    val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   else
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
 }
 
 uint32_t

@@ -11,12 +11,12 @@ For more information, see [BSA specification](https://developer.arm.com/document
 
 BSA **Architecture Compliance Suite** (ACS) is a collection of self-checking, portable C-based tests.
 This suite includes a set of examples of the invariant behaviors that are provided by the [BSA](https://developer.arm.com/documentation/den0094/latest) specification, so that you can verify if these behaviour have been interpreted correctly.
-Most of the tests are executed from UEFI Shell by executing the BSA UEFI shell application.
+Most of the tests are executed from UEFI (Unified Extensible Firmware Interface) Shell by executing the BSA UEFI shell application.
 A few tests are executed by running the BSA ACS Linux application which in turn depends on the BSA ACS Linux kernel module.
 
 
 ## Release details
- - Code quality: v0.9 Beta
+ - Code quality: v1.0
  - The tests are written for version 1.0 of the BSA specification.
  - The compliance suite is not a substitute for design verification.
  - To review the BSA ACS logs, Arm licensees can contact Arm directly through their partner managers.
@@ -93,8 +93,6 @@ The EFI executable file is generated at <edk2_path>/Build/Shell/DEBUG_GCC49/AARC
 
 ### 2. Test suite execution
 
-The execution of the compliance suite varies depending on the test environment. The below steps assume that the test suite is invoked through the ACS UEFI shell application.
-
 
 #### Prerequisites
 - If the system supports LPIs (Interrupt ID > 8192) then Firmware should support installation of handler for LPI interrupts.
@@ -105,6 +103,8 @@ The execution of the compliance suite varies depending on the test environment. 
 >        - Change this in GicV3DxeInitialize function.
 >          -mGicNumInterrupts      = ArmGicGetMaxNumInterrupts (mGicDistributorBase);
 >          +mGicNumInterrupts      = ARM_GIC_MAX_NUM_INTERRUPT;
+
+The execution of the compliance suite varies depending on the test environment. The following steps assume that the test suite is invoked through the ACS UEFI shell application.
 
 #### 2.1 Silicon
 
@@ -138,11 +138,11 @@ On an emulation environment with secondary storage, perform the following steps:
 2. Load the image file to the secondary storage using a backdoor. The steps to load the image file are emulation environment-specific and beyond the scope of this document.
 3. Boot the system to UEFI shell.
 4. To determine the file system number of the secondary storage, execute 'map -r' command.
-5. Type 'fsx' where 'x' is replaced by the number determined in step 4.
+5. Type 'fs<x>' where '<x>' is replaced by the number determined in step 4.
 6. To start the compliance tests, run the executable Bsa.efi with the appropriate parameters.
 7. Copy the UART console output to a log file for analysis and certification.
 
-  - For information on the BSA uefi shell application parameters, see [User Guide](docs/Arm_Base_System_Architecture_Compliance_User_Guide.pdf).
+  - For information on the BSA uefi shell application parameters, see the [User Guide](docs/Arm_Base_System_Architecture_Compliance_User_Guide.pdf).
 
 
 #### 2.3 Emulation environment without secondary storage
@@ -152,12 +152,12 @@ On an emulation platform where secondary storage is not available, perform the f
 1. Add the path to 'Bsa.efi' file in the UEFI FD file.
 2. Build UEFI image including the UEFI Shell.
 3. Boot the system to UEFI shell.
-4. Run the executable 'Bsa.efi' to start the compliance tests. For details about the parameters,
+4. Run the executable 'Bsa.efi' to start the compliance tests. For details about the parameters,see the [User Guide](docs/Arm_Base_System_Architecture_Compliance_User_Guide.pdf).
 5. Copy the UART console output to a log file for analysis and certification.
 
 
 ## Linux OS-based tests
-Certain Peripheral, PCIe and Memory map tests require Linux operating system with kernel version 5.11 or above.
+Certain Peripheral, PCIe and Memory map tests require Linux operating system with kernel version 5.13 or above.
 This chapter provides information on executing tests from the Linux application.
 
 ### 1. Build steps and environment setup
@@ -166,7 +166,7 @@ The patch for the kernel tree and the Linux PAL are hosted separately on [linux-
 
 ### 1.1 Building the kernel module
 #### Prerequisites
-- Linux kernel source version 5.11.
+- Linux kernel source version 5.13.
 - Linaro GCC tool chain 7.5 or above.
 - Build environment for AArch64 Linux kernel.
 
@@ -175,7 +175,7 @@ The patch for the kernel tree and the Linux PAL are hosted separately on [linux-
 2. git clone https://github.com/ARM-software/bsa-acs.git bsa-acs
 3. git clone https://github.com/torvalds/linux.git -b v5.11
 4. export CROSS_COMPILE=<GCC7.5 toolchain path> pointing to /bin/aarch64-linux-gnu-
-5. git apply <local_dir>/bsa-acs-drv/kernel/src/0001-BSA-ACS-Linux-5.11.patch to your kernel source tree.
+5. git apply <local_dir>/bsa-acs-drv/kernel/src/0001-BSA-ACS-Linux-5.13.patch to your kernel source tree.
 6. make ARCH=arm64 defconfig && make -j $(nproc) ARCH=arm64
 
 #### 1.2 Build steps for BSA kernel module
@@ -185,14 +185,14 @@ The patch for the kernel tree and the Linux PAL are hosted separately on [linux-
 4. ./setup.sh <local_dir/bsa-acs>
 5. ./linux_bsa_acs.sh
 
-Successfull completion of above steps will generate bsa_acs.ko
+Successful completion of above steps will generate bsa_acs.ko
 
 #### 1.3 BSA Linux application build
 1. cd <bsa-acs path>/linux_app/bsa-acs-app
 2. export CROSS_COMPILE=<ARM64 toolchain path>/bin/aarch64-linux-gnu-
 3. make
 
-Successfull completion of above steps will generate executable file bsa
+Successful completion of above steps will generate executable file bsa
 
 ### 2. Loading the kernel module
 Before the BSA ACS Linux application can be run, load the BSA ACS kernel module using the insmod command.
@@ -204,27 +204,36 @@ shell> insmod bsa_acs.ko
 ```sh
 shell> ./bsa
 ```
-  - For information on the BSA Linux application parameters, see [User Guide](docs/Arm_Base_System_Architecture_Compliance_User_Guide.pdf).
+  - For information on the BSA Linux application parameters, see the [User Guide](docs/Arm_Base_System_Architecture_Compliance_User_Guide.pdf).
 
 ## Security implication
-The Arm System Ready ACS test suite may run at a higher privilege level. An attacker may utilize these tests to elevate the privilege which can potentially reveal the platform security assets. To prevent the leakage of secure information, Arm strongly recommends that you run the ACS test suite only on development platforms. If it is run on production systems, the system should be scrubbed after running the test suite.
+The Arm SystemReady ACS test suite may run at a higher privilege level. An attacker may utilize these tests to elevate the privilege which can potentially reveal the platform security assets. To prevent the leakage of Secure information, Arm strongly recommends that you run the ACS test suite only on development platforms. If it is run on production systems, the system should be scrubbed after running the test suite.
 
 ## Limitations
 
  - PCIE iEP rules are out of scope for current release.
  - ITS rules are available only for systems that present firmware compliant to SBBR.
- - Peripheral rules RB_PER_01,02,03 are not implemented in current release for systems that present firmware compliant to EBBR.
+ - Some PCIe and Exerciser test are dependent on PCIe features supported by the test system.
+   Please fill the required API's with test system information.
+   - pal_pcie_p2p_support : If the test system PCIe supports peer to peer transaction.
+   - pal_pcie_is_cache_present : If the test system supports PCIe address translation cache.
+   - pal_pcie_get_legacy_ir_map : Fill system legacy ir map
+   Below exerciser capabilities are required by exerciser test.
+   - MSI-X interrupt generation.
+   - Incoming Transaction Monitoring(order, type).
+   - Initiating transacions from and to the exerciser.
+   - Ability to check on BDF and register address seen for each configuration address along with access type.
 
 ## License
 BSA ACS is distributed under Apache v2.0 License.
 
 
-## Feedback, contributions and support
+## Feedback, contributions, and support
 
  - For feedback, use the GitHub Issue Tracker that is associated with this repository.
- - For support, please send an email to "support-systemready-acs@arm.com" with details.
+ - For support, send an email to "support-systemready-acs@arm.com" with details.
  - Arm licensees may contact Arm directly through their partner managers.
- - Arm welcomes code contributions through GitHub pull requests. See GitHub documentation on how to raise pull requests.
+ - Arm welcomes code contributions through GitHub pull requests. See the GitHub documentation on how to raise pull requests.
 
 --------------
 

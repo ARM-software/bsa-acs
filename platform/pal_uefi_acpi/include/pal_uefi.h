@@ -318,7 +318,11 @@ typedef struct {
   UINT32         max_pasids;
   UINT32         baud_rate;
   UINT32         interface_type;
+  UINT32         platform_type;
 }PERIPHERAL_INFO_BLOCK;
+
+#define PLATFORM_TYPE_ACPI   0x0
+#define PLATFORM_TYPE_DT     0x1
 
 /**
   @brief Peripheral Info Structure

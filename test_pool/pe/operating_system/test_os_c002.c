@@ -36,14 +36,14 @@ payload()
   /* For Gic v2 number of max PE 8, for GIC v3 and higher number of max PE 2^28 */
   if (((gic_version == 2) && (num_of_pe <= 8)) ||
       ((gic_version >= 3)  && (num_of_pe <= (2 << 27)))) {
-      val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(index, RESULT_PASS(TEST_NUM, 1));
       return;
   }
 
   val_print(ACS_PRINT_DEBUG, "\n       Number of PE is %d", num_of_pe);
   val_print(ACS_PRINT_DEBUG, "\n       Gic version is %d", gic_version);
 
-  val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+  val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
 
   return;
 }

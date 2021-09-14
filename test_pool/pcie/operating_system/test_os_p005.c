@@ -61,7 +61,7 @@ payload(void)
       {
          /* Check if Address Translation Cache is Present in this device. */
          /* If ATC Not present, skip the test.*/
-         if (!val_pcie_is_cache_present(bdf))
+         if (val_pcie_is_cache_present(bdf))
              continue;
 
          test_skip = 0;
@@ -69,18 +69,19 @@ payload(void)
          /* If ATC Present, Check ATS Capability should be present. */
          if (val_pcie_find_capability(bdf, PCIE_ECAP, ECID_ATS, &cap_base) != PCIE_SUCCESS)
          {
-             val_print(ACS_PRINT_ERR, "\n       ATS Capability Not Present, Bdf : 0x%x", bdf);
+             val_print(ACS_PRINT_ERR, "\n       BDF 0x%x :ATS Cap Not Present",
+                                                                bdf);
              test_fails++;
          }
       }
   }
 
   if (test_skip)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
   else if (test_fails)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, test_fails));
   else
-      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

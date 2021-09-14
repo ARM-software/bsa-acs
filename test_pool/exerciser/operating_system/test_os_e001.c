@@ -24,6 +24,7 @@
 #include "val/include/bsa_acs_smmu.h"
 #include "val/include/bsa_acs_memory.h"
 #include "val/include/bsa_acs_exerciser.h"
+#include "val/include/bsa_acs_pcie.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 1)
 #define TEST_RULE  "PCI_PP_04"
@@ -39,6 +40,9 @@ get_target_exer_bdf(uint32_t req_rp_bdf, uint32_t *tgt_e_bdf,
   uint32_t e_bdf;
   uint32_t instance;
   uint32_t cap_base;
+  uint32_t req_rp_ecam_index;
+  uint32_t erp_ecam_index;
+  uint32_t status;
 
   instance = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
 
@@ -68,6 +72,23 @@ get_target_exer_bdf(uint32_t req_rp_bdf, uint32_t *tgt_e_bdf,
 
       if (req_rp_bdf != erp_bdf)
       {
+          status = val_pcie_get_ecam_index(req_rp_bdf, &req_rp_ecam_index);
+          if (status)
+          {
+             val_print(ACS_PRINT_ERR, "\n       Error Ecam index for req RP BDF: 0x%x", req_rp_bdf);
+             goto clean_fail;
+          }
+
+          status = val_pcie_get_ecam_index(erp_bdf, &erp_ecam_index);
+          if (status)
+          {
+             val_print(ACS_PRINT_ERR, "\n       Error Ecam index for tgt RP BDF: 0x%x", erp_bdf);
+             goto clean_fail;
+          }
+
+          if (req_rp_ecam_index != erp_ecam_index)
+              continue;
+
           *tgt_e_bdf = e_bdf;
           *tgt_rp_bdf = erp_bdf;
 
@@ -80,6 +101,7 @@ get_target_exer_bdf(uint32_t req_rp_bdf, uint32_t *tgt_e_bdf,
       }
   }
 
+clean_fail:
   /* Return failure if No Such Exerciser Found */
   *tgt_e_bdf = 0;
   *tgt_rp_bdf = 0;
@@ -102,7 +124,7 @@ check_source_validation (uint32_t req_instance, uint32_t req_e_bdf,
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)bar_base, 1, req_instance);
 
   if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance)) {
-      val_print(ACS_PRINT_DEBUG, "\n       DMA failure from exerciser %4x", req_instance);
+      val_print(ACS_PRINT_ERR, "\nSrc Validation 1st DMA failure from exerciser %4x", req_instance);
       return ACS_STATUS_FAIL;
   }
 
@@ -117,12 +139,13 @@ check_source_validation (uint32_t req_instance, uint32_t req_e_bdf,
   sub_bus = (reg_value >> SUBBN_SHIFT) & SUBBN_MASK;
   new_bdf = PCIE_CREATE_BDF(PCIE_EXTRACT_BDF_SEG(req_rp_bdf),
                             (sub_bus+1), 0, 0);
+  new_bdf = PCIE_CREATE_BDF_PACKED(new_bdf);
 
   val_exerciser_set_param(CFG_TXN_ATTRIBUTES, TXN_REQ_ID, new_bdf, req_instance);
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)bar_base, 1, req_instance);
 
-  if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance)) {
-      val_print(ACS_PRINT_DEBUG, "\n       DMA failure from exerciser %4x", req_instance);
+  if (!val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance)) {
+      val_print(ACS_PRINT_ERR, "\nSrc Validation 2nd DMA failure from exerciser %4x", req_instance);
       return ACS_STATUS_FAIL;
   }
 
@@ -132,7 +155,7 @@ check_source_validation (uint32_t req_instance, uint32_t req_e_bdf,
   if ((val_pcie_is_device_status_error(req_rp_bdf) == 0) &&
      (val_pcie_is_sig_target_abort(req_rp_bdf) == 0)) {
       /* Fail the part */
-      val_print(ACS_PRINT_DEBUG,
+      val_print(ACS_PRINT_ERR,
                      "\n       Src Validation Expected Error RootPort : 0x%x", req_rp_bdf);
       return ACS_STATUS_FAIL;
   }
@@ -157,8 +180,8 @@ check_transaction_blocking (uint32_t req_instance, uint32_t req_e_bdf,
   val_exerciser_set_param(CFG_TXN_ATTRIBUTES, TXN_ADDR_TYPE, AT_RESERVED, req_instance);
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)bar_base, 1, req_instance);
 
-  if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance)) {
-      val_print(ACS_PRINT_DEBUG, "\n       DMA failure from exerciser %4x", req_instance);
+  if (!val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance)) {
+      val_print(ACS_PRINT_ERR, "\n Traxn blocking DMA failure from exerciser %4x", req_instance);
       return ACS_STATUS_FAIL;
   }
 
@@ -168,7 +191,7 @@ check_transaction_blocking (uint32_t req_instance, uint32_t req_e_bdf,
   if ((val_pcie_is_device_status_error(req_rp_bdf) == 0) &&
      (val_pcie_is_sig_target_abort(req_rp_bdf) == 0)) {
       /* Fail the part */
-      val_print(ACS_PRINT_DEBUG,
+      val_print(ACS_PRINT_ERR,
                       "\n       Traxn Blocking Expected Error RootPort : 0x%x", req_rp_bdf);
       return ACS_STATUS_FAIL;
   }
@@ -203,7 +226,7 @@ payload(void)
   /* Check If PCIe Hierarchy supports P2P. */
   if (val_pcie_p2p_support())
   {
-    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
     return;
   }
 
@@ -235,27 +258,34 @@ payload(void)
       /* Find another exerciser on other rootport,
          Break from the test if no such exerciser if found */
       if (get_target_exer_bdf(req_rp_bdf, &tgt_e_bdf, &tgt_rp_bdf, &bar_base))
-          break;
+          continue;
 
-      /* If Both RP's Supports ACS Then Only Run Otherwise Skip the EP */
+      /* Enable Source Validation & Transaction Blocking */
+      val_pcie_read_cfg(tgt_rp_bdf, cap_base + ACSCR_OFFSET, &reg_value);
+      reg_value = reg_value | (1 << ACS_CTRL_SVE_SHIFT) | (1 << ACS_CTRL_TBE_SHIFT);
+      val_pcie_write_cfg(tgt_rp_bdf, cap_base + ACSCR_OFFSET, reg_value);
       test_skip = 0;
 
       /* Check For ACS Functionality */
       status = check_source_validation(instance, req_e_bdf, req_rp_bdf, tgt_e_bdf, bar_base);
       if (status == ACS_STATUS_SKIP)
-          val_print(ACS_PRINT_DEBUG, "\n     ACS Source Validation Skipped for 0x%x", req_rp_bdf);
+          val_print(ACS_PRINT_DEBUG, "\n       ACS Source Validation Skipped for 0x%x", req_rp_bdf);
       else if (status)
           curr_bdf_failed++;
+
+      val_exerciser_set_param(CFG_TXN_ATTRIBUTES, TXN_REQ_ID, RID_NOT_VALID, instance);
 
       status = check_transaction_blocking(instance, req_e_bdf, req_rp_bdf, tgt_e_bdf, bar_base);
       if (status == ACS_STATUS_SKIP)
           val_print(ACS_PRINT_DEBUG,
-                    "\n     ACS Transaction Blocking Skipped for 0x%x", req_rp_bdf);
+                    "\n       ACS Transaction Blocking Skipped for 0x%x", req_rp_bdf);
       else if (status)
           curr_bdf_failed++;
 
       if (curr_bdf_failed > 0) {
-          val_print(ACS_PRINT_ERR, "\n     ACS Functional Check Failed, RP Bdf : 0x%x", req_rp_bdf);
+          val_print(ACS_PRINT_ERR,
+                    "\n       ACS Functional Check Failed, RP Bdf : 0x%x",
+                    req_rp_bdf);
           curr_bdf_failed = 0;
           fail_cnt++;
       }
@@ -265,11 +295,11 @@ payload(void)
   }
 
   if (test_skip == 1)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
   else if (fail_cnt)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, fail_cnt));
   else
-      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 
   return;
 

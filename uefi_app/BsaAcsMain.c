@@ -455,10 +455,8 @@ ShellAppMain (
   Print(L"\n      *** Starting Peripheral tests ***  ");
   Status |= val_peripheral_execute_tests(val_pe_get_num(), g_sw_view);
 
-  if (val_wd_get_info(0, WD_INFO_COUNT)) {
-      Print(L"\n      *** Starting Watchdog tests ***  ");
-      Status |= val_wd_execute_tests(val_pe_get_num(), g_sw_view);
-  }
+  Print(L"\n      *** Starting Watchdog tests ***  ");
+  Status |= val_wd_execute_tests(val_pe_get_num(), g_sw_view);
 
   Print(L"\n      *** Starting PCIe tests ***  ");
   Status |= val_pcie_execute_tests(val_pe_get_num(), g_sw_view);
@@ -468,10 +466,10 @@ ShellAppMain (
 
 print_test_status:
   val_print(ACS_PRINT_TEST, "\n     ------------------------------------------------------- \n", 0);
-  val_print(ACS_PRINT_TEST, "     Total Tests run  = %4d;", g_bsa_tests_total);
+  val_print(ACS_PRINT_TEST, "     Total Tests run  = %4d", g_bsa_tests_total);
   val_print(ACS_PRINT_TEST, "  Tests Passed  = %4d", g_bsa_tests_pass);
   val_print(ACS_PRINT_TEST, "  Tests Failed = %4d\n", g_bsa_tests_fail);
-  val_print(ACS_PRINT_TEST, "     --------------------------------------------------------- \n", 0);
+  val_print(ACS_PRINT_TEST, "     ------------------------------------------------------- \n", 0);
 
   freeBsaAcsMem();
 

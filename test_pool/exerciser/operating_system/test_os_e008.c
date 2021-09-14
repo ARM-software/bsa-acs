@@ -33,7 +33,7 @@
 #include "val/include/bsa_acs_pcie_enumeration.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 8)
-#define TEST_RULE  "PCI_IC_04"
+#define TEST_RULE  "PCI_IC_04, RE_ORD_4"
 #define TEST_DESC  "Check PCIe Software Coherency         "
 
 #define TEST_DATA_BLK_SIZE  (4*1024)
@@ -48,6 +48,7 @@ test_sequence2(void *dram_buf1_virt, void *dram_buf1_phys, uint32_t e_bdf, uint3
   uint32_t dma_len;
   void *dram_buf2_virt;
   void *dram_buf2_phys;
+  uint32_t tp_bit;
 
   /* Set up a second dram buffer to send NEWEST_DATA to exerciser memory */
   dram_buf2_virt = dram_buf1_virt + (TEST_DATA_BLK_SIZE / 2);
@@ -69,6 +70,13 @@ test_sequence2(void *dram_buf1_virt, void *dram_buf1_phys, uint32_t e_bdf, uint3
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf1_phys, dma_len, instance);
   if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, instance)) {
       val_print(ACS_PRINT_ERR, "\n       DMA read failure from exerciser %4x", instance);
+      return 1;
+  }
+
+  /* Check if the transaction pending bit is cleared */
+  tp_bit = val_is_transaction_pending_set(e_bdf);
+  if (tp_bit) {
+      val_print(ACS_PRINT_ERR, "\n       Transaction still pending in function %4x", instance);
       return 1;
   }
 
@@ -94,6 +102,7 @@ test_sequence1(void *dram_buf1_virt, void *dram_buf1_phys, uint32_t e_bdf, uint3
   uint32_t dma_len;
   void *dram_buf2_virt;
   void *dram_buf2_phys;
+  uint32_t tp_bit;
 
   dram_buf2_virt = dram_buf1_virt + (TEST_DATA_BLK_SIZE / 2);
   dram_buf2_phys = dram_buf1_phys + (TEST_DATA_BLK_SIZE / 2);
@@ -116,6 +125,13 @@ test_sequence1(void *dram_buf1_virt, void *dram_buf1_phys, uint32_t e_bdf, uint3
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf2_phys, dma_len, instance);
   if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, instance)) {
       val_print(ACS_PRINT_ERR, "\n       DMA read failure from exerciser %4x", instance);
+      return 1;
+  }
+
+  /* Check if the transaction pending bit is cleared */
+  tp_bit = val_is_transaction_pending_set(e_bdf);
+  if (tp_bit) {
+      val_print(ACS_PRINT_ERR, "\n       Transaction still pending in function %4x", instance);
       return 1;
   }
 
@@ -163,7 +179,8 @@ payload (void)
     e_bdf = val_exerciser_get_bdf(instance);
 
     /* Find SMMU node index for this exerciser instance */
-    smmu_index = val_iovirt_get_rc_smmu_index(PCIE_EXTRACT_BDF_SEG(e_bdf));
+    smmu_index = val_iovirt_get_rc_smmu_index(PCIE_EXTRACT_BDF_SEG(e_bdf),
+                                              PCIE_CREATE_BDF_PACKED(e_bdf));
 
     /* Disable SMMU globally so that the transaction passes
      * through the SMMU without any address modification.
@@ -175,7 +192,7 @@ payload (void)
     if (smmu_index != ACS_INVALID_INDEX) {
         if (val_smmu_disable(smmu_index)) {
             val_print(ACS_PRINT_ERR, "\n       Exerciser %x smmu disable error", instance);
-            val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
+            val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
             return;
         }
     }
@@ -185,8 +202,8 @@ payload (void)
 
     if (!dram_buf1_virt) {
 
-      val_print(ACS_PRINT_ERR, "\n       WB and OSH mem alloc failure %x", 02);
-      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
+      val_print(ACS_PRINT_ERR, "\n       WB and OSH mem alloc failure %x", 2);
+      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
       return;
     }
 
@@ -212,7 +229,7 @@ payload (void)
   return;
 
 test_fail:
-  val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
+  val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
   val_memory_free_cacheable(e_bdf, TEST_DATA_BLK_SIZE, dram_buf1_virt, dram_buf1_phys);
   return;
 }

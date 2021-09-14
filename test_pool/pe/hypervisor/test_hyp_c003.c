@@ -41,19 +41,19 @@ payload()
 
   if ((Gran4_2 == 0x1) && (Gran4 != 0xF)) {
      /* 4KB granule not supported at stage 2 & supported at stage 1*/
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
     return;
   }
 
   if ((Gran4_2 == 0x2) && (Gran4 != 0x0)) {
     /* 4KB granule size with 48-bit addresses supported at stage 2, but not stage 1*/
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
     return;
   }
 
   if ((Gran4_2 == 0x3) && (Gran4 != 0x1)) {
     /* 4KB granule size with 52-bit addresses supported at stage 2, but not stage 1*/
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 03));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
     return;
   }
 
@@ -64,19 +64,19 @@ payload()
 
   if ((Gran16_2 == 0x1) && (Gran16 != 0x0)) {
     /* Stage 2 not supported 16KB granules & but stage 1 support */
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 04));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
     return;
   }
 
   if ((Gran16_2 == 0x2) && (Gran16 != 0x1)) {
     /* 16KB granule size with 48-bit addresses supported at stage 2, but not stage 1*/
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 05));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 5));
     return;
   }
 
   if ((Gran16_2 == 0x3) && (Gran16 != 0x2)) {
     /* 16KB granule size with 52-bit addresses supported at stage 2, but not stage 1*/
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 06));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 6));
     return;
   }
 
@@ -87,7 +87,7 @@ payload()
 
   if ((Gran64_2 == 0x1) && (Gran64 != 0xF)) {
     /* Stage 2 not supported 64KB granules & but stage 1 support */
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 07));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 7));
     return;
   }
 
@@ -97,7 +97,7 @@ payload()
     return;
   }
 
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018,2021 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,14 +43,12 @@ call_drv_get_status(unsigned long int *arg0, unsigned long int *arg1, unsigned l
 
 
     fd = fopen("/proc/bsa", "r");
-
-    fseek(fd, 0, SEEK_SET);
-
     if (NULL == fd)
     {
         printf("fopen failed \n");
         return 1;
     }
+
   fread(&test_params,1,sizeof(test_params),fd);
 
   //printf("read back value is %x %lx \n", test_params.api_num, test_params.arg1);
@@ -87,7 +85,6 @@ call_drv_init_test_env(unsigned int print_level)
     bsa_drv_parms_t test_params;
 
     fd = fopen("/proc/bsa", "rw+");
-
     if (NULL == fd)
     {
         printf("fopen failed \n");
@@ -113,7 +110,6 @@ call_drv_clean_test_env()
     bsa_drv_parms_t test_params;
 
     fd = fopen("/proc/bsa", "rw+");
-
     if (NULL == fd)
     {
         printf("fopen failed \n");
@@ -139,7 +135,6 @@ call_drv_execute_test(unsigned int api_num, unsigned int num_pe,
     bsa_drv_parms_t test_params;
 
     fd = fopen("/proc/bsa", "rw+");
-
     if (NULL == fd)
     {
         printf("fopen failed \n");
@@ -166,7 +161,6 @@ call_update_skip_list(unsigned int api_num, int *p_skip_test_num)
     bsa_drv_parms_t test_params;
 
     fd = fopen("/proc/bsa", "rw+");
-
     if (NULL == fd)
     {
         printf("fopen failed \n");
@@ -226,9 +220,6 @@ int read_from_proc_bsa_msg() {
   bsa_msg_parms_t msg_params;
 
   fd = fopen("/proc/bsa_msg", "r");
-
-  fseek(fd, 0, SEEK_SET);
-
   if (NULL == fd) {
     printf("fopen failed \n");
     return 1;

@@ -178,7 +178,7 @@ void val_its_create_lpi_map(uint32_t its_index, uint32_t device_id,
                             uint32_t int_id, uint32_t Priority);
 void val_its_clear_lpi_map(uint32_t its_index, uint32_t device_id, uint32_t int_id);
 
-uint64_t val_its_get_translator_addr(uint32_t its_index);
+uint64_t val_its_get_translater_addr(uint32_t its_index);
 uint32_t val_its_get_max_lpi(void);
 uint32_t val_its_init(void);
 uint64_t val_its_get_curr_rdbase(uint64_t rd_base, uint32_t length);

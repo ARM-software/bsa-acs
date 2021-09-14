@@ -36,6 +36,7 @@ extern ARM_SMC_ARGS g_smc_args;
            1. Caller       -  Application layer.
            2. Prerequisite -  val_pe_create_info_table, val_allocate_shared_mem
   @param   num_pe - the number of PE to run these tests on.
+  @param   g_sw_view - Keeps the information about which view tests to be run
   @return  Consolidated status of all the tests run.
 **/
 uint32_t
@@ -45,7 +46,7 @@ val_pe_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   for (i=0 ; i<MAX_TEST_SKIP_NUM ; i++){
       if (g_skip_test_num[i] == ACS_PE_TEST_NUM_BASE) {
-        val_print(ACS_PRINT_TEST, "\n      USER Override - Skipping all PE tests \n", 0);
+        val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all PE tests \n", 0);
         return ACS_STATUS_SKIP;
       }
   }
@@ -93,7 +94,7 @@ val_pe_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   if (status != ACS_STATUS_PASS)
       val_print(ACS_PRINT_TEST, "\n      *** One or more tests have Failed/Skipped.*** \n", 0);
   else
-      val_print(ACS_PRINT_TEST, "\n      All PE tests have passed!! \n", 0);
+      val_print(ACS_PRINT_TEST, "\n       All PE tests have passed!! \n", 0);
 
   return status;
 
@@ -442,6 +443,14 @@ val_pe_spe_disable(void)
   DisableSpe();
 }
 
+/**
+  @brief   This API reads the TCR register and fills info to structure.
+
+  @param   ttbr1  If ttbr1 is used
+  @param   *tcr   To fill the TCR information
+
+  @return  Status 0 if Success
+**/
 uint32_t val_pe_reg_read_tcr(uint32_t ttbr1, PE_TCR_BF *tcr)
 {
     uint64_t val = val_pe_reg_read(TCR_ELx);
@@ -488,6 +497,14 @@ uint32_t val_pe_reg_read_tcr(uint32_t ttbr1, PE_TCR_BF *tcr)
     return 0;
 }
 
+/**
+  @brief   This API reads the TTBR register and fills info to structure.
+
+  @param   ttbr1       If ttbr1 is used
+  @param   *ttbr_ptr   To fill the TTBR information
+
+  @return  Status 0 if Success
+**/
 uint32_t val_pe_reg_read_ttbr(uint32_t ttbr1, uint64_t *ttbr_ptr)
 {
     uint32_t el = AA64ReadCurrentEL() & AARCH64_EL_MASK;

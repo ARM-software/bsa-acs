@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2020,2021 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,7 +53,7 @@ pal_pcie_get_mcfg_ecam()
   gMcfgHdr = (EFI_ACPI_MEMORY_MAPPED_CONFIGURATION_BASE_ADDRESS_TABLE_HEADER *) pal_get_mcfg_ptr();
 
   if (gMcfgHdr == NULL) {
-      bsa_print(ACS_PRINT_WARN, L"ACPI - MCFG Table not found. Setting ECAM Base to 0. \n");
+      bsa_print(ACS_PRINT_WARN, L" ACPI - MCFG Table not found. Setting ECAM Base to 0. \n");
       return 0x0;
   }
 
@@ -79,7 +79,7 @@ pal_pcie_create_info_table(PCIE_INFO_TABLE *PcieTable)
   UINT32 i = 0;
 
   if (PcieTable == NULL) {
-    bsa_print(ACS_PRINT_ERR, L"Input PCIe Table Pointer is NULL. Cannot create PCIe INFO \n");
+    bsa_print(ACS_PRINT_ERR, L" Input PCIe Table Pointer is NULL. Cannot create PCIe INFO \n");
     return;
   }
 
@@ -88,7 +88,7 @@ pal_pcie_create_info_table(PCIE_INFO_TABLE *PcieTable)
   gMcfgHdr = (EFI_ACPI_MEMORY_MAPPED_CONFIGURATION_BASE_ADDRESS_TABLE_HEADER *) pal_get_mcfg_ptr();
 
   if (gMcfgHdr == NULL) {
-      bsa_print(ACS_PRINT_DEBUG, L"ACPI - MCFG Table not found. \n");
+      bsa_print(ACS_PRINT_DEBUG, L" ACPI - MCFG Table not found. \n");
       return;
   }
 
@@ -109,11 +109,11 @@ pal_pcie_create_info_table(PCIE_INFO_TABLE *PcieTable)
       PcieTable->block[i].segment_num   = Entry->PciSegmentGroupNumber;
       PcieTable->block[i].start_bus_num = Entry->StartBusNumber;
       PcieTable->block[i].end_bus_num   = Entry->EndBusNumber;
-      bsa_print(ACS_PRINT_INFO, L"\nEcam Index = %d", i);
-      bsa_print(ACS_PRINT_INFO, L"\n Base Address = 0x%llx", Entry->BaseAddress);
-      bsa_print(ACS_PRINT_INFO, L"\n Segment   = 0x%llx", Entry->PciSegmentGroupNumber);
-      bsa_print(ACS_PRINT_INFO, L"\n Start Bus = 0x%llx", Entry->StartBusNumber);
-      bsa_print(ACS_PRINT_INFO, L"\n End Bus   = 0x%llx", Entry->EndBusNumber);
+      bsa_print(ACS_PRINT_INFO, L"  Ecam Index = %d\n", i);
+      bsa_print(ACS_PRINT_INFO, L"  Base Address = 0x%llx\n", Entry->BaseAddress);
+      bsa_print(ACS_PRINT_INFO, L"  Segment   = 0x%llx\n", Entry->PciSegmentGroupNumber);
+      bsa_print(ACS_PRINT_INFO, L"  Start Bus = 0x%llx\n", Entry->StartBusNumber);
+      bsa_print(ACS_PRINT_INFO, L"  End Bus   = 0x%llx\n", Entry->EndBusNumber);
       length += sizeof(EFI_ACPI_MEMORY_MAPPED_ENHANCED_CONFIGURATION_SPACE_BASE_ADDRESS_ALLOCATION_STRUCTURE);
       Entry++;
       i++;
@@ -147,7 +147,7 @@ pal_pcie_io_read_cfg(UINT32 Bdf, UINT32 offset, UINT32 *data)
 
   Status = gBS->LocateHandleBuffer (ByProtocol, &gEfiPciIoProtocolGuid, NULL, &HandleCount, &HandleBuffer);
   if (EFI_ERROR (Status)) {
-    bsa_print(ACS_PRINT_INFO,L"No PCI devices found in the system\n");
+    bsa_print(ACS_PRINT_INFO,L" No PCI devices found in the system\n");
     return PCIE_NO_MAPPING;
   }
 
@@ -196,7 +196,7 @@ pal_pcie_io_write_cfg(UINT32 Bdf, UINT32 offset, UINT32 data)
 
   Status = gBS->LocateHandleBuffer (ByProtocol, &gEfiPciIoProtocolGuid, NULL, &HandleCount, &HandleBuffer);
   if (EFI_ERROR (Status)) {
-    bsa_print(ACS_PRINT_INFO,L"No PCI devices found in the system\n");
+    bsa_print(ACS_PRINT_INFO,L" No PCI devices found in the system\n");
     return;
   }
 
@@ -236,8 +236,13 @@ pal_pcie_p2p_support()
 /**
   @brief   This API checks the PCIe device P2P support
            1. Caller       -  Test Suite
-  @param   bdf      - PCIe BUS/Device/Function
-  @return  1 - P2P feature not supported 0 - P2P feature supported
+
+  @param   Seg       PCI segment number
+  @param   Bus        PCI bus address
+  @param   Dev        PCI device address
+  @param   Fn         PCI function number
+  @retval 0 P2P feature supported
+  @retval 1 P2P feature not supported
 **/
 UINT32
 pal_pcie_dev_p2p_support (
@@ -259,10 +264,11 @@ pal_pcie_dev_p2p_support (
 /**
     @brief   Create a list of MSI(X) vectors for a device
 
-    @param   bus        PCI bus address
-    @param   dev        PCI device address
-    @param   fn         PCI function number
-    @param   mvector    pointer to a MSI(X) list address
+    @param   Seg        PCI segment number
+    @param   Bus        PCI bus address
+    @param   Dev        PCI device address
+    @param   Fn         PCI function number
+    @param   MVector    pointer to a MSI(X) list address
 
     @return  mvector    list of MSI(X) vectors
     @return  number of MSI(X) vectors
@@ -282,10 +288,11 @@ pal_get_msi_vectors (
 /**
     @brief   Get legacy IRQ routing for a PCI device
 
-    @param   bus        PCI bus address
-    @param   dev        PCI device address
-    @param   fn         PCI function number
-    @param   irq_map    pointer to IRQ map structure
+    @param   Seg        PCI segment number
+    @param   Bus        PCI bus address
+    @param   Dev        PCI device address
+    @param   Fn         PCI function number
+    @param   Irq_Map    pointer to IRQ map structure
 
     @return  irq_map    IRQ routing map
     @return  status code
@@ -302,9 +309,17 @@ pal_pcie_get_legacy_irq_map (
   return 1; /* not implemented */
 }
 
-/* Place holder function. Need to be
- * implemented if needed in later releases
- */
+/** Place holder function. Need to be implemented if needed in later releases
+  @brief Returns the Bus, Device, and Function values of the Root Port of the device.
+
+  @param   Seg        PCI segment number
+  @param   Bus        PCI bus address
+  @param   Dev        PCI device address
+  @param   Fn         PCI function number
+
+  @return 0 if success; 1 if input BDF device cannot be found
+          2 if root Port for the input device cannot be determined
+**/
 UINT32
 pal_pcie_get_root_port_bdf (
   UINT32 *Seg,
@@ -320,8 +335,14 @@ pal_pcie_get_root_port_bdf (
   @brief   Platform dependent API checks the Address Translation
            Cache Support for BDF
            1. Caller       -  Test Suite
-  @return  0 - ATC not supported 1 - ATC supported
-**/
+
+  @param   Seg        PCI segment number
+  @param   Bus        PCI bus address
+  @param   Dev        PCI device address
+  @param   Fn         PCI function number
+  @retval 0 ATC supported
+  @retval 1 ATC not supported
+  **/
 UINT32
 pal_pcie_is_cache_present (
   UINT32 Seg,
@@ -330,17 +351,19 @@ pal_pcie_is_cache_present (
   UINT32 Fn
   )
 {
-  return 0;
+  return 1;
 }
 
 /**
     @brief   Checks if device is behind SMMU
 
+    @param   seg        PCI segment number
     @param   bus        PCI bus address
     @param   dev        PCI device address
     @param   fn         PCI function number
 
-    @return  staus code:0 -> not present, nonzero -> present
+    @retval 1 if device is behind SMMU
+    @retval 0 if device is not behind SMMU or SMMU is in bypass mode
 **/
 UINT32
 pal_pcie_is_device_behind_smmu(UINT32 seg, UINT32 bus, UINT32 dev, UINT32 fn)
@@ -351,11 +374,13 @@ pal_pcie_is_device_behind_smmu(UINT32 seg, UINT32 bus, UINT32 dev, UINT32 fn)
 /**
     @brief   Return the DMA addressability of the device
 
+    @param   seg        PCI segment number
     @param   bus        PCI bus address
     @param   dev        PCI device address
     @param   fn         PCI function number
 
-    @return  DMA Mask : 0, 0xffffffff or 0xffffffffffff
+    @retval 0 if does not support 64-bit transfers
+    @retval 1 if supports 64-bit transfers
 **/
 UINT32
 pal_pcie_is_devicedma_64bit(UINT32 seg, UINT32 bus, UINT32 dev, UINT32 fn)
@@ -366,14 +391,16 @@ pal_pcie_is_devicedma_64bit(UINT32 seg, UINT32 bus, UINT32 dev, UINT32 fn)
 /**
     @brief   Get the PCIe device type
 
+    @param   seg        PCI segment number
     @param   bus        PCI bus address
     @param   dev        PCI device address
     @param   fn         PCI function number
 
-    @return  staus code:
-             1: Normal PCIe device, 2: PCIe Host bridge,
-             3: PCIe bridge device, else: INVALID
-**/
+    @retval 0 if Error: could not determine device structures
+    @retval 1 if normal PCIe device
+    @retval 2 if PCIe host bridge
+    @retval 3 if PCIe bridge
+    **/
 UINT32
 pal_pcie_get_device_type(UINT32 seg, UINT32 bus, UINT32 dev, UINT32 fn)
 {
@@ -402,8 +429,8 @@ pal_bsa_pcie_enumerate()
     @param   fn         PCI function number
     @param   seg        PCI segment number
 
-    @return  0 if rp not involved in transaction forwarding
-             1 if rp is involved in transaction forwarding
+    @return  1 if rp not involved in transaction forwarding
+             0 if rp is involved in transaction forwarding
 **/
 UINT32
 pal_pcie_get_rp_transaction_frwd_support(UINT32 seg, UINT32 bus, UINT32 dev, UINT32 fn)

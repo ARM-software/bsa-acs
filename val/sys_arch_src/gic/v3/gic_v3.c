@@ -49,6 +49,18 @@ v3_read_gicdTyper(void)
 }
 
 /**
+  @brief  Retruns GICR_TYPER value
+  @param  none
+  @return gicr typer value
+**/
+uint64_t
+v3_read_gicr_typer(void)
+{
+  return val_mmio_read64(v3_get_pe_gicr_base() + GICR_TYPER);
+}
+
+
+/**
   @brief  derives current pe rd base
   @param  rd base
   @param  rd base length
@@ -124,6 +136,21 @@ WakeUpRD(void)
 }
 
 /**
+  @brief  derives current pe rd base
+  @param  none
+  @return pe rd base
+**/
+uint64_t v3_get_pe_gicr_base(void)
+{
+  uint32_t                rdbase_len;
+  uint64_t                rd_base;
+
+  rd_base = val_get_gicr_base(&rdbase_len);
+
+  return CurrentCpuRDBase(rd_base, rdbase_len);
+}
+
+/**
   @brief  Acknowledges the interrupt
   @param  none
   @return interrupt id
@@ -159,6 +186,11 @@ v3_DisableInterruptSource(uint32_t int_id)
   uint64_t                rd_base;
   uint64_t                cpuRd_base;
 
+  if (v3_is_extended_spi(int_id) || v3_is_extended_ppi(int_id)) {
+      v3_disable_extended_interrupt_source(int_id);
+      return;
+  }
+
   /* Calculate register offset and bit position */
   regOffset = int_id / 32;
   regShift = int_id % 32;
@@ -190,6 +222,10 @@ v3_EnableInterruptSource(uint32_t int_id)
   uint64_t                rd_base;
   uint64_t                cpuRd_base;
 
+  if (v3_is_extended_spi(int_id) || v3_is_extended_ppi(int_id)) {
+      v3_enable_extended_interrupt_source(int_id);
+      return;
+  }
   /* Calculate register offset and bit position */
   regOffset = int_id / 32;
   regShift = int_id % 32;
@@ -221,6 +257,11 @@ v3_SetInterruptPriority(uint32_t int_id, uint32_t priority)
   uint32_t                rdbase_len;
   uint64_t                rd_base;
   uint64_t                cpuRd_base;
+
+  if (v3_is_extended_spi(int_id) || v3_is_extended_ppi(int_id)) {
+      v3_set_extended_interrupt_priority(int_id, priority);
+      return;
+  }
 
   /* Calculate register offset and bit position */
   regOffset = int_id / 4;
@@ -257,14 +298,17 @@ v3_Init(void)
   uint64_t   cpuTarget;
   uint64_t   Mpidr;
 
+  if (val_bsa_gic_espi_support() || val_bsa_gic_eppi_support())
+    v3_extended_init();
+
   /* Get the distributor base */
   gicd_base = val_get_gicd_base();
 
   /* Get the max interrupt */
   max_num_interrupts = val_get_max_intid();
 
-  val_print(ACS_PRINT_DEBUG, " \n GIC_INIT: D base %x\n", gicd_base);
-  val_print(ACS_PRINT_DEBUG, " \n GIC_INIT: Interrupts %d\n", max_num_interrupts);
+  val_print(ACS_PRINT_DEBUG, "  GIC_INIT: D base %x\n", gicd_base);
+  val_print(ACS_PRINT_DEBUG, "  GIC_INIT: Interrupts %d\n", max_num_interrupts);
 
   /* Disable all interrupt */
   for (index = 0; index < max_num_interrupts; index++) {
@@ -289,7 +333,7 @@ v3_Init(void)
   /* Set ARI bits for v3 mode */
   val_mmio_write(gicd_base + GICD_CTLR, val_mmio_read(gicd_base + GICD_CTLR) | GIC_ARE_ENABLE);
   val_mmio_write(gicd_base + GICD_CTLR, val_mmio_read(gicd_base + GICD_CTLR) | 0x2);
-  val_print(ACS_PRINT_DEBUG, " \n GIC_INIT: GICD_CTLR value 0x%08x\n",
+  val_print(ACS_PRINT_DEBUG, "  GIC_INIT: GICD_CTLR value 0x%08x\n",
                              val_mmio_read(gicd_base + GICD_CTLR));
 
   WakeUpRD();

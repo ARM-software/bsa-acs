@@ -51,7 +51,7 @@ void val_exerciser_create_info_table(void)
       if (val_pcie_read_cfg(Bdf, TYPE01_VIDR, &reg_value) == PCIE_NO_MAPPING)
       {
           /* Return if there is a bdf mapping issue */
-          val_print(ACS_PRINT_ERR, "\n      BDF 0x%x mapping issue", Bdf);
+          val_print(ACS_PRINT_ERR, "\n       BDF 0x%x mapping issue", Bdf);
           return;
       }
 
@@ -101,6 +101,11 @@ uint32_t val_exerciser_set_param(EXERCISER_PARAM_TYPE type, uint64_t value1,
     return pal_exerciser_set_param(type, value1, value2, bdf, ecam);
 }
 
+/**
+  @brief   This API returns the bdf of the PCIe Stimulus generation hardware
+  @param   instance  - Stimulus hardware instance number
+  @return  bdf       - BDF Number of the instance
+**/
 uint32_t val_exerciser_get_bdf(uint32_t instance)
 {
     return g_exercier_info_table.e_info[instance].bdf;
@@ -180,7 +185,7 @@ uint32_t val_exerciser_init(uint32_t instance)
       g_exercier_info_table.e_info[instance].initialized = 1;
   }
   else
-           val_print(ACS_PRINT_DEBUG, "\n       Already initialized %d",
+           val_print(ACS_PRINT_INFO, "\n       Already initialized %2d",
                                                                     instance);
   return 0;
 }
@@ -218,6 +223,7 @@ uint32_t val_exerciser_get_data(EXERCISER_DATA_TYPE type, exerciser_data_t *data
 /**
   @brief   This API executes all the Exerciser tests sequentially
            1. Caller       -  Application layer.
+  @param   g_sw_view - Keeps the information about which view tests to be run
   @return  Consolidated status of all the tests run.
 **/
 uint32_t
@@ -230,7 +236,7 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
 
   for (i = 0; i < MAX_TEST_SKIP_NUM; i++){
       if (g_skip_test_num[i] == ACS_EXERCISER_TEST_NUM_BASE) {
-          val_print(ACS_PRINT_TEST, "\n      USER Override - Skipping all Exerciser tests \n", 0);
+          val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all Exerciser tests \n", 0);
           return ACS_STATUS_SKIP;
       }
   }
@@ -245,7 +251,8 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
   num_instances = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
 
   if (num_instances == 0) {
-      val_print(ACS_PRINT_WARN, "\n     No Exerciser Devices Found, Skipping tests...\n", 0);
+      val_print(ACS_PRINT_WARN, "\n       No Exerciser Devices Found, "
+                                    "Skipping tests...\n", 0);
       return ACS_STATUS_SKIP;
   }
 
@@ -266,14 +273,18 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
      if (!pal_target_is_dt()) {
        status |= os_e011_entry();
        status |= os_e012_entry();
+       status |= os_e013_entry();
      }
+
+     status |= os_e014_entry();
+     status |= os_e015_entry();
 
   }
 
   if (status != ACS_STATUS_PASS)
     val_print(ACS_PRINT_TEST, "\n      *** One or more tests have Failed/Skipped.*** \n", 0);
   else
-    val_print(ACS_PRINT_TEST, "\n      All Exerciser tests passed!! \n", 0);
+    val_print(ACS_PRINT_TEST, "\n       All Exerciser tests passed!! \n", 0);
 
   return status;
 }

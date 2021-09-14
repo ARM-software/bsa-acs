@@ -23,7 +23,7 @@
 #include "val/include/bsa_std_smc.h"
 
 #define TEST_NUM   (ACS_WAKEUP_TEST_NUM_BASE + 6)
-#define TEST_RULE  "B_WAK_02,B_WAK_09-10"
+#define TEST_RULE  "B_WAK_02, B_WAK_09, B_WAK_10"
 #define TEST_DESC  "Test No-Wake from Power Semantic F    "
 
 static uint32_t intid, wakeup_event, cnt_base_n;
@@ -48,7 +48,7 @@ isr()
           val_print(ACS_PRINT_ERR, "\n       Setting watchdog timeout failed", 0);
   }
 
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   val_gic_end_of_interrupt(intid);
 }
 
@@ -107,7 +107,7 @@ payload_target_pe()
   val_gic_cpuif_init();
   val_suspend_pe(0, 0);
   // Set the status to indicate that target PE has resumed execution from sleep mode
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 }
 
 static
@@ -139,7 +139,7 @@ payload()
   wakeup_event = wakeup_event_for_semantic_f();
   if (wakeup_event == 0) {
       val_print(ACS_PRINT_DEBUG, "\n       No Watchdogs and system timers present", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
@@ -147,7 +147,7 @@ payload()
   val_gic_route_interrupt_to_pe(intid, val_pe_get_mpid_index(target_pe));
   if (val_gic_install_isr(intid, isr)) {
       val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
       val_gic_route_interrupt_to_pe(intid, index);
       return;
   }
@@ -169,7 +169,7 @@ payload()
       status = val_wd_set_ws0(wd_num, timer_expire_ticks);
       if (status) {
           val_print(ACS_PRINT_ERR, "\n       Setting watchdof timeout failed", 0);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
           return;
       }
   }
@@ -192,7 +192,7 @@ payload()
           status = val_wd_set_ws0(wd_num, 0);
           if (status) {
               val_print(ACS_PRINT_ERR, "\n       Setting watchdof timeout failed", 0);
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 03));
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
               return;
           }
      }
@@ -211,7 +211,7 @@ payload()
   val_gic_route_interrupt_to_pe(intid, val_pe_get_mpid_index(target_pe));
   if (val_gic_install_isr(intid, isr)) {
       val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
       val_gic_route_interrupt_to_pe(intid, index);
       return;
   }
@@ -223,7 +223,7 @@ payload()
       status = val_wd_set_ws0(wd_num, timer_expire_ticks);
           if (status) {
               val_print(ACS_PRINT_ERR, "\n       Setting watchdof timeout failed", 0);
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 04));
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
               return;
           }
   }
@@ -246,7 +246,7 @@ payload()
           status = val_wd_set_ws0(wd_num, 0);
           if (status) {
               val_print(ACS_PRINT_ERR, "\n       Setting watchdof timeout failed", 0);
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 05));
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 5));
               return;
           }
       }
@@ -261,9 +261,9 @@ payload()
   val_execute_on_pe(target_pe, payload_dummy, 0);
 
   if (IS_TEST_FAIL(val_get_status(target_pe)) || IS_RESULT_PENDING(val_get_status(target_pe)))
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 03));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
   else
-      val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 
   // Step12:  Route interrupt back to main PE*/
   val_gic_route_interrupt_to_pe(intid, index);
