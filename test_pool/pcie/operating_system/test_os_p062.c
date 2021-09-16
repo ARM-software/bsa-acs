@@ -21,7 +21,7 @@
 #include "val/include/bsa_acs_smmu.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 62)
-#define TEST_RULE  "PCI_MM_05-07"
+#define TEST_RULE  "PCI_MM_05, PCI_MM_06, PCI_MM_07"
 #define TEST_DESC  "No extra address translation          "
 
 
@@ -44,7 +44,7 @@ payload(void)
 
   if (!target_dev_index) {
       val_print(ACS_PRINT_TEST, "\n       No DMA controllers detected...    ", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
       return;
   }
 
@@ -58,7 +58,7 @@ payload(void)
           val_dma_device_get_dma_addr(target_dev_index, &dma_addr, &dma_len);
           status = val_smmu_ops(SMMU_CHECK_DEVICE_IOVA, 0, &target_dev_index, &dma_addr);
           if (status) {
-              val_print(ACS_PRINT_ERR, "\n   The DMA address %lx used by device ", dma_addr);
+              val_print(ACS_PRINT_ERR, "\n       The DMA address %lx used by device ", dma_addr);
               val_print(ACS_PRINT_ERR, "\n       is not present in the SMMU IOVA table \n", 0);
               val_set_status(index, RESULT_FAIL(TEST_NUM, target_dev_index));
               return;
@@ -78,7 +78,8 @@ payload(void)
           dma_addr = val_dma_mem_alloc(&buffer, 512, target_dev_index, DMA_COHERENT);
           status = val_smmu_ops(SMMU_CHECK_DEVICE_IOVA, 0, &target_dev_index, &dma_addr);
           if (status) {
-              val_print(ACS_PRINT_ERR, "\n The DMA addr allocated to device %d ", target_dev_index);
+              val_print(ACS_PRINT_ERR, "\n       The DMA addr allocated to device %d ",
+                        target_dev_index);
               val_print(ACS_PRINT_ERR, "\n       is not present in the SMMU IOVA table \n", 0);
               val_set_status(index, RESULT_FAIL(TEST_NUM, target_dev_index));
               return;
@@ -89,9 +90,9 @@ payload(void)
   }
 
   if (iommu_flag)
-      val_set_status(index, RESULT_PASS(TEST_NUM, 02));
+      val_set_status(index, RESULT_PASS(TEST_NUM, 2));
   else
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
 
 }
 

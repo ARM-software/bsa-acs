@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2020,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,402 +14,225 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-
 #include "val/include/bsa_acs_val.h"
 #include "val/include/val_interface.h"
 
-#include "val/include/bsa_acs_pcie_enumeration.h"
 #include "val/include/bsa_acs_pcie.h"
-#include "val/include/bsa_acs_pe.h"
-#include "val/include/bsa_acs_smmu.h"
-#include "val/include/bsa_acs_pgt.h"
-#include "val/include/bsa_acs_iovirt.h"
+#include "val/include/bsa_acs_gic.h"
 #include "val/include/bsa_acs_memory.h"
+#include "val/include/bsa_acs_iovirt.h"
+#include "val/include/bsa_acs_smmu.h"
+#include "val/include/bsa_acs_pcie_enumeration.h"
 #include "val/include/bsa_acs_exerciser.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 13)
-#define TEST_DESC  "PCI_PP_04: Check ACS Redirect Req Valid               "
+#define TEST_RULE  "ITS_DEV_4"
+#define TEST_DESC  "MSI originating from different master "
+
+static uint32_t irq_pending;
+static uint32_t lpi_int_id = 0x204C;
+static uint32_t instance;
+
+static
+void
+intr_handler(void)
+{
+  /* Clear the interrupt pending state */
+  irq_pending = 0;
+
+  val_print(ACS_PRINT_INFO, "\n       Received MSI interrupt %x       ", lpi_int_id + instance);
+  val_gic_end_of_interrupt(lpi_int_id + instance);
+  return;
+}
 
 static
 uint32_t
-get_target_exer_bdf(uint32_t req_rp_bdf, uint32_t *tgt_e_bdf,
-                    uint32_t *tgt_rp_bdf, uint64_t *bar_base)
+get_exerciser_in_its_group(uint32_t its_id, uint32_t *req_instance)
 {
-
-  uint32_t erp_bdf;
-  uint32_t e_bdf;
-  uint32_t instance;
-  uint32_t cap_base;
-
-  instance = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
-
-  while (instance-- != 0)
-  {
-      /* if init fail moves to next exerciser */
-      if (val_exerciser_init(instance))
-          continue;
-
-      e_bdf = val_exerciser_get_bdf(instance);
-
-      /* Read e_bdf BAR Register to get the Address to perform P2P */
-      /* If No BAR Space, continue */
-      val_pcie_get_mmio_bar(e_bdf, bar_base);
-      if (*bar_base == 0)
-          continue;
-
-      /* Get RP of the exerciser */
-      if (val_pcie_get_rootport(e_bdf, &erp_bdf))
-          continue;
-
-      /* It ACS Not Supported, continue */
-      if (val_pcie_find_capability(erp_bdf, PCIE_ECAP, ECID_ACS, &cap_base) != PCIE_SUCCESS) {
-          val_print(ACS_PRINT_DEBUG, "\n       ACS Not Supported for BDF : 0x%x", erp_bdf);
-          continue;
-      }
-
-      if (req_rp_bdf != erp_bdf)
-      {
-          *tgt_e_bdf = e_bdf;
-          *tgt_rp_bdf = erp_bdf;
-
-          /* Enable Bus Master Enable */
-          val_pcie_enable_bme(e_bdf);
-          /* Enable Memory Space Access */
-          val_pcie_enable_msa(e_bdf);
-
-          return ACS_STATUS_PASS;
-      }
-  }
-
-  /* Return failure if No Such Exerciser Found */
-  *tgt_e_bdf = 0;
-  *tgt_rp_bdf = 0;
-  *bar_base = 0;
-  return ACS_STATUS_FAIL;
-}
-
-uint32_t
-create_va_pa_mapping (uint64_t txn_va, uint64_t txn_pa,
-                      smmu_master_attributes_t *smmu_master,
-                      pgt_descriptor_t *pgt_descriptor,
-                      uint32_t e_bdf, uint32_t pgt_ap)
-{
-  smmu_master_attributes_t master;
-  pgt_descriptor_t pgt_desc;
-  memory_region_descriptor_t mem_desc_array[2], *mem_desc;
-  uint64_t ttbr;
-  uint32_t num_smmus;
-  uint32_t instance;
-  uint32_t device_id, its_id;
-
-  master = *smmu_master;
-  pgt_desc = *pgt_descriptor;
-
-  val_memory_set(&master, sizeof(master), 0);
-  val_memory_set(mem_desc_array, sizeof(mem_desc_array), 0);
-  mem_desc = &mem_desc_array[0];
-
-  /* Get translation attributes via TCR and translation table base via TTBR */
-  if (val_pe_reg_read_tcr(0 /*for TTBR0*/, &pgt_desc.tcr))
-    return ACS_STATUS_FAIL;
-  if (val_pe_reg_read_ttbr(0 /*TTBR0*/, &ttbr))
-    return ACS_STATUS_FAIL;
-  pgt_desc.pgt_base = (ttbr & AARCH64_TTBR_ADDR_MASK);
-  pgt_desc.mair = val_pe_reg_read(MAIR_ELx);
-  pgt_desc.stage = PGT_STAGE1;
-
-  /* Get memory attributes of the test buffer, we'll use the same attibutes to create
-   * our own page table later.
-   */
-  if (val_pgt_get_attributes(pgt_desc, (uint64_t)txn_va, &mem_desc->attributes))
-    return ACS_STATUS_FAIL;
-
-  num_smmus = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
-
-  /* Enable all SMMUs */
-  for (instance = 0; instance < num_smmus; ++instance)
-     val_smmu_enable(instance);
-
-  /* Get SMMU node index for this exerciser instance */
-  master.smmu_index = val_iovirt_get_rc_smmu_index(PCIE_EXTRACT_BDF_SEG(e_bdf));
-
-  if (master.smmu_index != ACS_INVALID_INDEX &&
-      val_iovirt_get_smmu_info(SMMU_CTRL_ARCH_MAJOR_REV, master.smmu_index) == 3) {
-      if (val_iovirt_get_device_info(PCIE_CREATE_BDF_PACKED(e_bdf),
-                                     PCIE_EXTRACT_BDF_SEG(e_bdf),
-                                     &device_id, &master.streamid,
-                                     &its_id))
-          return ACS_STATUS_FAIL;
-
-      /* Each exerciser instance accesses a unique IOVA, which, because of SMMU translations,
-       * will point to the same physical address. We create the requisite page tables and
-       * configure the SMMU for each exerciser as such.
-       */
-
-      mem_desc->virtual_address = (uint64_t)txn_va;
-      mem_desc->physical_address = txn_pa;
-      mem_desc->length = 4; /* 4 Bytes */
-      mem_desc->attributes |= pgt_ap;
-
-      /* Need to know input and output address sizes before creating page table */
-      pgt_desc.ias = val_smmu_get_info(SMMU_IN_ADDR_SIZE, master.smmu_index);
-      if (pgt_desc.ias == 0)
-        return ACS_STATUS_FAIL;
-
-      pgt_desc.oas = val_smmu_get_info(SMMU_OUT_ADDR_SIZE, master.smmu_index);
-      if (pgt_desc.oas == 0)
-        return ACS_STATUS_FAIL;
-
-      if (val_pgt_create(mem_desc, &pgt_desc))
-        return ACS_STATUS_FAIL;
-
-      /* Configure SMMU tables for this exerciser to use this page table for VA to PA translations*/
-      if (val_smmu_map(master, pgt_desc))
-      {
-          val_print(ACS_PRINT_DEBUG, "\n      SMMU mapping failed (%x)     ", e_bdf);
-          return ACS_STATUS_FAIL;
-      }
-      return ACS_STATUS_PASS;
-  }
-  return ACS_STATUS_FAIL;
-}
-
-uint32_t
-check_redirected_req_validation (uint32_t req_instance, uint32_t req_e_bdf,
-                                 uint32_t req_rp_bdf, uint32_t tgt_e_bdf,
-                                 uint64_t bar_base)
-{
-  uint64_t txn_va;
-  uint32_t instance;
-  uint32_t e_bdf;
-  uint32_t num_smmus;
+  uint32_t num_cards, index;
+  uint32_t bdf, req_its_id;
   uint32_t status;
-  smmu_master_attributes_t master;
-  pgt_descriptor_t pgt_desc;
+  uint32_t device_id = 0;
 
-  /* Sequence 1 : No Write Permission, Trigger a DMA Write to bar address
-   * It should Result into ACS Violation
-   */
+  /* Read the number of excerciser cards */
+  num_cards = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
 
-  /* Create VA-PA Mapping in SMMU with PGT permissions as Read Only */
-  /* Initialize DMA master and memory descriptors */
+  for (index = 0; index < num_cards; index++)
+  {
+    if (index == instance)
+      continue;
 
-  /* Set the virtual and physical addresses for test buffers */
-  txn_va = (uint64_t)val_memory_phys_to_virt(bar_base);
+    /* Get the exerciser BDF */
+    bdf = val_exerciser_get_bdf(index);
 
-  /* Get exerciser bdf */
-  e_bdf = val_exerciser_get_bdf(req_instance);
+    /* Get DeviceID & ITS_ID for this device */
+    status = val_iovirt_get_device_info(PCIE_CREATE_BDF_PACKED(bdf),
+                                        PCIE_EXTRACT_BDF_SEG(bdf), &device_id,
+                                        NULL, &req_its_id);
+    if (status) {
+        val_print(ACS_PRINT_ERR,
+            "\n       Could not get device info for BDF : 0x%x", bdf);
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+        return 1;
+    }
 
-  num_smmus = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
-
-  status = create_va_pa_mapping(txn_va, bar_base, &master,
-                                &pgt_desc, e_bdf,
-                                PGT_STAGE1_AP_RO);
-  if (status) {
-      val_print(ACS_PRINT_DEBUG,
-                      "\n       Seq1:SMMU Mapping Failed For : %4x", req_instance);
-      goto test_fail;
+    if (its_id == req_its_id) {
+      *req_instance = index;
+      return 0;
+    }
   }
 
-  /* Trigger DMA from req_e_bdf */
-  val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)txn_va, 1, req_instance);
-
-  /* Clear Error Status Bits */
-  val_pcie_clear_device_status_error(req_rp_bdf);
-  val_pcie_clear_sig_target_abort(req_rp_bdf);
-
-  /* DMA Should fail because Write permission not given */
-  if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance) == 0) {
-      val_print(ACS_PRINT_DEBUG,
-                "\n       Seq1:DMA Write Should not happen For : %4x", req_instance);
-      goto test_fail;
-  }
-
-  /* Check For Error in Device Status Register / Status Register
-   * Secondary Status Register
-   */
-  if ((val_pcie_is_device_status_error(req_rp_bdf) == 0) &&
-     (val_pcie_is_sig_target_abort(req_rp_bdf) == 0)) {
-      val_print(ACS_PRINT_DEBUG, "\n       Seq1:Expected Error For RootPort : 0x%x", req_rp_bdf);
-      goto test_fail;
-  }
-
-  /* Unmap SMMU & Pgt */
-  val_smmu_unmap(master);
-  val_pgt_destroy(pgt_desc);
-
-  /* Disable all SMMUs */
-  for (instance = 0; instance < num_smmus; ++instance)
-     val_smmu_disable(instance);
-
-  /* Sequence 2 : Read Write Permission, Trigger a DMA Write to bar address
-   * It should NOT Result into ACS Violation
-   */
-
-  /* Create VA-PA Mapping in SMMU with PGT permissions as Read Write */
-  status = create_va_pa_mapping(txn_va, bar_base, &master,
-                                &pgt_desc, e_bdf,
-                                PGT_STAGE1_AP_RW);
-  if (status) {
-      val_print(ACS_PRINT_DEBUG, "\n       Seq2:SMMU Mapping Failed For : %4x", req_instance);
-      goto test_fail;
-  }
-
-  /* Trigger DMA from req_e_bdf */
-  val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)txn_va, 1, req_instance);
-
-  /* Clear Error Status Bits */
-  val_pcie_clear_device_status_error(req_rp_bdf);
-  val_pcie_clear_sig_target_abort(req_rp_bdf);
-
-  /* DMA Should fail not because Write permission given */
-  if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance) != 0) {
-      val_print(ACS_PRINT_DEBUG, "\n       Seq2:DMA Write Should happen For : %4x", req_instance);
-      goto test_fail;
-  }
-
-  /* Check For Error in Device Status Register / Status Register
-   * Secondary Status Register
-   */
-  if (val_pcie_is_device_status_error(req_rp_bdf) ||
-     val_pcie_is_sig_target_abort(req_rp_bdf)) {
-      val_print(ACS_PRINT_DEBUG, "\n       Seq2:Expected No Error For RootPort : 0x%x", req_rp_bdf);
-      goto test_fail;
-  }
-
-  status = ACS_STATUS_PASS;
-  goto test_clean;
-
-test_fail:
-  status = ACS_STATUS_FAIL;
-
-test_clean:
-  val_smmu_unmap(master);
-  val_pgt_destroy(pgt_desc);
-
-  /* Clear Error Status Bits */
-  val_pcie_clear_device_status_error(req_rp_bdf);
-  val_pcie_clear_sig_target_abort(req_rp_bdf);
-
-  /* Disable all SMMUs */
-  for (instance = 0; instance < num_smmus; ++instance)
-     val_smmu_disable(instance);
-  return status;
+  /* Did not find exerciser with Same ITS Group */
+  return 1;
 }
 
 static
 void
-payload(void)
+payload (void)
 {
 
+  uint32_t index;
+  uint32_t e_bdf = 0;
+  uint32_t req_bdf = 0;
+  uint32_t timeout;
   uint32_t status;
-  uint32_t pe_index;
-  uint32_t bdf;
-  uint32_t req_e_bdf;
-  uint32_t req_rp_bdf;
-  uint32_t tgt_e_bdf;
-  uint32_t tgt_rp_bdf;
-  uint32_t instance;
-  uint32_t fail_cnt;
-  uint32_t cap_base;
-  uint32_t reg_value;
-  uint32_t test_skip;
-  uint32_t tbl_index;
-  uint64_t bar_base;
+  uint32_t num_cards;
+  uint32_t num_smmus;
+  uint32_t test_skip = 1;
+  uint32_t msi_index = 0;
+  uint32_t msi_cap_offset = 0;
 
-  fail_cnt = 0;
-  test_skip = 1;
-  pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
-  instance = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
-  pcie_device_bdf_table *bdf_tbl_ptr;
+  uint32_t device_id = 0;
+  uint32_t stream_id = 0;
+  uint32_t its_id = 0;
+  uint32_t req_instance;
 
-  tbl_index = 0;
-  bdf_tbl_ptr = val_pcie_bdf_table_ptr();
+  index = val_pe_get_index_mpid (val_pe_get_mpid());
 
-  /* Check If PCIe Hierarchy supports P2P. */
-  if (val_pcie_p2p_support())
+  if (val_gic_get_info(GIC_INFO_NUM_ITS) == 0) {
+      val_print(ACS_PRINT_DEBUG, "\n       No ITS, Skipping Test.\n", 0);
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
+      return;
+  }
+
+  /* Read the number of excerciser cards */
+  num_cards = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
+
+  /* Disable all SMMUs */
+  num_smmus = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
+  for (instance = 0; instance < num_smmus; ++instance)
+     val_smmu_disable(instance);
+
+  for (instance = 0; instance < num_cards; instance++)
   {
-    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+
+    /* if init fail moves to next exerciser */
+    if (val_exerciser_init(instance))
+        continue;
+
+    /* Get the exerciser BDF */
+    e_bdf = val_exerciser_get_bdf(instance);
+
+    /* Search for MSI-X Capability */
+    if (val_pcie_find_capability(e_bdf, PCIE_CAP, CID_MSIX, &msi_cap_offset)) {
+      val_print(ACS_PRINT_INFO, "\n       No MSI-X Capability, Skipping for 0x%x", e_bdf);
+      continue;
+    }
+
+    /* Get DeviceID & ITS_ID for this device */
+    status = val_iovirt_get_device_info(PCIE_CREATE_BDF_PACKED(e_bdf),
+                                        PCIE_EXTRACT_BDF_SEG(e_bdf), &device_id,
+                                        &stream_id, &its_id);
+    if (status) {
+        val_print(ACS_PRINT_ERR,
+            "\n       Could not get device info for BDF : 0x%x", e_bdf);
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+        return;
+    }
+
+    /* Search for an exerciser within the same ITS Group */
+    status = get_exerciser_in_its_group(its_id, &req_instance);
+    if (status) {
+        val_print(ACS_PRINT_INFO,
+            "\n       Could not find another exerciser : 0x%x", e_bdf);
+        continue;
+    }
+
+    /* Get the other exerciser BDF, for which we will not create the mappings */
+    req_bdf = val_exerciser_get_bdf(req_instance);
+
+    test_skip = 0;
+
+    /* Create mappings for device = device_id & fill msi address and data to
+     * other exerciser = req_bdf's MSI Table */
+    status = val_gic_request_msi(req_bdf, device_id, its_id, lpi_int_id + instance, msi_index);
+    if (status) {
+        val_print(ACS_PRINT_ERR,
+            "\n       MSI Assignment failed for bdf : 0x%x", req_bdf);
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
+        return;
+    }
+
+    status = val_gic_install_isr(lpi_int_id + instance, intr_handler);
+
+    if (status) {
+        val_print(ACS_PRINT_ERR,
+            "\n       Intr handler registration failed Interrupt : 0x%x", lpi_int_id + instance);
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
+        return;
+    }
+
+    /* Set the interrupt trigger status to pending */
+    irq_pending = 1;
+
+    /* Trigger the interrupt from other exerciser */
+    val_exerciser_ops(GENERATE_MSI, msi_index, req_instance);
+
+    /* PE busy polls to check the completion of interrupt service routine */
+    timeout = TIMEOUT_MEDIUM;
+    while ((--timeout > 0) && irq_pending)
+        {};
+
+    /* Interrupt should not be generated */
+    if (irq_pending == 0) {
+        val_print(ACS_PRINT_ERR,
+            "\n       Interrupt triggered from diff exerciser : 0x%x, ", req_bdf);
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 5));
+        val_gic_free_msi(req_bdf, device_id, its_id, lpi_int_id + instance, msi_index);
+        return;
+    }
+
+    /* Clear Interrupt and Mappings */
+    val_gic_free_msi(req_bdf, device_id, its_id, lpi_int_id + instance, msi_index);
+
+  }
+
+  if (test_skip) {
+    val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
     return;
   }
 
-  while (tbl_index < bdf_tbl_ptr->num_entries)
-  {
-      bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
-      if (val_pcie_find_capability(bdf, PCIE_ECAP, ECID_ACS, &cap_base) == PCIE_SUCCESS) {
-          /* Enable P2P Request Redirect & Upstream Forwarding */
-          val_pcie_read_cfg(bdf, cap_base + ACSCR_OFFSET, &reg_value);
-
-          reg_value = reg_value | (1 << ACS_CTRL_RRE_SHIFT) | (1 << ACS_CTRL_UFE_SHIFT);
-          val_pcie_write_cfg(bdf, cap_base + ACSCR_OFFSET, reg_value);
-      }
-  }
-
-  while (instance-- != 0)
-  {
-
-      /* if init fail moves to next exerciser */
-      if (val_exerciser_init(instance))
-          continue;
-
-      req_e_bdf = val_exerciser_get_bdf(instance);
-
-      /* Get RP of the exerciser */
-      if (val_pcie_get_rootport(req_e_bdf, &req_rp_bdf))
-          continue;
-
-      /* It ACS Not Supported, Fail.*/
-      if (val_pcie_find_capability(req_rp_bdf, PCIE_ECAP, ECID_ACS, &cap_base) != PCIE_SUCCESS) {
-          val_print(ACS_PRINT_ERR, "\n       ACS Not Supported for BDF : 0x%x", req_rp_bdf);
-          fail_cnt++;
-          continue;
-      }
-
-      /* Find another exerciser on other rootport,
-         Break from the test if no such exerciser if found */
-      if (get_target_exer_bdf(req_rp_bdf, &tgt_e_bdf, &tgt_rp_bdf, &bar_base))
-          break;
-
-      /* If Both RP's Supports ACS Then Only Run Otherwise Skip the EP */
-      test_skip = 0;
-
-      /* Check For Redirected Request Validation Functionality */
-      status = check_redirected_req_validation(instance, req_e_bdf, req_rp_bdf,
-                                               tgt_e_bdf, bar_base);
-      if (status == ACS_STATUS_SKIP)
-          val_print(ACS_PRINT_ERR, "\n       ACS Validation Check Skipped for 0x%x", req_rp_bdf);
-      else if (status) {
-          fail_cnt++;
-          val_print(ACS_PRINT_ERR, "\n       ACS Redirected Req Check Failed for 0x%x", req_rp_bdf);
-      }
-
-  }
-
-  if (test_skip == 1)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
-  else if (fail_cnt)
-      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, fail_cnt));
-  else
-      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
-
-  return;
+  /* Pass Test */
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 
 }
 
 uint32_t
 os_e013_entry(void)
 {
-  uint32_t num_pe = 1;
+
   uint32_t status = ACS_STATUS_FAIL;
+
+  uint32_t num_pe = 1;  //This test is run on single processor
 
   status = val_initialize_test(TEST_NUM, TEST_DESC, num_pe);
   if (status != ACS_STATUS_SKIP)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
-  /* Get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe);
+  /* get the result from all PE and check for failure */
+  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM));
+  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
 
   return status;
 }

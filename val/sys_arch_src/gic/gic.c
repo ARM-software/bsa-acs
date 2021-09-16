@@ -142,3 +142,89 @@ val_bsa_gic_max_espi_val(void)
   else
       return 0;
 }
+
+
+/**
+  @brief  API used to check whether int_id is a espi interrupt
+  @param  interrupt
+  @return 1: espi interrupt, 0: non-espi interrupt
+**/
+uint32_t
+val_bsa_gic_check_espi_interrupt(uint32_t int_id)
+{
+  if (val_bsa_gic_espi_support() && v3_is_extended_spi(int_id))
+    return 1;
+  else
+    return 0;
+}
+
+/**
+  @brief  API used to clear espi interrupt
+  @param  interrupt
+  @return none
+**/
+void val_bsa_gic_clear_espi_interrupt(uint32_t int_id)
+{
+  v3_clear_extended_spi_interrupt(int_id);
+}
+
+
+/**
+  @brief  API used to find extended PPI support in system.
+  @param  none
+  @return 0 if not supported, 1 supported
+**/
+uint32_t
+val_bsa_gic_eppi_support(void)
+{
+  uint32_t gic_version;
+
+  gic_version = val_gic_get_info(GIC_INFO_VERSION);
+  if (gic_version >= 3) {
+      if ((v3_read_gicr_typer() >> GICD_TYPER_EPPI_NUM_SHIFT) & GICD_TYPER_EPPI_NUM_MASK)
+        return 1;
+      else
+         return 0;
+  }
+  else
+      return 0;
+}
+
+/**
+  @brief  API used to find  max eppi value
+  @param  none
+  @return max eppi value
+**/
+uint32_t
+val_bsa_gic_max_eppi_val(void)
+{
+  uint32_t gic_version;
+  uint32_t ppi_range;
+
+  gic_version = val_gic_get_info(GIC_INFO_VERSION);
+  if (gic_version >= 3) {
+      ppi_range = ((v3_read_gicr_typer() >> GICD_TYPER_EPPI_NUM_SHIFT) & GICD_TYPER_EPPI_NUM_MASK);
+      if (ppi_range == 1)
+        return 1087;
+      else if (ppi_range == 2)
+        return 1119;
+      else
+        return 0; /* return 0 if EPPI not supported*/
+   }
+  else
+      return 0;
+}
+
+/**
+  @brief  API used to check whether int_id is a eppi interrupt
+  @param  interrupt
+  @return 1: eppi interrupt
+**/
+uint32_t
+val_bsa_gic_check_eppi_interrupt(uint32_t int_id)
+{
+  if (val_bsa_gic_eppi_support() && v3_is_extended_ppi(int_id))
+    return 1;
+  else
+    return 0;
+}

@@ -36,7 +36,7 @@ isr()
 
   val_print(ACS_PRINT_INFO, "\n       Received interrupt   ", 0);
   val_timer_disable_system_timer((addr_t)cnt_base_n);
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   val_gic_end_of_interrupt(intid);
 }
 
@@ -54,7 +54,7 @@ payload()
 
   if (!timer_num) {
       val_print(ACS_PRINT_DEBUG, "\n       No System timers are defined  ", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
@@ -73,14 +73,14 @@ payload()
       if (status == ACS_STATUS_SKIP) {
           val_print(ACS_PRINT_WARN,
                     "\n       Security doesn't allow access to timer registers      ", 0);
-          val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
+          val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
           return;
       }
 
       cnt_base_n = val_timer_get_info(TIMER_INFO_SYS_CNT_BASE_N, timer_num);
       if (cnt_base_n == 0) {
-          val_print(ACS_PRINT_WARN, "\n      CNT_BASE_N is zero                 ", 0);
-          val_set_status(index, RESULT_SKIP(TEST_NUM, 03));
+          val_print(ACS_PRINT_WARN, "\n       CNT_BASE_N is zero                 ", 0);
+          val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
           return;
       }
 
@@ -88,7 +88,7 @@ payload()
       intid = val_timer_get_info(TIMER_INFO_SYS_INTID, timer_num);
       if (val_gic_install_isr(intid, isr)) {
           val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
           return;
       }
 
@@ -100,14 +100,14 @@ payload()
 
       if (timeout == 0) {
           val_print(ACS_PRINT_ERR, "\n       Sys timer interrupt not received on %d   ", intid);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
           return;
       }
   }
 
   if (!ns_timer) {
       val_print(ACS_PRINT_WARN, "\n       No non-secure systimer implemented", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 05));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 5));
       return;
   }
 

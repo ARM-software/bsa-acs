@@ -39,7 +39,7 @@ esr(uint64_t interrupt_type, void *context)
   val_pe_update_elr(context, (uint64_t)branch_to_test);
 
   val_print(ACS_PRINT_INFO, "\n       Received exception of type: %d", interrupt_type);
-  val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 }
 
 static
@@ -108,7 +108,7 @@ payload(void)
       val_pcie_disable_msa(bdf);
 
       /* Set test status as FAIL, update to PASS in exception handler */
-      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
+      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
 
       /* If test runs for atleast an endpoint */
       test_skip = 0;
@@ -133,7 +133,7 @@ exception_return:
           val_pcie_clear_urd(bdf);
        } else
        {
-           val_print(ACS_PRINT_ERR, "\n      BDF %x MSE functionality failure", bdf);
+           val_print(ACS_PRINT_ERR, "\n       BDF %x MSE functionality failure", bdf);
            test_fails++;
        }
 
@@ -145,11 +145,11 @@ exception_return:
   }
 
   if (test_skip == 1)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
   else if (test_fails)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, test_fails));
   else
-      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

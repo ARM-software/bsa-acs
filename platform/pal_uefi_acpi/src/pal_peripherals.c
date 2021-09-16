@@ -58,7 +58,8 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
   EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE *spcr = NULL;
 
   if (peripheralInfoTable == NULL) {
-    bsa_print(ACS_PRINT_ERR, L"Input Peripheral Table Pointer is NULL. Cannot create Peripheral INFO \n");
+    bsa_print(ACS_PRINT_ERR,
+              L" Input Peripheral Table Pointer is NULL. Cannot create Peripheral INFO \n");
     return;
   }
 
@@ -76,7 +77,9 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
           per_info->type  = PERIPHERAL_TYPE_USB;
           per_info->base0 = palPcieGetBase(DeviceBdf, BAR0);
           per_info->bdf   = DeviceBdf;
-          bsa_print(ACS_PRINT_INFO, L"Found a USB controller %4x \n", per_info->base0);
+          per_info->platform_type = PLATFORM_TYPE_ACPI;
+          bsa_print(ACS_PRINT_INFO, L"  Found a USB controller %4x\n",
+                                                            per_info->base0);
           peripheralInfoTable->header.num_usb++;
           per_info++;
        }
@@ -93,7 +96,9 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
           per_info->type  = PERIPHERAL_TYPE_SATA;
           per_info->base0 = palPcieGetBase(DeviceBdf, BAR0);
           per_info->bdf   = DeviceBdf;
-          bsa_print(ACS_PRINT_INFO, L"Found a SATA controller %4x \n", per_info->base0);
+          per_info->platform_type = PLATFORM_TYPE_ACPI;
+          bsa_print(ACS_PRINT_INFO, L"  Found a SATA controller %4x\n",
+                                                            per_info->base0);
           peripheralInfoTable->header.num_sata++;
           per_info++;
        }
@@ -210,7 +215,7 @@ IsDeviceMemory(EFI_MEMORY_TYPE type)
   @brief  This API fills in the MEMORY_INFO_TABLE with information about memory in the
           system. This is achieved by parsing the UEFI memory map.
 
-  @param  peripheralInfoTable  - Address where the Peripheral information needs to be filled.
+  @param  memory_info_table Address where the memory info table is created
 
   @return  None
 **/
@@ -230,7 +235,7 @@ pal_memory_create_info_table(MEMORY_INFO_TABLE *memoryInfoTable)
   UINT32                Index, i = 0;
 
   if (memoryInfoTable == NULL) {
-    bsa_print(ACS_PRINT_ERR, L"Input Memory Table Pointer is NULL. Cannot create Memory INFO \n");
+    bsa_print(ACS_PRINT_ERR, L" Input Memory Table Pointer is NULL. Cannot create Memory INFO \n");
     return;
   }
 
@@ -256,7 +261,7 @@ pal_memory_create_info_table(MEMORY_INFO_TABLE *memoryInfoTable)
   if (!EFI_ERROR (Status)) {
     MemoryMapPtr = MemoryMap;
     for (Index = 0; Index < (MemoryMapSize / DescriptorSize); Index++) {
-          bsa_print(ACS_PRINT_INFO, L"Reserved region of type %d [0x%lX, 0x%lX]\n",
+          bsa_print(ACS_PRINT_INFO, L"  Reserved region of type %d [0x%lX, 0x%lX]\n",
             MemoryMapPtr->Type, (UINTN)MemoryMapPtr->PhysicalStart,
             (UINTN)(MemoryMapPtr->PhysicalStart + MemoryMapPtr->NumberOfPages * EFI_PAGE_SIZE));
       if (IsUefiMemory ((EFI_MEMORY_TYPE)MemoryMapPtr->Type)) {
@@ -277,7 +282,7 @@ pal_memory_create_info_table(MEMORY_INFO_TABLE *memoryInfoTable)
       memoryInfoTable->info[i].size      = (MemoryMapPtr->NumberOfPages * EFI_PAGE_SIZE);
       i++;
       if (i >= MEM_INFO_TBL_MAX_ENTRY) {
-        bsa_print(ACS_PRINT_DEBUG, L"Memory Info tbl limit exceeded, Skipping remaining\n", 0);
+        bsa_print(ACS_PRINT_DEBUG, L"  Memory Info tbl limit exceeded, Skipping remaining\n", 0);
         break;
       }
 
@@ -288,6 +293,15 @@ pal_memory_create_info_table(MEMORY_INFO_TABLE *memoryInfoTable)
 
 }
 
+/**
+  @brief Maps the physical memory region into the virtual address space
+
+  @param ptr Pointer to physical memory region
+  @param size Size
+  @param attr Attributes
+
+  @return Pointer to mapped virtual address space
+**/
 UINT64
 pal_memory_ioremap(VOID *ptr, UINT32 size, UINT32 attr)
 {
@@ -296,7 +310,13 @@ pal_memory_ioremap(VOID *ptr, UINT32 size, UINT32 attr)
   return (UINT64)ptr;
 }
 
+/**
+  @brief Removes the physical memory to virtual address space mapping
 
+  @param ptr Pointer to mapped space
+
+  @return None
+**/
 VOID
 pal_memory_unmap(VOID *ptr)
 {
@@ -337,7 +357,7 @@ pal_memory_get_unpopulated_addr(UINT64 *addr, UINT32 instance)
         if (*addr == 0)
           continue;
 
-        bsa_print(ACS_PRINT_INFO,L"Unpopulated region with base address 0x%lX found\n", *addr);
+        bsa_print(ACS_PRINT_INFO,L" Unpopulated region with base address 0x%lX found\n", *addr);
         return EFI_SUCCESS;
       }
 

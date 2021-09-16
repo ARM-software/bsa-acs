@@ -104,8 +104,7 @@ PalGetMaxMpidr()
   @brief  Allocate memory region for secondary PE stack use. SIZE of stack for each PE
           is a #define
 
-  @param  Number of PEs
-
+  @param  mpidr Pass MIPDR register content
   @return  None
 **/
 VOID
@@ -152,19 +151,17 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
 
 
   if (PeTable == NULL) {
-    bsa_print(ACS_PRINT_ERR, L"Input PE Table Pointer is NULL. Cannot create PE INFO \n");
+    bsa_print(ACS_PRINT_ERR, L" Input PE Table Pointer is NULL. Cannot create PE INFO \n");
     return;
   }
+  pal_pe_create_info_table_dt(PeTable);
+  return;
 
   gMadtHdr = (EFI_ACPI_6_1_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER *) pal_get_madt_ptr();
 
   if (gMadtHdr != NULL) {
     TableLength =  gMadtHdr->Header.Length;
-    bsa_print(ACS_PRINT_INFO, L" MADT is at %x and length is %x \n", gMadtHdr, TableLength);
-  } else {
-    bsa_print(ACS_PRINT_DEBUG, L"MADT not found..Checking DT \n");
-    pal_pe_create_info_table_dt(PeTable);
-    return;
+    bsa_print(ACS_PRINT_INFO, L"  MADT is at %x and length is %x \n", gMadtHdr, TableLength);
   }
 
   PeTable->header.num_of_pe = 0;
@@ -180,7 +177,7 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
       Ptr->mpidr    = Entry->MPIDR;
       Ptr->pe_num   = PeTable->header.num_of_pe;
       Ptr->pmu_gsiv = Entry->PerformanceInterruptGsiv;
-      bsa_print(ACS_PRINT_DEBUG, L"MPIDR %x PE num %x \n", Ptr->mpidr, Ptr->pe_num);
+      bsa_print(ACS_PRINT_DEBUG, L"  MPIDR %x PE num %d \n", Ptr->mpidr, Ptr->pe_num);
       pal_pe_data_cache_ops_by_va((UINT64)Ptr, CLEAN_AND_INVALIDATE);
       Ptr++;
       PeTable->header.num_of_pe++;
@@ -376,7 +373,7 @@ pal_pe_info_table_pmu_gsiv_dt(PE_INFO_TABLE *PeTable)
 
   dt_ptr = pal_get_dt_ptr();
   if (dt_ptr == 0) {
-      bsa_print(ACS_PRINT_ERR, L"dt_ptr is NULL \n");
+      bsa_print(ACS_PRINT_ERR, L" dt_ptr is NULL \n");
       return;
   }
 
@@ -387,7 +384,7 @@ pal_pe_info_table_pmu_gsiv_dt(PE_INFO_TABLE *PeTable)
       /* Search for pmu nodes*/
       offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, pmu_dt_arr[i]);
       if (offset < 0) {
-          bsa_print(ACS_PRINT_DEBUG, L" PMU compatible value not found for index:%d\n", i);
+          bsa_print(ACS_PRINT_DEBUG, L"  PMU compatible value not found for index:%d\n", i);
           continue; /* Search for next compatible item*/
       }
 
@@ -396,23 +393,23 @@ pal_pe_info_table_pmu_gsiv_dt(PE_INFO_TABLE *PeTable)
           Pintr = (UINT32 *)
                     fdt_getprop_namelen((void *)dt_ptr, offset, "interrupts", 10, &prop_len);
           if ((prop_len < 0) || (Pintr == NULL)) {
-              bsa_print(ACS_PRINT_ERR, L" PROPERTY interrupts offset %x, Error %d\n",
+              bsa_print(ACS_PRINT_ERR, L"  PROPERTY interrupts offset %x, Error %d\n",
                         offset, prop_len);
               return;
           }
 
           interrupt_cell = fdt_interrupt_cells((const void *)dt_ptr, offset);
-          bsa_print(ACS_PRINT_DEBUG, L" interrupt_cell  %d\n", interrupt_cell);
+          bsa_print(ACS_PRINT_DEBUG, L"  interrupt_cell  %d\n", interrupt_cell);
           if (interrupt_cell < INTERRUPT_CELLS_MIN || interrupt_cell > INTERRUPT_CELLS_MAX) {
-              bsa_print(ACS_PRINT_ERR, L" Invalid interrupt cell : %d \n", interrupt_cell);
+              bsa_print(ACS_PRINT_ERR, L"  Invalid interrupt cell : %d \n", interrupt_cell);
               return;
           }
 
           interrupt_frame_count = ((prop_len/sizeof(int))/interrupt_cell);
-          bsa_print(ACS_PRINT_DEBUG, L" interrupt frame count : %d \n", interrupt_frame_count);
+          bsa_print(ACS_PRINT_DEBUG, L"  interrupt frame count : %d \n", interrupt_frame_count);
 
           if (interrupt_frame_count == 0) {
-              bsa_print(ACS_PRINT_ERR, L" interrupt_frame_count is invalid\n");
+              bsa_print(ACS_PRINT_ERR, L"  interrupt_frame_count is invalid\n");
               return;
           }
 
@@ -433,12 +430,12 @@ pal_pe_info_table_pmu_gsiv_dt(PE_INFO_TABLE *PeTable)
                     Ptr->pmu_gsiv = 0; /* Set to zero*/
                     Ptr++;
                 }
-                bsa_print(ACS_PRINT_WARN, L" PMU interrupt type not mentioned\n");
+                bsa_print(ACS_PRINT_WARN, L"  PMU interrupt type not mentioned\n");
                 return;
               }
 
-              bsa_print(ACS_PRINT_DEBUG, L" intr_type    : %d \n", intr_type);
-              bsa_print(ACS_PRINT_DEBUG, L" pmu_intr_num : %d \n", curr_pmu_intr_num);
+              bsa_print(ACS_PRINT_DEBUG, L"  intr_type    : %d \n", intr_type);
+              bsa_print(ACS_PRINT_DEBUG, L"  pmu_intr_num : %d \n", curr_pmu_intr_num);
 
               if (intr_type == INTERRUPT_TYPE_PPI) {
                 curr_pmu_intr_num += PPI_OFFSET;
@@ -448,7 +445,7 @@ pal_pe_info_table_pmu_gsiv_dt(PE_INFO_TABLE *PeTable)
                       Ptr->pmu_gsiv = 0; /* Set to zero*/
                       Ptr++;
                     }
-                    bsa_print(ACS_PRINT_WARN, L" PMU interrupt number mismatch found\n");
+                    bsa_print(ACS_PRINT_WARN, L"  PMU interrupt number mismatch found\n");
                     return;
                 }
                 if (prev_pmu_intr_num == 0) { /* Update table first time with same id*/
@@ -504,23 +501,23 @@ pal_pe_create_info_table_dt(PE_INFO_TABLE *PeTable)
 
   if (offset != -FDT_ERR_NOTFOUND) {
       parent_offset = fdt_parent_offset((const void *) dt_ptr, offset);
-      bsa_print(ACS_PRINT_DEBUG, L" NODE cpu offset %d\n", offset);
+      bsa_print(ACS_PRINT_DEBUG, L"  NODE cpu offset %d\n", offset);
 
       size_cell = fdt_size_cells((const void *) dt_ptr, parent_offset);
-      bsa_print(ACS_PRINT_DEBUG, L" NODE cpu size cell %d\n", size_cell);
+      bsa_print(ACS_PRINT_DEBUG, L"  NODE cpu size cell %d\n", size_cell);
       if (size_cell != 0) {
-        bsa_print(ACS_PRINT_ERR, L" Invalid size cell for node cpu\n");
+        bsa_print(ACS_PRINT_ERR, L"  Invalid size cell for node cpu\n");
         return;
       }
 
       addr_cell = fdt_address_cells((const void *) dt_ptr, parent_offset);
-      bsa_print(ACS_PRINT_DEBUG, L" NODE cpu  addr cell %d\n", addr_cell);
+      bsa_print(ACS_PRINT_DEBUG, L"  NODE cpu  addr cell %d\n", addr_cell);
       if (addr_cell <= 0 || addr_cell > 2) {
-        bsa_print(ACS_PRINT_ERR, L" Invalid address cell for node cpu\n");
+        bsa_print(ACS_PRINT_ERR, L"  Invalid address cell for node cpu\n");
         return;
       }
   } else {
-        bsa_print(ACS_PRINT_ERR, L" No CPU node found \n");
+        bsa_print(ACS_PRINT_ERR, L"  No CPU node found \n");
         return;
   }
 
@@ -528,19 +525,19 @@ pal_pe_create_info_table_dt(PE_INFO_TABLE *PeTable)
 
   /* Perform a DT traversal till all cpu node are parsed */
   while (offset != -FDT_ERR_NOTFOUND) {
-      bsa_print(ACS_PRINT_DEBUG, L" SUBNODE cpu%d offset %x\n", PeTable->header.num_of_pe, offset);
+      bsa_print(ACS_PRINT_DEBUG, L"  SUBNODE cpu%d offset %x\n", PeTable->header.num_of_pe, offset);
 
       prop_val = (UINT32 *)fdt_getprop_namelen((void *)dt_ptr, offset, "reg", 3, &prop_len);
       if ((prop_len < 0) || (prop_val == NULL)) {
-        bsa_print(ACS_PRINT_ERR, L" PROPERTY reg offset %x, Error %d\n", offset, prop_len);
+        bsa_print(ACS_PRINT_ERR, L"  PROPERTY reg offset %x, Error %d\n", offset, prop_len);
         return;
       }
 
       reg_val[0] = fdt32_to_cpu(prop_val[0]);
-      bsa_print(ACS_PRINT_DEBUG, L" reg_val<0> = %x\n", reg_val[0]);
+      bsa_print(ACS_PRINT_DEBUG, L"  reg_val<0> = %x\n", reg_val[0]);
       if (addr_cell == 2) {
         reg_val[1] = fdt32_to_cpu(prop_val[1]);
-        bsa_print(ACS_PRINT_DEBUG, L" reg_val<1> = %x\n", reg_val[1]);
+        bsa_print(ACS_PRINT_DEBUG, L"  reg_val<1> = %x\n", reg_val[1]);
         Ptr->mpidr = (((INT64)(reg_val[0] & PROPERTY_MASK_PE_AFF3) << 32) |
                      (reg_val[1] & PROPERTY_MASK_PE_AFF0_AFF2));
       } else {

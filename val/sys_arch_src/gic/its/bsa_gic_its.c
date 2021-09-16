@@ -17,6 +17,7 @@
 
 
 #include "bsa_gic_its.h"
+#include "include/bsa_acs_gic_support.h"
 
 uint64_t ArmReadMpidr(void);
 
@@ -102,7 +103,7 @@ ArmGicSetItsCommandQueueBase(
 
   write_value = val_mmio_read64(ItsBase + ARM_GITS_CBASER) & (~ARM_GITS_CBASER_PA_MASK);
   write_value = write_value | (Address & ARM_GITS_CBASER_PA_MASK);
-  write_value = write_value | ARM_GITS_CBASER_VALID;
+  write_value = write_value | ARM_GITS_CBASER_VALID | (NUM_PAGES_8 - 1);
 
   val_mmio_write64(ItsBase + ARM_GITS_CBASER, write_value);
 
@@ -318,7 +319,8 @@ void PollTillCommandQueueDone(uint32_t its_index)
 
     count++;
     if (count > WAIT_ITS_COMMAND_DONE) {
-      val_print(ACS_PRINT_ERR,  "ITS : Command Queue READR not moving, Test may not pass.\n", 0);
+      val_print(ACS_PRINT_ERR,
+                "\n       ITS : Command Queue READR not moving, Test may not pass", 0);
       break;
     }
 
@@ -369,15 +371,21 @@ void val_its_clear_lpi_map(uint32_t its_index, uint32_t device_id, uint32_t int_
 
   /* Discard Mappings */
   WriteCmdQDISCARD(its_index, (uint64_t *)(ItsCommandBase), device_id, int_id);
+  /* Un Map Device using MAPD */
+  WriteCmdQMAPD(its_index, (uint64_t *)(ItsCommandBase), device_id,
+                g_gic_its_info->GicIts[its_index].ITTBase,
+                0, 0 /*InValid*/);
   /* ITS SYNC Command */
   WriteCmdQSYNC(its_index, (uint64_t *)(ItsCommandBase), RDBase);
 
+  TestExecuteBarrier();
   /* Update the CWRITER Register so that all the commands from Command queue gets executed.*/
   value = ((g_cwriter_ptr[its_index] * NUM_BYTES_IN_DW));
   val_mmio_write64((ItsBase + ARM_GITS_CWRITER), value);
 
   /* Check CREADR value which ensures Command Queue is processed */
   PollTillCommandQueueDone(its_index);
+  TestExecuteBarrier();
 
 }
 
@@ -421,12 +429,15 @@ void val_its_create_lpi_map(uint32_t its_index, uint32_t device_id,
   /* ITS SYNC Command */
   WriteCmdQSYNC(its_index, (uint64_t *)(ItsCommandBase), RDBase);
 
+  TestExecuteBarrier();
+
   /* Update the CWRITER Register so that all the commands from Command queue gets executed.*/
   value = ((g_cwriter_ptr[its_index] * NUM_BYTES_IN_DW));
   val_mmio_write64((ItsBase + ARM_GITS_CWRITER), value);
 
   /* Check CREADR value which ensures Command Queue is processed */
   PollTillCommandQueueDone(its_index);
+  TestExecuteBarrier();
 
 }
 
@@ -453,7 +464,7 @@ uint32_t val_its_get_max_lpi(void)
 }
 
 
-uint64_t val_its_get_translator_addr(uint32_t its_index)
+uint64_t val_its_get_translater_addr(uint32_t its_index)
 {
   return (g_gic_its_info->GicIts[its_index].Base + ARM_GITS_TRANSLATER);
 }
@@ -534,12 +545,12 @@ uint32_t val_its_init(void)
 
   g_its_setup_done = 1;
 
-  val_print(ACS_PRINT_INFO, "ITS : Info Block \n", 0);
+  val_print(ACS_PRINT_INFO, "  ITS : Info Block \n", 0);
   for (index = 0; index < g_gic_its_info->GicNumIts; index++)
   {
-      val_print(ACS_PRINT_INFO, "GIC ITS Index : %x\n", index);
-      val_print(ACS_PRINT_INFO, "GIC ITS ID : %x\n", g_gic_its_info->GicIts[index].ID);
-      val_print(ACS_PRINT_INFO, "GIC ITS Base : %x\n\n", g_gic_its_info->GicIts[index].Base);
+      val_print(ACS_PRINT_INFO, "  GIC ITS Index: %x", index);
+      val_print(ACS_PRINT_INFO, " ID: %x", g_gic_its_info->GicIts[index].ID);
+      val_print(ACS_PRINT_INFO, " Base: %x\n", g_gic_its_info->GicIts[index].Base);
   }
 
   return 0;

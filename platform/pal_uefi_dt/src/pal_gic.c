@@ -94,11 +94,11 @@ pal_pe_info_table_gmaint_gsiv_dt(PE_INFO_TABLE *PeTable)
       /* Search for GICv3 nodes*/
       offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, gicv3_dt_arr[i]);
       if (offset < 0) {
-        bsa_print(ACS_PRINT_DEBUG, L" GICv3 compatible value not found for index : %d\n", i);
+        bsa_print(ACS_PRINT_DEBUG, L"  GICv3 compatible value not found for index : %d\n", i);
         continue; /* Search for next compatible item*/
       }
       else {
-        bsa_print(ACS_PRINT_DEBUG, L" NODE Int Ctrl offset  %x  \n", offset);
+        bsa_print(ACS_PRINT_DEBUG, L"  GIC_V3: NODE Int Ctrl offset  %x  \n", offset);
         break;
       }
   }
@@ -108,32 +108,33 @@ pal_pe_info_table_gmaint_gsiv_dt(PE_INFO_TABLE *PeTable)
           /* Search for GICv2 nodes*/
           offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, gicv2_dt_arr[i]);
           if (offset < 0) {
-              bsa_print(ACS_PRINT_DEBUG, L" GICv2 compatible value not found for index : %d\n", i);
+              bsa_print(ACS_PRINT_DEBUG, L"  GICv2 compatible value not found for index : %d\n", i);
               continue; /* Search for next compatible item*/
           }
           else {
-            bsa_print(ACS_PRINT_DEBUG, L" NODE Int Ctrl offset  %x  \n", offset);
+            bsa_print(ACS_PRINT_DEBUG, L"  GIC_V2: NODE Int Ctrl offset  %x  \n", offset);
             break;
           }
       }
   }
 
   if (offset < 0) {
-      bsa_print(ACS_PRINT_DEBUG, L"GIC compatible node not found\n");
+      bsa_print(ACS_PRINT_DEBUG, L"  GIC compatible node not found\n");
       return;
   }
 
   /* read the interrupt property value */
   Pintr = (UINT32 *)fdt_getprop_namelen((void *)dt_ptr, offset, "interrupts", 10, &prop_len);
   if ((prop_len < 0) || (Pintr == NULL)) {
-      bsa_print(ACS_PRINT_ERR, L" PROPERTY interrupts offset %x, Error %d\n", offset, prop_len);
+      bsa_print(ACS_PRINT_DEBUG, L"  PROPERTY interrupts read Error %d\n",
+                    prop_len);
       return;
   }
 
   interrupt_cell = fdt_interrupt_cells((const void *)dt_ptr, offset);
-  bsa_print(ACS_PRINT_DEBUG, L" interrupt_cell  %d\n", interrupt_cell);
+  bsa_print(ACS_PRINT_DEBUG, L"  interrupt_cell  %d\n", interrupt_cell);
   if (interrupt_cell < INTERRUPT_CELLS_MIN || interrupt_cell > INTERRUPT_CELLS_MAX) {
-      bsa_print(ACS_PRINT_ERR, L" Invalid interrupt cell : %d \n", interrupt_cell);
+      bsa_print(ACS_PRINT_ERR, L"  Invalid interrupt cell : %d \n", interrupt_cell);
       return;
   }
 
@@ -142,7 +143,7 @@ pal_pe_info_table_gmaint_gsiv_dt(PE_INFO_TABLE *PeTable)
           if (Pintr[0])
               Ptr->gmain_gsiv = fdt32_to_cpu(Pintr[1]) + PPI_OFFSET;
           else
-              bsa_print(ACS_PRINT_WARN, L" Int is not PPI \n", 0);
+              bsa_print(ACS_PRINT_WARN, L"  Int is not PPI \n", 0);
       }
       else
           Ptr->gmain_gsiv = fdt32_to_cpu(Pintr[0]) + PPI_OFFSET;
@@ -178,16 +179,15 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
   GicTable->header.num_its = 0;
   GicTable->header.num_msi_frame = 0;
 
+  pal_gic_create_info_table_dt(GicTable);
+  dt_dump_gic_table(GicTable);
+  return;
+
   gMadtHdr = (EFI_ACPI_6_1_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER *) pal_get_madt_ptr();
 
   if (gMadtHdr != NULL) {
     TableLength =  gMadtHdr->Header.Length;
-    bsa_print(ACS_PRINT_INFO, L" MADT is at %x and length is %x \n", gMadtHdr, TableLength);
-  } else {
-    bsa_print(ACS_PRINT_DEBUG, L" MADT not found. Checking DT table \n");
-    pal_gic_create_info_table_dt(GicTable);
-    dt_dump_gic_table(GicTable);
-    return;
+    bsa_print(ACS_PRINT_INFO, L"  MADT is at %x and length is %x \n", gMadtHdr, TableLength);
   }
 
   Entry = (EFI_ACPI_6_1_GIC_STRUCTURE *) (gMadtHdr + 1);
@@ -200,7 +200,7 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
       if (Entry->PhysicalBaseAddress != 0) {
         GicEntry->type = ENTRY_TYPE_CPUIF;
         GicEntry->base = Entry->PhysicalBaseAddress;
-        bsa_print(ACS_PRINT_INFO, L" GIC CPUIF base %x \n", GicEntry->base);
+        bsa_print(ACS_PRINT_INFO, L"  GIC CPUIF base %x \n", GicEntry->base);
         GicEntry++;
       }
 
@@ -208,7 +208,7 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
         GicEntry->type = ENTRY_TYPE_GICC_GICRD;
         GicEntry->base = Entry->GICRBaseAddress;
         GicEntry->length = 0;
-        bsa_print(ACS_PRINT_INFO, L" GIC RD base %x \n", GicEntry->base);
+        bsa_print(ACS_PRINT_INFO, L"  GIC RD base %x \n", GicEntry->base);
         GicTable->header.num_gicrd++;
         GicEntry++;
       }
@@ -218,7 +218,7 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
         GicEntry->type = ENTRY_TYPE_GICD;
         GicEntry->base = ((EFI_ACPI_6_1_GIC_DISTRIBUTOR_STRUCTURE *)Entry)->PhysicalBaseAddress;
         GicTable->header.gic_version = ((EFI_ACPI_6_1_GIC_DISTRIBUTOR_STRUCTURE *)Entry)->GicVersion;
-        bsa_print(ACS_PRINT_INFO, L" GIC DIS base %x \n", GicEntry->base);
+        bsa_print(ACS_PRINT_INFO, L"  GIC DIS base %x \n", GicEntry->base);
         GicTable->header.num_gicd++;
         GicEntry++;
     }
@@ -227,7 +227,7 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
         GicEntry->type = ENTRY_TYPE_GICR_GICRD;
         GicEntry->base = ((EFI_ACPI_6_1_GICR_STRUCTURE *)Entry)->DiscoveryRangeBaseAddress;
         GicEntry->length = ((EFI_ACPI_6_1_GICR_STRUCTURE *)Entry)->DiscoveryRangeLength;
-        bsa_print(ACS_PRINT_INFO, L" GIC RD base Structure %x \n", GicEntry->base);
+        bsa_print(ACS_PRINT_INFO, L"  GIC RD base Structure %x \n", GicEntry->base);
         GicTable->header.num_gicrd++;
         GicEntry++;
     }
@@ -236,8 +236,8 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
         GicEntry->type = ENTRY_TYPE_GICITS;
         GicEntry->base = ((EFI_ACPI_6_1_GIC_ITS_STRUCTURE *)Entry)->PhysicalBaseAddress;
         GicEntry->entry_id = ((EFI_ACPI_6_1_GIC_ITS_STRUCTURE *)Entry)->GicItsId;
-        bsa_print(ACS_PRINT_INFO, L" GIC ITS base %x \n", GicEntry->base);
-        bsa_print(ACS_PRINT_INFO, L" GIC ITS ID%x \n", GicEntry->entry_id);
+        bsa_print(ACS_PRINT_INFO, L"  GIC ITS base %x \n", GicEntry->base);
+        bsa_print(ACS_PRINT_INFO, L"  GIC ITS ID%x \n", GicEntry->entry_id);
         GicTable->header.num_its++;
         GicEntry++;
     }
@@ -344,9 +344,15 @@ pal_gic_set_intr_trigger(UINT32 int_id, INTR_TRIGGER_INFO_TYPE_e trigger_type)
   return 0;
 }
 
-/* Place holder function. Need to be
- * implemented if needed in later releases
- */
+/** Place holder function. Need to be implemented if needed in later releases
+  @brief Registers the interrupt handler for a given IRQ
+
+  @param IrqNum Hardware IRQ number
+  @param MappedIrqNum Mapped IRQ number
+  @param Isr Interrupt Service Routine that returns the status
+
+  @return Status of the operation
+**/
 UINT32
 pal_gic_request_irq (
   UINT32 IrqNum,
@@ -357,9 +363,14 @@ pal_gic_request_irq (
     return 0;
 }
 
-/* Place holder function. Need to be
- * implemented if needed in later releases
- */
+/** Place holder function. Need to be implemented if needed in later releases
+  @brief This function frees the registered interrupt handler for a given IRQ
+
+  @param IrqNum Hardware IRQ number
+  @param MappedIrqNum Mapped IRQ number
+
+  @return none
+**/
 VOID
 pal_gic_free_irq (
   UINT32 IrqNum,
@@ -372,7 +383,7 @@ pal_gic_free_irq (
 /**
   @brief  This API fills in the GIC_INFO Table with information about the GIC in the
           system. This is achieved by parsing the DT blob.
-  @param  PeTable  - Address where the GIC information needs to be filled.
+  @param  GicTable  - Address where the GIC information needs to be filled.
   @return  None
 **/
 VOID
@@ -399,27 +410,27 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
       /* Search for GICv3 nodes*/
       offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, gicv3_dt_arr[i]);
       if (offset < 0) {
-        bsa_print(ACS_PRINT_DEBUG, L" GICv3 compatible value not found for index : %d\n", i);
+        bsa_print(ACS_PRINT_DEBUG, L"  GICv3 compatible value not found for index : %d\n", i);
         continue; /* Search for next compatible item*/
       }
       else {
-        bsa_print(ACS_PRINT_DEBUG, L" NODE Int Ctrl offset  %x  \n", offset);
+        bsa_print(ACS_PRINT_DEBUG, L"  NODE Int Ctrl offset  %x  \n", offset);
         GicTable->header.gic_version = 3;
         break;
       }
   }
 
   if (offset < 0) {
-      bsa_print(ACS_PRINT_DEBUG, L" GIC v3 compatible node not found\n");
+      bsa_print(ACS_PRINT_DEBUG, L"  GIC v3 compatible node not found\n");
       for (i = 0; i < (sizeof(gicv2_dt_arr)/GIC_COMPATIBLE_STR_LEN); i++) {
           /* Search for GICv2 nodes*/
           offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, gicv2_dt_arr[i]);
           if (offset < 0) {
-            bsa_print(ACS_PRINT_DEBUG, L" GICv2 compatible value not found for index : %d\n", i);
+            bsa_print(ACS_PRINT_DEBUG, L"  GICv2 compatible value not found for index : %d\n", i);
             continue; /* Search for next compatible item*/
           }
           else {
-            bsa_print(ACS_PRINT_DEBUG, L" NODE Int Ctrl offset  %x  \n", offset);
+            bsa_print(ACS_PRINT_DEBUG, L"  NODE Int Ctrl offset  %x  \n", offset);
             GicTable->header.gic_version = 2;
             break;
           }
@@ -427,7 +438,7 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
   }
 
   if (offset < 0) {
-      bsa_print(ACS_PRINT_DEBUG, L" GIC v2 compatible node not found\n");
+      bsa_print(ACS_PRINT_DEBUG, L"  GIC v2 compatible node not found\n");
       return;
   }
 
@@ -435,28 +446,28 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
   parent_offset = fdt_parent_offset((const void *) dt_ptr, offset);
 
   size_cell = fdt_size_cells((const void *) dt_ptr, parent_offset);
-  bsa_print(ACS_PRINT_DEBUG, L" NODE gic size cell %d\n", size_cell);
+  bsa_print(ACS_PRINT_DEBUG, L"  NODE gic size cell %d\n", size_cell);
   if (size_cell < 0) {
-      bsa_print(ACS_PRINT_ERR, L" Invalid size cell for node gic\n");
+      bsa_print(ACS_PRINT_ERR, L"  Invalid size cell for node gic\n");
       return;
   }
 
   addr_cell = fdt_address_cells((const void *) dt_ptr, parent_offset);
-  bsa_print(ACS_PRINT_DEBUG, L" NODE gic addr cell %d\n", addr_cell);
+  bsa_print(ACS_PRINT_DEBUG, L"  NODE gic addr cell %d\n", addr_cell);
   if (addr_cell < 0) {
-      bsa_print(ACS_PRINT_ERR, L" Invalid address cell for node gic\n");
+      bsa_print(ACS_PRINT_ERR, L"  Invalid address cell for node gic\n");
       return;
   }
 
   /* read the reg property value */
   Preg_val = (UINT32 *)fdt_getprop_namelen((void *)dt_ptr, offset, "reg", 3, &prop_len);
   if ((prop_len < 0) || (Preg_val == NULL)) {
-      bsa_print(ACS_PRINT_ERR, L" PROPERTY reg offset %x, Error %d\n", offset, prop_len);
+      bsa_print(ACS_PRINT_ERR, L"  PROPERTY reg offset %x, Error %d\n", offset, prop_len);
       return;
   }
 
   num_gic_interfaces = (prop_len/sizeof(int))/(addr_cell + size_cell);
-  bsa_print(ACS_PRINT_DEBUG, L" Gic frame count : %d \n", num_gic_interfaces);
+  bsa_print(ACS_PRINT_DEBUG, L"  Gic frame count : %d \n", num_gic_interfaces);
 
   /* Fill details for Distributor */
   GicEntry->type = ENTRY_TYPE_GICD;
@@ -472,7 +483,7 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
   } else
     GicEntry->length = fdt32_to_cpu(Preg_val[Index++]);
 
-  bsa_print(ACS_PRINT_DEBUG, L"GIC DIS base %x \n", GicEntry->base);
+  bsa_print(ACS_PRINT_DEBUG, L"  GIC DIS base %lx \n", GicEntry->base);
   GicTable->header.num_gicd++;
   GicEntry++;
 
@@ -481,12 +492,12 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
       Prdregions_val = (UINT32 *)fdt_getprop_namelen((void *)dt_ptr, offset,
                                     "redistributor-regions", 21, &prop_len);
       if (prop_len < 0) {
-          bsa_print(ACS_PRINT_DEBUG, L" Single redistributor regions present \n");
+          bsa_print(ACS_PRINT_DEBUG, L"  Single redistributor regions present \n");
           num_of_rd = 1;
       } else
           num_of_rd = fdt32_to_cpu(Prdregions_val[0]);
 
-      bsa_print(ACS_PRINT_DEBUG, L" NUM GIC RD %d \n", num_of_rd);
+      bsa_print(ACS_PRINT_DEBUG, L"  NUM GIC RD %d \n", num_of_rd);
       i = num_of_rd;
       /* Fill details for Redistributor */
       while (i--) {
@@ -503,7 +514,7 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
           } else
               GicEntry->length = fdt32_to_cpu(Preg_val[Index++]);
 
-          bsa_print(ACS_PRINT_DEBUG, L"GIC RD base %x \n", GicEntry->base);
+          bsa_print(ACS_PRINT_DEBUG, L"  GIC RD base %lx \n", GicEntry->base);
           GicTable->header.num_gicrd++;
           GicEntry++;
     }
@@ -524,18 +535,18 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
         cpuif_length = fdt32_to_cpu(Preg_val[Index++]);
 
       num_of_pe = pal_pe_get_num();
+      bsa_print(ACS_PRINT_DEBUG, L"  GIC CPUIF base %lx \n", cpuif_base);
       while (num_of_pe--) {
-        GicEntry->type = ENTRY_TYPE_CPUIF;
-        GicEntry->base = cpuif_base;
-        GicEntry->length = cpuif_length;
-        bsa_print(ACS_PRINT_DEBUG, L"GIC CPUIF base %x \n", GicEntry->base);
-        GicEntry++;
+          GicEntry->type = ENTRY_TYPE_CPUIF;
+          GicEntry->base = cpuif_base;
+          GicEntry->length = cpuif_length;
+          GicEntry++;
       }
   } else
-    bsa_print(ACS_PRINT_WARN, L" GIC CPUIF not present\n");
+    bsa_print(ACS_PRINT_WARN, L"  GIC CPUIF not present\n");
 
   num_gic_interfaces -= (num_of_rd + 1);
-  bsa_print(ACS_PRINT_INFO, L" Number of gic interface %d\n", num_gic_interfaces);
+  bsa_print(ACS_PRINT_INFO, L"  Number of gic interface %d\n", num_gic_interfaces);
 
   if (GicTable->header.gic_version == 2) { /* parse v2m frame if present */
       /* fill details of GICH needed for gic v2 */
@@ -552,14 +563,14 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
             GicEntry->length = (GicEntry->length << 32) | fdt32_to_cpu(Preg_val[Index++]);
           } else
             GicEntry->length = fdt32_to_cpu(Preg_val[Index++]);
-          bsa_print(ACS_PRINT_DEBUG, L"GICH base %x \n", GicEntry->base);
+          bsa_print(ACS_PRINT_DEBUG, L"  GICH base %x \n", GicEntry->base);
           GicEntry++;
       }
 
       /* Search for GICv2m-frame nodes*/
       offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, gicv2m_frame_dt_arr[0]);
       if (offset < 0) {
-          bsa_print(ACS_PRINT_DEBUG, L" No v2m-frame present\n", 0);
+          bsa_print(ACS_PRINT_DEBUG, L"  No v2m-frame present\n", 0);
           GicEntry->type = 0xFF;
           return;
       }
@@ -568,26 +579,26 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
       parent_offset = fdt_parent_offset((const void *) dt_ptr, offset);
 
       size_cell = fdt_size_cells((const void *) dt_ptr, parent_offset);
-      bsa_print(ACS_PRINT_DEBUG, L" NODE gic size cell %d\n", size_cell);
+      bsa_print(ACS_PRINT_DEBUG, L"  NODE gic size cell %d\n", size_cell);
       if (size_cell < 0) {
-          bsa_print(ACS_PRINT_ERR, L" Invalid size cell for node gic\n");
+          bsa_print(ACS_PRINT_ERR, L"  Invalid size cell for node gic\n");
           return;
       }
 
       addr_cell = fdt_address_cells((const void *) dt_ptr, parent_offset);
-      bsa_print(ACS_PRINT_DEBUG, L" NODE gic addr cell %d\n", addr_cell);
+      bsa_print(ACS_PRINT_DEBUG, L"  NODE gic addr cell %d\n", addr_cell);
       if (addr_cell < 0) {
-          bsa_print(ACS_PRINT_ERR, L" Invalid address cell for node gic\n");
+          bsa_print(ACS_PRINT_ERR, L"  Invalid address cell for node gic\n");
           return;
       }
 
       while (offset != -FDT_ERR_NOTFOUND) {
-          bsa_print(ACS_PRINT_DEBUG, L" NODE v2m frame offset %x  \n", offset);
+          bsa_print(ACS_PRINT_DEBUG, L"  NODE v2m frame offset %x  \n", offset);
           Index = 0;
           /* read the reg property value */
           Preg_val = (UINT32 *)fdt_getprop_namelen((void *)dt_ptr, offset, "reg", 3, &prop_len);
           if ((prop_len < 0) || (Preg_val == NULL)) {
-              bsa_print(ACS_PRINT_ERR, L" PROPERTY reg offset %x, Error %d\n", offset, prop_len);
+              bsa_print(ACS_PRINT_ERR, L"  PROPERTY reg offset %x, Error %d\n", offset, prop_len);
               return;
           }
 
@@ -607,13 +618,13 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
           } else
              GicEntry->length = fdt32_to_cpu(Preg_val[Index++]);
 
-          bsa_print(ACS_PRINT_DEBUG, L"GIC v2m frame base %x \n", GicEntry->base);
+          bsa_print(ACS_PRINT_DEBUG, L"  GIC v2m frame base %x \n", GicEntry->base);
 
           /* read the arm,msi-base-spi property value */
           Preg_val = (UINT32 *)fdt_getprop_namelen((void *)dt_ptr, offset, "arm,msi-base-spi", 16,
                                                     &prop_len);
           if ((prop_len < 0) || (Preg_val == NULL)) {
-              bsa_print(ACS_PRINT_WARN, L" PROPERTY arm,msi-base-spi Error %d\n", prop_len);
+              bsa_print(ACS_PRINT_DEBUG, L"  PROPERTY arm,msi-base-spi Error %d\n", prop_len);
               GicEntry->spi_base = 0;
           } else
               GicEntry->spi_base = fdt32_to_cpu(Preg_val[0]);
@@ -622,7 +633,7 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
           Preg_val = (UINT32 *)fdt_getprop_namelen((void *)dt_ptr, offset, "arm,msi-num-spis", 16,
                                                     &prop_len);
           if ((prop_len < 0) || (Preg_val == NULL)) {
-              bsa_print(ACS_PRINT_WARN, L" PROPERTY arm,msi-num-spis Error %d\n", prop_len);
+              bsa_print(ACS_PRINT_DEBUG, L"  PROPERTY arm,msi-num-spis Error %d\n", prop_len);
               GicEntry->spi_count = 0;
           } else
               GicEntry->spi_count = fdt32_to_cpu(Preg_val[0]);
@@ -631,14 +642,14 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
           offset = fdt_node_offset_by_compatible((const void *)dt_ptr, offset,
                                                  gicv2m_frame_dt_arr[0]);
       }
-      bsa_print(ACS_PRINT_DEBUG, L" Num of v2m frame %x \n", GicTable->header.num_msi_frame);
+      bsa_print(ACS_PRINT_DEBUG, L"  Num of v2m frame %x \n", GicTable->header.num_msi_frame);
   }
 
   if (GicTable->header.gic_version == 3) { /* Check if ITS sub-node present */
       /* Search for its nodes*/
       offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, its_dt_arr[0]);
       if (offset < 0) {
-          bsa_print(ACS_PRINT_DEBUG, L" No its present\n", 0);
+          bsa_print(ACS_PRINT_DEBUG, L"  No ITS present\n", 0);
           GicEntry->type = 0xFF;
           return;
       }
@@ -646,7 +657,7 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
           GicTable->header.num_its++;
           offset = fdt_node_offset_by_compatible((const void *)dt_ptr, offset, its_dt_arr[0]);
       }
-      bsa_print(ACS_PRINT_DEBUG, L" Num of its frame %x \n", GicTable->header.num_its);
+      bsa_print(ACS_PRINT_DEBUG, L"  Num of ITS frame %x \n", GicTable->header.num_its);
   }
 
   /* Mark end of table */

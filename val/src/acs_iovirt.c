@@ -28,6 +28,7 @@ IOVIRT_INFO_TABLE *g_iovirt_info_table;
            1. Caller       -  val_smmu_get_info
            2. Prerequisite -  val_iovirt_create_info_table
   @param   type   the type of information being requested
+  @param   index  smmu index in iovirt table
   @return  64-bit data
 **/
 uint64_t
@@ -85,6 +86,7 @@ val_iovirt_get_smmu_info(SMMU_INFO_e type, uint32_t index)
            1. Caller       -  Test suite
            2. Prerequisite -  val_iovirt_create_info_table
   @param   type   the type of information being requested
+  @param   index  PCIe RC index in iovirt table
   @return  64-bit data
 **/
 uint64_t
@@ -230,6 +232,13 @@ val_iovirt_get_its_info(
   return ACS_INVALID_INDEX;
 }
 
+/**
+  @brief  Check if given root complex node has unique requestor id to stream id mapping
+
+  @param  rc_index root complex IOVIRT block index
+
+  @return 0 if test fails, 1 if test passes
+**/
 uint32_t
 val_iovirt_unique_rid_strid_map(uint32_t rc_index)
 {
@@ -284,14 +293,14 @@ val_iovirt_get_device_info(uint32_t rid, uint32_t segment, uint32_t *device_id,
                   id =  (rid - (*map).map.input_base) + (*map).map.output_base;
                   oref = (*map).map.output_ref;
                   mapping_found = 1;
+                  break;
               }
           }
-          break;
       }
   }
   if (!mapping_found) {
       val_print(ACS_PRINT_ERR,
-             "\n       GET_DEVICE_ID: RID to Stream/Dev ID mapping not found", 0);
+             "\n       RID to Stream/Dev ID map not found ", 0);
       return ACS_STATUS_ERR;
   }
   /* If output reference node is to ITS group, 'id' is device id */
@@ -363,6 +372,7 @@ val_iovirt_create_info_table(uint64_t *iovirt_info_table)
       val_print(ACS_PRINT_ERR, "\n   Input for Create Info table cannot be NULL \n", 0);
       return;
   }
+  val_print(ACS_PRINT_INFO, " Creating SMMU INFO table\n", 0);
 
   g_iovirt_info_table = (IOVIRT_INFO_TABLE *)iovirt_info_table;
 
@@ -374,6 +384,7 @@ val_iovirt_create_info_table(uint64_t *iovirt_info_table)
 
 #ifndef TARGET_LINUX
   uint32_t instance;
+  val_print(ACS_PRINT_INFO, "  Initializing SMMU\n", 0);
 
   val_smmu_init();
 
@@ -384,6 +395,13 @@ val_iovirt_create_info_table(uint64_t *iovirt_info_table)
 
 }
 
+/**
+  @brief Check if given SMMU node has unique context bank interrupt ids
+
+  @param smmu_index smmu index in iovirt table
+
+  @return 0 if test fail ; 1 if test pass
+**/
 uint32_t
 val_iovirt_check_unique_ctx_intid(uint32_t smmu_index)
 {
@@ -391,6 +409,13 @@ val_iovirt_check_unique_ctx_intid(uint32_t smmu_index)
   return pal_iovirt_check_unique_ctx_intid(smmu_block);
 }
 
+/**
+  @brief This API deletes IO virt info table pointed by g_iovirt_info_table pointer
+
+  @param None
+
+  @return None
+**/
 void
 val_iovirt_free_info_table()
 {
@@ -398,14 +423,22 @@ val_iovirt_free_info_table()
   pal_mem_free((void *)g_iovirt_info_table);
 }
 
+/**
+  @brief This API returns the SMMU index of root complex node requested
+
+  @param rc_seg_num Root complex segment number
+  @param rid Unique requester ID
+
+  @return SMMU index of root complex node requested
+**/
 uint32_t
-val_iovirt_get_rc_smmu_index(uint32_t rc_seg_num)
+val_iovirt_get_rc_smmu_index(uint32_t rc_seg_num, uint32_t rid)
 {
 
   uint32_t num_smmu;
   uint64_t smmu_base;
 
-  smmu_base = pal_iovirt_get_rc_smmu_base(g_iovirt_info_table, rc_seg_num);
+  smmu_base = pal_iovirt_get_rc_smmu_base(g_iovirt_info_table, rc_seg_num, rid);
   if (smmu_base) {
       num_smmu = val_smmu_get_info(SMMU_NUM_CTRL, 0);
       while (num_smmu--) {

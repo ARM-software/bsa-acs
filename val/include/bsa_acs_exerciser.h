@@ -64,5 +64,8 @@ uint32_t os_e009_entry(void);
 uint32_t os_e010_entry(void);
 uint32_t os_e011_entry(void);
 uint32_t os_e012_entry(void);
+uint32_t os_e013_entry(void);
+uint32_t os_e014_entry(void);
+uint32_t os_e015_entry(void);
 
 #endif

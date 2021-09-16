@@ -36,16 +36,16 @@ payload()
   /* bits 15:12 for Number of breakpoints - 1 */
   breakpointcount = VAL_EXTRACT_BITS(data, 12, 15) + 1;
   if (breakpointcount < 6) {
-      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 1));
       return;
   }
 
   /*bits [31:28] Number of breakpoints that are context-aware, minus 1*/
   context_aware_breakpoints = VAL_EXTRACT_BITS(data, 28, 31) + 1;
   if (context_aware_breakpoints > 1)
-      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
   else
-      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
+      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
 
   return;
 

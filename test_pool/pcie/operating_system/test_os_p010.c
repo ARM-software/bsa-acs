@@ -64,9 +64,9 @@ payload(void)
 
            while (offset <= TYPE1_BAR_MAX_OFFSET) {
               val_pcie_read_cfg(bdf, offset, &bar_value);
-              val_print(ACS_PRINT_DEBUG, "\n       The BAR value of bdf %x",
-                                                                         bdf);
-              val_print(ACS_PRINT_DEBUG, " is %x ", bar_value);
+              val_print(ACS_PRINT_DEBUG, "\n       BDF %.6x ", bdf);
+              val_print(ACS_PRINT_DEBUG, "BAR offset0x%x value", offset);
+              val_print(ACS_PRINT_DEBUG, " is 0x%x     ", bar_value);
               bar_orig = 0;
               bar_new = 0;
 
@@ -137,11 +137,11 @@ payload(void)
 
 
   if (test_skip == 1)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
   else if (fail_cnt)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, fail_cnt));
   else
-      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
       }
 }
 

@@ -36,7 +36,7 @@ payload(void)
   uint32_t status = 0;
 
   if (!count) {
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
@@ -56,13 +56,13 @@ payload(void)
 
       if ((data & PER_FLAG_MSI_ENABLED) == 0) {
           val_print(ACS_PRINT_ERR, "\n       MSI should be enabled for a PCIe device ", 0);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
           status = 1;
           break;
       }
   }
   if (!status)
-      val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

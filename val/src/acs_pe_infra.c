@@ -43,6 +43,8 @@ uint32_t
 val_pe_create_info_table(uint64_t *pe_info_table)
 {
 
+  val_print(ACS_PRINT_INFO, " Creating PE INFO table\n", 0);
+
   if (pe_info_table == NULL) {
       val_print(ACS_PRINT_ERR, "Input memory for PE Info table cannot be NULL \n", 0);
       return ACS_STATUS_ERR;
@@ -62,6 +64,13 @@ val_pe_create_info_table(uint64_t *pe_info_table)
   return ACS_STATUS_PASS;
 }
 
+/**
+  @brief  Free the memory allocated for the pe_info_table
+
+  @param  None
+
+  @return None
+**/
 void
 val_pe_free_info_table()
 {
@@ -262,6 +271,11 @@ val_pe_install_esr(uint32_t exception_type, void (*esr)(uint64_t, void *))
 
 /**
   @brief  Save context data (LR, SP and ELR in case of unexpected exception)
+
+  @param  sp Stack Pointer
+  @param  elr ELR register
+
+  @return None
 **/
 void
 val_pe_context_save(uint64_t sp, uint64_t elr)
@@ -273,6 +287,10 @@ val_pe_context_save(uint64_t sp, uint64_t elr)
 
 /**
   @brief  Restore context data (LR, SP for return to a known location)
+
+  @param  sp Stack Pointer
+
+  @return None
 **/
 void
 val_pe_context_restore(uint64_t sp)
@@ -283,6 +301,10 @@ val_pe_context_restore(uint64_t sp)
 
 /**
   @brief  Initialise exception vector with the default handler
+
+  @param  esr Exception Handler function pointer
+
+  @return None
 **/
 void
 val_pe_initialize_default_exception_handler(void (*esr)(uint64_t, void *))
@@ -293,6 +315,11 @@ val_pe_initialize_default_exception_handler(void (*esr)(uint64_t, void *))
 /**
   @brief  Default handler which, if installed into exception vector, will be
           called in case of unexpected exceptions
+
+  @param  interrupt_type Type of Interrupt(IRQ/FIQ/ASYNC/SERROR)
+  @param  context To restore the context
+
+  @return None
 **/
 void
 val_pe_default_esr(uint64_t interrupt_type, void *context)
@@ -310,12 +337,17 @@ val_pe_default_esr(uint64_t interrupt_type, void *context)
     }
 #endif
 
-    val_set_status(index, RESULT_FAIL(0, 01));
+    val_set_status(index, RESULT_FAIL(0, 1));
     val_pe_update_elr(context, g_exception_ret_addr);
 }
 
 /**
   @brief  Cache clean operation on a defined address range
+
+  @param  start_addr Start Address
+  @param  length Length of the block
+
+  @return None
 **/
 void
 val_pe_cache_clean_range(uint64_t start_addr, uint64_t length)

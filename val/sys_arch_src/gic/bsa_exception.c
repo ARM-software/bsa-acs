@@ -52,7 +52,7 @@ void default_irq_handler(uint64_t exception_type, void *context)
 
 void bsa_gic_vector_table_init(void)
 {
-  val_print(ACS_PRINT_DEBUG, " GIC_INIT: Setting Up Vector Table...\n", 0);
+  val_print(ACS_PRINT_DEBUG, "  GIC_INIT: Setting Up Vector Table...\n", 0);
 
   /* Setting Up Vector Table */
   bsa_gic_set_el2_vector_table();

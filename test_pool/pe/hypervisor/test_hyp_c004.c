@@ -31,9 +31,9 @@ payload()
 
   data = val_pe_reg_read(PMCR_EL0);
   if (((data & 0x0F800) >> 11) > 1) //bits 15:11 for Number of counters.
-      val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   else
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
 
   return;
 }

@@ -34,8 +34,8 @@ isr()
 {
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
   val_wd_set_ws0(wd_num, 0);
-  val_print(ACS_PRINT_DEBUG, "\n       Received WS0 interrupt            ", 0);
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_print(ACS_PRINT_DEBUG, "\n       Received WS0 interrupt                ", 0);
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   val_gic_end_of_interrupt(int_id);
 }
 
@@ -52,7 +52,7 @@ payload()
 
   if (wd_num == 0) {
       val_print(ACS_PRINT_DEBUG, "\n       No Watchdogs reported          %d  ", wd_num);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
@@ -71,7 +71,7 @@ payload()
 
       if (val_gic_install_isr(int_id, isr)) {
           val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
           return;
       }
 
@@ -84,7 +84,7 @@ payload()
       status = val_wd_set_ws0(wd_num, timer_expire_ticks);
       if (status) {
           val_print(ACS_PRINT_ERR, "\n       Setting watchdof timeout failed", 0);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
           return;
       }
 
@@ -92,7 +92,7 @@ payload()
 
       if (timeout == 0) {
           val_print(ACS_PRINT_ERR, "\n       WS0 Interrupt not received on %d   ", int_id);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
           return;
       }
 
@@ -100,7 +100,7 @@ payload()
 
   if(!ns_wdg) {
       val_print(ACS_PRINT_WARN, "\n       No non-secure Watchdogs reported", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 03));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
       return;
   }
 

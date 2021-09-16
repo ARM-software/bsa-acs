@@ -62,7 +62,7 @@ payload()
 
   if (!ns_timer) {
       val_print(ACS_PRINT_DEBUG, "\n       No non-secure systimer implemented", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
@@ -85,7 +85,7 @@ payload()
       val_timer_disable_system_timer((addr_t)cnt_base_n);
       val_gic_clear_interrupt(intid);
       val_timer_set_phy_el1(0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
       return;
   }
 
@@ -94,7 +94,7 @@ payload()
       val_timer_disable_system_timer((addr_t)cnt_base_n);
       val_gic_clear_interrupt(intid);
       val_timer_set_phy_el1(0);
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
       return;
   }
 
@@ -110,9 +110,9 @@ payload()
   /* Check whether count is moved or not*/
   if ((timer_cnt < ((pe_timer_ticks - sys_timer_ticks) + (sys_timer_ticks/100)))
                                                       && (timer_cnt != 0))
-    val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+    val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   else
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
 }
 
 uint32_t

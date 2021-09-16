@@ -21,7 +21,7 @@
 #include "val/include/bsa_acs_memory.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 61)
-#define TEST_RULE  "PCI_MM_01-02, RE_BAR_2"
+#define TEST_RULE  "PCI_MM_01, PCI_MM_02, PCI_MM_03, RE_BAR_2"
 #define TEST_DESC  "PCIe Unaligned access                 "
 
 #define DATA 0xC0DECAFE
@@ -54,7 +54,7 @@ next_bdf:
 
       while (offset <= BAR_MAX_OFFSET) {
           val_pcie_read_cfg(bdf, offset, &bar_value);
-          val_print(ACS_PRINT_DEBUG, "\n       The BAR value of bdf %x", bdf);
+          val_print(ACS_PRINT_DEBUG, "\n       The BAR value of bdf %.6x", bdf);
           val_print(ACS_PRINT_DEBUG, " is %x ", bar_value);
           base = 0;
 
@@ -70,7 +70,7 @@ next_bdf:
               count--;
               goto next_bdf;
           }
-
+#
           if (BAR_REG(bar_value) == BAR_64_BIT)
           {
               val_print(ACS_PRINT_INFO, "BAR supports 64-bit address decoding capability \n", 0);

@@ -28,6 +28,7 @@ GIC_INFO_TABLE  *g_gic_info_table;
            1. Caller       -  Application layer.
            2. Prerequisite -  val_gic_create_info_table()
   @param   num_pe - the number of PE to run these tests on.
+  @param   g_sw_view - Keeps the information about which view tests to be run
   @return  Consolidated status of all the tests run.
 **/
 uint32_t
@@ -39,19 +40,24 @@ val_gic_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   for (i=0 ; i<MAX_TEST_SKIP_NUM ; i++){
       if (g_skip_test_num[i] == ACS_GIC_TEST_NUM_BASE) {
-          val_print(ACS_PRINT_TEST, "\n      USER Override - Skipping all GIC tests \n", 0);
+          val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all GIC tests \n", 0);
           return ACS_STATUS_SKIP;
       }
   }
 
-  status = ACS_STATUS_PASS;
+  status      = ACS_STATUS_PASS;
+  gic_version = val_gic_get_info(GIC_INFO_VERSION);
 
   if (g_sw_view[G_SW_OS]) {
       val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
       status |= os_g001_entry(num_pe);
       status |= os_g002_entry(num_pe);
-      status |= os_g003_entry(num_pe);
-      status |= os_g004_entry(num_pe);
+
+      if (gic_version > 2) {
+        status |= os_g003_entry(num_pe);
+        status |= os_g004_entry(num_pe);
+      }
+
       status |= os_g005_entry(num_pe);
       status |= os_g006_entry(num_pe);
   }
@@ -62,16 +68,15 @@ val_gic_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   }
 
   /* Run GICv2m only if GIC Version is v2m. */
-  gic_version   = val_gic_get_info(GIC_INFO_VERSION);
   num_msi_frame = val_gic_get_info(GIC_INFO_NUM_MSI_FRAME);
 
   if ((gic_version != 2) || (num_msi_frame == 0)) {
-      val_print(ACS_PRINT_TEST, "\n      No GICv2m, Skipping all GICv2m tests \n", 0);
+      val_print(ACS_PRINT_TEST, "\n       No GICv2m, Skipping all GICv2m tests \n", 0);
       goto its_test;
   }
 
   if (val_gic_v2m_parse_info()) {
-      val_print(ACS_PRINT_TEST, "\n     GICv2m info mismatch, Skipping all GICv2m tests \n", 0);
+      val_print(ACS_PRINT_TEST, "\n       GICv2m info mismatch, Skipping all GICv2m tests \n", 0);
       goto its_test;
   }
 
@@ -86,7 +91,7 @@ val_gic_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
 its_test:
   if ((val_gic_get_info(GIC_INFO_NUM_ITS) == 0) || (pal_target_is_dt())) {
-      val_print(ACS_PRINT_TEST, "\n      No ITS, Skipping all ITS tests \n", 0);
+      val_print(ACS_PRINT_DEBUG, "\n       No ITS, Skipping all ITS tests \n", 0);
       goto test_done;
   }
   val_print(ACS_PRINT_ERR, "\n      *** Starting ITS tests ***\n", 0);
@@ -94,13 +99,15 @@ its_test:
       val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
       status |= os_its001_entry(num_pe);
       status |= os_its002_entry(num_pe);
+      status |= os_its003_entry(num_pe);
+      status |= os_its004_entry(num_pe);
   }
 
 test_done:
   if (status != ACS_STATUS_PASS)
     val_print(ACS_PRINT_TEST, "\n      *** One or more tests have Failed/Skipped.*** \n", 0);
   else
-    val_print(ACS_PRINT_TEST, "\n     All GIC tests Passed!! \n", 0);
+    val_print(ACS_PRINT_TEST, "\n       All GIC tests Passed!! \n", 0);
 
   return status;
 
@@ -123,6 +130,7 @@ val_gic_create_info_table(uint64_t *gic_info_table)
       val_print(ACS_PRINT_ERR, "Input for Create Info table cannot be NULL \n", 0);
       return ACS_STATUS_ERR;
   }
+  val_print(ACS_PRINT_INFO, " Creating GIC INFO table\n", 0);
 
   g_gic_info_table = (GIC_INFO_TABLE *)gic_info_table;
 
@@ -141,8 +149,15 @@ val_gic_create_info_table(uint64_t *gic_info_table)
   return ACS_STATUS_PASS;
 }
 
+/**
+  @brief   This API frees the memory assigned for gic info table
+           1. Caller       -  Application Layer
+           2. Prerequisite -  val_gic_create_info_table
+  @param   None
+  @return  None
+**/
 void
-val_gic_free_info_table()
+val_gic_free_info_table(void)
 {
   pal_mem_free((void *)g_gic_info_table);
 }
@@ -182,7 +197,7 @@ val_get_gicd_base(void)
   @brief   This API returns the base address of the GIC Redistributor for the current PE
            1. Caller       -  Test Suite
            2. Prerequisite -  val_gic_create_info_table
-  @param   None
+  @param   rdbase_len - To Store the Lenght of the Redistributor
   @return  Address of GIC Redistributor
 **/
 addr_t
@@ -344,7 +359,7 @@ val_gic_get_info(uint32_t type)
 uint32_t
 val_get_max_intid(void)
 {
-  return 32 * ((val_mmio_read(val_get_gicd_base() + 0x004) & 0x1F) + 1);
+  return (32 * ((val_mmio_read(val_get_gicd_base() + GICD_TYPER) & 0x1F) + 1));
 }
 
 /**
@@ -402,7 +417,9 @@ void val_gic_clear_interrupt(uint32_t int_id)
     uint32_t reg_offset = int_id / 32;
     uint32_t reg_shift  = int_id % 32;
 
-    if ((int_id > 31) && (int_id < 1020)) {
+    if (val_gic_is_valid_espi(int_id))
+      val_bsa_gic_clear_espi_interrupt(int_id);
+    else if ((int_id > 31) && (int_id < 1020)) {
         val_mmio_write(val_get_gicd_base() + GICD_ICPENDR0 + (4 * reg_offset), (1 << reg_shift));
         val_mmio_write(val_get_gicd_base() + GICD_ICACTIVER0 + (4 * reg_offset), (1 << reg_shift));
     }
@@ -430,6 +447,7 @@ void val_gic_cpuif_init(void)
            1. Caller       -  Test Suite
            2. Prerequisite -  val_gic_create_info_table
   @param   int_id Interrupt ID
+  @param   trigger_type to Store the Interrupt Trigger type
   @return  Status
 **/
 uint32_t val_gic_get_intr_trigger_type(uint32_t int_id, INTR_TRIGGER_INFO_TYPE_e *trigger_type)
@@ -461,6 +479,7 @@ uint32_t val_gic_get_intr_trigger_type(uint32_t int_id, INTR_TRIGGER_INFO_TYPE_e
            1. Caller       -  Test Suite
            2. Prerequisite -  val_gic_create_info_table
   @param   int_id Interrupt ID
+  @param   trigger_type to Store the Interrupt Trigger type
   @return  Status
 **/
 uint32_t val_gic_get_espi_intr_trigger_type(uint32_t int_id,
@@ -501,11 +520,13 @@ void val_gic_set_intr_trigger(uint32_t int_id, INTR_TRIGGER_INFO_TYPE_e trigger_
 {
   uint32_t status;
 
-  val_print(ACS_PRINT_DEBUG, "\n    Setting Trigger type as %d  ", trigger_type);
+  val_print(ACS_PRINT_DEBUG, "\n       Setting Trigger type as %d  ",
+                                                                trigger_type);
   status = pal_gic_set_intr_trigger(int_id, trigger_type);
 
   if (status)
-    val_print(ACS_PRINT_ERR, "\n    Error Could Not Configure Trigger Type", 0);
+    val_print(ACS_PRINT_ERR, "\n       Error Could Not Configure Trigger Type",
+                                                                            0);
 }
 
 /**
@@ -538,4 +559,42 @@ val_gic_max_espi_val(void)
 
   val_print(ACS_PRINT_INFO, "\n    max ESPI value %d  ", max_espi_val);
   return max_espi_val;
+}
+
+/**
+  @brief   This API returns max extended PPI interrupt value
+  @param   None
+  @return  max extended PPI int value
+**/
+uint32_t
+val_gic_max_eppi_val(void)
+{
+  uint32_t max_eppi_val;
+
+  max_eppi_val = val_bsa_gic_max_eppi_val();
+
+  val_print(ACS_PRINT_INFO, "\n    max EPPI value %d  ", max_eppi_val);
+  return max_eppi_val;
+}
+
+/**
+  @brief  API used to check whether int_id is a espi interrupt
+  @param  interrupt
+  @return 1: espi interrupt, 0: non-espi interrupt
+**/
+uint32_t
+val_gic_is_valid_espi(uint32_t int_id)
+{
+  return val_bsa_gic_check_espi_interrupt(int_id);
+}
+
+/**
+  @brief  API used to check whether int_id is a Extended PPI
+  @param  interrupt
+  @return 1: eppi interrupt, 0: non-eppi interrupt
+**/
+uint32_t
+val_gic_is_valid_eppi(uint32_t int_id)
+{
+  return val_bsa_gic_check_eppi_interrupt(int_id);
 }

@@ -27,6 +27,7 @@ PERIPHERAL_INFO_TABLE  *g_peripheral_info_table;
           1. Caller       - Application
           2. Prerequisite - val_peripheral_create_info_table
   @param  num_pe - number of PEs to run this test on
+  @param  g_sw_view - Keeps the information about which view tests to be run
 
   @result  consolidated status of all the tests
 **/
@@ -40,7 +41,7 @@ val_peripheral_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   for (i=0 ; i<MAX_TEST_SKIP_NUM ; i++){
       if (g_skip_test_num[i] == ACS_PER_TEST_NUM_BASE) {
-          val_print(ACS_PRINT_TEST, "\n      USER Override - Skipping all Peripheral tests \n", 0);
+          val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all Peripheral tests \n", 0);
           return ACS_STATUS_SKIP;
       }
   }
@@ -48,10 +49,8 @@ val_peripheral_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   if (g_sw_view[G_SW_OS]) {
       val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
 #ifndef TARGET_LINUX
-      if (!pal_target_is_dt()) {
-        status |= os_d001_entry(num_pe);
-        status |= os_d002_entry(num_pe);
-      }
+      status |= os_d001_entry(num_pe);
+      status |= os_d002_entry(num_pe);
       status |= os_d003_entry(num_pe);
       status |= os_d005_entry(num_pe);
 #else
@@ -62,7 +61,7 @@ val_peripheral_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   if (status != ACS_STATUS_PASS)
     val_print(ACS_PRINT_TEST, "\n      *** One or more tests have Failed/Skipped.*** \n", 0);
   else
-    val_print(ACS_PRINT_TEST, "\n      All Peripheral tests passed!! \n", 0);
+    val_print(ACS_PRINT_TEST, "\n       All Peripheral tests passed!! \n", 0);
 
   return status;
 }
@@ -143,6 +142,16 @@ val_peripheral_get_info(PERIPHERAL_INFO_e info_type, uint32_t instance)
           if (i != 0xFFFF)
               return g_peripheral_info_table->info[i].bdf;
           break;
+      case USB_INTERFACE_TYPE:
+          i = val_peripheral_get_entry_index(PERIPHERAL_TYPE_USB, instance);
+          if (i != 0xFFFF)
+              return g_peripheral_info_table->info[i].interface_type;
+          break;
+      case USB_PLATFORM_TYPE:
+          i = val_peripheral_get_entry_index(PERIPHERAL_TYPE_USB, instance);
+          if (i != 0xFFFF)
+              return g_peripheral_info_table->info[i].platform_type;
+          break;
       case SATA_BASE0:
           i = val_peripheral_get_entry_index(PERIPHERAL_TYPE_SATA, instance);
           if (i != 0xFFFF)
@@ -167,6 +176,16 @@ val_peripheral_get_info(PERIPHERAL_INFO_e info_type, uint32_t instance)
           i = val_peripheral_get_entry_index(PERIPHERAL_TYPE_SATA, instance);
           if (i != 0xFFFF)
               return g_peripheral_info_table->info[i].irq;
+          break;
+      case SATA_INTERFACE_TYPE:
+          i = val_peripheral_get_entry_index(PERIPHERAL_TYPE_SATA, instance);
+          if (i != 0xFFFF)
+              return g_peripheral_info_table->info[i].interface_type;
+          break;
+      case SATA_PLATFORM_TYPE:
+          i = val_peripheral_get_entry_index(PERIPHERAL_TYPE_SATA, instance);
+          if (i != 0xFFFF)
+              return g_peripheral_info_table->info[i].platform_type;
           break;
       case UART_BASE0:
           i = val_peripheral_get_entry_index(PERIPHERAL_TYPE_UART, instance);
@@ -241,6 +260,7 @@ val_peripheral_create_info_table(uint64_t *peripheral_info_table)
 {
 
   g_peripheral_info_table = (PERIPHERAL_INFO_TABLE *)peripheral_info_table;
+  val_print(ACS_PRINT_INFO, " Creating PERIPHERAL INFO table\n", 0);
 
   pal_peripheral_create_info_table(g_peripheral_info_table);
 
@@ -256,6 +276,10 @@ val_peripheral_create_info_table(uint64_t *peripheral_info_table)
 
 /**
   @brief  Free the memory allocated for Peripheral Info table
+
+  @param  None
+
+  @return None
  **/
 void
 val_peripheral_free_info_table()

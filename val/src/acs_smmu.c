@@ -49,6 +49,7 @@ val_smmu_read_cfg(uint32_t offset, uint32_t index)
            1. Caller       -  Application layer.
            2. Prerequisite -  val_smmu_create_info_table()
   @param   num_pe - the number of PE to run these tests on.
+  @param   g_sw_view - Keeps the information about which view tests to be run
   @return  Consolidated status of all the tests run.
 **/
 uint32_t
@@ -61,14 +62,14 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   for (i=0 ; i<MAX_TEST_SKIP_NUM ; i++){
       if (g_skip_test_num[i] == ACS_SMMU_TEST_NUM_BASE) {
-          val_print(ACS_PRINT_TEST, "\n      USER Override - Skipping all SMMU tests \n", 0);
+          val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all SMMU tests \n", 0);
           return ACS_STATUS_SKIP;
       }
   }
 
   num_smmu = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
   if (num_smmu == 0) {
-    val_print(ACS_PRINT_WARN, "\n     No SMMU Controller Found, Skipping SMMU tests...\n", 0);
+    val_print(ACS_PRINT_WARN, "\n       No SMMU Controller Found, Skipping SMMU tests...\n", 0);
     return ACS_STATUS_SKIP;
   }
 
@@ -101,12 +102,22 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   if (status != ACS_STATUS_PASS)
     val_print(ACS_PRINT_TEST, "\n      *** One or more tests have Failed/Skipped.*** \n", 0);
   else
-    val_print(ACS_PRINT_TEST, "\n     All SMMU tests Passed!! \n", 0);
+    val_print(ACS_PRINT_TEST, "\n       All SMMU tests Passed!! \n", 0);
 
   return status;
 }
 #endif
 
+/**
+  @brief  This API is used to start the process of saving
+          DMA addresses being used by the input devic. It is
+          used by the test to indicate the upcoming DMA
+          transfers to be recorded
+
+  @param  ctrl_index  dma controller index
+
+  @return 0 for success
+**/
 uint32_t
 val_smmu_start_monitor_dev(uint32_t ctrl_index)
 {
@@ -123,6 +134,14 @@ val_smmu_start_monitor_dev(uint32_t ctrl_index)
   return 0;
 }
 
+/**
+  @brief  Stops the recording of the DMA addresses being
+          used by the input port.
+
+  @param  ctrl_index  dma controller index
+
+  @return 0 for success
+**/
 uint32_t
 val_smmu_stop_monitor_dev(uint32_t ctrl_index)
 {
@@ -166,7 +185,16 @@ val_smmu_check_device_iova(uint32_t ctrl_index, addr_t dma_addr)
   return status;
 }
 
+/**
+  @brief  To implement the requested operation for SMMU.
 
+  @param  ops  Desired Operation
+  @param  smmu_index  SMMU index
+  @param  *param1  Parameter 1
+  @param  *param2  Parameter 2
+
+  @return 0 for success
+**/
 uint64_t
 val_smmu_ops(SMMU_OPS_e ops, uint32_t smmu_index, void *param1, void *param2)
 {
@@ -186,11 +214,18 @@ val_smmu_ops(SMMU_OPS_e ops, uint32_t smmu_index, void *param1, void *param2)
       default:
           break;
   }
-//  pal_smmu_ops(ops, index, param1, param2);
   return 0;
 
 }
 
+/**
+  @brief  Returns the maximum PASID value supported by the SMMU controller
+
+  @param  smmu_index  SMMU index
+
+  @return 0 is returned when PASID support isnot detected.
+          Nonzero is returned ifmaximum PASID value supported
+**/
 uint32_t
 val_smmu_max_pasids(uint32_t smmu_index)
 {
@@ -200,6 +235,14 @@ val_smmu_max_pasids(uint32_t smmu_index)
   return pal_smmu_max_pasids(smmu_base);
 }
 
+/**
+  @brief  Prepares the SMMU page tables to support input PASID.
+
+  @param  smmu_index  SMMU index for which PASID support is needed.
+  @param  pasid       Process Address Space IDentifier.
+
+  @return Returns 0 for success and 1 for failure.
+**/
 uint32_t
 val_smmu_create_pasid_entry(uint32_t smmu_index, uint32_t pasid)
 {
@@ -209,6 +252,14 @@ val_smmu_create_pasid_entry(uint32_t smmu_index, uint32_t pasid)
   return pal_smmu_create_pasid_entry(smmu_base, pasid);
 }
 
+/**
+  @brief  Converts physical address to I/Ovirtual address
+
+  @param  smmu_index  SMMU index
+  @param  pa          Physical address to use in conversion
+
+  @return Returns 0 for success and 1 for failure.
+**/
 uint64_t
 val_smmu_pa2iova(uint32_t smmu_index, uint64_t pa)
 {

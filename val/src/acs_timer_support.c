@@ -19,7 +19,13 @@
 #include "include/bsa_acs_timer_support.h"
 #include "include/bsa_acs_common.h"
 
+/**
+  @brief   This API is used to read Timer related registers
 
+  @param   Reg  Register to be read
+
+  @return  Register value
+**/
 uint64_t
 ArmArchTimerReadReg (
     ARM_ARCH_TIMER_REGS   Reg
@@ -71,16 +77,25 @@ ArmArchTimerReadReg (
 
     case CnthCtl:
     case CnthpCval:
-      pal_print ("The register is related to Hypervisor Mode. Can't perform requested operation\n ", 0);
+      pal_print("The register is related to Hypervisor Mode. \
+Can't perform requested operation\n ", 0);
       break;
 
     default:
-      pal_print ("Unknown ARM Generic Timer register %x. \n ", Reg);
+      pal_print("Unknown ARM Generic Timer register %x. \n ", Reg);
     }
 
     return 0xFFFFFFFF;
 }
 
+/**
+  @brief   This API is used to write Timer related registers
+
+  @param   Reg  Register to be read
+  @param   data_buf Data to write in register
+
+  @return  None
+**/
 void
 ArmArchTimerWriteReg (
     ARM_ARCH_TIMER_REGS   Reg,

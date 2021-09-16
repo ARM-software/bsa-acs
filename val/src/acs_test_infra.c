@@ -46,6 +46,7 @@ val_print(uint32_t level, char8_t *string, uint64_t data)
           1. Caller       - Application layer
           2. Prerequisite - None.
 
+  @param uart_address  Address of UART to be used
   @param level   the print verbosity (1 to 5)
   @param string  formatted ASCII string
   @param data    64-bit data. set to 0 if no data is to sent to console.
@@ -53,11 +54,11 @@ val_print(uint32_t level, char8_t *string, uint64_t data)
   @return        None
  **/
 void
-val_print_raw(uint32_t level, char8_t *string, uint64_t data)
+val_print_raw(uint64_t uart_address, uint32_t level, char8_t *string,
+                                                                uint64_t data)
 {
 
   if (level >= g_print_level){
-      uint64_t uart_address = val_peripheral_get_info(UART_BASE0, 0);
       pal_print_raw(uart_address, string, data);
   }
 
@@ -211,7 +212,6 @@ val_mmio_write64(addr_t addr, uint64_t data)
   @param test_num unique number identifying this test
   @param desc     brief description of the test
   @param num_pe   the number of PE to execute this test on.
-  @param level    compliance level being tested against
 
   @return         Skip - if the user has overriden to skip the test.
  **/
@@ -315,6 +315,8 @@ val_set_test_data(uint32_t index, uint64_t addr, uint64_t test_data)
           2. Prerequisite - val_set_test_data
 
   @param index   PE index whose data parameter has to be returned.
+  @param *data0  Shared Data0.
+  @param *data1  Shared Data1.
 
   @return    64-bit data
  **/
@@ -421,6 +423,7 @@ val_run_test_payload(uint32_t test_num, uint32_t num_pe, void (*payload)(void), 
 
   @param test_num   unique test number
   @param num_pe     The number of PEs to query for status
+  @param *ruleid    RuleID of the test
 
   @return     Success or on failure - status of the last failed PE
  **/
@@ -475,6 +478,11 @@ val_check_for_error(uint32_t test_num, uint32_t num_pe, char8_t *ruleid)
 /**
   @brief  Clean and Invalidate the Data cache line containing
           the input address tag
+
+  @param  addr Address
+  @param  type type of invalidation
+
+  @return Status
 **/
 void
 val_data_cache_ops_by_va(addr_t addr, uint32_t type)
@@ -485,6 +493,11 @@ val_data_cache_ops_by_va(addr_t addr, uint32_t type)
 
 /**
   @brief  Update ELR based on the offset provided
+
+  @param  *context  Context to re restored
+  @param  offset    Address to be saved
+
+  @return None
 **/
 void
 val_pe_update_elr(void *context, uint64_t offset)
@@ -500,6 +513,10 @@ val_pe_update_elr(void *context, uint64_t offset)
 
 /**
   @brief  Get ESR from exception context
+
+  @param  *context  Context to be read
+
+  @return ESR Value
 **/
 uint64_t
 val_pe_get_esr(void *context)
@@ -509,6 +526,10 @@ val_pe_get_esr(void *context)
 
 /**
   @brief  Get FAR from exception context
+
+  @param  *context  Context to be read
+
+  @return FAR value
 **/
 uint64_t
 val_pe_get_far(void *context)
@@ -518,6 +539,10 @@ val_pe_get_far(void *context)
 
 /**
   @brief  Write to an address, meant for debugging purpose
+
+  @param  data Data to be written
+
+  @return None
 **/
 void
 val_debug_brk(uint32_t data)

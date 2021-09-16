@@ -35,16 +35,16 @@ payload()
                 1:((pfr0 & 0xf0) == 0x20) ? 1:((pfr0 & 0xf) == 0x2) ? 1:0;
 
   if (a32_support == 0) {
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
   data = val_pe_reg_read(ID_MMFR0_EL1);
 
   if ((((data >> 28) & 0xF) == 1) && (((data >> 12) & 0xF) == 1)) //bits 31:28 and 15:12 should be 1
-      val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   else
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
 
   return;
 

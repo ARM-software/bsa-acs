@@ -51,6 +51,7 @@
   sys_arch_src/gic/bsa_exception.c
   sys_arch_src/gic/AArch64/bsa_exception_asm.S
   sys_arch_src/gic/v3/gic_v3.c
+  sys_arch_src/gic/v3/gic_v3_extended.c
   sys_arch_src/gic/v3/AArch64/v3_asm.S
   sys_arch_src/gic/v2/gic_v2.c
   sys_arch_src/pcie/pcie.c

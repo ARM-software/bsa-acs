@@ -63,8 +63,8 @@ payload (void)
 /* Allocate memory for interrupt mappings */
   e_intr_map = val_memory_alloc(sizeof(PERIPHERAL_IRQ_MAP));
   if (!e_intr_map) {
-    val_print (ACS_PRINT_ERR, "\n       Memory allocation error", 00);
-    val_set_status(pe_index, RESULT_FAIL (TEST_NUM, 02));
+    val_print(ACS_PRINT_ERR, "\n       Memory allocation error", 00);
+    val_set_status(pe_index, RESULT_FAIL (TEST_NUM, 2));
     return;
   }
 
@@ -81,7 +81,7 @@ payload (void)
     e_bdf = val_exerciser_get_bdf(instance);
 
     val_pcie_read_cfg(e_bdf, PCIE_INTERRUPT_LINE, &e_intr_pin);
-    val_print (ACS_PRINT_DEBUG, "  e_intr_pin %x", e_intr_pin);
+    val_print(ACS_PRINT_DEBUG, "\n       e_intr_pin %x", e_intr_pin);
 
     if (((e_intr_pin >> 8) == 0) || ((e_intr_pin >> 8) > 4))
         continue;
@@ -115,17 +115,17 @@ payload (void)
         val_gic_free_irq(e_intr_line, 0);
 
    } else {
-        val_print (ACS_PRINT_ERR, "\n       Legacy interrupt mapping Read error", status);
+        val_print(ACS_PRINT_ERR, "\n       Legacy interrupt mapping Read error", status);
         goto test_fail;
    }
  }
 
   val_memory_free(e_intr_map);
-  val_set_status (pe_index, RESULT_PASS (TEST_NUM, 01));
+  val_set_status(pe_index, RESULT_PASS (TEST_NUM, 1));
   return;
 
 test_fail:
-  val_set_status(pe_index, RESULT_FAIL (TEST_NUM, 02));
+  val_set_status(pe_index, RESULT_FAIL (TEST_NUM, 2));
   val_memory_free(e_intr_map);
   return;
 

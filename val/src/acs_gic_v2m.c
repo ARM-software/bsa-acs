@@ -24,6 +24,13 @@
 extern GIC_INFO_TABLE * g_gic_info_table;
 GICv2m_MSI_FRAME_INFO *g_v2m_msi_info;
 
+/**
+  @brief   This function parses the V2M MSI Information from gic info table
+           1. Caller       -  Validation Layer
+           2. Prerequisite -  val_gic_create_info_table
+  @param   None
+  @return  Status
+**/
 uint32_t val_gic_v2m_parse_info(void)
 {
 
@@ -38,7 +45,7 @@ uint32_t val_gic_v2m_parse_info(void)
   /* Allocate memory to store MSI Frame info */
   g_v2m_msi_info = (GICv2m_MSI_FRAME_INFO *) val_memory_alloc(1024);
   if (!g_v2m_msi_info) {
-      val_print(ACS_PRINT_DEBUG, "\n      GICv2m : MSI Frame Info Failed.", 0);
+      val_print(ACS_PRINT_DEBUG, "\n       GICv2m : MSI Frame Info Failed.", 0);
       return ACS_STATUS_SKIP;
   }
 
@@ -61,6 +68,14 @@ uint32_t val_gic_v2m_parse_info(void)
   return 0;
 }
 
+/**
+  @brief   This function gets the V2M MSI Information for Frame instance
+           1. Caller       -  Test Suite
+           2. Prerequisite -  val_gic_create_info_table
+  @param   type Type of information we want to get
+  @param   instance v2m MSI Frame Instance number
+  @return  Status
+**/
 uint64_t val_gic_v2m_get_info(V2M_MSI_INFO_e type, uint32_t instance)
 {
 

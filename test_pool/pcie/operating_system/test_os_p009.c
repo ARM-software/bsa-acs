@@ -105,13 +105,13 @@ payload(void)
             if (check_pcie_cfg_space(bdf)) {
                 val_print(ACS_PRINT_ERR,
                     "\n       Invalid PCIe capability found on dev: %d", tbl_index);
-                val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
+                val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
                 return;
             }
         }
     }
 
-    val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
+    val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
     return;
 
 }

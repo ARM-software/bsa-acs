@@ -27,6 +27,15 @@
 
 UINT8   *gSharedMemory;
 
+/**
+ @brief This API provides a single point of abstraction to write 8-bit
+        data to all memory-mapped I/O addresses.
+
+ @param addr 64-bit address
+ @param data 8-bit data write to address
+
+ @return None
+**/
 VOID
 pal_mmio_write8(UINT64 addr, UINT8 data)
 {
@@ -35,6 +44,15 @@ pal_mmio_write8(UINT64 addr, UINT8 data)
 
 }
 
+/**
+  @brief This API provides a single point of abstraction to write 16-bit
+         data to all memory-mapped I/O addresses.
+
+  @param addr 64-bit address
+  @param data 16-bit data write to address
+
+  @return None
+**/
 VOID
 pal_mmio_write16(UINT64 addr, UINT16 data)
 {
@@ -43,6 +61,15 @@ pal_mmio_write16(UINT64 addr, UINT16 data)
 
 }
 
+/**
+   @brief This API provides a single point of abstraction to write 64-bit
+          data to all memory-mapped I/O addresses.
+
+   @param addr 64-bit address
+   @param data 64-bit data write to address
+
+   @return None
+**/
 VOID
 pal_mmio_write64(UINT64 addr, UINT64 data)
 {
@@ -51,6 +78,14 @@ pal_mmio_write64(UINT64 addr, UINT64 data)
 
 }
 
+/**
+  @brief This API provides a single point of abstraction to read 8-bit data
+         from all memory-mapped I/O addresses.
+
+  @param addr 64-bit input address
+
+  @return 8-bit data read from the input address
+**/
 UINT8
 pal_mmio_read8(UINT64 addr)
 {
@@ -62,6 +97,14 @@ pal_mmio_read8(UINT64 addr)
   return data;
 }
 
+/**
+  @brief This API provides a single point of abstraction to read 16-bit data
+         from all memory-mapped I/O addresses.
+
+  @param addr 64-bit input address
+
+  @return 16-bit data read from the input address
+**/
 UINT16
 pal_mmio_read16(UINT64 addr)
 {
@@ -73,6 +116,14 @@ pal_mmio_read16(UINT64 addr)
   return data;
 }
 
+/**
+  @brief This API provides a single point of abstraction to read 64-bit data
+         from all memory-mapped I/O addresses.
+
+  @param addr 64-bit input address
+
+  @return 64-bit data read from the input address
+**/
 UINT64
 pal_mmio_read64(UINT64 addr)
 {
@@ -144,7 +195,7 @@ pal_print(CHAR8 *string, UINT64 data)
     AsciiPrint(Buffer);
     Status = ShellWriteFile(g_bsa_log_file_handle, &BufferSize, (VOID*)Buffer);
     if(EFI_ERROR(Status))
-      bsa_print(ACS_PRINT_ERR, L"Error in writing to log file\n");
+      bsa_print(ACS_PRINT_ERR, L" Error in writing to log file\n");
   } else
       AsciiPrint(string, data);
 }
@@ -153,6 +204,7 @@ pal_print(CHAR8 *string, UINT64 data)
   @brief  Sends a string to the output console without using UEFI print function
           This function will get COMM port address and directly writes to the addr char-by-char
 
+  @param  addr    Address to be written
   @param  string  An ASCII string
   @param  data    data for the formatted output
 
@@ -259,10 +311,10 @@ pal_mem_allocate_shared(UINT32 num_pe, UINT32 sizeofentry)
                                (num_pe * sizeofentry),
                                (VOID **) &gSharedMemory );
 
-  bsa_print(ACS_PRINT_INFO, L"Shared memory is %llx \n", gSharedMemory);
+  bsa_print(ACS_PRINT_INFO, L" Shared memory is %llx \n", gSharedMemory);
 
   if (EFI_ERROR(Status)) {
-    bsa_print(ACS_PRINT_ERR, L"Allocate Pool shared memory failed %x \n", Status);
+    bsa_print(ACS_PRINT_ERR, L" Allocate Pool shared memory failed %x \n", Status);
   }
   pal_pe_data_cache_ops_by_va((UINT64)&gSharedMemory, CLEAN_AND_INVALIDATE);
 
@@ -299,13 +351,13 @@ pal_mem_free_shared()
 }
 
 /**
- * @brief  Allocates requested buffer size in bytes in a contiguous memory
- *         and returns the base address of the range.
- *
- * @param  Size         allocation size in bytes
- * @retval if SUCCESS   pointer to allocated memory
- * @retval if FAILURE   NULL
- */
+  @brief  Allocates requested buffer size in bytes in a contiguous memory
+          and returns the base address of the range.
+
+  @param  Size         allocation size in bytes
+
+  @return if SUCCESS   pointer to allocated memory ;  if FAILURE   NULL
+**/
 VOID *
 pal_mem_alloc (
   UINT32 Size
@@ -321,7 +373,7 @@ pal_mem_alloc (
                               (VOID **) &Buffer);
   if (EFI_ERROR(Status))
   {
-    bsa_print(ACS_PRINT_ERR, L"Allocate Pool failed %x \n", Status);
+    bsa_print(ACS_PRINT_ERR, L" Allocate Pool failed %x \n", Status);
     return NULL;
   }
 
@@ -330,14 +382,15 @@ pal_mem_alloc (
 }
 
 /**
- * @brief  Allocates requested buffer size in bytes in a contiguous cacheable
- *         memory and returns the base address of the range.
- *
- * @param  Size         allocation size in bytes
- * @param  Pa           Pointer to Physical Addr
- * @retval if SUCCESS   Pointer to Virtual Addr
- * @retval if FAILURE   NULL
- */
+  @brief  Allocates requested buffer size in bytes in a contiguous cacheable
+          memory and returns the base address of the range.
+
+  @param  Bdf          Bus, Device, and Function of the requesting PCIe device
+  @param  Size         allocation size in bytes
+  @param  Pa           Pointer to Physical Addr
+
+  @return if SUCCESS   Pointer to Virtual Addr ; if FAILURE   NULL
+**/
 VOID *
 pal_mem_alloc_cacheable (
   UINT32 Bdf,
@@ -354,14 +407,14 @@ pal_mem_alloc_cacheable (
                                EFI_SIZE_TO_PAGES(Size),
                                &Address);
   if (EFI_ERROR(Status)) {
-    bsa_print(ACS_PRINT_ERR, L"Allocate Pool failed %x \n", Status);
+    bsa_print(ACS_PRINT_ERR, L" Allocate Pool failed %x \n", Status);
     return NULL;
   }
 
   /* Check Whether Cpu architectural protocol is installed */
   Status = gBS->LocateProtocol ( &gEfiCpuArchProtocolGuid, NULL, (VOID **)&Cpu);
   if (EFI_ERROR(Status)) {
-    bsa_print(ACS_PRINT_ERR, L"Could not get Cpu Arch Protocol %x \n", Status);
+    bsa_print(ACS_PRINT_ERR, L" Could not get Cpu Arch Protocol %x \n", Status);
     return NULL;
   }
 
@@ -371,7 +424,7 @@ pal_mem_alloc_cacheable (
                                      Size,
                                      EFI_MEMORY_WB);
   if (EFI_ERROR (Status)) {
-    bsa_print(ACS_PRINT_ERR, L"Could not Set Memory Attribute %x \n", Status);
+    bsa_print(ACS_PRINT_ERR, L" Could not Set Memory Attribute %x \n", Status);
     return NULL;
   }
 
@@ -380,13 +433,15 @@ pal_mem_alloc_cacheable (
 }
 
 /**
- * @brief  Free the cacheable memory region allocated above
- *
- * @param  Size         allocation size in bytes
- * @param  Va           Pointer to Virtual Addr
- * @param  Pa           Pointer to Physical Addr
- * @retval None
- */
+  @brief  Free the cacheable memory region allocated above
+
+  @param  Bdf          Bus, Device, and Function of the requesting PCIe device
+  @param  Size         allocation size in bytes
+  @param  Va           Pointer to Virtual Addr
+  @param  Pa           Pointer to Physical Addr
+
+  @return None
+**/
 VOID
 pal_mem_free_cacheable (
   UINT32 Bdf,
@@ -398,9 +453,13 @@ pal_mem_free_cacheable (
   gBS->FreePages((EFI_PHYSICAL_ADDRESS)(UINTN)Va, EFI_SIZE_TO_PAGES(Size));
 }
 
-/* Place holder function. Need to be
- * implemented if needed in later releases
- */
+/** Place holder function. Need to be implemented if needed in later releases
+  @brief This API returns the physical address of the input virtual address.
+
+  @param Va virtual address of the memory to be converted
+
+  @return Returns the physical address
+**/
 VOID *
 pal_mem_virt_to_phys (
   VOID *Va
@@ -409,6 +468,13 @@ pal_mem_virt_to_phys (
   return Va;
 }
 
+/**
+ @brief Returns the virtual address of the input physical address.
+
+ @param Pa Physical Address of the memory to be converted
+
+ @return Pointer to virtual address space
+**/
 VOID *
 pal_mem_phys_to_virt (
   UINT64 Pa
@@ -472,12 +538,26 @@ pal_time_delay_ms (
   return gBS->Stall(MicroSeconds);
 }
 
+/**
+ @brief Returns the memory page size (in bytes) used by the platform.
+
+ @param None
+
+ @return Size of memory page
+**/
 UINT32
 pal_mem_page_size()
 {
     return EFI_PAGE_SIZE;
 }
 
+/**
+  @brief Allocates the requested number of memory pages
+
+  @param NumPages Number of memory pages needed
+
+  @return Address of the allocated space
+**/
 VOID *
 pal_mem_alloc_pages (
   UINT32 NumPages
@@ -492,13 +572,21 @@ pal_mem_alloc_pages (
                                &PageBase);
   if (EFI_ERROR(Status))
   {
-    bsa_print(ACS_PRINT_ERR, L"Allocate Pages failed %x \n", Status);
+    bsa_print(ACS_PRINT_ERR, L" Allocate Pages failed %x \n", Status);
     return NULL;
   }
 
   return (VOID*)(UINTN)PageBase;
 }
 
+/**
+  @brief Free number of pages in the memory as requested.
+
+  @param PageBase Address from where we need to free
+  @param NumPages Number of memory pages needed
+
+  @return None
+**/
 VOID
 pal_mem_free_pages(
   VOID *PageBase,

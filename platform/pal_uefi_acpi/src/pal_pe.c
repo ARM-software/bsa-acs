@@ -82,8 +82,7 @@ PalGetMaxMpidr()
   @brief  Allocate memory region for secondary PE stack use. SIZE of stack for each PE
           is a #define
 
-  @param  Number of PEs
-
+  @param  mpidr Pass MIPDR register content
   @return  None
 **/
 VOID
@@ -130,7 +129,7 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
 
 
   if (PeTable == NULL) {
-    bsa_print(ACS_PRINT_ERR, L"Input PE Table Pointer is NULL. Cannot create PE INFO \n");
+    bsa_print(ACS_PRINT_ERR, L" Input PE Table Pointer is NULL. Cannot create PE INFO \n");
     return;
   }
 
@@ -138,9 +137,9 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
 
   if (gMadtHdr != NULL) {
     TableLength =  gMadtHdr->Header.Length;
-    bsa_print(ACS_PRINT_INFO, L" MADT is at %x and length is %x \n", gMadtHdr, TableLength);
+    bsa_print(ACS_PRINT_INFO, L"  MADT is at %x and length is %x \n", gMadtHdr, TableLength);
   } else {
-    bsa_print(ACS_PRINT_ERR, L"MADT not found \n");
+    bsa_print(ACS_PRINT_ERR, L" MADT not found \n");
     return;
   }
 
@@ -158,7 +157,7 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
       Ptr->pe_num     = PeTable->header.num_of_pe;
       Ptr->pmu_gsiv   = Entry->PerformanceInterruptGsiv;
       Ptr->gmain_gsiv = Entry->VGICMaintenanceInterrupt;
-      bsa_print(ACS_PRINT_DEBUG, L" MPIDR %x PE num %x \n", Ptr->mpidr, Ptr->pe_num);
+      bsa_print(ACS_PRINT_DEBUG, L"  MPIDR %x PE num %x \n", Ptr->mpidr, Ptr->pe_num);
       pal_pe_data_cache_ops_by_va((UINT64)Ptr, CLEAN_AND_INVALIDATE);
       Ptr++;
       PeTable->header.num_of_pe++;

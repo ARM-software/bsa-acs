@@ -48,15 +48,15 @@ payload()
   if (gic_version < 3) {
     if ((num_ecam > 0) && (num_msi_frame == 0)) {
       val_print(ACS_PRINT_ERR, "\n       GICv2 with PCIe : Invalid Configuration", 0);
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
       return;
     }
   } else {
-    val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+    val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
     return;
   }
 
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

@@ -44,7 +44,7 @@ payload()
     if (data == 0)
     {
         val_print(ACS_PRINT_ERR, "\n       GICv3 and PCIe : ITS Not Present", 0);
-        val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
         return;
     }
 
@@ -52,17 +52,17 @@ payload()
     if (data == 0)
     {
         val_print(ACS_PRINT_ERR, "\n       GICv3 and PCIe : LPI Not Supported", 0);
-        val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
         return;
     }
 
-    val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+    val_set_status(index, RESULT_PASS(TEST_NUM, 1));
     return;
   }
 
   /* If PCIe is not present or Gic version is older then GICv3,
      just Skip the test */
-  val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+  val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
 }
 
 uint32_t

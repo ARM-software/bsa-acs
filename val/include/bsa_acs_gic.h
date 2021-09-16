@@ -41,13 +41,21 @@
 #define GICD_ICPENDR0       0x280
 #define GICD_ICACTIVER0     0x380
 #define GICD_ICFGR          0xC00
-#define GICD_ICFGRE         0x3000
 #define GICD_IROUTER        0x6000
 #define GICD_PIDR2          0xFFE8
+
+#define GICD_ICENABLERE     0x1400
+#define GICD_ICPENDRE0      0x1800
+#define GICD_ICACTIVERE0    0x1C00
+#define GICD_IPRIORITYRE    0x2000
+#define GICD_ICFGRE         0x3000
+#define GICD_IROUTERnE      0x8000
 
 #define GICR_ISENABLER      0x100
 
 #define RD_FRAME_SIZE       0x10000
+
+#define GITS_TRANSLATER     0x10040
 
 #define GICD_ICFGR_INTR_STRIDE          16 /* (32/2) Interrupt per Register */
 #define GICD_ICFGR_INTR_CONFIG1(intid)  ((1+int_id*2) % 32) /* Bit Config[2x+1] for config type level/edge */
@@ -109,6 +117,15 @@ val_gic_espi_supported(void);
 uint32_t
 val_gic_max_espi_val(void);
 
+uint32_t
+val_gic_max_eppi_val(void);
+
+uint32_t
+val_gic_is_valid_espi(uint32_t int_id);
+
+uint32_t
+val_gic_is_valid_eppi(uint32_t int_id);
+
 uint32_t os_v2m001_entry(uint32_t num_pe);
 uint32_t os_v2m002_entry(uint32_t num_pe);
 uint32_t os_v2m003_entry(uint32_t num_pe);
@@ -117,5 +134,7 @@ uint32_t os_v2m004_entry(uint32_t num_pe);
 /* ITS tests */
 uint32_t os_its001_entry(uint32_t num_pe);
 uint32_t os_its002_entry(uint32_t num_pe);
+uint32_t os_its003_entry(uint32_t num_pe);
+uint32_t os_its004_entry(uint32_t num_pe);
 
 #endif

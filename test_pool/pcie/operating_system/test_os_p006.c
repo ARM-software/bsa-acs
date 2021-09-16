@@ -46,8 +46,8 @@ payload(void)
   /* Allocate memory for interrupt mappings */
   intr_map = val_memory_alloc(sizeof(PERIPHERAL_IRQ_MAP));
   if (!intr_map) {
-    val_print (ACS_PRINT_ERR, "\n       Memory allocation error", 0);
-    val_set_status(pe_index, RESULT_FAIL (TEST_NUM, 01));
+    val_print(ACS_PRINT_ERR, "\n       Memory allocation error", 0);
+    val_set_status(pe_index, RESULT_FAIL (TEST_NUM, 1));
     return;
   }
 
@@ -68,7 +68,7 @@ payload(void)
       status = val_pci_get_legacy_irq_map(bdf, intr_map);
       if (status) {
         // Skip the test if the Legacy IRQ map does not exist
-        val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 02));
+        val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
         return;
       }
 
@@ -85,7 +85,7 @@ payload(void)
       }
       else {
           val_print(ACS_PRINT_ERR, "\n Int id %d is not SPI", intr_line);
-          val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 03));
+          val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 3));
           return;
       }
 
@@ -96,20 +96,20 @@ payload(void)
           status = val_gic_get_espi_intr_trigger_type(intr_line, &trigger_type);
 
       if (status) {
-        val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 04));
+        val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 4));
         return;
       }
 
       if (trigger_type != INTR_TRIGGER_INFO_LEVEL_HIGH) {
-        val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 05));
+        val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 5));
         return;
       }
   }
 
   if (test_skip == 1)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
   else
-      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
+      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

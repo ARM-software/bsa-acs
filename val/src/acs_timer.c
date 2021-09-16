@@ -29,6 +29,7 @@ TIMER_INFO_TABLE  *g_timer_info_table;
            1. Caller       -  Application layer.
            2. Prerequisite -  val_timer_create_info_table()
   @param   num_pe - the number of PE to run these tests on.
+  @param   g_sw_view - Keeps the information about which view tests to be run
   @return  Consolidated status of all the tests run.
 **/
 uint32_t
@@ -40,7 +41,7 @@ val_timer_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   for (i=0 ; i<MAX_TEST_SKIP_NUM ; i++){
       if (g_skip_test_num[i] == ACS_TIMER_TEST_NUM_BASE) {
-          val_print(ACS_PRINT_TEST, "\n      USER Override - Skipping all Timer tests \n", 0);
+          val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all Timer tests \n", 0);
           return ACS_STATUS_SKIP;
       }
   }
@@ -57,7 +58,7 @@ val_timer_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   if (status != ACS_STATUS_PASS)
     val_print(ACS_PRINT_TEST, "\n      *** One or more tests have Failed/Skipped.*** \n", 0);
   else
-    val_print(ACS_PRINT_TEST, "\n      All Timer tests passed!! \n", 0);
+    val_print(ACS_PRINT_TEST, "\n       All Timer tests passed!! \n", 0);
 
   return status;
 }
@@ -67,6 +68,7 @@ val_timer_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
            1. Caller       -  Test Suite
            2. Prerequisite -  val_timer_create_info_table
   @param   info_type  - Type of the information to be returned
+  @param   instance   - timer instance number
 
   @return  64-bit data pertaining to the requested input type
 **/
@@ -125,6 +127,15 @@ val_timer_get_info(TIMER_INFO_e info_type, uint64_t instance)
   }
 }
 
+/**
+  @brief   This API returns the index in timer info table.
+
+  @param   instance - For which info to be returned
+  @param   *block - Information Block
+  @param   *index - Index in timer info table
+
+  @return  None
+**/
 void
 val_platform_timer_get_entry_index(uint64_t instance, uint32_t *block, uint32_t *index)
 {
@@ -314,6 +325,7 @@ val_timer_create_info_table(uint64_t *timer_info_table)
       val_print(ACS_PRINT_ERR, "Input for Create Info table cannot be NULL \n", 0);
       return;
   }
+  val_print(ACS_PRINT_INFO, " Creating TIMER INFO table\n", 0);
 
   g_timer_info_table = (TIMER_INFO_TABLE *)timer_info_table;
 
@@ -330,6 +342,10 @@ val_timer_create_info_table(uint64_t *timer_info_table)
 
 /**
   @brief  Free the memory allocated for the Timer Info table
+
+  @param  None
+
+  @return None
 **/
 void
 val_timer_free_info_table()
@@ -339,6 +355,11 @@ val_timer_free_info_table()
 
 /**
   @brief  This API will program and start the counter
+
+  @param  cnt_base_n  Counter base address
+  @param  timeout     Timeout value
+
+  @return None
 **/
 void
 val_timer_set_system_timer(addr_t cnt_base_n, uint32_t timeout)
@@ -353,6 +374,10 @@ val_timer_set_system_timer(addr_t cnt_base_n, uint32_t timeout)
 
 /**
   @brief  This API will stop the counter
+
+  @param  cnt_base_n  Counter base address
+
+  @return None
 **/
 void
 val_timer_disable_system_timer(addr_t cnt_base_n)
@@ -365,6 +390,10 @@ val_timer_disable_system_timer(addr_t cnt_base_n)
 /**
   @brief  This API will read CNTACR (from CNTCTLBase) to determine whether
           access permission from NS state is permitted
+
+  @param  index  index of SYS counter in timer table
+
+  @return Status 0 if success
 **/
 uint32_t
 val_timer_skip_if_cntbase_access_not_allowed(uint64_t index)

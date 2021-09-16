@@ -21,7 +21,7 @@
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 2)
 #define TEST_RULE  "PCI_IN_02"
-#define TEST_DESC  "PE - ECAM Region accessiblity check   "
+#define TEST_DESC  "PE - ECAM Region accessibility check  "
 
 #define PCIE_VENDOR_ID_REG_OFFSET 0x0
 #define PCIE_CACHE_LINE_SIZE_REG_OFFSET 0xC
@@ -48,7 +48,7 @@ payload(void)
   num_ecam = val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
   if (num_ecam == 0) {
       val_print(ACS_PRINT_DEBUG, "\n       No ECAM in MCFG                   ", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
@@ -56,7 +56,7 @@ payload(void)
       ecam_base = val_pcie_get_info(PCIE_INFO_ECAM, num_ecam);
       if (ecam_base == 0) {
           val_print(ACS_PRINT_DEBUG, "\n       ECAM Base in MCFG is 0            ", 0);
-          val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+          val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
           return;
       }
 
@@ -68,7 +68,7 @@ payload(void)
       ret = val_pcie_read_cfg(bdf, PCIE_VENDOR_ID_REG_OFFSET, &data);
       if (data == PCIE_UNKNOWN_RESPONSE) {
           val_print(ACS_PRINT_ERR,
-                "\n      First device in a ECAM space is not a valid device", 0);
+                "\n       First device in a ECAM space is not a valid device", 0);
            val_set_status(index, RESULT_FAIL(TEST_NUM, (bus << 8)));
            return;
       }
@@ -84,7 +84,7 @@ payload(void)
                //If this is really PCIe CFG space, Device ID and Vendor ID cannot be 0
                if (ret == PCIE_NO_MAPPING || (data == 0)) {
                   val_print(ACS_PRINT_ERR,
-                        "\n      Incorrect data at ECAM Base %4x    ", data);
+                        "\n       Incorrect data at ECAM Base %4x    ", data);
                   val_set_status(index, RESULT_FAIL(TEST_NUM, (bus_index << 8)|dev_index));
                   return;
                }
@@ -92,7 +92,7 @@ payload(void)
                ret = val_pcie_read_cfg(bdf, PCIE_CACHE_LINE_SIZE_REG_OFFSET, &data);
                if (ret == PCIE_NO_MAPPING) {
                   val_print(ACS_PRINT_ERR,
-                        "\n      Incorrect PCIe CFG Hdr type %4x    ", data);
+                        "\n       Incorrect PCIe CFG Hdr type %4x    ", data);
                   val_set_status(index, RESULT_FAIL(TEST_NUM, (bus_index << 8)|dev_index));
                   return;
                }
@@ -101,7 +101,7 @@ payload(void)
                ret = val_pcie_read_cfg(bdf, PCIE_ECAP_START + 0x100, &data);
                if (ret == PCIE_NO_MAPPING) {
                   val_print(ACS_PRINT_ERR,
-                        "\n      PCIe Extended Capability region error for BDF %x", bdf);
+                        "\n       PCIe Extended Capability region error for BDF %x", bdf);
                   val_set_status(index, RESULT_FAIL(TEST_NUM, (bus_index << 8)|dev_index));
                   return;
                }
@@ -109,7 +109,7 @@ payload(void)
                ret = val_pcie_read_cfg(bdf, PCIE_ECAP_END - 0x100, &data);
                if (ret == PCIE_NO_MAPPING) {
                   val_print(ACS_PRINT_ERR,
-                        "\n      PCIe Extended Capability region error for BDF %x", bdf);
+                        "\n       PCIe Extended Capability region error for BDF %x", bdf);
                   val_set_status(index, RESULT_FAIL(TEST_NUM, (bus_index << 8)|dev_index));
                   return;
                }
@@ -118,7 +118,7 @@ payload(void)
       }
   }
 
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 
 }
 

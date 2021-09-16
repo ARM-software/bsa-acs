@@ -30,12 +30,12 @@ static void check_pauth_algorithm(uint32_t index, uint64_t data)
      */
     if ((VAL_EXTRACT_BITS(data, 4, 7) == 0) && (VAL_EXTRACT_BITS(data, 24, 27) == 0)) {
         if ((VAL_EXTRACT_BITS(data, 8, 11) != 0) && (VAL_EXTRACT_BITS(data, 28, 31) != 0))
-            val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+            val_set_status(index, RESULT_PASS(TEST_NUM, 1));
         else
-            val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+            val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
     }
     else
-        val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+        val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 }
 
 static
@@ -50,7 +50,7 @@ payload()
     if ((VAL_EXTRACT_BITS(data, 4, 7) == 0) && (VAL_EXTRACT_BITS(data, 8, 11) == 0) &&
         (VAL_EXTRACT_BITS(data, 24, 27) == 0) && (VAL_EXTRACT_BITS(data, 28, 31) == 0)) {
         /* Pointer signing not implemented, Skip the test */
-        val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+        val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
         return;
     }
 

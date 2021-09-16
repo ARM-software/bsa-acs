@@ -162,7 +162,7 @@ id_regs_check(void)
 
           if ((reg_read_data & (~reg_list[0].reg_mask)) != (cache_list[i] & (~reg_list[0].reg_mask))) {
               val_set_test_data(index, (reg_read_data & (~reg_list[0].reg_mask)), 0);
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
               return;
           }
       }
@@ -175,12 +175,12 @@ id_regs_check(void)
       if((reg_read_data & (~reg_list[i].reg_mask)) != (rd_data_array[i] & (~reg_list[i].reg_mask)))
       {
           val_set_test_data(index, (reg_read_data & (~reg_list[i].reg_mask)), i);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
           return;
       }
       reg_read_data = 0;
   }
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 
   return;
 }
@@ -196,7 +196,7 @@ payload(uint32_t num_pe)
 
   if (num_pe == 1) {
       val_print(ACS_PRINT_DEBUG, "\n       Skipping as num of PE is 1    ", 0);
-      val_set_status(my_index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(my_index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
@@ -209,7 +209,7 @@ payload(uint32_t num_pe)
          val_pe_reg_write(CSSELR_EL1, i << 1);
          cache_list[i] = return_reg_value(reg_list[0].reg_name, reg_list[0].dependency);
          val_data_cache_ops_by_va((addr_t)(cache_list + i), CLEAN_AND_INVALIDATE);
-         val_print(ACS_PRINT_INFO, "\n      cache size read is %x ", cache_list[i]);
+         val_print(ACS_PRINT_INFO, "\n       cache size read is %x ", cache_list[i]);
       }
       i++;
   }
@@ -227,7 +227,7 @@ payload(uint32_t num_pe)
 
           if(timeout == 0) {
               val_print(ACS_PRINT_ERR, "\n       **Timed out** for PE index = %d", i);
-              val_set_status(i, RESULT_FAIL(TEST_NUM, 02));
+              val_set_status(i, RESULT_FAIL(TEST_NUM, 2));
               return;
           }
 

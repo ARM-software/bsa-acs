@@ -21,7 +21,7 @@
 #include "val/include/bsa_acs_wd.h"
 
 #define TEST_NUM   (ACS_WD_TEST_NUM_BASE + 1)
-#define TEST_RULE  "B_WD_01-02"
+#define TEST_RULE  "B_WD_01, B_WD_02"
 #define TEST_DESC  "Non Secure Watchdog Access            "
 
 static
@@ -35,10 +35,12 @@ payload()
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
   uint32_t data, ns_wdg = 0;
 
-  val_print(ACS_PRINT_DEBUG, "\n       Found %d watchdogs in table ", wd_num);
+  val_print(ACS_PRINT_DEBUG,
+            "\n       Found %d watchdogs in table             ",
+            wd_num);
 
   if (wd_num == 0) {
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
@@ -50,39 +52,39 @@ payload()
 
       ns_wdg++;
       refresh_base = val_wd_get_info(wd_num, WD_INFO_REFRESH_BASE);
-      val_print(ACS_PRINT_INFO, "\n      Watchdog Refresh base is %x ", refresh_base);
+      val_print(ACS_PRINT_INFO, "\n       Watchdog Refresh base is %x ", refresh_base);
       ctrl_base    = val_wd_get_info(wd_num, WD_INFO_CTRL_BASE);
-      val_print(ACS_PRINT_INFO, "\n      Watchdog CTRL base is  %x      ", ctrl_base);
+      val_print(ACS_PRINT_INFO, "\n       Watchdog CTRL base is  %x      ", ctrl_base);
 
       data = val_mmio_read(ctrl_base);
       //Control register bits 31:3 are reserved 0
       if(data >> WD_CSR_RSRV_SHIFT) {
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
           return;
       }
 
       data = val_mmio_read(refresh_base);
       //refresh frame offset 0 must return 0 on reads.
       if(data) {
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
           return;
       }
 
       /* WOR.Upper word  [31:16] is reserved & must be zero */
       data = val_mmio_read(ctrl_base + WD_OR_UPPER_WORD_OFFSET);
       if(data >> WD_OR_RSRV_SHIFT) {
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 03));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
           return;
       }
   } while(wd_num);
 
   if(!ns_wdg) {
       val_print(ACS_PRINT_WARN, "\n       No non-secure Watchdogs reported", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 03));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
       return;
   }
 
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 
 }
 

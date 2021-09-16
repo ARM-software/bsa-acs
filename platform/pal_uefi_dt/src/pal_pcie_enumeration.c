@@ -83,7 +83,7 @@ palPcieGetBdf(UINT32 ClassCode, UINT32 StartBdf)
 
   Status = gBS->LocateHandleBuffer (ByProtocol, &gEfiPciIoProtocolGuid, NULL, &HandleCount, &HandleBuffer);
   if (EFI_ERROR (Status)) {
-    bsa_print(ACS_PRINT_INFO,L"No PCI devices found in the system\n");
+    bsa_print(ACS_PRINT_INFO,L" No PCI devices found in the system\n");
     return EFI_SUCCESS;
   }
 
@@ -167,7 +167,7 @@ palPcieGetBase(UINT32 bdf, UINT32 bar_index)
 
   Status = gBS->LocateHandleBuffer (ByProtocol, &gEfiPciIoProtocolGuid, NULL, &HandleCount, &HandleBuffer);
   if (EFI_ERROR (Status)) {
-    bsa_print(ACS_PRINT_INFO,L"No PCI devices found in the system\n");
+    bsa_print(ACS_PRINT_INFO,L" No PCI devices found in the system\n");
     return EFI_SUCCESS;
   }
 
@@ -195,6 +195,13 @@ palPcieGetBase(UINT32 bdf, UINT32 bar_index)
   return 0;
 }
 
+/**
+  @brief Returns the PCI device structure for the given bdf
+
+  @param Bdf PCI Bus, Device, and Function
+
+  @return Pointer to device structure for the input bdf
+**/
 VOID *
 pal_pci_bdf_to_dev (
  UINT32 Bdf
@@ -203,6 +210,15 @@ pal_pci_bdf_to_dev (
   return NULL;
 }
 
+/**
+  @brief Reads 1 byte from the PCI configuration space for the current BDF at given offset.
+
+  @param Bdf PCI Bus, Device, and Function
+  @param Offset offset in the PCI configuration space for that BDF
+  @param Val return value
+
+  @return None
+**/
 VOID
 pal_pci_read_config_byte (
   UINT32 Bdf,
@@ -213,6 +229,13 @@ pal_pci_read_config_byte (
 
 }
 
+/**
+  @brief This API performs the PCI enumeration
+
+  @param None
+
+  @return None
+**/
 VOID pal_pcie_enumerate(VOID)
 {
   /**Implemented functionality only for Baremetal support

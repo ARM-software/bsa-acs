@@ -40,7 +40,7 @@ payload()
   msi_frame   = val_gic_get_info(GIC_INFO_NUM_MSI_FRAME);
   if (msi_frame == 0) {
       val_print(ACS_PRINT_DEBUG, "\n       No MSI frame, Skipping               ", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 01));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
@@ -59,7 +59,7 @@ payload()
       /* Read GICD_ICFGR register to Check for Level/Edge Sensitive. */
       status = val_gic_get_intr_trigger_type(spi_id, &trigger_type);
       if (status) {
-        val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
         return;
       }
 
@@ -72,17 +72,17 @@ payload()
 
   if (test_skip) {
       val_print(ACS_PRINT_WARN, "\n       No SPI Information Found. Skipping   ", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
       return;
   }
 
   if (fail_cnt) {
       val_print(ACS_PRINT_ERR, "\n       SPI Trigger Type Check Failed", 0);
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 02));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
       return;
   }
 
-  val_set_status(index, RESULT_PASS(TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t

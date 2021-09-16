@@ -42,6 +42,10 @@ pal_pcie_get_mcfg_ecam();
 
 /**
   @brief This API increments the BDF
+
+  @param Bdf Stimulus hardware bdf number
+
+  @return incremented bdf number
 **/
 UINT32
 pal_increment_bus_dev(
@@ -67,7 +71,12 @@ pal_increment_bus_dev(
 }
 
 /**
-  @brief This API will return the ECSR base address of particular BAR Index
+  @brief This API returns the ECSR base address of particular BAR Index
+
+  @param EcsrBase Exerciser Base address
+  @param BarIndex input BAR index
+
+  @return ECSR base address of required BAR Index
 **/
 UINT64
 pal_exerciser_get_ecsr_base (
@@ -78,6 +87,13 @@ pal_exerciser_get_ecsr_base (
   return pal_mmio_read(EcsrBase + BAR0_OFFSET + (BarIndex * 4));
 }
 
+/**
+  @brief This API returns PCI config offset address for input BDF
+
+  @param Bdf BDF value for the device
+
+  @return PCI config offset address
+**/
 UINT64
 pal_exerciser_get_pcie_config_offset(UINT32 Bdf)
 {
@@ -93,6 +109,13 @@ pal_exerciser_get_pcie_config_offset(UINT32 Bdf)
   return cfg_addr;
 }
 
+/**
+  @brief This API checks whether a device specified by BDF is an exerciser or not
+
+  @param bdf BDF value for the device
+
+  @return 1 if device is an exerciser ; 0 if device is not a exerciser
+**/
 UINT32
 pal_is_bdf_exerciser(UINT32 bdf)
 {
@@ -109,6 +132,11 @@ pal_is_bdf_exerciser(UINT32 bdf)
 
 /**
   @brief This function triggers the DMA operation
+
+  @param Base DMA Base address
+  @param Direction Specify DMA direction
+
+  @return status of the DMA
 **/
 UINT32
 pal_exerciser_start_dma_direction (
@@ -139,6 +167,13 @@ pal_exerciser_start_dma_direction (
 
 /**
   @brief This function finds the PCI capability and return 0 if it finds.
+
+  @param ID    PCI capability IF 
+  @param Bdf   BDF value for the device
+  @param Value 1 PCIE capability 0 PCI capability
+  @param Offset capability offset
+
+  @return 0 if PCI capability found ; 1 if PCI capability found
 **/
 UINT32
 pal_exerciser_find_pcie_capability (
@@ -189,7 +224,8 @@ pal_exerciser_find_pcie_capability (
   @param   Type         - Parameter type that needs to be set in the stimulus hadrware
   @param   Value1       - Parameter 1 that needs to be set
   @param   Value2       - Parameter 2 that needs to be set
-  @param   Instance     - Stimulus hardware instance number
+  @param   Bdf          - Stimulus hardware bdf number
+  @param   Ecam         - Ecam base for exerciser under test
   @return  Status       - SUCCESS if the input paramter type is successfully written
 **/
 UINT32 pal_exerciser_set_param (
@@ -200,7 +236,6 @@ UINT32 pal_exerciser_set_param (
   UINT64 Ecam
   )
 {
-  UINT32 Status;
   UINT32 Data;
   UINT64 Base;
   UINT64 EcsrBase; /* Exerciser Base */
@@ -219,9 +254,7 @@ UINT32 pal_exerciser_set_param (
       case DMA_ATTRIBUTES:
           pal_mmio_write(Base + DMA_BUS_ADDR,Value1);// wrting into the DMA Control Register 2
           pal_mmio_write(Base + DMA_LEN,Value2);// writing into the DMA Control Register 3
-          Data = pal_mmio_read(Base + DMASTATUS);// Reading the DMA status register
-          Status = Data & ((MASK_BIT << 1) | MASK_BIT);
-          return Status;
+          return 0;
 
       case P2P_ATTRIBUTES:
           return 0;
@@ -241,9 +274,38 @@ UINT32 pal_exerciser_set_param (
 
             case TXN_REQ_ID:
                 /* Change Requester ID for DMA Transaction.*/
+                Data = (Value2 & RID_VALUE_MASK) | RID_VALID_MASK;
+                pal_mmio_write(Base + RID_CTL_REG, Data);
                 return 0;
+            case TXN_REQ_ID_VALID:
+                switch (Value2)
+                {
+                    case RID_VALID:
+                        Data = pal_mmio_read(Base + RID_CTL_REG);
+                        Data |= RID_VALID_MASK;
+                        pal_mmio_write(Base + RID_CTL_REG, Data);
+                        return 0;
+                    case RID_NOT_VALID:
+                        pal_mmio_write(Base + RID_CTL_REG, 0);
+                        return 0;
+                }
             case TXN_ADDR_TYPE:
                 /* Change Address Type for DMA Transaction.*/
+                switch (Value2)
+                {
+                    case AT_UNTRANSLATED:
+                        Data = 0x1;
+                        pal_mmio_write(Base + DMACTL1, pal_mmio_read(Base + DMACTL1) | (Data << 10));
+                        break;
+                    case AT_TRANSLATED:
+                        Data = 0x2;
+                        pal_mmio_write(Base + DMACTL1, pal_mmio_read(Base + DMACTL1) | (Data << 10));
+                        break;
+                    case AT_RESERVED:
+                        Data = 0x3;
+                        pal_mmio_write(Base + DMACTL1, pal_mmio_read(Base + DMACTL1) | (Data << 10));
+                        break;
+                }
                 return 0;
             default:
                 return 1;
@@ -259,7 +321,8 @@ UINT32 pal_exerciser_set_param (
   @param   Type         - Parameter type that needs to be read from the stimulus hadrware
   @param   Value1       - Parameter 1 that is read from hardware
   @param   Value2       - Parameter 2 that is read from hardware
-  @param   Instance     - Stimulus hardware instance number
+  @param   Bdf          - Stimulus hardware bdf number
+  @param   Ecam         - Ecam base for exerciser under test
   @return  Status       - SUCCESS if the requested paramter type is successfully read
 **/
 UINT32
@@ -300,6 +363,9 @@ pal_exerciser_get_param (
       case MSIX_ATTRIBUTES:
           *Value1 = pal_mmio_read(Base + MSICTL);
           return pal_mmio_read(Base + MSICTL) | MASK_BIT;
+      case ATS_RES_ATTRIBUTES:
+          *Value1 = pal_mmio_read(Base + ATS_ADDR);
+          return 0;
       default:
           return 1;
   }
@@ -341,8 +407,9 @@ pal_exerciser_get_state (
 /**
   @brief   This API performs the input operation using the PCIe stimulus generation hardware
   @param   Ops          - Operation thta needs to be performed with the stimulus hadrware
-  @param   Value        - Additional information to perform the operation
-  @param   Instance     - Stimulus hardware instance number
+  @param   Param        - Additional information to perform the operation
+  @param   Bdf          - Stimulus hardware bdf number
+  @param   Ecam         - Ecam base for exerciser under test
   @return  Status       - SUCCESS if the operation is successfully performed using the hardware
 **/
 UINT32
@@ -401,9 +468,10 @@ pal_exerciser_ops (
 
     case PASID_TLP_START:
         data = pal_mmio_read(Base + DMACTL1);
-        data &= ~(PASID_VAL_MASK << PASID_VAL_SHIFT);
-        data |= (MASK_BIT << 6) | ((Param & PASID_VAL_MASK) << PASID_VAL_SHIFT);
+        data |= (MASK_BIT << PASID_EN_SHIFT);
         pal_mmio_write(Base + DMACTL1, data);
+        data = ((Param & PASID_VAL_MASK));
+        pal_mmio_write(Base + PASID_VAL, data);
 
         if (!pal_exerciser_find_pcie_capability(PASID, Bdf, PCIE, &CapabilityOffset)) {
             pal_mmio_write(Ecam + pal_exerciser_get_pcie_config_offset(Bdf) + CapabilityOffset + PCIE_CAP_CTRL_OFFSET,
@@ -430,6 +498,11 @@ pal_exerciser_ops (
         pal_mmio_write(Base + DMACTL1, (pal_mmio_read(Base + DMACTL1)) & NO_SNOOP_STOP_MASK);//disabling the NO SNOOP
         return 0;
 
+    case ATS_TXN_REQ:
+        pal_mmio_write(Base + DMA_BUS_ADDR, Param);
+        pal_mmio_write(Base + ATSCTL, ATS_TRIGGER);
+        return !(pal_mmio_read(Base + ATSCTL) & ATS_STATUS);
+
     default:
         return 1;
   }
@@ -437,9 +510,10 @@ pal_exerciser_ops (
 
 /**
   @brief   This API returns test specific data from the PCIe stimulus generation hardware
-  @param   type         - data type for which the data needs to be returned
-  @param   data         - test specific data to be be filled by pal layer
-  @param   instance     - Stimulus hardware instance number
+  @param   Type         - data type for which the data needs to be returned
+  @param   Data         - test specific data to be be filled by pal layer
+  @param   Bdf          - Stimulus hardware bdf number
+  @param   Ecam         - Ecam base for exerciser under test
   @return  status       - SUCCESS if the requested data is successfully filled
 **/
 UINT32
@@ -467,8 +541,7 @@ pal_exerciser_get_data (
           for (Index = 0; Index < TEST_REG_COUNT; Index++) {
               Data->cfg_space.reg[Index].offset = (offset_table[Index] + pal_exerciser_get_pcie_config_offset (Bdf));
               Data->cfg_space.reg[Index].attribute = attr_table[Index];
-              Data->cfg_space.reg[Index].value =
-                                pal_mmio_read(EcsrBase +  offset_table[Index]);
+              Data->cfg_space.reg[Index].value = pal_mmio_read(EcsrBase + offset_table[Index]);
           }
           return 0;
       case EXERCISER_DATA_BAR0_SPACE:

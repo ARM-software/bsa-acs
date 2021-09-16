@@ -319,6 +319,7 @@ typedef struct {
   UINT32         max_pasids;
   UINT32         baud_rate;
   UINT32         interface_type;
+  UINT32         platform_type;
 }PERIPHERAL_INFO_BLOCK;
 
 /**
@@ -328,6 +329,9 @@ typedef struct {
   PERIPHERAL_INFO_HDR     header;
   PERIPHERAL_INFO_BLOCK   info[]; ///< Array of Information blocks - instantiated for each peripheral
 }PERIPHERAL_INFO_TABLE;
+
+#define PLATFORM_TYPE_ACPI   0x0
+#define PLATFORM_TYPE_DT     0x1
 
 /**
   @brief MSI(X) controllers info structure

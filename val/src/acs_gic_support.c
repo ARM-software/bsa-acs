@@ -94,6 +94,13 @@ val_gic_reg_write(uint32_t reg_id, uint64_t write_data)
 }
 #endif
 
+/**
+  @brief   This function checks if Interrupt ID is a valid LPI or not
+           1. Caller       -  Test Suite
+           2. Prerequisite -  val_gic_create_info_table
+  @param   int_id Interrupt ID to check
+  @return  1 - If Valid LPI, 0 - Otherwise
+**/
 uint32_t
 val_gic_is_valid_lpi(uint32_t int_id)
 {
@@ -126,7 +133,8 @@ val_gic_install_isr(uint32_t int_id, void (*isr)(void))
   uint32_t      reg_offset = int_id / 32;
   uint32_t      reg_shift  = int_id % 32;
 
-  if (((int_id > val_get_max_intid()) && (!val_gic_is_valid_lpi(int_id))) || (int_id == 0)) {
+  if (((int_id > val_get_max_intid()) && (!val_gic_is_valid_lpi(int_id)) &&
+      (!val_gic_is_valid_espi(int_id)) && (!val_gic_is_valid_eppi(int_id))) || (int_id == 0)) {
       val_print(ACS_PRINT_ERR, "\n       Invalid Interrupt ID number 0x%x ", int_id);
       return ACS_STATUS_ERR;
   }
@@ -134,16 +142,16 @@ val_gic_install_isr(uint32_t int_id, void (*isr)(void))
 
   if (pal_target_is_dt())
       return val_gic_bsa_install_isr(int_id, isr);
-  else
+  else {
       ret_val = pal_gic_install_isr(int_id, isr);
-
 #ifndef TARGET_LINUX
-  if (int_id > 31 && int_id < 1024) {
-      /**** UEFI GIC code is not enabling interrupt in the Distributor ***/
-      /**** So, do this here as a fail-safe. Remove if PAL guarantees this ***/
-      val_mmio_write(val_get_gicd_base() + GICD_ISENABLER + (4 * reg_offset), 1 << reg_shift);
-  }
+      if (int_id > 31 && int_id < 1024) {
+          /**** UEFI GIC code is not enabling interrupt in the Distributor ***/
+          /**** So, do this here as a fail-safe. Remove if PAL guarantees this ***/
+          val_mmio_write(val_get_gicd_base() + GICD_ISENABLER + (4 * reg_offset), 1 << reg_shift);
+      }
 #endif
+  }
 
   return ret_val;
 }
@@ -189,6 +197,13 @@ uint32_t val_gic_end_of_interrupt(uint32_t int_id)
   return 0;
 }
 
+/**
+  @brief   This function gets list of ITS in the system and ITS initialization
+           1. Caller       -  Application Layer
+           2. Prerequisite -  val_gic_create_info_table
+  @param   None
+  @return  Status
+**/
 uint32_t val_gic_its_configure()
 {
   uint32_t Status;
@@ -204,7 +219,8 @@ uint32_t val_gic_its_configure()
   /* Allocate memory to store ITS info */
   g_gic_its_info = (GIC_ITS_INFO *) val_memory_alloc(1024);
   if (!g_gic_its_info) {
-      val_print(ACS_PRINT_ERR, "GIC : ITS table memory allocation failed\n", 0);
+      val_print(ACS_PRINT_ERR, "  ITS Configure: memory allocation failed\n",
+                                                                          0);
       return ACS_STATUS_ERR;
   }
 
@@ -236,13 +252,14 @@ uint32_t val_gic_its_configure()
 
   /* Return if no ITS */
   if (g_gic_its_info->GicNumIts == 0) {
-    val_print(ACS_PRINT_DEBUG, "\n      ITS Configure : No ITS Found", 0);
+    val_print(ACS_PRINT_DEBUG, "  ITS Configure: No ITS Found\n", 0);
     goto its_fail;
   }
 
   /* Base Address Check. */
   if ((g_gic_its_info->GicRdBase == 0) || (g_gic_its_info->GicDBase == 0)) {
-    val_print(ACS_PRINT_DEBUG, "\n      ITS Configure : Could not get GICD/GICRD Base", 0);
+    val_print(ACS_PRINT_DEBUG, "  ITS Configure: GICD/GICRD Base addr failed\n",
+                                                                            0);
     goto its_fail;
   }
 
@@ -250,11 +267,11 @@ uint32_t val_gic_its_configure()
       && val_its_gicr_lpi_support(g_gic_its_info->GicRdBase)) {
     Status = val_its_init();
     if ((Status)) {
-      val_print(ACS_PRINT_DEBUG, "\n      ITS Configure : val_its_init failed", 0);
+      val_print(ACS_PRINT_DEBUG, "  ITS Configure: its_init failed\n", 0);
       goto its_fail;
     }
   } else {
-    val_print(ACS_PRINT_DEBUG, "\n      LPIs not supported in the system", 0);
+    val_print(ACS_PRINT_DEBUG, "  ITS Configure: LPI unsupported\n", 0);
     goto its_fail;
   }
 
@@ -262,13 +279,20 @@ uint32_t val_gic_its_configure()
 
 its_fail:
 
-  val_print(ACS_PRINT_DEBUG, "\n      GIC ITS Initialization Failed", 0);
-  val_print(ACS_PRINT_DEBUG, "\n      LPI Interrupt related test may not pass", 0);
+  val_print(ACS_PRINT_DEBUG, "  ITS Init failed: ", 0);
+  val_print(ACS_PRINT_DEBUG, "LPI Interrupt related test may not pass\n", 0);
   val_memory_free((void *)g_gic_its_info);
 
   return ACS_STATUS_ERR;
 }
 
+/**
+  @brief   This function gets ITS Index in g_gic_its_info for its_id
+           1. Caller       -  VAL Layer
+           2. Prerequisite -  val_gic_its_configure
+  @param   its_id ID of the ITS Block
+  @return  Index in ITS Info Block
+**/
 uint32_t get_its_index(uint32_t its_id)
 {
   uint32_t  index;
@@ -281,6 +305,14 @@ uint32_t get_its_index(uint32_t its_id)
   return ACS_INVALID_INDEX;
 }
 
+/**
+  @brief   This function clear msi-x table in PCIe config space
+           1. Caller       -  val_its_clear_lpi_map
+           2. Prerequisite -  val_gic_its_configure
+  @param   bdf BDF of the device
+  @param   msi_index MSI Index in MSI-X table in Config space
+  @return  None
+**/
 void clear_msi_x_table(uint32_t bdf, uint32_t msi_index)
 {
 
@@ -307,6 +339,16 @@ void clear_msi_x_table(uint32_t bdf, uint32_t msi_index)
   val_mmio_write(table_address + msi_index*MSI_X_ENTRY_SIZE + MSI_X_MSG_TBL_MVC_OFFSET, 0x1);
 }
 
+/**
+  @brief   This function fills msi-x table in PCIe config space
+           1. Caller       -  val_its_create_lpi_map
+           2. Prerequisite -  val_gic_its_configure
+  @param   bdf BDF of the device
+  @param   msi_index MSI Index in MSI-X table in Config space
+  @param   msi_addr MSI Address to be programmed
+  @param   msi_data MSI Data to be programmed
+  @return  Status
+**/
 uint32_t fill_msi_x_table(uint32_t bdf, uint32_t msi_index, uint32_t msi_addr, uint32_t msi_data)
 {
 
@@ -406,11 +448,37 @@ uint32_t val_gic_request_msi(uint32_t bdf, uint32_t device_id, uint32_t its_id,
 
   val_its_create_lpi_map(its_index, device_id, int_id, LPI_PRIORITY1);
 
-  msi_addr = val_its_get_translator_addr(its_index);
+  msi_addr = val_its_get_translater_addr(its_index);
   msi_data = int_id;
 
 
   status = fill_msi_x_table(bdf, msi_index, msi_addr, msi_data);
 
   return status;
+}
+
+/**
+  @brief   This function gets the ITS Base for an ITS block with its_id
+           1. Caller       -  Validation layer
+           2. Prerequisite -  val_gic_its_configure
+  @param   its_id ITS Block ID
+  @param   *its_base Stores the ITS Base
+  @return  Status
+**/
+uint32_t val_gic_its_get_base(uint32_t its_id, uint64_t *its_base)
+{
+  uint32_t its_index;
+
+   if ((g_gic_its_info == NULL) || (g_gic_its_info->GicNumIts == 0))
+    return ACS_STATUS_ERR;
+
+  its_index = get_its_index(its_id);
+
+  if (its_index >= g_gic_its_info->GicNumIts) {
+    val_print(ACS_PRINT_ERR, "\n       Could not find ITS ID [%x]", its_id);
+    return ACS_STATUS_ERR;
+  }
+
+  *its_base = g_gic_its_info->GicIts[its_index].Base;
+  return 0;
 }

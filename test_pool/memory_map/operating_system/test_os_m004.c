@@ -20,7 +20,7 @@
 #include "val/include/bsa_acs_pcie.h"
 
 #define TEST_NUM   (ACS_MEMORY_MAP_TEST_BASE + 4)
-#define TEST_RULE  "B_MEM_03-04, B_MEM_06"
+#define TEST_RULE  "B_MEM_03, B_MEM_04, B_MEM_06"
 #define TEST_DESC  "Addressability                        "
 
 static
@@ -38,8 +38,8 @@ payload (void)
   count = val_peripheral_get_info (NUM_ALL, 0);
 
   if (!count) {
-     val_print (ACS_PRINT_DEBUG, "\n       Skip as No peripherals detected   ", 0);
-     val_set_status (index, RESULT_SKIP (TEST_NUM, 1));
+     val_print(ACS_PRINT_DEBUG, "\n       Skip as No peripherals detected   ", 0);
+     val_set_status(index, RESULT_SKIP (TEST_NUM, 1));
      return;
   }
 
@@ -57,20 +57,20 @@ payload (void)
       data = val_pcie_is_devicedma_64bit(dev_bdf);
       if (data == 0) {
           if (!val_pcie_is_device_behind_smmu(dev_bdf)) {
-              val_print (ACS_PRINT_ERR, "\n       WARNING:The device with bdf=0x%x", dev_bdf);
-              val_print (ACS_PRINT_ERR, "\n       doesn't support 64 bit addressing and is not", 0);
-              val_print (ACS_PRINT_ERR, "\n       behind SMMU. Please install driver for this", 0);
-              val_print (ACS_PRINT_ERR, "\n       device and test again. If driver is already", 0);
-              val_print (ACS_PRINT_ERR, "\n       installed, this test has failed.", 0);
-              val_print (ACS_PRINT_ERR, "\n       The device is of type = %d", dev_type);
-              val_set_status (index, RESULT_FAIL (TEST_NUM, 1));
+              val_print(ACS_PRINT_ERR, "\n       WARNING:The device with bdf=0x%x", dev_bdf);
+              val_print(ACS_PRINT_ERR, "\n       doesn't support 64 bit addressing and is not", 0);
+              val_print(ACS_PRINT_ERR, "\n       behind SMMU. Please install driver for this", 0);
+              val_print(ACS_PRINT_ERR, "\n       device and test again. If driver is already", 0);
+              val_print(ACS_PRINT_ERR, "\n       installed, this test has failed.", 0);
+              val_print(ACS_PRINT_ERR, "\n       The device is of type = %d", dev_type);
+              val_set_status(index, RESULT_FAIL (TEST_NUM, 1));
               return;
           }
       }
 
   }
 
-  val_set_status (index, RESULT_PASS (TEST_NUM, 01));
+  val_set_status(index, RESULT_PASS (TEST_NUM, 1));
 }
 
 uint32_t

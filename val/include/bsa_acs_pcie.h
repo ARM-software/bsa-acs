@@ -195,6 +195,15 @@ val_pcie_get_atomicop_requester_capable(uint32_t bdf);
 uint32_t
 val_pcie_is_cache_present(uint32_t bdf);
 
+uint32_t
+val_pcie_get_max_pasid_width(uint32_t bdf, uint32_t *max_pasid_width);
+
+uint32_t
+val_pcie_get_ecam_index(uint32_t bdf, uint32_t *ecam_index);
+
+uint32_t
+val_is_transaction_pending_set(uint32_t bdf);
+
 uint32_t os_p001_entry(uint32_t num_pe);
 uint32_t os_p002_entry(uint32_t num_pe);
 uint32_t os_p003_entry(uint32_t num_pe);
