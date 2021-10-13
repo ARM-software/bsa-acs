@@ -168,7 +168,7 @@ payload()
   else if (wakeup_event == WATCHDOG_SEMF) {
       status = val_wd_set_ws0(wd_num, timer_expire_ticks);
       if (status) {
-          val_print(ACS_PRINT_ERR, "\n       Setting watchdof timeout failed", 0);
+          val_print(ACS_PRINT_ERR, "\n       Setting watchdog timeout failed", 0);
           val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
           return;
       }
@@ -191,7 +191,7 @@ payload()
       else if (wakeup_event == WATCHDOG_SEMF) {
           status = val_wd_set_ws0(wd_num, 0);
           if (status) {
-              val_print(ACS_PRINT_ERR, "\n       Setting watchdof timeout failed", 0);
+              val_print(ACS_PRINT_ERR, "\n       Setting watchdog timeout failed", 0);
               val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
               return;
           }
@@ -222,7 +222,7 @@ payload()
   else if (wakeup_event == WATCHDOG_SEMF) {
       status = val_wd_set_ws0(wd_num, timer_expire_ticks);
           if (status) {
-              val_print(ACS_PRINT_ERR, "\n       Setting watchdof timeout failed", 0);
+              val_print(ACS_PRINT_ERR, "\n       Setting watchdog timeout failed", 0);
               val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
               return;
           }
@@ -245,7 +245,7 @@ payload()
       else if (wakeup_event == WATCHDOG_SEMF) {
           status = val_wd_set_ws0(wd_num, 0);
           if (status) {
-              val_print(ACS_PRINT_ERR, "\n       Setting watchdof timeout failed", 0);
+              val_print(ACS_PRINT_ERR, "\n       Setting watchdog timeout failed", 0);
               val_set_status(index, RESULT_FAIL(TEST_NUM, 5));
               return;
           }

@@ -52,9 +52,9 @@ payload()
 
       ns_wdg++;
       refresh_base = val_wd_get_info(wd_num, WD_INFO_REFRESH_BASE);
-      val_print(ACS_PRINT_INFO, "\n       Watchdog Refresh base is %x ", refresh_base);
+      val_print(ACS_PRINT_INFO, "\n       Watchdog Refresh base is %llx ", refresh_base);
       ctrl_base    = val_wd_get_info(wd_num, WD_INFO_CTRL_BASE);
-      val_print(ACS_PRINT_INFO, "\n       Watchdog CTRL base is  %x      ", ctrl_base);
+      val_print(ACS_PRINT_INFO, "\n       Watchdog CTRL base is  %llx      ", ctrl_base);
 
       data = val_mmio_read(ctrl_base);
       //Control register bits 31:3 are reserved 0

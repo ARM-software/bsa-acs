@@ -39,9 +39,8 @@ UINT8   *gSharedMemory;
 VOID
 pal_mmio_write8(UINT64 addr, UINT8 data)
 {
+  bsa_print(ACS_PRINT_INFO, L" pal_mmio_write8 Address = %llx  Data = %lx \n", addr, data);
   *(volatile UINT8 *)addr = data;
-  bsa_print(ACS_PRINT_INFO, L" pal_mmio_write8 Address = %lx  Data = %lx \n", addr, data);
-
 }
 
 /**
@@ -56,9 +55,8 @@ pal_mmio_write8(UINT64 addr, UINT8 data)
 VOID
 pal_mmio_write16(UINT64 addr, UINT16 data)
 {
+  bsa_print(ACS_PRINT_INFO, L" pal_mmio_write16 Address = %llx  Data = %lx \n", addr, data);
   *(volatile UINT16 *)addr = data;
-  bsa_print(ACS_PRINT_INFO, L" pal_mmio_write16 Address = %lx  Data = %lx \n", addr, data);
-
 }
 
 /**
@@ -73,9 +71,8 @@ pal_mmio_write16(UINT64 addr, UINT16 data)
 VOID
 pal_mmio_write64(UINT64 addr, UINT64 data)
 {
+  bsa_print(ACS_PRINT_INFO, L" pal_mmio_write64 Address = %llx  Data = %llx \n", addr, data);
   *(volatile UINT64 *)addr = data;
-  bsa_print(ACS_PRINT_INFO, L" pal_mmio_write64 Address = %lx  Data = %lx \n", addr, data);
-
 }
 
 /**
@@ -171,7 +168,7 @@ pal_mmio_read(UINT64 addr)
 VOID
 pal_mmio_write(UINT64 addr, UINT32 data)
 {
-  bsa_print(ACS_PRINT_INFO, L" pal_mmio_write Address = %lx  Data = %x \n", addr, data);
+  bsa_print(ACS_PRINT_INFO, L" pal_mmio_write Address = %llx  Data = %x \n", addr, data);
   *(volatile UINT32 *)addr = data;
 }
 
