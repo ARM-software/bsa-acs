@@ -114,7 +114,7 @@ pal_timer_create_info_table(TIMER_INFO_TABLE *TimerTable)
       GtEntry->type = TIMER_TYPE_SYS_TIMER;
       GtEntry->block_cntl_base = Entry->CntCtlBase;
       GtEntry->timer_count     = Entry->GTBlockTimerCount;
-      bsa_print(ACS_PRINT_DEBUG, L"  CNTCTLBase = %x \n", GtEntry->block_cntl_base);
+      bsa_print(ACS_PRINT_DEBUG, L"  CNTCTLBase = %llx \n", GtEntry->block_cntl_base);
       GtBlockTimer = (EFI_ACPI_6_1_GTDT_GT_BLOCK_TIMER_STRUCTURE *)(((UINT8 *)Entry) + Entry->GTBlockTimerOffset);
       for (i = 0; i < GtEntry->timer_count; i++) {
         bsa_print(ACS_PRINT_INFO, L"  Found timer entry \n");
@@ -124,7 +124,7 @@ pal_timer_create_info_table(TIMER_INFO_TABLE *TimerTable)
         GtEntry->gsiv[i]         = GtBlockTimer->GTxPhysicalTimerGSIV;
         GtEntry->virt_gsiv[i]    = GtBlockTimer->GTxVirtualTimerGSIV;
         GtEntry->flags[i]        = GtBlockTimer->GTxPhysicalTimerFlags | (GtBlockTimer->GTxVirtualTimerFlags << 8) | (GtBlockTimer->GTxCommonFlags << 16);
-        bsa_print(ACS_PRINT_DEBUG, L"  CNTBaseN = %x for sys counter = %d\n",
+        bsa_print(ACS_PRINT_DEBUG, L"  CNTBaseN = %llx for sys counter = %d\n",
                                                      GtEntry->GtCntBase[i], i);
         GtBlockTimer++;
         TimerTable->header.num_platform_timer++;
@@ -219,7 +219,7 @@ pal_wd_create_info_table(WD_INFO_TABLE *WdTable)
       WdEntry->wd_gsiv         = Entry->WatchdogTimerGSIV;
       WdEntry->wd_flags        = Entry->WatchdogTimerFlags;
       WdTable->header.num_wd++;
-      bsa_print(ACS_PRINT_DEBUG, L"  Watchdog base = 0x%x INTID = 0x%x \n",
+      bsa_print(ACS_PRINT_DEBUG, L"  Watchdog base = 0x%llx INTID = 0x%x \n",
                                       WdEntry->wd_ctrl_base, WdEntry->wd_gsiv);
       WdEntry++;
     }
