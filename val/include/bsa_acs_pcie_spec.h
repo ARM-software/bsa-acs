@@ -198,8 +198,8 @@
 #define DCTLR_OFFSET   8
 #define LCAPR_OFFSET   0xC
 #define LCTLR_OFFSET   0x10
-#define DCAP2R_OFFSET  24
-#define DCTL2R_OFFSET  28
+#define DCAP2R_OFFSET  0x24
+#define DCTL2R_OFFSET  0x28
 #define LCAP2R_OFFSET  0x2C
 #define LCTL2R_OFFSET  0x30
 #define DCTL2R_MASK    0xFFFF
