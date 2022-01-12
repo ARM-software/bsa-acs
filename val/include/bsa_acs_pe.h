@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2020,2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -338,6 +338,8 @@ uint64_t AA64ReadDbgbcr14El1(void);
 uint64_t AA64ReadDbgbcr15El1(void);
 
 void ArmCallWFI(void);
+
+void ArmExecuteMemoryBarrier(void);
 
 void SpeProgramUnderProfiling(uint64_t interval, uint64_t address);
 

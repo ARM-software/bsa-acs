@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2019,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2019,2021-2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,6 +45,8 @@
 static uint32_t intid;
 static uint32_t failsafe_test_num;
 uint64_t timer_num;
+static uint32_t g_wd_int_received;
+static uint32_t g_failsafe_int_received;
 
 static
 void
@@ -53,6 +55,7 @@ isr1()
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
   val_wd_set_ws0(timer_num, 0);
   val_print(ACS_PRINT_INFO, "       Received WS0 interrupt          \n", 0);
+  g_wd_int_received = 1;
   val_set_status(index, RESULT_PASS(TEST_NUM1, 1));
   intid = val_wd_get_info(timer_num, WD_INFO_GSIV);
   val_gic_end_of_interrupt(intid);
@@ -79,6 +82,7 @@ isr_failsafe()
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
   val_timer_set_phy_el1(0);
   val_print(ACS_PRINT_ERR, "       Received Failsafe interrupt      \n", 0);
+  g_failsafe_int_received = 1;
   val_set_status(index, RESULT_FAIL(failsafe_test_num, 1));
   intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
   val_gic_end_of_interrupt(intid);
@@ -170,8 +174,21 @@ payload1()
               val_set_status(index, RESULT_FAIL(TEST_NUM1, 2));
               return;
           }
+          g_wd_int_received = 0;
+          g_failsafe_int_received = 0;
+
           val_power_enter_semantic(BSA_POWER_SEM_B);
           wakeup_clear_failsafe();
+          /* If PE wakeup is due to some interrupt other than WD
+             or failsafe, test will be consider as PASS(as BSA WAK_10 rule
+             Semantic B is satisfied)
+             Test will be consider as failure in case WD interrupt
+             failed to fire.
+          */
+          if (! (g_wd_int_received || g_failsafe_int_received)) {
+            val_gic_clear_interrupt(intid);
+            val_set_status(index, RESULT_PASS(TEST_NUM1, 1));
+          }
       } else {
           val_print(ACS_PRINT_WARN, "\n       GIC Install Handler Failed...", 0);
           val_set_status(index, RESULT_FAIL(TEST_NUM1, 1));
