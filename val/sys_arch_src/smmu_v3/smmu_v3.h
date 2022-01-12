@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2020, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020, 2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,7 @@
 #include "../include/bsa_acs_memory.h"
 #include "../include/bsa_acs_iovirt.h"
 #include "../include/bsa_acs_pgt.h"
+#include "../include/bsa_acs_pe.h"
 #include "smmu_reg.h"
 
 static uint64_t inline get_max(uint64_t x, uint64_t y)
