@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2020,2021,2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,6 +37,7 @@
 #define PCIE_MAX_DEV    32
 #define PCIE_MAX_FUNC    8
 
+#define PCIE_BUS_SHIFT 8
 #define PCIE_CFG_SIZE  4096
 
 #define PCIE_INTERRUPT_LINE  0x3c
