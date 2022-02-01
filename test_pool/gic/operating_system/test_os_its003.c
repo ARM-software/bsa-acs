@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,11 @@
 #include "val/include/val_interface.h"
 #include "val/include/bsa_acs_iovirt.h"
 #include "val/include/bsa_acs_pcie.h"
+#include "val/include/bsa_acs_memory.h"
 
 #define TEST_NUM   (ACS_GIC_ITS_TEST_NUM_BASE + 3)
 #define TEST_RULE  "ITS_DEV_2"
 #define TEST_DESC  "Check uniqueness of StreamID          "
-
-static uint32_t streamID[PCIE_MAX_DEV];
 
 static
 void
@@ -39,9 +38,30 @@ payload()
   uint32_t test_skip = 1;
   pcie_device_bdf_table *bdf_tbl_ptr;
   int32_t prev_its_id = -1, i, j;
+  uint32_t *streamID = NULL;
 
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
   bdf_tbl_ptr = val_pcie_bdf_table_ptr();
+
+  if (!bdf_tbl_ptr) {
+      val_print(ACS_PRINT_DEBUG, "\n       No BDF table created", 0);
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+      return;
+  }
+
+  if (!bdf_tbl_ptr->num_entries) {
+      val_print(ACS_PRINT_DEBUG, "\n       No entries in BDF table", 0);
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
+      return;
+  }
+
+  /* Allocate memory to store stream ID */
+  streamID = val_memory_alloc(bdf_tbl_ptr->num_entries * sizeof(uint32_t));
+  if (!streamID) {
+      val_print(ACS_PRINT_DEBUG, "\n       Stream ID memory allocation failed", 0);
+      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 1));
+      return;
+  }
 
   /* Check for all the function present in bdf table */
   for (tbl_index = 0; tbl_index < bdf_tbl_ptr->num_entries; tbl_index++)
@@ -66,7 +86,9 @@ payload()
     if (status) {
         val_print(ACS_PRINT_DEBUG,
             "\n       Could not get device info for BDF : 0x%x", bdf);
-        val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 1));
+        val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
+        /* Free allocated memory before return*/
+        val_memory_free(streamID);
         return;
     }
 
@@ -87,7 +109,9 @@ payload()
             if (streamID[i] == streamID[j]) {
                 val_print(ACS_PRINT_DEBUG,
                         "\n       Stream ID is not unique for bdf : 0x%x", bdf);
-                val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
+                val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 3));
+                /* Free allocated memory before return*/
+                val_memory_free(streamID);
                 return;
             }
           }
@@ -95,7 +119,7 @@ payload()
       prev_its_id = its_id;
       dev_index = 0;
     }
-    /* Skip exicuting remaining steps for last device to avoid buffer overflow*/
+    /* Skip executing remaining steps for last device to avoid buffer overflow*/
     if (tbl_index == (bdf_tbl_ptr->num_entries - 1))
       break;
 
@@ -104,8 +128,11 @@ payload()
     dev_index++;
   }
 
+  /* Free allocated memory before return*/
+  val_memory_free(streamID);
+
   if (test_skip == 1)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 3));
   else
       val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 }
