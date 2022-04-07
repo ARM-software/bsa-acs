@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1362,6 +1362,28 @@ val_pcie_enable_msa(uint32_t bdf)
   val_pcie_read_cfg(bdf, TYPE01_CR, &reg_value);
   val_pcie_write_cfg(bdf, TYPE01_CR, reg_value | (1 << CR_MSE_SHIFT));
 
+}
+
+/**
+  @brief  Reads the BAR memory space access in the command register.
+
+  @param  bdf   - Segment/Bus/Dev/Func in the format of PCIE_CREATE_BDF
+  @return 0 - Success
+          1 - Failure
+**/
+uint32_t
+val_pcie_is_msa_enabled(uint32_t bdf)
+{
+
+  uint32_t reg_value;
+
+  /* Enable MSE bit in Command Register to enable BAR memory space accesses */
+  val_pcie_read_cfg(bdf, TYPE01_CR, &reg_value);
+  reg_value &= (1 << CR_MSE_SHIFT);
+  if (reg_value)
+      return 0;
+  else
+      return 1;
 }
 
 /**
