@@ -101,6 +101,7 @@ call_drv_init_test_env(unsigned int print_level)
 
     call_drv_wait_for_completion();
 
+    return 0;
 }
 
 int
@@ -125,6 +126,8 @@ call_drv_clean_test_env()
     fclose(fd);
 
     call_drv_wait_for_completion();
+
+    return 0;
 }
 
 int
@@ -152,6 +155,7 @@ call_drv_execute_test(unsigned int api_num, unsigned int num_pe,
 
     fclose(fd);
 
+    return 0;
 }
 
 int
@@ -178,6 +182,7 @@ call_update_skip_list(unsigned int api_num, int *p_skip_test_num)
 
     fclose(fd);
 
+    return 0;
 }
 
 int
@@ -205,6 +210,7 @@ call_update_sw_view(unsigned int api_num, int *p_sw_view)
 
     fclose(fd);
 
+    return 0;
 }
 
 typedef struct __BSA_MSG__ {
@@ -231,4 +237,6 @@ int read_from_proc_bsa_msg() {
   }
 
   fclose(fd);
+
+  return 0;
 }
