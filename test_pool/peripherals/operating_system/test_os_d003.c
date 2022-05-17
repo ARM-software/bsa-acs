@@ -83,7 +83,6 @@ uart_setup()
 {
 
 
-
 }
 
 void
@@ -110,7 +109,6 @@ uart_disable_txintr()
 }
 
 
-
 static
 void
 isr()
@@ -123,42 +121,20 @@ isr()
   val_gic_end_of_interrupt(int_id);
 }
 
-
-
+/* Write to a read only register*/
 uint32_t
-validate_register_readonly(uint32_t offset, uint32_t width)
+validate_register_access(uint32_t offset, uint32_t width)
 {
-
-  uint32_t data = 0;
-  uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
-
   if (width & WIDTH_BIT8) {
-      data = uart_reg_read(offset, WIDTH_BIT8);
-      uart_reg_write(offset, WIDTH_BIT8, 0xF);
-      if (data != uart_reg_read(offset, WIDTH_BIT8)) {
-          val_set_status(index, RESULT_FAIL(TEST_NUM, offset));
-          return ACS_STATUS_ERR;
-      }
+      uart_reg_write(offset, WIDTH_BIT8, 0xFF);
   }
   if (width & WIDTH_BIT16) {
-      data = uart_reg_read(offset, WIDTH_BIT16);
-      uart_reg_write(offset, WIDTH_BIT16, 0xF);
-      if (data != uart_reg_read(offset, WIDTH_BIT16)) {
-          val_set_status(index, RESULT_FAIL(TEST_NUM, offset));
-          return ACS_STATUS_ERR;
-      }
-
+      uart_reg_write(offset, WIDTH_BIT16, 0xFFFF);
   }
   if (width & WIDTH_BIT32) {
-      data = uart_reg_read(offset, WIDTH_BIT32);
-      uart_reg_write(offset, WIDTH_BIT32, 0xF);
-      if (data != uart_reg_read(offset, WIDTH_BIT32)) {
-          val_set_status(index, RESULT_FAIL(TEST_NUM, offset));
-          return ACS_STATUS_ERR;
-      }
+      uart_reg_write(offset, WIDTH_BIT32, 0xFFFFFFFF);
   }
   return ACS_STATUS_PASS;
-
 }
 
 static
@@ -168,7 +144,6 @@ payload()
 
   uint32_t count = val_peripheral_get_info(NUM_UART, 0);
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
-  uint32_t data1, data2;
   uint32_t interface_type;
 
   val_pe_install_esr(EXCEPT_AARCH64_SYNCHRONOUS_EXCEPTIONS, esr);
@@ -196,27 +171,12 @@ payload()
 
           uart_setup();
 
-          if (validate_register_readonly(BSA_UARTFR, WIDTH_BIT8 | WIDTH_BIT16 | WIDTH_BIT32))
-              return;
-
-          if (validate_register_readonly(BSA_UARTRIS, WIDTH_BIT16 | WIDTH_BIT32))
-              return;
-
-          if (validate_register_readonly(BSA_UARTMIS, WIDTH_BIT16 | WIDTH_BIT32))
-              return;
-
-          /* Check bits 11:8 in the UARTDR reg are read-only */
-          data1 = uart_reg_read(BSA_UARTDR, WIDTH_BIT32);
-          /* Negating bits 11:8 and writing space character (0x20) to UART data register */
-          data2 = data1 ^ 0x0F00 ;
-          data2 = (data2 & (~0xFF)) | 0x20;
-          uart_reg_write(BSA_UARTDR, WIDTH_BIT32, data2);
-          data1 = (data1 >> 8) & 0x0F;
-          if (data1 != ((uart_reg_read(BSA_UARTDR, WIDTH_BIT32)>>8) & 0x0F)) {
-              val_print(ACS_PRINT_ERR, "\n       UARTDR Bits 11:8 are not Read Only", 0);
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
-              return;
-          }
+          /*Make sure  write to a read only register doesn't cause any exceptions*/
+          validate_register_access(BSA_UARTFR, WIDTH_BIT8 | WIDTH_BIT16 | WIDTH_BIT32);
+          validate_register_access(BSA_UARTRIS, WIDTH_BIT16 | WIDTH_BIT32);
+          validate_register_access(BSA_UARTMIS, WIDTH_BIT16 | WIDTH_BIT32);
+          /* Writing bits 11:8 as F and writing space character (0x20) to UART data register */
+          uart_reg_write(BSA_UARTDR, WIDTH_BIT32, 0xF20);
 
           val_set_status(index, RESULT_PASS(TEST_NUM, 1));
       }
