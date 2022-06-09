@@ -52,9 +52,9 @@ void print_help(){
          "        Refer to section 4 of BSA_ACS_User_Guide\n"
          "        To skip a module, use Model_ID as mentioned in user guide\n"
          "        To skip a particular test within a module, use the exact testcase number\n"
-         "-os     Enable the execution of operating system tests\n"
-         "-hyp    Enable the execution of hypervisor tests\n"
-         "-ps     Enable the execution of platform security tests\n"
+         "--os    Enable the execution of operating system tests\n"
+         "--hyp   Enable the execution of hypervisor tests\n"
+         "--ps    Enable the execution of platform security tests\n"
   );
 }
 
