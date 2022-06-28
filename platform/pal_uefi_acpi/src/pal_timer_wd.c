@@ -72,9 +72,11 @@ pal_timer_create_info_table(TIMER_INFO_TABLE *TimerTable)
   EFI_ACPI_6_1_GTDT_GT_BLOCK_STRUCTURE       *Entry = NULL;
   EFI_ACPI_6_1_GTDT_GT_BLOCK_TIMER_STRUCTURE *GtBlockTimer = NULL;
   TIMER_INFO_GTBLOCK         *GtEntry = NULL;
-  UINT32                      Length= 0;
+  UINT32                      Offset= 0;
   UINT32                      i;
   UINT32                      num_of_entries;
+  UINT32                      revision = 0;
+  UINT32                      *virtualpl2 = NULL;
 
   if (TimerTable == NULL) {
     bsa_print(ACS_PRINT_ERR, L" Input Timer Table Pointer is NULL. Cannot create Timer INFO \n");
@@ -92,6 +94,9 @@ pal_timer_create_info_table(TIMER_INFO_TABLE *TimerTable)
   }
   bsa_print(ACS_PRINT_INFO, L"  GTDT is at %x and length is %x \n", gGtdtHdr, gGtdtHdr->Header.Length);
 
+  revision = gGtdtHdr->Header.Revision;
+  bsa_print(ACS_PRINT_INFO, L"  GTDT revision is at %d \n", revision);
+
   //Fill in our internal table
   TimerTable->header.s_el1_timer_flag  = gGtdtHdr->SecurePL1TimerFlags;
   TimerTable->header.ns_el1_timer_flag = gGtdtHdr->NonSecurePL1TimerFlags;
@@ -102,9 +107,12 @@ pal_timer_create_info_table(TIMER_INFO_TABLE *TimerTable)
   TimerTable->header.virtual_timer_flag = gGtdtHdr->VirtualTimerFlags;
   TimerTable->header.virtual_timer_gsiv = gGtdtHdr->VirtualTimerGSIV;
 
-  Length         = gGtdtHdr->PlatformTimerOffset;
-  Entry          = (EFI_ACPI_6_1_GTDT_GT_BLOCK_STRUCTURE *) ((UINT8 *)gGtdtHdr + Length);
-  Length         = sizeof (EFI_ACPI_6_1_GENERIC_TIMER_DESCRIPTION_TABLE);
+  /* If table Rev is  0x01 it will have above information only */
+  if (revision < 2)
+      return;
+
+  Offset         = gGtdtHdr->PlatformTimerOffset;
+  Entry          = (EFI_ACPI_6_1_GTDT_GT_BLOCK_STRUCTURE *) ((UINT8 *)gGtdtHdr + Offset);
   num_of_entries = gGtdtHdr->PlatformTimerCount;
 
   while(num_of_entries) {
@@ -132,17 +140,18 @@ pal_timer_create_info_table(TIMER_INFO_TABLE *TimerTable)
       GtEntry++;
     }
 
-    if (Entry->Type == EFI_ACPI_6_1_GTDT_SBSA_GENERIC_WATCHDOG) {
-      //This is a Watchdog entry. Skip.. added in a separate function.
-    }
-
     Entry = (EFI_ACPI_6_1_GTDT_GT_BLOCK_STRUCTURE *) ((UINT8 *)Entry + (Entry->Length));
     num_of_entries--;
 
   };
 
-  pal_timer_platform_override(TimerTable);
-
+  if (revision == 3) {
+      virtualpl2 = &(gGtdtHdr->PlatformTimerOffset);
+      TimerTable->header.el2_virt_timer_gsiv = *(++virtualpl2);
+      TimerTable->header.el2_virt_timer_flag = *(++virtualpl2);
+  }
+  else
+      pal_timer_platform_override(TimerTable);
 }
 
 /**
