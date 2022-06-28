@@ -52,9 +52,6 @@ void print_help(){
          "        Refer to section 4 of BSA_ACS_User_Guide\n"
          "        To skip a module, use Model_ID as mentioned in user guide\n"
          "        To skip a particular test within a module, use the exact testcase number\n"
-         "-os     Enable the execution of operating system tests\n"
-         "-hyp    Enable the execution of hypervisor tests\n"
-         "-ps     Enable the execution of platform security tests\n"
   );
 }
 
@@ -66,15 +63,11 @@ main (int argc, char **argv)
     char *endptr, *pt;
     int   status;
     int   run_exerciser = 0;
-    int   sw_view = 0;
 
     struct option long_opt[] =
     {
       {"skip", required_argument, NULL, 'n'},
       {"help", no_argument, NULL, 'h'},
-      {"os", no_argument, NULL, 'o'},
-      {"hyp", no_argument, NULL, 'q'},
-      {"ps", no_argument, NULL, 'p'},
       {NULL, 0, NULL, 0}
     };
 
@@ -98,15 +91,6 @@ main (int argc, char **argv)
            pt = strtok(NULL, ",");
          }
          break;
-       case 'o':
-         sw_view = sw_view | (1 << G_SW_OS);
-         break;
-       case 'q':
-         sw_view = sw_view | (1 << G_SW_HYP);
-         break;
-       case 'p':
-         sw_view = sw_view | (1 << G_SW_PS);
-         break;
        case 'e':
          run_exerciser = 1;
          break;
@@ -123,12 +107,11 @@ main (int argc, char **argv)
        }
     }
 
-    if (sw_view)
-    {
-      g_sw_view[G_SW_OS]  = (sw_view >> G_SW_OS) & 0x1;
-      g_sw_view[G_SW_HYP] = (sw_view >> G_SW_HYP) & 0x1;
-      g_sw_view[G_SW_PS]  = (sw_view >> G_SW_PS) & 0x1;
-    }
+    
+    g_sw_view[G_SW_OS]  = 0x1;
+    g_sw_view[G_SW_HYP] = 0x0;
+    g_sw_view[G_SW_PS]  = 0x0;
+    
 
     printf ("\n ************ BSA Architecture Compliance Suite ********* \n");
     printf ("                        Version %d.%d  \n", BSA_APP_VERSION_MAJOR, BSA_APP_VERSION_MINOR);
