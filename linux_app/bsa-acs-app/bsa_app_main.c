@@ -114,7 +114,8 @@ main (int argc, char **argv)
     
 
     printf ("\n ************ BSA Architecture Compliance Suite ********* \n");
-    printf ("                        Version %d.%d  \n", BSA_APP_VERSION_MAJOR, BSA_APP_VERSION_MINOR);
+    printf ("                        Version %d.%d.%d  \n",
+            BSA_APP_VERSION_MAJOR, BSA_APP_VERSION_MINOR, BSA_APP_VERSION_SUBMINOR);
 
 
     printf ("\n Starting tests (Print level is %2d)\n\n", g_print_level);
