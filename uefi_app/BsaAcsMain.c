@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2022, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -250,12 +250,12 @@ HelpMsg (
 {
   Print (L"\nUsage: Bsa.efi [-v <n>] | [-f <filename>] | [-skip <n>]\n"
          "Options:\n"
-         "-v      Verbosity of the Prints\n"
-         "        1 shows all prints, 5 shows Errors\n"
+         "-v      Verbosity of the prints\n"
+         "        1 prints all, 5 prints only the errors\n"
          "-f      Name of the log file to record the test results in\n"
          "-skip   Test(s) to be skipped\n"
-         "        Refer to section 4 of BSA_ACS_User_Guide\n"
-         "        To skip a module, use Model_ID as mentioned in user guide\n"
+         "        Refer to section 4 of BSA ACS User Guide\n"
+         "        To skip a module, use Module ID as mentioned in user guide\n"
          "        To skip a particular test within a module, use the exact testcase number\n"
          "-os     Enable the execution of operating system tests\n"
          "-hyp    Enable the execution of hypervisor tests\n"
@@ -366,7 +366,7 @@ ShellAppMain (
              EFI_FILE_MODE_WRITE | EFI_FILE_MODE_READ | EFI_FILE_MODE_CREATE, 0x0);
     if(EFI_ERROR(Status)) {
          Print(L"Failed to open log file %s\n", CmdLineArg);
-	 g_bsa_log_file_handle = NULL;
+         g_bsa_log_file_handle = NULL;
     }
   }
 
@@ -398,13 +398,18 @@ ShellAppMain (
   g_bsa_tests_pass  = 0;
   g_bsa_tests_fail  = 0;
 
-  Print(L"\n\n BSA Architecture Compliance Suite \n");
-  Print(L"    Version %d.%d  \n", BSA_ACS_MAJOR_VER, BSA_ACS_MINOR_VER);
+  val_print(ACS_PRINT_TEST, "\n\n BSA Architecture Compliance Suite", 0);
+  val_print(ACS_PRINT_TEST, "\n          Version %d.", BSA_ACS_MAJOR_VER);
+  val_print(ACS_PRINT_TEST, "%d.", BSA_ACS_MINOR_VER);
+  val_print(ACS_PRINT_TEST, "%d\n", BSA_ACS_SUBMINOR_VER);
 
-  Print(L"\n Starting tests with Print level is %2d\n\n", g_print_level);
+  val_print(ACS_PRINT_TEST, "\n Starting tests with print level : %2d\n\n", g_print_level);
+  val_print(ACS_PRINT_TEST, "\n Creating Platform Information Tables\n", 0);
 
 
-  Print(L" Creating Platform Information Tables \n");
+
+
+
   Status = createPeInfoTable();
   if (Status)
     return Status;
@@ -428,10 +433,10 @@ ShellAppMain (
 
   FlushImage();
 
-  Print(L"\n      ***  Starting PE tests ***  ");
+  val_print(ACS_PRINT_TEST, "\n      ***  Starting PE tests ***  ", 0);
   Status = val_pe_execute_tests(val_pe_get_num(), g_sw_view);
 
-  Print(L"\n      ***  Starting Memory Map tests ***  ");
+  val_print(ACS_PRINT_TEST, "\n      ***  Starting Memory Map tests ***  ", 0);
   val_memory_execute_tests(val_pe_get_num(), g_sw_view);
 
   /*
@@ -440,28 +445,28 @@ ShellAppMain (
   */
   configureGicIts();
 
-  Print(L"\n      ***  Starting GIC tests ***  ");
+  val_print(ACS_PRINT_TEST, "\n      ***  Starting GIC tests ***  ", 0);
   Status |= val_gic_execute_tests(val_pe_get_num(), g_sw_view);
 
-  Print(L"\n      *** Starting System MMU tests ***  ");
+  val_print(ACS_PRINT_TEST, "\n      *** Starting System MMU tests ***  ", 0);
   Status |= val_smmu_execute_tests(val_pe_get_num(), g_sw_view);
 
-  Print(L"\n      *** Starting Timer tests ***  ");
+  val_print(ACS_PRINT_TEST, "\n      *** Starting Timer tests ***  ", 0);
   Status |= val_timer_execute_tests(val_pe_get_num(), g_sw_view);
 
-  Print(L"\n      *** Starting Power and Wakeup semantic tests ***  ");
+  val_print(ACS_PRINT_TEST, "\n      *** Starting Power and Wakeup semantic tests ***  ", 0);
   Status |= val_wakeup_execute_tests(val_pe_get_num(), g_sw_view);
 
-  Print(L"\n      *** Starting Peripheral tests ***  ");
+  val_print(ACS_PRINT_TEST, "\n      *** Starting Peripheral tests ***  ", 0);
   Status |= val_peripheral_execute_tests(val_pe_get_num(), g_sw_view);
 
-  Print(L"\n      *** Starting Watchdog tests ***  ");
+  val_print(ACS_PRINT_TEST, "\n      *** Starting Watchdog tests ***  ", 0);
   Status |= val_wd_execute_tests(val_pe_get_num(), g_sw_view);
 
-  Print(L"\n      *** Starting PCIe tests ***  ");
+  val_print(ACS_PRINT_TEST, "\n      *** Starting PCIe tests ***  ", 0);
   Status |= val_pcie_execute_tests(val_pe_get_num(), g_sw_view);
 
-  Print(L"\n      *** Starting PCIe Exerciser tests ***  ");
+  val_print(ACS_PRINT_TEST, "\n      *** Starting PCIe Exerciser tests ***  ", 0);
   Status |= val_exerciser_execute_tests(g_sw_view);
 
 print_test_status:
@@ -481,7 +486,7 @@ print_test_status:
     ShellCloseFile(&g_dtb_log_file_handle);
   }
 
-  Print(L"\n      *** BSA tests complete. Reset the system. *** \n\n");
+  val_print(ACS_PRINT_TEST, "\n      *** BSA tests complete. Reset the system. *** \n\n", 0);
 
   val_pe_context_restore(AA64WriteSp(g_stack_pointer));
 

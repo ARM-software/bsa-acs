@@ -295,7 +295,7 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   if (g_pcie_bdf_table->num_entries == 0) {
       val_print(ACS_PRINT_WARN,
-                "\n      *** No Valid Devices Found, Skipping PCIE tests *** \n",
+                "\n       No PCIe Devices Found, Skipping PCIe tests...\n",
                 0);
       return ACS_STATUS_SKIP;
   }
