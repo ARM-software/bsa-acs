@@ -16,7 +16,12 @@ v21.07_0.9_BETA
 v21.09_1.0
 
 * BSA: Added test for PCIe Rules PCI_PP_02, PCI_PP_08 and RE_ORD_4.
-* BSA : Added test for ITS Rules ITS_DEV_2,ITS_DEV_7 and ITS_DEV_8 for systems presenting firmware which is SBBR complaint.
+* BSA: Added test for ITS Rules ITS_DEV_2,ITS_DEV_7 and ITS_DEV_8 for systems presenting firmware which is SBBR complaint.
 * BSA: Added test for Peripherals Rules PER_01,PER_02 and PER_03 for systems presenting firmware which is EBBR complaint.
 * BSA: Bug Fixes on BETA release
 
+v22.06_1.0.1
+
+This version is integrated in IR ACS v2.0.0_BETA-0
+* BSA: Added subminor version prints
+* BSA: Bug Fixes and Enhancements
