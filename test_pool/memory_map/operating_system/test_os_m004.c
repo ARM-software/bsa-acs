@@ -33,6 +33,7 @@ payload (void)
   uint32_t data;
   uint32_t dev_type;
   uint32_t dev_bdf;
+  uint32_t test_run = 0;
 
   index = val_pe_get_index_mpid (val_pe_get_mpid());
   count = val_peripheral_get_info (NUM_ALL, 0);
@@ -49,28 +50,35 @@ payload (void)
       dev_type = val_pcie_get_device_type(dev_bdf);
       // 1: Normal PCIe device, 2: PCIe Host bridge, 3: PCIe bridge device, else: INVALID
 
+      val_print(ACS_PRINT_INFO, "\n Dev bdf 0x%x", dev_bdf);
+
       if ((!dev_type) || (dev_type > 1)) {
           //Skip this device, if we either got pdev as NULL or if it is a bridge
           continue;
       }
+
+      if (!val_pcie_device_driver_present(dev_bdf)) {
+          val_print(ACS_PRINT_DEBUG, "\n Driver not present for bdf 0x%x", dev_bdf);
+          continue;
+      }
+      test_run = 1;
 
       data = val_pcie_is_devicedma_64bit(dev_bdf);
       if (data == 0) {
           if (!val_pcie_is_device_behind_smmu(dev_bdf)) {
               val_print(ACS_PRINT_ERR, "\n       WARNING:The device with bdf=0x%x", dev_bdf);
               val_print(ACS_PRINT_ERR, "\n       doesn't support 64 bit addressing and is not", 0);
-              val_print(ACS_PRINT_ERR, "\n       behind SMMU. Please install driver for this", 0);
-              val_print(ACS_PRINT_ERR, "\n       device and test again. If driver is already", 0);
-              val_print(ACS_PRINT_ERR, "\n       installed, this test has failed.", 0);
-              val_print(ACS_PRINT_ERR, "\n       The device is of type = %d", dev_type);
+              val_print(ACS_PRINT_ERR, "\n       behind smmu. device is of type = %d", dev_type);
               val_set_status(index, RESULT_FAIL (TEST_NUM, 1));
               return;
           }
       }
-
   }
 
-  val_set_status(index, RESULT_PASS (TEST_NUM, 1));
+  if (test_run)
+      val_set_status (index, RESULT_PASS (TEST_NUM, 01));
+  else
+      val_set_status (index, RESULT_SKIP (TEST_NUM, 02));
 }
 
 uint32_t
