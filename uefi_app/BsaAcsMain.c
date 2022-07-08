@@ -478,15 +478,15 @@ print_test_status:
 
   freeBsaAcsMem();
 
-  if (g_bsa_log_file_handle) {
-    ShellCloseFile(&g_bsa_log_file_handle);
-  }
-
   if (g_dtb_log_file_handle) {
     ShellCloseFile(&g_dtb_log_file_handle);
   }
 
   val_print(ACS_PRINT_TEST, "\n      *** BSA tests complete. Reset the system. *** \n\n", 0);
+  
+  if (g_bsa_log_file_handle) {
+    ShellCloseFile(&g_bsa_log_file_handle);
+  }
 
   val_pe_context_restore(AA64WriteSp(g_stack_pointer));
 
