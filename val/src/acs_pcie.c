@@ -852,7 +852,7 @@ val_pcie_device_driver_present(uint32_t bdf)
   uint32_t dev  = PCIE_EXTRACT_BDF_DEV (bdf);
   uint32_t func = PCIE_EXTRACT_BDF_FUNC (bdf);
 
-  return (pal_pcie_device_driver_present(seg, bus, dev, func));
+  return pal_pcie_device_driver_present(seg, bus, dev, func);
 }
 
 /**
@@ -1976,6 +1976,7 @@ val_pcie_get_rootport(uint32_t bdf, uint32_t *rp_bdf)
   uint32_t index;
   uint32_t sec_bus;
   uint32_t sub_bus;
+  uint32_t seg_num;
   uint32_t reg_value;
   uint32_t dp_type;
 
@@ -2009,13 +2010,15 @@ val_pcie_get_rootport(uint32_t bdf, uint32_t *rp_bdf)
        * bus number falls within that range.
        */
       val_pcie_read_cfg(*rp_bdf, TYPE1_PBN, &reg_value);
+      seg_num = PCIE_EXTRACT_BDF_SEG(*rp_bdf);
       sec_bus = ((reg_value >> SECBN_SHIFT) & SECBN_MASK);
       sub_bus = ((reg_value >> SUBBN_SHIFT) & SUBBN_MASK);
       dp_type = val_pcie_device_port_type(*rp_bdf);
 
       if (((dp_type == RP) || (dp_type == iEP_RP)) &&
           (sec_bus <= PCIE_EXTRACT_BDF_BUS(bdf)) &&
-          (sub_bus >= PCIE_EXTRACT_BDF_BUS(bdf)))
+          (sub_bus >= PCIE_EXTRACT_BDF_BUS(bdf)) &&
+          (seg_num == PCIE_EXTRACT_BDF_SEG(bdf)))
           return 0;
   }
 
@@ -2106,6 +2109,41 @@ val_pcie_is_cache_present(uint32_t bdf)
 }
 
 /**
+  @brief  Returns data link layer link active status of the given PCIe function
+  @param  bdf        - Segment/Bus/Dev/Func in the format of PCIE_CREATE_BDF
+  @return Returns PCIE_DLL_LINK_STATUS_NOT_ACTIVE    - If the Link status is not active.
+                  PCIE_DLL_LINK_STATUS_ACTIVE        - If the Link status is active.
+                  PCIE_DLL_LINK_ACTIVE_NOT_SUPPORTED - If the Link status is not supported
+**/
+uint32_t
+val_pcie_data_link_layer_status(uint32_t bdf)
+{
+   uint32_t pciecs_base;
+   uint32_t data_link_report;
+   uint32_t dll_status;
+
+   /* Obtain the Data Link Layer Link Active Reporting Capable to check if the
+    * link status can be polled.
+    */
+   val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &pciecs_base);
+   val_pcie_read_cfg(bdf, pciecs_base + LCAPR_OFFSET, &data_link_report);
+   data_link_report = (data_link_report & LCAPR_DLLLARC_MASK) >> LCAPR_DLLLARC_SHIFT;
+
+   /* If  Data Link Layer Link Active Reporting is supported, the check the
+    * status of Data Link Layer Link Active.
+    */
+   if (data_link_report)
+   {
+       val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &pciecs_base);
+       val_pcie_read_cfg(bdf, pciecs_base + LCTRLR_OFFSET, &dll_status);
+       dll_status = (dll_status & LSTAT_DLLLA_MASK) >> LSTAT_DLLLA_SHIFT;
+       return dll_status;
+   }
+
+   return PCIE_DLL_LINK_ACTIVE_NOT_SUPPORTED;
+}
+
+/**
   @brief  Checks if link Capabilities is supported
 
   @param  bdf    -  Segment/Bus/Dev/Func in the format of PCIE_CREATE_BDF
@@ -2126,7 +2164,7 @@ val_pcie_link_cap_support(uint32_t bdf)
   }
 
   reg_value = 0xFFFFFFFF;
-  val_pcie_read_cfg(bdf, pciecs_base + LCTLR_OFFSET, &reg_value);
+  val_pcie_read_cfg(bdf, pciecs_base + LCTRLR_OFFSET, &reg_value);
   if (reg_value != 0) {
      val_print(ACS_PRINT_ERR, "\n       Link Capabilities control and status check failed", 0);
      return 1;

@@ -33,6 +33,7 @@ payload()
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
   counter_freq = val_timer_get_info(TIMER_INFO_CNTFREQ, 0);
+  val_print(ACS_PRINT_DEBUG, "\n       Counter frequency is %x     ", counter_freq);
 
   if (counter_freq > 10*1000*1000) {
       val_set_status(index, RESULT_PASS(TEST_NUM, 1));

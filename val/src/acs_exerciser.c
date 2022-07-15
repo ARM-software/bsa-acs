@@ -19,6 +19,7 @@
 #include "include/bsa_acs_exerciser.h"
 #include "include/bsa_acs_pcie.h"
 #include "include/bsa_acs_smmu.h"
+#include "include/bsa_acs_iovirt.h"
 
 EXERCISER_INFO_TABLE g_exercier_info_table;
 /**
@@ -231,6 +232,7 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
 {
   uint32_t status, i;
   uint32_t num_instances;
+  uint32_t instance, num_smmu;
 
   status = ACS_STATUS_PASS;
 
@@ -256,6 +258,15 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
       return ACS_STATUS_SKIP;
   }
 
+  val_print(ACS_PRINT_INFO, "  Initializing SMMU\n", 0);
+
+  num_smmu = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
+  val_smmu_init();
+
+  /* Disable All SMMU's */
+  for (instance = 0; instance < num_smmu; ++instance)
+      val_smmu_disable(instance);
+
   if (g_sw_view[G_SW_OS]) {
      val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
 
@@ -278,8 +289,9 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
 
      status |= os_e014_entry();
      status |= os_e015_entry();
-
   }
+
+  val_smmu_stop();
 
   if (status != ACS_STATUS_PASS)
     val_print(ACS_PRINT_TEST, "\n      *** One or more tests have Failed/Skipped.*** \n", 0);

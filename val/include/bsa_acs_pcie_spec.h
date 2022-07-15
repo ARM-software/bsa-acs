@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019-2020,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -197,7 +197,7 @@
 #define ACSCR_OFFSET   4
 #define DCTLR_OFFSET   8
 #define LCAPR_OFFSET   0xC
-#define LCTLR_OFFSET   0x10
+#define LCTRLR_OFFSET   0x10
 #define DCAP2R_OFFSET  0x24
 #define DCTL2R_OFFSET  0x28
 #define LCAP2R_OFFSET  0x2C
@@ -213,6 +213,14 @@
 /* PCIe capabilities reg shifts and masks */
 #define PCIECR_DPT_SHIFT 4
 #define PCIECR_DPT_MASK  0xf
+
+/* Link Capabilities register shifts and masks */
+#define LCAPR_DLLLARC_SHIFT 20
+#define LCAPR_DLLLARC_MASK  0x100000
+
+/* Link Status register shifts and masks */
+#define LSTAT_DLLLA_SHIFT   29
+#define LSTAT_DLLLA_MASK    0x20000000
 
 /* Device Capabilities register */
 #define DCAPR_MPSS_SHIFT 0
