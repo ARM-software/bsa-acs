@@ -187,7 +187,8 @@ val_wd_set_ws0(uint32_t index, uint32_t timeout)
 
   /* W_IIDR.Architecture Revision [19:16] = 0x1 for Watchdog Rev 1 */
   data = VAL_EXTRACT_BITS(val_mmio_read(ctrl_base + WD_IIDR_OFFSET), 16, 19);
-  counter_freq = val_timer_get_info(TIMER_INFO_CNTFREQ, 0);
+
+  counter_freq = val_get_counter_frequency();
 
   /* Check if the timeout value exceeds */
   if (data == 0)

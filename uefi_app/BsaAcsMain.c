@@ -39,6 +39,8 @@ UINT32  g_bsa_tests_fail;
 UINT64  g_stack_pointer;
 UINT64  g_exception_ret_addr;
 UINT64  g_ret_addr;
+UINT32  g_wakeup_timeout;
+
 SHELL_FILE_HANDLE g_bsa_log_file_handle;
 SHELL_FILE_HANDLE g_dtb_log_file_handle;
 
@@ -257,6 +259,8 @@ HelpMsg (
          "        Refer to section 4 of BSA ACS User Guide\n"
          "        To skip a module, use Module ID as mentioned in user guide\n"
          "        To skip a particular test within a module, use the exact testcase number\n"
+         "-timeout  Set timeout multiple for wakeup tests\n"
+         "        1 - min value  5 - max value\n"
          "-os     Enable the execution of operating system tests\n"
          "-hyp    Enable the execution of hypervisor tests\n"
          "-ps     Enable the execution of platform security tests\n"
@@ -268,6 +272,7 @@ STATIC CONST SHELL_PARAM_ITEM ParamList[] = {
   {L"-v", TypeValue},    // -v    # Verbosity of the Prints. 1 shows all prints, 5 shows Errors
   {L"-f", TypeValue},    // -f    # Name of the log file to record the test results in.
   {L"-skip", TypeValue}, // -skip # test(s) to skip execution
+  {L"-timeout", TypeValue}, // -timeout # Set timeout multiple for wakeup tests
   {L"-help", TypeFlag},  // -help # help : info about commands
   {L"-h", TypeFlag},     // -h    # help : info about commands
   {L"-os", TypeFlag},    // -os   # Binary Flag to enable the execution of operating system tests.
@@ -327,6 +332,17 @@ ShellAppMain (
         }
       }
   }
+
+  // Options with Values
+  CmdLineArg  = ShellCommandLineGetValue (ParamPackage, L"-timeout");
+  if (CmdLineArg == NULL) {
+    g_wakeup_timeout = 1;
+  } else {
+    g_wakeup_timeout = StrDecimalToUintn(CmdLineArg);
+    Print(L"Wakeup timeout multiple %d.\n", g_wakeup_timeout);
+    if (g_wakeup_timeout > 5)
+        g_wakeup_timeout = 5;
+    }
 
     // Options with Values
   CmdLineArg  = ShellCommandLineGetValue (ParamPackage, L"-v");
@@ -483,7 +499,7 @@ print_test_status:
   }
 
   val_print(ACS_PRINT_TEST, "\n      *** BSA tests complete. Reset the system. *** \n\n", 0);
-  
+
   if (g_bsa_log_file_handle) {
     ShellCloseFile(&g_bsa_log_file_handle);
   }

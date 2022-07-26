@@ -107,11 +107,9 @@ main (int argc, char **argv)
        }
     }
 
-    
     g_sw_view[G_SW_OS]  = 0x1;
     g_sw_view[G_SW_HYP] = 0x0;
     g_sw_view[G_SW_PS]  = 0x0;
-    
 
     printf ("\n ************ BSA Architecture Compliance Suite ********* \n");
     printf ("                        Version %d.%d.%d  \n",

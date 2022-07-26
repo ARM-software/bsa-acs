@@ -47,6 +47,7 @@ static uint32_t failsafe_test_num;
 uint64_t timer_num;
 static uint32_t g_wd_int_received;
 static uint32_t g_failsafe_int_received;
+extern uint32_t g_wakeup_timeout;
 
 static
 void
@@ -129,7 +130,7 @@ isr5()
 void
 wakeup_set_failsafe()
 {
-  uint64_t timer_expire_val = val_get_counter_frequency() * 2;
+  uint64_t timer_expire_val = val_get_counter_frequency() * (g_wakeup_timeout + 1);
 
   intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
   val_gic_install_isr(intid, isr_failsafe);
@@ -148,7 +149,7 @@ void
 payload1()
 {
   uint32_t status, ns_wdg = 0;
-  uint64_t timer_expire_val = 1;
+  uint64_t timer_expire_val = 1 * g_wakeup_timeout;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
   timer_num = val_wd_get_info(0, WD_INFO_COUNT);
@@ -185,7 +186,7 @@ payload1()
              Test will be consider as failure in case WD interrupt
              failed to fire.
           */
-          if (! (g_wd_int_received || g_failsafe_int_received)) {
+          if (!(g_wd_int_received || g_failsafe_int_received)) {
             val_gic_clear_interrupt(intid);
             val_set_status(index, RESULT_PASS(TEST_NUM1, 1));
           }
@@ -208,7 +209,7 @@ void
 payload2()
 {
   uint64_t cnt_base_n;
-  uint64_t timer_expire_val = TIMEOUT_SMALL;
+  uint64_t timer_expire_val = val_get_counter_frequency() * g_wakeup_timeout;
   uint32_t status, ns_timer = 0;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
@@ -269,7 +270,7 @@ static
 void
 payload3()
 {
-  uint64_t timer_expire_val = TIMEOUT_SMALL;
+  uint64_t timer_expire_val = val_get_counter_frequency() * g_wakeup_timeout;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
   val_set_status(index, RESULT_FAIL(TEST_NUM3, 1));
@@ -289,7 +290,7 @@ static
 void
 payload4()
 {
-  uint64_t timer_expire_val = TIMEOUT_SMALL;
+  uint64_t timer_expire_val = val_get_counter_frequency() * g_wakeup_timeout;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
   val_set_status(index, RESULT_FAIL(TEST_NUM4, 1));
@@ -312,7 +313,7 @@ static
 void
 payload5()
 {
-  uint64_t timer_expire_val = TIMEOUT_SMALL;
+  uint64_t timer_expire_val = val_get_counter_frequency() * g_wakeup_timeout;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
   val_set_status(index, RESULT_FAIL(TEST_NUM5, 1));
