@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2022, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -69,12 +69,14 @@ val_pe_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       status |= os_c012_entry(num_pe);
       status |= os_c013_entry(num_pe);
       status |= os_c014_entry(num_pe);
+#ifdef EXCLUSION_LIST
       status |= os_c015_entry(num_pe);
       status |= os_c016_entry(num_pe);
       status |= os_c017_entry(num_pe);
       status |= os_c018_entry(num_pe);
       status |= os_c019_entry(num_pe);
       status |= os_c020_entry(num_pe);
+#endif
   }
 
   if (g_sw_view[G_SW_HYP]) {

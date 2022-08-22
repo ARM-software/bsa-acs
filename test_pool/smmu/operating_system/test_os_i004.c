@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,59 +18,72 @@
 #include "val/include/bsa_acs_val.h"
 #include "val/include/val_interface.h"
 
-#include "val/include/bsa_acs_smmu.h"
 #include "val/include/bsa_acs_pe.h"
+#include "val/include/bsa_acs_smmu.h"
+#include "val/include/bsa_acs_pcie.h"
 
 #define TEST_NUM   (ACS_SMMU_TEST_NUM_BASE + 4)
-#define TEST_RULE  "B_SMMU_04, B_SMMU_05"
-#define TEST_DESC  "Check TLB Range Invalidation          "
+#define TEST_RULE  "B_SMMU_08"
+#define TEST_DESC  "SMMU revision and S-EL2 support       "
 
 static
 void
 payload()
 {
 
-  uint64_t data_pe_tlb, data_ril;
   uint32_t num_smmu;
   uint32_t index;
+  uint32_t s_el2;
+  uint32_t smmu_rev;
+  uint32_t minor;
+  uint32_t s1ts, s1p;
 
   index = val_pe_get_index_mpid(val_pe_get_mpid());
+  s_el2 = VAL_EXTRACT_BITS(val_pe_reg_read(ID_AA64PFR0_EL1), 36, 39);
 
-  data_pe_tlb = VAL_EXTRACT_BITS(val_pe_reg_read(ID_AA64ISAR0_EL1), 56, 59);
-  if (data_pe_tlb != 0x2) {
-      val_print(ACS_PRINT_DEBUG, "\n       TLB Range Invalid Not "
-                                "Supported For PE              ", 0);
+  num_smmu = val_smmu_get_info(SMMU_NUM_CTRL, 0);
+  if (num_smmu == 0) {
+      val_print(ACS_PRINT_ERR, "\n       No SMMU Controllers are discovered               ", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
-  num_smmu = val_smmu_get_info(SMMU_NUM_CTRL, 0);
-  if (num_smmu == 0) {
-    val_print(ACS_PRINT_DEBUG, "\n       No SMMU Controllers are discovered"
-                                 "                  ", 0);
-    val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
-    return;
+  if (s_el2) {
+      val_print(ACS_PRINT_DEBUG, "\n       S-EL2 implemented...Skipping", 0);
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
+      return;
   }
 
   while (num_smmu--) {
-    if (val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) < 3) {
-      val_print(ACS_PRINT_DEBUG, "\n       Not valid for SMMUv2 or older"
-                                    "version               ", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
-      return;
-    }
+      smmu_rev = val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu);
 
-    data_ril = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_IDR3, num_smmu), 10, 10);
-
-    /* If PE TLB Range Invalidation then SMMU_IDR3.RIL = 0b1 */
-    if (data_pe_tlb == 0x2) {
-        if (data_ril != 0x1) {
-            val_print(ACS_PRINT_ERR, "\n       Range Invalidation unsupported "
-                                     "for SMMU %x", num_smmu);
-            val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
-            return;
-        }
-    }
+      if (smmu_rev == 2) {
+          s1ts = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv2_IDR0, num_smmu), 30, 30);
+          // Stage 1 translation functionality cannot be provided by SMMU v2 revision
+          if (!s1ts) {
+              val_print(ACS_PRINT_ERR,
+                        "\n       SMMUv2 not providing Stage1 functionality  ", 0);
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+              return;
+          }
+      }
+      else if (smmu_rev == 3) {
+          minor = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_AIDR, num_smmu), 0, 3);
+          s1p = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_IDR0, num_smmu), 1, 1);
+          // Stage 1 translation functionality cannot be provided by SMMU v3.0/3.1 revisions
+          if (!s1p) {
+              val_print(ACS_PRINT_ERR,
+                        "\n       SMMUv3.%d not providing Stage1 functionality  ", minor);
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+              return;
+          }
+      }
+      if (smmu_rev < 2) {
+         val_print(ACS_PRINT_ERR,
+                "\n       SMMU revision must be at least v2  ", 0);
+         val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
+         return;
+      }
   }
 
   val_set_status(index, RESULT_PASS(TEST_NUM, 1));
@@ -85,7 +98,6 @@ os_i004_entry(uint32_t num_pe)
   num_pe = 1;  //This test is run on single processor
 
   status = val_initialize_test(TEST_NUM, TEST_DESC, num_pe);
-
   if (status != ACS_STATUS_SKIP)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 

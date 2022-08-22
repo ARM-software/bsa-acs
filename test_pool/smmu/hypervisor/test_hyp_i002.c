@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,7 @@
 #include "val/include/bsa_acs_pcie.h"
 
 #define TEST_NUM   (ACS_SMMU_HYP_TEST_NUM_BASE + 2)
-#define TEST_RULE  "B_SMMU_18, B_SMMU_20"
+#define TEST_RULE  "B_SMMU_18 "
 #define TEST_DESC  "SMMU Revision,S-EL2 support Hyp       "
 
 static
@@ -44,41 +44,44 @@ payload()
   num_smmu = val_smmu_get_info(SMMU_NUM_CTRL, 0);
   if (num_smmu == 0) {
       val_print(ACS_PRINT_ERR, "\n       No SMMU Controllers are discovered ", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
+      return;
+  }
+
+  if (s_el2) {
+      val_print(ACS_PRINT_DEBUG, "\n       S-EL2 implemented...Skipping", 0);
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
       return;
   }
 
   while (num_smmu--) {
       smmu_rev = val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu);
 
-      if (s_el2) {
-            if (smmu_rev == 2) {
-                s2ts = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv2_IDR0, num_smmu), 29, 29);
-                // Stage 2 translation functionality cannot be provided by SMMU v2 revision
-                if (s2ts) {
-                    val_print(ACS_PRINT_ERR,
-                        "\n       SMMUv2 detected: revision must be v3.2 or higher  ", 0);
-                    val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
-                    return;
-                }
-            }
-            else if (smmu_rev == 3) {
-                minor = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_AIDR, num_smmu), 0, 3);
-                s2p = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_IDR0, num_smmu), 0, 0);
-                // Stage 2 translation functionality cannot be provided by SMMU v3.0/3.1 revisions
-                if ((minor < 2) && s2p) {
-                    val_print(ACS_PRINT_ERR,
-                        "\n       SMMUv3.%d detected: revision must be v3.2 or higher  ", minor);
-                    val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
-                    return;
-                }
-            }
+      if (smmu_rev == 2) {
+          s2ts = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv2_IDR0, num_smmu), 29, 29);
+          // Stage 2 translation functionality cannot be provided by SMMU v2 revision
+          if (!s2ts) {
+              val_print(ACS_PRINT_ERR,
+                        "\n       SMMUv2 not providing Stage2 functionality", 0);
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+              return;
+          }
+      }
+      else if (smmu_rev == 3) {
+          minor = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_AIDR, num_smmu), 0, 3);
+          s2p = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_IDR0, num_smmu), 0, 0);
+          // Stage 2 translation functionality cannot be provided by SMMU v3.0/3.1 revisions
+          if (!s2p) {
+              val_print(ACS_PRINT_ERR,
+                        "\n       SMMUv3.%d not providing Stage2 functionality", minor);
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+              return;
+          }
       }
       if (smmu_rev < 2) {
-            val_print(ACS_PRINT_ERR,
-                "\n       SMMU revision must be at least v2  ", 0);
-            val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
-            return;
+          val_print(ACS_PRINT_ERR, "\n       SMMU revision must be at least v2  ", 0);
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
+          return;
       }
   }
 
