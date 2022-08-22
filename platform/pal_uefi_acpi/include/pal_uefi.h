@@ -311,6 +311,7 @@ typedef struct {
   UINT32         bdf;   ///< Bus Device Function
   UINT64         base0; ///< Base Address of the controller
   UINT64         base1; ///< Base Address of the controller
+  UINT32         width; ///< Access width
   UINT32         irq;   ///< IRQ to install an ISR
   UINT32         flags;
   UINT32         msi;   ///< MSI Enabled

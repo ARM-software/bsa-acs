@@ -113,6 +113,7 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
   if (spcr) {
     peripheralInfoTable->header.num_uart++;
     per_info->base0 = spcr->BaseAddress.Address;
+    per_info->width = 1 << (spcr->BaseAddress.AccessSize + 2);  // Convert GAS to 8/16/32
     per_info->irq   = spcr->GlobalSystemInterrupt;
     per_info->type  = PERIPHERAL_TYPE_UART;
 

@@ -455,6 +455,7 @@ typedef struct {
   uint32_t         bdf;   ///< Bus Device Function
   uint64_t         base0; ///< Base Address of the controller
   uint64_t         base1; ///< Base Address of the controller
+  uint32_t         width; ///< Access width
   uint32_t         irq;   ///< IRQ to install an ISR
   uint32_t         flags;
   uint32_t         msi;   ///< MSI Enabled
