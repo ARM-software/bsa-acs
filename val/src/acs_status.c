@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2022, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,8 +37,12 @@ val_report_status(uint32_t index, uint32_t status, char8_t *ruleid)
       val_print(ACS_PRINT_ERR, "\n       Failed on PE - %4d", index);
   }
 
-  if (IS_TEST_PASS(status))
-    val_print(ACS_PRINT_TEST, "     : Result:  PASS \n", status);
+  if (IS_TEST_PASS(status)) {
+      val_print(ACS_PRINT_DEBUG, "\n       ", 0);
+      val_print(ACS_PRINT_DEBUG, ruleid, 0);
+      val_print(ACS_PRINT_DEBUG, "\n                                  ", 0);
+      val_print(ACS_PRINT_TEST, "     : Result:  PASS \n", status);
+  }
   else
     if (IS_TEST_FAIL(status)) {
         if (ruleid) {
