@@ -166,6 +166,13 @@ payload1()
       ns_wdg++;
       intid = val_wd_get_info(timer_num, WD_INFO_GSIV);
       status = val_gic_install_isr(intid, isr1);
+
+      /* Set Interrupt Type Edge/Level Trigger */
+      if (val_wd_get_info(timer_num, WD_INFO_IS_EDGE))
+          val_gic_set_intr_trigger(intid, INTR_TRIGGER_INFO_EDGE_RISING);
+      else
+          val_gic_set_intr_trigger(intid, INTR_TRIGGER_INFO_LEVEL_HIGH);
+
       if (status == 0) {
           failsafe_test_num = TEST_NUM1;
           wakeup_set_failsafe();
