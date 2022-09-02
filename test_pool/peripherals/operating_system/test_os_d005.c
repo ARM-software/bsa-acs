@@ -28,31 +28,31 @@
 
 static
 void
-uart_reg_write(uint64_t uart_base, uint32_t offset, uint32_t width_mask, uint32_t data)
+uart_reg_write(uint64_t uart_base, uint32_t offset, uint32_t reg_shift, uint32_t width_mask, uint32_t data)
 {
   if (width_mask & WIDTH_BIT8)
-      *((volatile uint8_t *)(uart_base + offset)) = (uint8_t)data;
+      *((volatile uint8_t *)(uart_base + (offset << reg_shift))) = (uint8_t)data;
 
   if (width_mask & WIDTH_BIT16)
-      *((volatile uint16_t *)(uart_base + offset)) = (uint16_t)data;
+      *((volatile uint16_t *)(uart_base + (offset << reg_shift))) = (uint16_t)data;
 
   if (width_mask & WIDTH_BIT32)
-      *((volatile uint32_t *)(uart_base + offset)) = (uint32_t)data;
+      *((volatile uint32_t *)(uart_base + (offset << reg_shift))) = (uint32_t)data;
 
 }
 
 static
 uint32_t
-uart_reg_read(uint64_t uart_base, uint32_t offset, uint32_t width_mask)
+uart_reg_read(uint64_t uart_base, uint32_t offset, uint32_t reg_shift, uint32_t width_mask)
 {
   if (width_mask & WIDTH_BIT8)
-      return *((volatile uint8_t *)(uart_base + offset));
+      return *((volatile uint8_t *)(uart_base + (offset << reg_shift)));
 
   if (width_mask & WIDTH_BIT16)
-      return *((volatile uint16_t *)(uart_base + offset));
+      return *((volatile uint16_t *)(uart_base + (offset << reg_shift)));
 
   if (width_mask & WIDTH_BIT32)
-      return *((volatile uint32_t *)(uart_base + offset));
+      return *((volatile uint32_t *)(uart_base + (offset << reg_shift)));
 
   return 0;
 }
@@ -66,6 +66,9 @@ payload()
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
   uint32_t interface_type;
   uint32_t baud_rate;
+  uint32_t access_width;
+  uint32_t reg_shift;
+  uint32_t width_mask;
   uint32_t counter_freq;
   uint32_t ier_reg;
   uint32_t ier_scratch2;
@@ -107,6 +110,28 @@ payload()
               return;
           }
 
+          /* Check the access width (use width for reg_shift like linux earlycon) */
+          access_width = val_peripheral_get_info(UART_WIDTH, count - 1);
+          switch (access_width) {
+              case 8:
+		  reg_shift  = 0;
+                  width_mask = WIDTH_BIT8;
+                  break;
+              case 16:
+		  reg_shift  = 1;
+                  width_mask = WIDTH_BIT16;
+                  break;
+              case 32:
+		  reg_shift  = 2;
+                  width_mask = WIDTH_BIT32;
+                  break;
+              default:
+                  val_print(ACS_PRINT_ERR, "\n         UART access width must be specified"
+                                           " for instance: %x", count - 1);
+                  val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+                  return;
+          }
+
           /* Check the Baudrate from the hardware map */
           baud_rate = val_peripheral_get_info(UART_BAUDRATE, count - 1);
           if (baud_rate < BAUDRATE_9600 || baud_rate > BAUDRATE_115200)
@@ -120,14 +145,18 @@ payload()
               }
           }
 
+	  val_print(ACS_PRINT_ERR, "\nDEBUG: uart_base %X", uart_base);
+	  val_print(ACS_PRINT_ERR, "\nDEBUG: access_width %d", access_width);
+
           /* Check the baudrate in the UART register. Obtained the divisor by
            * enabling the divisor latch access and reading the divisor latch
            * byte1 and byte2. Divisor = system clock speed / (16 * baudrate)
            */
-          uart_reg_write(uart_base, LCR, WIDTH_BIT8, DIVISOR_LATCH_EN);
-          divisor = uart_reg_read(uart_base, DIVISOR_LATCH_BYTE1, WIDTH_BIT8);
-          divisor |= uart_reg_read(uart_base, DIVISOR_LATCH_BYTE2, WIDTH_BIT8) << 8;
-          uart_reg_write(uart_base, LCR, WIDTH_BIT8, DIVISOR_LATCH_DIS);
+          lcr_reg = uart_reg_read(uart_base, LCR, reg_shift, width_mask);
+          uart_reg_write(uart_base, LCR, reg_shift, width_mask, DIVISOR_LATCH_EN | lcr_reg);
+          divisor = uart_reg_read(uart_base, DIVISOR_LATCH_BYTE1, reg_shift, width_mask);
+          divisor |= uart_reg_read(uart_base, DIVISOR_LATCH_BYTE2, reg_shift, width_mask) << 8;
+          uart_reg_write(uart_base, LCR, reg_shift, width_mask, lcr_reg);
           counter_freq = val_timer_get_info(TIMER_INFO_CNTFREQ, 0);
           baud_rate = counter_freq / (16 * divisor);
           if (baud_rate < BAUDRATE_1200 || baud_rate > BAUDRATE_115200)
@@ -140,12 +169,12 @@ payload()
           }
 
           /* Check the read/write property of Line Control Register */
-          lcr_reg = uart_reg_read(uart_base, LCR, WIDTH_BIT8);
-          uart_reg_write(uart_base, LCR, WIDTH_BIT8, 0);
-          lcr_scratch2 = uart_reg_read(uart_base, LCR, WIDTH_BIT8);
-          uart_reg_write(uart_base, LCR, WIDTH_BIT8, 0xFF);
-          lcr_scratch3 = uart_reg_read(uart_base, LCR, WIDTH_BIT8);
-          uart_reg_write(uart_base, LCR, WIDTH_BIT8, lcr_reg);
+          lcr_reg = uart_reg_read(uart_base, LCR, reg_shift, width_mask);
+          uart_reg_write(uart_base, LCR, reg_shift, width_mask, 0);
+          lcr_scratch2 = uart_reg_read(uart_base, LCR, reg_shift, width_mask);
+          uart_reg_write(uart_base, LCR, reg_shift, width_mask, 0xFF);
+          lcr_scratch3 = uart_reg_read(uart_base, LCR, reg_shift, width_mask);
+          uart_reg_write(uart_base, LCR, reg_shift, width_mask, lcr_reg);
           if ((lcr_scratch2 != 0) || (lcr_scratch3 != 0xFF))
           {
               val_print(ACS_PRINT_ERR, "\n   LCR register are not read/write"
@@ -154,12 +183,12 @@ payload()
           }
 
           /* Check the read/write property of Interrupt Enable Register */
-          ier_reg = uart_reg_read(uart_base, IER, WIDTH_BIT8);
-          uart_reg_write(uart_base, IER, WIDTH_BIT8, 0);
-          ier_scratch2 = uart_reg_read(uart_base, IER, WIDTH_BIT8) & 0xF;
-          uart_reg_write(uart_base, IER, WIDTH_BIT8, 0xF);
-          ier_scratch3 = uart_reg_read(uart_base, IER, WIDTH_BIT8);
-          uart_reg_write(uart_base, IER, WIDTH_BIT8, ier_reg);
+          ier_reg = uart_reg_read(uart_base, IER, reg_shift, width_mask);
+          uart_reg_write(uart_base, IER, reg_shift, width_mask, 0);
+          ier_scratch2 = uart_reg_read(uart_base, IER, reg_shift, width_mask) & 0xF;
+          uart_reg_write(uart_base, IER, reg_shift, width_mask, 0xF);
+          ier_scratch3 = uart_reg_read(uart_base, IER, reg_shift, width_mask);
+          uart_reg_write(uart_base, IER, reg_shift, width_mask, ier_reg);
           if ((ier_scratch2 != 0) || (ier_scratch3 != 0xF))
           {
               val_print(ACS_PRINT_ERR, "\n   IER register[0:3] are not read/write"
@@ -168,10 +197,10 @@ payload()
           }
 
           /* Check if UART is really present using loopback test mode */
-          mcr_reg = uart_reg_read(uart_base, MCR, WIDTH_BIT8);
-          uart_reg_write(uart_base, MCR, WIDTH_BIT8, MCR_LOOP | 0xA);
-          msr_status = uart_reg_read(uart_base, MSR, WIDTH_BIT8);
-          uart_reg_write(uart_base, MCR, WIDTH_BIT8, mcr_reg);
+          mcr_reg = uart_reg_read(uart_base, MCR, reg_shift, width_mask);
+          uart_reg_write(uart_base, MCR, reg_shift, width_mask, MCR_LOOP | 0xA);
+          msr_status = uart_reg_read(uart_base, MSR, reg_shift, width_mask);
+          uart_reg_write(uart_base, MCR, reg_shift, width_mask, mcr_reg);
           if (msr_status != CTS_DCD_EN)
           {
               val_print(ACS_PRINT_ERR, "\n   Loopback test mode failed"
