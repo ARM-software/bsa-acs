@@ -1,6 +1,5 @@
-
 /** @file
- * Copyright (c) 2016-2019, 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2019, 2021-2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -69,13 +68,11 @@ payload()
   uint32_t access_width;
   uint32_t reg_shift;
   uint32_t width_mask;
-  uint32_t counter_freq;
   uint32_t ier_reg;
   uint32_t ier_scratch2;
   uint32_t ier_scratch3;
   uint32_t mcr_reg;
   uint32_t msr_status;
-  uint32_t divisor;
   uint32_t uart_base;
   uint32_t lcr_reg;
   uint32_t lcr_scratch2;
@@ -145,28 +142,9 @@ payload()
               }
           }
 
-	  val_print(ACS_PRINT_ERR, "\nDEBUG: uart_base %X", uart_base);
-	  val_print(ACS_PRINT_ERR, "\nDEBUG: access_width %d", access_width);
+          val_print(ACS_PRINT_ERR, "\nDEBUG: uart_base %X", uart_base);
+          val_print(ACS_PRINT_ERR, "\nDEBUG: access_width %d", access_width);
 
-          /* Check the baudrate in the UART register. Obtained the divisor by
-           * enabling the divisor latch access and reading the divisor latch
-           * byte1 and byte2. Divisor = system clock speed / (16 * baudrate)
-           */
-          lcr_reg = uart_reg_read(uart_base, LCR, reg_shift, width_mask);
-          uart_reg_write(uart_base, LCR, reg_shift, width_mask, DIVISOR_LATCH_EN | lcr_reg);
-          divisor = uart_reg_read(uart_base, DIVISOR_LATCH_BYTE1, reg_shift, width_mask);
-          divisor |= uart_reg_read(uart_base, DIVISOR_LATCH_BYTE2, reg_shift, width_mask) << 8;
-          uart_reg_write(uart_base, LCR, reg_shift, width_mask, lcr_reg);
-          counter_freq = val_timer_get_info(TIMER_INFO_CNTFREQ, 0);
-          baud_rate = counter_freq / (16 * divisor);
-          if (baud_rate < BAUDRATE_1200 || baud_rate > BAUDRATE_115200)
-          {
-              val_print(ACS_PRINT_ERR,
-              "\n        Baud rate %d outside supported range",
-              baud_rate);
-              val_print(ACS_PRINT_ERR, " for instance %x", count - 1);
-              test_fail = 1;
-          }
 
           /* Check the read/write property of Line Control Register */
           lcr_reg = uart_reg_read(uart_base, LCR, reg_shift, width_mask);
@@ -201,7 +179,7 @@ payload()
           uart_reg_write(uart_base, MCR, reg_shift, width_mask, MCR_LOOP | 0xA);
           msr_status = uart_reg_read(uart_base, MSR, reg_shift, width_mask);
           uart_reg_write(uart_base, MCR, reg_shift, width_mask, mcr_reg);
-          if (msr_status != CTS_DCD_EN)
+          if ((msr_status & 0xF0) != CTS_DCD_EN)
           {
               val_print(ACS_PRINT_ERR, "\n   Loopback test mode failed"
                                        " for instance: %x", count - 1);
