@@ -22,7 +22,7 @@
 #include "val/include/bsa_acs_pe.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 32)
-#define TEST_RULE  "RE_REC_1, RE_REC_2"
+#define TEST_RULE  "PCI_IN_19"
 #define TEST_DESC  "Check HDR CapPtr Register rule        "
 
 static

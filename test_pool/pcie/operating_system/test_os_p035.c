@@ -23,7 +23,7 @@
 #include "val/include/bsa_acs_memory.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 35)
-#define TEST_RULE  "RE_RST_1, PCI_SM_02"
+#define TEST_RULE  "PCI_SM_02"
 #define TEST_DESC  "Check Function level reset            "
 
 uint32_t is_flr_failed(uint32_t bdf)

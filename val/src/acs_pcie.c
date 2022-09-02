@@ -312,35 +312,39 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       status |= os_p002_entry(num_pe);
       status |= os_p003_entry(num_pe);
       status |= os_p004_entry(num_pe);
-      status |= os_p005_entry(num_pe);
       status |= os_p006_entry(num_pe);
       status |= os_p008_entry(num_pe);
       status |= os_p009_entry(num_pe);
-      status |= os_p010_entry(num_pe);
       status |= os_p011_entry(num_pe);
+
+#ifdef PCIE_ON_CHIP_DEV_TEST
+      status |= os_p005_entry(num_pe);
+      status |= os_p010_entry(num_pe);
       status |= os_p012_entry(num_pe);
       status |= os_p013_entry(num_pe);
       status |= os_p014_entry(num_pe);
       status |= os_p015_entry(num_pe);
       status |= os_p016_entry(num_pe);
+      status |= os_p023_entry(num_pe);
+      status |= os_p027_entry(num_pe);
+      status |= os_p029_entry(num_pe);
+      status |= os_p034_entry(num_pe);
+#endif
+
       status |= os_p017_entry(num_pe);
       status |= os_p018_entry(num_pe);
       status |= os_p019_entry(num_pe);
       status |= os_p020_entry(num_pe);
       status |= os_p021_entry(num_pe);
       status |= os_p022_entry(num_pe);
-      status |= os_p023_entry(num_pe);
       status |= os_p024_entry(num_pe);
       status |= os_p025_entry(num_pe);
       status |= os_p026_entry(num_pe);
-      status |= os_p027_entry(num_pe);
       status |= os_p028_entry(num_pe);
-      status |= os_p029_entry(num_pe);
       status |= os_p030_entry(num_pe);
       status |= os_p031_entry(num_pe);
       status |= os_p032_entry(num_pe);
       status |= os_p033_entry(num_pe);
-      status |= os_p034_entry(num_pe);
       status |= os_p035_entry(num_pe);
       status |= os_p036_entry(num_pe);
 
@@ -557,6 +561,7 @@ val_pcie_create_device_bdf_table()
   uint32_t reg_value;
   uint32_t cid_offset;
   uint32_t p_cap;
+  uint32_t dp_type;
 
   /* if table is already present, return success */
   if (g_pcie_bdf_table)
@@ -621,6 +626,16 @@ val_pcie_create_device_bdf_table()
                         &cid_offset);
 
                       if (p_cap != PCIE_SUCCESS)
+                          continue;
+
+                      dp_type = val_pcie_device_port_type(bdf);
+
+                      /* RCiEP device rules are for SBSA L6 */
+                      if (dp_type == RCiEP)
+                          continue;
+
+                      /* iEP device rules are for SBSA L6 */
+                      if ((dp_type == iEP_EP) || (dp_type == iEP_RP))
                           continue;
 
                       g_pcie_bdf_table->device[g_pcie_bdf_table->num_entries++].bdf = bdf;

@@ -21,7 +21,7 @@
 #include "test_os_p028_data.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 28)
-#define TEST_RULE  "RE_REG_2, RE_REC_1, RE_REC_2"
+#define TEST_RULE  "PCI_IN_05"
 #define TEST_DESC  "Power management cap rules            "
 
 static

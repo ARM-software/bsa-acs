@@ -20,7 +20,7 @@
 #include "val/include/bsa_acs_val.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 21)
-#define TEST_RULE  "RE_REG_1, RE_REC_1, RE_REC_2"
+#define TEST_RULE  "B_PER_12"
 #define TEST_DESC  "Type 0 config header rules            "
 
 static
