@@ -22,7 +22,7 @@
 #include "val/include/bsa_acs_memory.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 61)
-#define TEST_RULE  "PCI_MM_01, PCI_MM_02, PCI_MM_03, RE_BAR_2"
+#define TEST_RULE  "PCI_MM_01, PCI_MM_02, PCI_MM_03"
 #define TEST_DESC  "PCIe Unaligned access                 "
 
 #define DATA 0xC0DECAFE
