@@ -277,6 +277,15 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       }
   }
 
+  if (g_single_module != SINGLE_MODULE_SENTINEL && g_single_module != ACS_PCIE_TEST_NUM_BASE &&
+       (g_single_test == SINGLE_MODULE_SENTINEL ||
+         (g_single_test - ACS_PCIE_TEST_NUM_BASE > 100 ||
+          g_single_test - ACS_PCIE_TEST_NUM_BASE < 0))) {
+    val_print(ACS_PRINT_TEST, "\n      USER Override - Skipping all PCIE tests ", 0);
+    val_print(ACS_PRINT_TEST, "\n      (Running only a single module)\n", 0);
+    return ACS_STATUS_SKIP;
+  }
+
   num_ecam = val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
   if (!num_ecam) {
       val_print(ACS_PRINT_WARN, "\n      *** No ECAM region found, Skipping PCIE tests *** \n", 0);
@@ -320,17 +329,16 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 #ifdef PCIE_ON_CHIP_DEV_TEST
       status |= os_p005_entry(num_pe);
       status |= os_p010_entry(num_pe);
-      status |= os_p012_entry(num_pe);
       status |= os_p013_entry(num_pe);
       status |= os_p014_entry(num_pe);
       status |= os_p015_entry(num_pe);
       status |= os_p016_entry(num_pe);
+      status |= os_p034_entry(num_pe);
       status |= os_p023_entry(num_pe);
+      status |= os_p012_entry(num_pe);
       status |= os_p027_entry(num_pe);
       status |= os_p029_entry(num_pe);
-      status |= os_p034_entry(num_pe);
 #endif
-
       status |= os_p017_entry(num_pe);
       status |= os_p018_entry(num_pe);
       status |= os_p019_entry(num_pe);
@@ -630,11 +638,11 @@ val_pcie_create_device_bdf_table()
 
                       dp_type = val_pcie_device_port_type(bdf);
 
-                      /* RCiEP device rules are for SBSA L6 */
+                      /* RCiEP rules are for SBSA L6 */
                       if (dp_type == RCiEP)
                           continue;
 
-                      /* iEP device rules are for SBSA L6 */
+                      /* iEP rules are for SBSA L6 */
                       if ((dp_type == iEP_EP) || (dp_type == iEP_RP))
                           continue;
 

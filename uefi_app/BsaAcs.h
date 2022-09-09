@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2022, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,7 +31,8 @@
   #define G_SW_PS            2
 
   #define PE_INFO_TBL_SZ         8192 /*Supports maximum 400 PEs*/
-  #define GIC_INFO_TBL_SZ        239616 /*Supports maximum 832 gic info (GICH, CPUIF, RD, ITS, MSI, D)*/
+  #define GIC_INFO_TBL_SZ        239616 /*Supports maximum 832 GIC info (GICH,
+                                          CPUIF, RD, ITS, MSI, D)*/
   #define TIMER_INFO_TBL_SZ      1024 /*Supports maximum 2 system timers*/
   #define WD_INFO_TBL_SZ         512  /*Supports maximum 20 Watchdogs*/
   #define MEM_INFO_TBL_SZ        32768/*Supports maximum 800 memory regions*/
