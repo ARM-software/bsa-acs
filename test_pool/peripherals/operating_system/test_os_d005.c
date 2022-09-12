@@ -27,7 +27,8 @@
 
 static
 void
-uart_reg_write(uint64_t uart_base, uint32_t offset, uint32_t reg_shift, uint32_t width_mask, uint32_t data)
+uart_reg_write(uint64_t uart_base, uint32_t offset, uint32_t reg_shift,
+               uint32_t width_mask, uint32_t data)
 {
   if (width_mask & WIDTH_BIT8)
       *((volatile uint8_t *)(uart_base + (offset << reg_shift))) = (uint8_t)data;
@@ -110,23 +111,23 @@ payload()
           /* Check the access width (use width for reg_shift like linux earlycon) */
           access_width = val_peripheral_get_info(UART_WIDTH, count - 1);
           switch (access_width) {
-              case 8:
-		  reg_shift  = 0;
-                  width_mask = WIDTH_BIT8;
-                  break;
-              case 16:
-		  reg_shift  = 1;
-                  width_mask = WIDTH_BIT16;
-                  break;
-              case 32:
-		  reg_shift  = 2;
-                  width_mask = WIDTH_BIT32;
-                  break;
-              default:
-                  val_print(ACS_PRINT_ERR, "\n         UART access width must be specified"
-                                           " for instance: %x", count - 1);
-                  val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
-                  return;
+          case 8:
+              reg_shift  = 0;
+              width_mask = WIDTH_BIT8;
+              break;
+          case 16:
+		      reg_shift  = 1;
+              width_mask = WIDTH_BIT16;
+              break;
+          case 32:
+		      reg_shift  = 2;
+              width_mask = WIDTH_BIT32;
+              break;
+          default:
+              val_print(ACS_PRINT_ERR, "\n         UART access width must be specified"
+                                       " for instance: %x", count - 1);
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+              return;
           }
 
           /* Check the Baudrate from the hardware map */

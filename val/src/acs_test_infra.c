@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2022, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -204,7 +204,7 @@ val_mmio_write64(addr_t addr, uint64_t data)
 }
 
 /**
-  @brief  This API prinst the test number, description and
+  @brief  This API prints the test number, description and
           sets the test status to pending for the input number of PEs.
           1. Caller       - Application layer
           2. Prerequisite - val_allocate_shared_mem
@@ -238,6 +238,15 @@ val_initialize_test(uint32_t test_num, char8_t *desc, uint32_t num_pe)
           val_set_status(index, RESULT_SKIP(test_num, 0));
           return ACS_STATUS_SKIP;
       }
+  }
+
+  if ((g_single_test != SINGLE_TEST_SENTINEL && test_num != g_single_test) &&
+        (g_single_module == SINGLE_MODULE_SENTINEL ||
+          (test_num - g_single_module >= 100 ||
+           test_num - g_single_module < 0))) {
+    val_print(ACS_PRINT_TEST, "\n       USER OVERRIDE VIA SINGLE TEST - Skip Test        ", 0);
+    val_set_status(index, RESULT_SKIP(test_num, 0));
+    return ACS_STATUS_SKIP;
   }
 
   return ACS_STATUS_PASS;

@@ -41,6 +41,9 @@ UINT64  g_exception_ret_addr;
 UINT64  g_ret_addr;
 UINT32  g_wakeup_timeout;
 
+UINT32  g_single_test = SINGLE_TEST_SENTINEL;
+UINT32  g_single_module = SINGLE_MODULE_SENTINEL;
+
 SHELL_FILE_HANDLE g_bsa_log_file_handle;
 SHELL_FILE_HANDLE g_dtb_log_file_handle;
 
@@ -250,7 +253,7 @@ HelpMsg (
   VOID
   )
 {
-  Print (L"\nUsage: Bsa.efi [-v <n>] | [-f <filename>] | [-skip <n>]\n"
+  Print (L"\nUsage: Bsa.efi [-v <n>] | [-f <filename>] | [-skip <n>] | [-t <n>] | [-m <n>]\n"
          "Options:\n"
          "-v      Verbosity of the prints\n"
          "        1 prints all, 5 prints only the errors\n"
@@ -259,12 +262,16 @@ HelpMsg (
          "        Refer to section 4 of BSA ACS User Guide\n"
          "        To skip a module, use Module ID as mentioned in user guide\n"
          "        To skip a particular test within a module, use the exact testcase number\n"
+         "-t      If set, will only run the specified test, all others will be skipped.\n"
+         "-m      If set, will only run the specified module, all others will be skipped.\n"
          "-timeout  Set timeout multiple for wakeup tests\n"
          "        1 - min value  5 - max value\n"
          "-os     Enable the execution of operating system tests\n"
          "-hyp    Enable the execution of hypervisor tests\n"
          "-ps     Enable the execution of platform security tests\n"
          "-dtb    Enable the execution of dtb dump\n"
+         "-rciep  Enable running pcie tests for RCiEP\n"
+         "-iep    Enable running pcie tests for iEP\n"
   );
 }
 
@@ -272,6 +279,8 @@ STATIC CONST SHELL_PARAM_ITEM ParamList[] = {
   {L"-v", TypeValue},    // -v    # Verbosity of the Prints. 1 shows all prints, 5 shows Errors
   {L"-f", TypeValue},    // -f    # Name of the log file to record the test results in.
   {L"-skip", TypeValue}, // -skip # test(s) to skip execution
+  {L"-t", TypeValue},    // -t    # Test to be run
+  {L"-m", TypeValue},    // -m    # Module to be run
   {L"-timeout", TypeValue}, // -timeout # Set timeout multiple for wakeup tests
   {L"-help", TypeFlag},  // -help # help : info about commands
   {L"-h", TypeFlag},     // -h    # help : info about commands
@@ -355,7 +364,7 @@ ShellAppMain (
     }
   }
 
-  // Options with Values
+  // Options with Flags
    if (ShellCommandLineGetFlag (ParamPackage, L"-os")
        || ShellCommandLineGetFlag (ParamPackage, L"-hyp")
        || ShellCommandLineGetFlag (ParamPackage, L"-ps")) {
@@ -405,6 +414,18 @@ ShellAppMain (
   if ((ShellCommandLineGetFlag (ParamPackage, L"-help")) || (ShellCommandLineGetFlag (ParamPackage, L"-h"))){
      HelpMsg();
      return 0;
+  }
+
+  // Options with Values
+  CmdLineArg  = ShellCommandLineGetValue(ParamPackage, L"-t");
+  if (CmdLineArg != NULL) {
+    g_single_test = StrDecimalToUintn(CmdLineArg);
+  }
+
+  // Options with Values
+  CmdLineArg  = ShellCommandLineGetValue(ParamPackage, L"-m");
+  if (CmdLineArg != NULL) {
+    g_single_module = StrDecimalToUintn(CmdLineArg);
   }
 
   //

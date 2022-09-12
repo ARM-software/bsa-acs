@@ -67,6 +67,15 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       }
   }
 
+  if (g_single_module != SINGLE_MODULE_SENTINEL && g_single_module != ACS_SMMU_TEST_NUM_BASE &&
+       (g_single_test == SINGLE_MODULE_SENTINEL ||
+         (g_single_test - ACS_SMMU_TEST_NUM_BASE > 100 ||
+          g_single_test - ACS_SMMU_TEST_NUM_BASE < 0))) {
+    val_print(ACS_PRINT_TEST, "\n      USER Override - Skipping all SMMU tests ", 0);
+    val_print(ACS_PRINT_TEST, "\n      (Running only a single module)\n", 0);
+    return ACS_STATUS_SKIP;
+  }
+
   num_smmu = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
   if (num_smmu == 0) {
     val_print(ACS_PRINT_WARN, "\n       No SMMU Controller Found, Skipping SMMU tests...\n", 0);

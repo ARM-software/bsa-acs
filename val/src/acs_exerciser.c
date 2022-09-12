@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -241,6 +241,15 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
           val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all Exerciser tests \n", 0);
           return ACS_STATUS_SKIP;
       }
+  }
+
+  if (g_single_module != SINGLE_MODULE_SENTINEL && g_single_module != ACS_EXERCISER_TEST_NUM_BASE &&
+       (g_single_test == SINGLE_MODULE_SENTINEL ||
+         (g_single_test - ACS_EXERCISER_TEST_NUM_BASE > 100 ||
+          g_single_test - ACS_EXERCISER_TEST_NUM_BASE < 0))) {
+    val_print(ACS_PRINT_TEST, "\n      USER Override - Skipping all Exerciser tests ", 0);
+    val_print(ACS_PRINT_TEST, "\n      (Running only a single module) \n", 0);
+    return ACS_STATUS_SKIP;
   }
 
   /* Create the list of valid Pcie Device Functions */
