@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020, 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -212,6 +212,14 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
         GicTable->header.num_gicrd++;
         GicEntry++;
       }
+
+      if (Entry->GICH != 0) {
+        GicEntry->type = ENTRY_TYPE_GICH;
+        GicEntry->base = Entry->GICH;
+        GicEntry->length = 0;
+        bsa_print(ACS_PRINT_INFO, L" GICH base %x \n", GicEntry->base);
+        GicEntry++;
+      }
     }
 
     if (Entry->Type == EFI_ACPI_6_1_GICD) {
@@ -239,6 +247,20 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
         bsa_print(ACS_PRINT_INFO, L"  GIC ITS base %x \n", GicEntry->base);
         bsa_print(ACS_PRINT_INFO, L"  GIC ITS ID%x \n", GicEntry->entry_id);
         GicTable->header.num_its++;
+        GicEntry++;
+    }
+
+    if (Entry->Type == EFI_ACPI_6_1_GIC_MSI_FRAME) {
+        GicEntry->type = ENTRY_TYPE_GIC_MSI_FRAME;
+        GicEntry->base = ((EFI_ACPI_6_1_GIC_MSI_FRAME_STRUCTURE *)Entry)->PhysicalBaseAddress;
+        GicEntry->entry_id = ((EFI_ACPI_6_1_GIC_MSI_FRAME_STRUCTURE *)Entry)->GicMsiFrameId;
+        GicEntry->flags = ((EFI_ACPI_6_1_GIC_MSI_FRAME_STRUCTURE *)Entry)->Flags;
+        GicEntry->spi_count = ((EFI_ACPI_6_1_GIC_MSI_FRAME_STRUCTURE *)Entry)->SPICount;
+        GicEntry->spi_base = ((EFI_ACPI_6_1_GIC_MSI_FRAME_STRUCTURE *)Entry)->SPIBase;
+        bsa_print(ACS_PRINT_INFO, L" GIC MSI Frame base %x \n", GicEntry->base);
+        bsa_print(ACS_PRINT_INFO, L" GIC MSI SPI base %x \n", GicEntry->spi_base);
+        bsa_print(ACS_PRINT_INFO, L" GIC MSI SPI Count %x \n", GicEntry->spi_count);
+        GicTable->header.num_msi_frame++;
         GicEntry++;
     }
     Length += Entry->Length;

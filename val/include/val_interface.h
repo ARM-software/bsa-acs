@@ -20,7 +20,18 @@
 
 #include "pal_interface.h"
 
-/* set G_PRINT_LEVEL to one of the below values in your application entry 
+#ifdef TARGET_EMULATION
+#define TRUE 1
+#define FALSE 0
+#define BIT0 (1)
+#define BIT1 (1 << 1)
+#define BIT4 (1 << 4)
+#define BIT6 (1 << 6)
+#define BIT14 (1 << 14)
+#define BIT29 (1 << 29)
+#endif
+
+/* set G_PRINT_LEVEL to one of the below values in your application entry
   to control the verbosity of the prints */
 #define ACS_PRINT_ERR   5      /* Only Errors. use this to de-clutter the terminal and focus only on specifics */
 #define ACS_PRINT_WARN  4      /* Only warnings & errors. use this to de-clutter the terminal and focus only on specifics */
@@ -34,6 +45,8 @@
 #define ACS_STATUS_SKIP      0x10000000
 #define ACS_STATUS_PASS      0x0
 #define ACS_INVALID_INDEX    0xFFFFFFFF
+
+#define NOT_IMPLEMENTED         0x4B1D  /* Feature or API not implemented */
 
 #define VAL_EXTRACT_BITS(data, start, end) ((data >> start) & ((1ul << (end-start+1))-1))
 
@@ -70,6 +83,7 @@ int      val_suspend_pe(uint64_t entry, uint32_t context_id);
 
 /* GIC VAL APIs */
 uint32_t    val_gic_create_info_table(uint64_t *gic_info_table);
+
 typedef enum {
   GIC_INFO_VERSION=1,
   GIC_INFO_SEC_STATES,
@@ -202,6 +216,7 @@ void val_pcie_enable_msa(uint32_t bdf);
 uint32_t val_pcie_is_msa_enabled(uint32_t bdf);
 void val_pcie_clear_urd(uint32_t bdf);
 uint32_t val_pcie_is_urd(uint32_t bdf);
+void val_pcie_enable_eru(uint32_t bdf);
 void val_pcie_disable_eru(uint32_t bdf);
 uint32_t val_pcie_bitfield_check(uint32_t bdf, uint64_t *bf_entry);
 uint32_t val_pcie_register_bitfields_check(uint64_t *bf_info_table, uint32_t table_size);

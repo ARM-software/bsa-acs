@@ -24,6 +24,7 @@
 #define WARN_STR_LEN 7
 PCIE_INFO_TABLE *g_pcie_info_table;
 pcie_device_bdf_table *g_pcie_bdf_table;
+uint32_t pcie_bdf_table_list_flag;
 
 uint64_t
 pal_get_mcfg_ptr(void);
@@ -276,6 +277,11 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
           return ACS_STATUS_SKIP;
       }
   }
+   if (pcie_bdf_table_list_flag == 1) {
+    val_print(ACS_PRINT_WARN, "\n     *** Created device list with valid bdf doesn't match \
+                    with the platform pcie device hierarchy, Skipping PCIE tests *** \n", 0);
+    return ACS_STATUS_SKIP;
+  }
 
   if (g_single_module != SINGLE_MODULE_SENTINEL && g_single_module != ACS_PCIE_TEST_NUM_BASE &&
        (g_single_test == SINGLE_MODULE_SENTINEL ||
@@ -502,6 +508,12 @@ val_pcie_create_info_table(uint64_t *pcie_info_table)
       return;
   }
 
+  if (pal_pcie_check_device_list()) {
+    pcie_bdf_table_list_flag = 1;
+    val_print(ACS_PRINT_ERR, "Pcie device list doesn't match \
+                with platform pcie device hierarchy\n", 0);
+  }
+
   val_pcie_print_device_info();
 }
 
@@ -527,9 +539,9 @@ static uint32_t val_pcie_populate_device_rootport(void)
       bdf = bdf_tbl_ptr->device[tbl_index].bdf;
       val_print(ACS_PRINT_DEBUG, "  Dev bdf 0x%x", bdf);
 
-      /* Fn returns rp_bdf = 0, if RP not found */
+      /* Fn returns rp_bdf = 0 and status = 1, if RP not found */
       status = val_pcie_get_rootport(bdf, &rp_bdf);
-      if (status && rp_bdf == 0)
+      if ((rp_bdf == 0) && status)
         return 1;
 
       bdf_tbl_ptr->device[tbl_index].rp_bdf = rp_bdf;
@@ -562,6 +574,7 @@ val_pcie_create_device_bdf_table()
   uint32_t cid_offset;
   uint32_t p_cap;
   uint32_t dp_type;
+  uint32_t status;
 
   /* if table is already present, return success */
   if (g_pcie_bdf_table)
@@ -636,6 +649,10 @@ val_pcie_create_device_bdf_table()
 
                       /* iEP rules are for SBSA L6 */
                       if ((dp_type == iEP_EP) || (dp_type == iEP_RP))
+                          continue;
+
+                      status = pal_pcie_check_device_valid(bdf);
+                      if (status)
                           continue;
 
                       g_pcie_bdf_table->device[g_pcie_bdf_table->num_entries++].bdf = bdf;
@@ -1175,9 +1192,7 @@ val_pcie_read_ext_cap_word(uint32_t bdf, uint32_t ext_cap_id, uint8_t offset, ui
 uint32_t
 val_pcie_is_onchip_peripheral(uint32_t bdf)
 {
-  /* TO DO */
-  //return pal_pcie_is_onchip_peripheral(bdf);
-  return 0;
+  return pal_pcie_is_onchip_peripheral(bdf);
 }
 
 /**
@@ -1571,6 +1586,43 @@ val_pcie_is_sig_target_abort(uint32_t bdf)
 }
 
 /**
+  @brief  Enable error reporting of the PCIe Function to the upstream
+  @param  bdf   - Segment/Bus/Dev/Func in the format of PCIE_CREATE_BDF
+  @return None
+**/
+void
+val_pcie_enable_eru(uint32_t bdf)
+{
+
+  uint32_t reg_value;
+  uint32_t dis_mask;
+  uint32_t pciecs_base;
+
+  /* Set SERR# Enable bit in the Command Register to enable reporting
+   * upstream of Non-fatal and Fatal errors detected by the Function.
+   */
+  val_pcie_read_cfg(bdf, TYPE01_CR, &reg_value);
+  dis_mask = (1 << CR_SERRE_SHIFT);
+  val_pcie_write_cfg(bdf, TYPE01_CR, reg_value | dis_mask);
+
+  /* Get the PCI Express Capability structure offset and
+   * use that offset to read the Device Control register
+   */
+  val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &pciecs_base);
+  val_pcie_read_cfg(bdf, pciecs_base + DCTLR_OFFSET, &reg_value);
+
+  /* Set Correctable, Non-fatal, Fatal, UR Reporting Enable bits in the
+   * Device Control Register to enable reporting upstream of these errors
+   * detected by the Function.
+   */
+  dis_mask = (1 << DCTLR_CERE_SHIFT |
+              1 << DCTLR_NFERE_SHIFT |
+              1 << DCTLR_FERE_SHIFT |
+              1 << DCTLR_URRE_SHIFT);
+  val_pcie_write_cfg(bdf, pciecs_base + DCTLR_OFFSET, reg_value | dis_mask);
+}
+
+/**
   @brief  Disable error reporting of the PCIe Function to the upstream
   @param  bdf   - Segment/Bus/Dev/Func in the format of PCIE_CREATE_BDF
   @return None
@@ -1849,6 +1901,23 @@ val_pcie_get_mmio_bar(uint32_t bdf, void *base)
   uint32_t *base_ptr;
   uint32_t bar_low32bits;
   uint32_t bar_high32bits;
+  uint64_t ecam;
+  uint32_t status;
+  exerciser_data_t data;
+
+  if (pal_is_bdf_exerciser(bdf))
+  {
+      ecam = val_pcie_get_ecam_base(bdf);
+      status = pal_exerciser_get_data(EXERCISER_DATA_MMIO_SPACE, &data, bdf, ecam);
+      if (status == NOT_IMPLEMENTED)
+      {
+          val_print(ACS_PRINT_ERR, "\n       pal_exerciser_get_data() not implemented", 0);
+      }
+
+      /* data.bar_space.base_addr will be zero if no MMIO bar are present for the function */
+      *(uint64_t *)base = (uint64_t)data.bar_space.base_addr;
+      return;
+  }
 
   index = 0;
   base_ptr = (uint32_t *) base;
@@ -2001,8 +2070,8 @@ val_pcie_get_rootport(uint32_t bdf, uint32_t *rp_bdf)
 
   val_print(ACS_PRINT_INFO, " type 0x%x", dp_type);
 
-  /* If the device is RP, set its rootport value to same */
-  if (dp_type == RP)
+  /* If the device is RP or iEP_RP, set its rootport value to same */
+  if ((dp_type == RP) || (dp_type == iEP_RP))
   {
       *rp_bdf = bdf;
       return 0;
@@ -2073,7 +2142,7 @@ val_pcie_parent_is_rootport(uint32_t dsf_bdf, uint32_t *rp_bdf)
       dp_type = val_pcie_device_port_type(bdf);
 
       /* Check if this table entry is a Root Port */
-      if (dp_type == RP)
+      if ((dp_type == RP) || (dp_type == iEP_RP))
       {
          /* Check if device is a direct child of this root port */
           val_pcie_read_cfg(bdf, TYPE1_PBN, &reg_value);
@@ -2156,6 +2225,25 @@ val_pcie_data_link_layer_status(uint32_t bdf)
    }
 
    return PCIE_DLL_LINK_ACTIVE_NOT_SUPPORTED;
+}
+
+/**
+  @brief  Returns whether a PCIe Function has detected an Interrupt request
+
+  @param  bdf        - Segment/Bus/Dev/Func in the format of PCIE_CREATE_BDF
+  @return Returns 1 - if the Function has received an Interrupt Request or
+                  0 - if it does not detect Interrupt request
+**/
+uint32_t
+val_pcie_check_interrupt_status(uint32_t bdf)
+{
+
+  uint32_t reg_value;
+
+  val_pcie_read_cfg(bdf, TYPE01_CR, &reg_value);
+  reg_value = (reg_value >> SR_IS_SHIFT) & SR_IS_MASK;
+
+  return reg_value;
 }
 
 /**

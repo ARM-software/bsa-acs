@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2020-2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020-2022, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,12 +55,7 @@ static uint32_t test_sequence_check(uint32_t instance)
   uint64_t num_transactions;
   uint64_t transaction_type;
 
-  /* Get number of transactions captured from exerciser */
-  val_exerciser_get_param(NUM_TRANSACTIONS, NULL, &num_transactions, instance);
-  if (num_transactions !=  sizeof(transaction_order)/sizeof(transaction_order[0])) {
-      val_print(ACS_PRINT_ERR, "\n       Exerciser %d gathering check failed", instance);
-      return 1;
-  }
+  num_transactions = sizeof(transaction_order)/sizeof(transaction_order[0]);
 
   /* Check transactions arrival order */
   for (idx = 0; idx < sizeof(transaction_order)/sizeof(transaction_order[0]); idx++) {
@@ -70,6 +65,13 @@ static uint32_t test_sequence_check(uint32_t instance)
           return 1;
       }
   }
+
+  /* Get number of transactions captured from exerciser */
+  if (num_transactions != idx) {
+      val_print(ACS_PRINT_ERR, "\n       Exerciser %d gathering check failed", instance);
+      return 1;
+  }
+
   return 0;
 }
 
@@ -147,6 +149,7 @@ static uint32_t test_sequence_4B(uint32_t *addr, uint8_t increment_addr, uint32_
   uint64_t idx;
   uint32_t write_val, pidx;
   uint32_t *pattern_ptr;
+
   /* Start monitoring exerciser transactions */
   if (val_exerciser_ops(START_TXN_MONITOR, CFG_READ, instance))
       return ACS_STATUS_SKIP;
@@ -180,6 +183,7 @@ static uint32_t test_sequence_8B(uint64_t *addr, uint8_t increment_addr, uint32_
   uint64_t write_val;
   uint32_t pidx;
   uint64_t *pattern_ptr;
+
   /* Start monitoring exerciser transactions */
   if (val_exerciser_ops(START_TXN_MONITOR, CFG_READ, instance))
       return ACS_STATUS_SKIP;
@@ -230,8 +234,8 @@ cfgspace_transactions_order_check(void)
     /* Get exerciser bdf */
     bdf = val_exerciser_get_bdf(instance);
 
-    /* If exerciser doesn't have PCI_ECAP skip the bdf */
-    if (val_pcie_find_capability(bdf, PCIE_ECAP, CID_PCIECS, &cid_offset) == PCIE_CAP_NOT_FOUND)
+    /* If exerciser doesn't have PCI_CAP skip the bdf */
+    if (val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &cid_offset) == PCIE_CAP_NOT_FOUND)
         continue;
 
     bdf_addr = val_pcie_get_bdf_config_addr(bdf);
@@ -268,6 +272,7 @@ barspace_transactions_order_check(void)
   uint32_t instance;
   exerciser_data_t e_data;
   char *baseptr;
+  uint32_t status;
 
   /* Read the number of excerciser cards */
   instance = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
@@ -279,7 +284,11 @@ barspace_transactions_order_check(void)
         continue;
 
     /* Get BAR 0 details for this instance */
-    if (val_exerciser_get_data(EXERCISER_DATA_BAR0_SPACE, &e_data, instance)) {
+    status = val_exerciser_get_data(EXERCISER_DATA_MMIO_SPACE, &e_data, instance);
+    if (status == NOT_IMPLEMENTED) {
+        val_print(ACS_PRINT_ERR, "\n      pal_exerciser_get_data() for MMIO not implemented", 0);
+        continue;
+    } else if (status) {
         val_print(ACS_PRINT_ERR, "\n       Exerciser %d data read error     ", instance);
         continue;
     }

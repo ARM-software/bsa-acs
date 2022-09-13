@@ -379,6 +379,38 @@ pal_mem_alloc (
 }
 
 /**
+ * @brief  Allocates requested buffer size in bytes with zeros in a contiguous memory
+ *         and returns the base address of the range.
+ *
+ * @param  Size         allocation size in bytes
+ * @retval if SUCCESS   pointer to allocated memory
+ * @retval if FAILURE   NULL
+ */
+VOID *
+pal_mem_calloc (
+  UINT32 num,
+  UINT32 Size
+  )
+{
+  EFI_STATUS            Status;
+  VOID                  *Buffer;
+
+  Buffer = NULL;
+  Status = gBS->AllocatePool (EfiBootServicesData,
+                              num * Size,
+                              (VOID **) &Buffer);
+  if (EFI_ERROR(Status))
+  {
+    bsa_print(ACS_PRINT_ERR, L" Allocate Pool failed %x \n", Status);
+    return NULL;
+  }
+
+  gBS->SetMem (Buffer, num * Size, 0);
+
+  return Buffer;
+}
+
+/**
   @brief  Allocates requested buffer size in bytes in a contiguous cacheable
           memory and returns the base address of the range.
 
@@ -507,7 +539,7 @@ pal_memcpy (
 
   @param  MicroSeconds  The minimum number of microseconds to delay.
 
-  @return The value of MicroSeconds inputted.
+  @return 1 - Success, 0 -Failure
 
 **/
 UINT64
@@ -515,7 +547,8 @@ pal_time_delay_ms (
   UINT64 MicroSeconds
   )
 {
-  return gBS->Stall(MicroSeconds);
+  gBS->Stall(MicroSeconds);
+  return 1;
 }
 
 /**
@@ -557,6 +590,35 @@ pal_mem_alloc_pages (
   }
 
   return (VOID*)(UINTN)PageBase;
+}
+
+/**
+  @brief  Allocates memory with the given alignement.
+
+  @param  Alignment   Specifies the alignment.
+  @param  Size        Requested memory allocation size.
+
+  @return Pointer to the allocated memory with requested alignment.
+**/
+VOID *
+pal_aligned_alloc( UINT32 alignment, UINT32 size)
+{
+  VOID *Mem = NULL;
+  VOID *Aligned_Ptr = NULL;
+
+  /* Generate mask for the Alignment parameter*/
+  UINT64 Mask = ~(UINT64)(alignment - 1);
+
+  /* Allocate memory with extra bytes, so we can return an aligned address*/
+  Mem = (VOID *)pal_mem_alloc(size + alignment);
+
+  if( Mem == NULL)
+    return 0;
+
+  /* Add the alignment to allocated memory address and align it to target alignment*/
+  Aligned_Ptr = (VOID *)(((UINT64) Mem + alignment-1) & Mask);
+
+  return Aligned_Ptr;
 }
 
 /**

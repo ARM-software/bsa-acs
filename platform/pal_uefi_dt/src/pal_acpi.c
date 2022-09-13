@@ -28,6 +28,21 @@
 #include "include/pal_uefi.h"
 
 /**
+  @brief   Checks if System information is passed using Baremetal (BM)
+           This api is also used to check if GIC/Interrupt Init ACS Code
+           is used or not. In case of BM, ACS Code is used for INIT
+
+  @param  None
+
+  @return True/False
+*/
+UINT32
+pal_target_is_bm()
+{
+  return 0;
+}
+
+/**
   @brief   Use UEFI System Table to look up Acpi20TableGuid and returns the Xsdt Address
 
   @param  None

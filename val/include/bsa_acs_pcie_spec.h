@@ -73,6 +73,8 @@
 #define CR_ID_MASK     0x1
 
 /* Status Register */
+#define SR_IS_SHIFT    19
+#define SR_IS_MASK     0x1
 #define SR_STA_SHIFT   27
 #define SR_STA_MASK    0x1
 
@@ -123,11 +125,11 @@
 #define BAR_BASE_MASK   0xfffffff
 
 /*BAR offset */
-#define BAR0_OFFSET           0x10
-#define BAR_MAX_OFFSET        0x24
-#define TYPE1_BAR_MAX_OFFSET  0x14
-#define BAR_64_BIT            1
-#define BAR_32_BIT            0
+#define BAR0_OFFSET               0x10
+#define BAR_TYPE_0_MAX_OFFSET     0x24
+#define BAR_TYPE_1_MAX_OFFSET     0x14
+#define BAR_64_BIT                0x1
+#define BAR_32_BIT                0x0
 #define BAR_REG(bar_reg_value) ((bar_reg_value >> 2) & 0x1)
 
 #define TYPE0_MAX_BARS  6
@@ -186,6 +188,7 @@
 #define CID_MSI        0x05
 #define CID_MSIX       0x11
 #define CID_PMC        0x01
+#define CID_EA         0x14
 #define ECID_AER       0x0001
 #define ECID_RCECEA    0x0007
 #define ECID_ACS       0x000D
@@ -193,20 +196,82 @@
 #define ECID_ATS       0x000F
 #define ECID_PRI       0x0013
 #define ECID_PASID     0x001B
+#define ECID_DPC       0x001D
+#define ECID_DVSEC     0x0023
 
 /* PCI Express capability struct offsets */
-#define CIDR_OFFSET    0
-#define PCIECR_OFFSET  2
-#define DCAPR_OFFSET   4
-#define ACSCR_OFFSET   4
-#define DCTLR_OFFSET   8
+#define CIDR_OFFSET    0x0
+#define PCIECR_OFFSET  0x2
+#define DCAPR_OFFSET   0x4
+#define ACSCR_OFFSET   0x4
+#define DCTLR_OFFSET   0x8
 #define LCAPR_OFFSET   0xC
-#define LCTRLR_OFFSET   0x10
+#define LCTRLR_OFFSET  0x10
 #define DCAP2R_OFFSET  0x24
 #define DCTL2R_OFFSET  0x28
 #define LCAP2R_OFFSET  0x2C
 #define LCTL2R_OFFSET  0x30
 #define DCTL2R_MASK    0xFFFF
+#define DSTS_SHIFT     16
+#define DS_UNCORR_MASK 0x6
+#define DS_CORR_MASK   0x1
+
+/* DPC Capability struct offsets and shifts */
+#define DPC_CTRL_OFFSET        0x4
+#define DPC_STATUS_OFFSET      0x8
+#define DPC_STATUS_RESET       0xFFFFFFFF
+#define DPC_STATUS_MASK        0x1
+#define DPC_TRIGGER_MASK       0x6
+#define DPC_TRIGGER_FATAL      0x2
+#define DPC_TRIGGER_NON_FATAL  0x1
+#define DPC_CTRL_TRG_EN_SHIFT  16
+#define DPC_CTRL_TRG_EN_MASK   0x3
+#define DPC_SOURCE_ID_SHIFT    16
+#define DPC_TRIGGER_SHIFT      0x1
+
+/* AER Capability struct offsets and shifts */
+#define ERR_CNT                  0x18
+#define AER_UNCORR_STATUS_OFFSET 0x4
+#define AER_UNCORR_MASK_OFFSET   0x8
+#define AER_UNCORR_SEVR_OFFSET   0xC
+#define AER_UNCORR_SEVR_FATAL    0xFFFFFFFF
+#define AER_UNCORR_SEVR_NONFATAL 0x0
+#define AER_CORR_STATUS_OFFSET   0x10
+#define AER_CORR_MASK_OFFSET     0x14
+#define AER_ROOT_ERR_CMD_OFFSET  0x2C
+#define AER_ROOT_ERR_OFFSET      0x30
+#define AER_ROOT_ERR_SOURCE_ID   0x34
+#define AER_SOURCE_ID_SHIFT      16
+#define AER_SOURCE_ID_MASK       0xFFFF
+#define AER_ERROR_MASK           0xFFFFFFFF
+
+/* DPC Capability struct offsets and shifts */
+#define DPC_CTRL_OFFSET        0x4
+#define DPC_STATUS_OFFSET      0x8
+#define DPC_STATUS_RESET       0xFFFFFFFF
+#define DPC_STATUS_MASK        0x1
+#define DPC_TRIGGER_MASK       0x6
+#define DPC_TRIGGER_FATAL      0x2
+#define DPC_TRIGGER_NON_FATAL  0x1
+#define DPC_CTRL_TRG_EN_SHIFT  16
+#define DPC_CTRL_TRG_EN_MASK   0x3
+#define DPC_SOURCE_ID_SHIFT    16
+#define DPC_TRIGGER_SHIFT      0x1
+#define DPC_DISABLE_MASK       0xFFFCFFFF
+#define DPC_INTR_ENABLE        0x80000
+
+/* AER Capability struct offsets and shifts */
+#define AER_UNCORR_STATUS_OFFSET 0x4
+#define AER_UNCORR_MASK_OFFSET   0x8
+#define AER_UNCORR_SEVR_OFFSET   0xC
+#define AER_UNCORR_SEVR_FATAL    0xFFFFFFFF
+#define AER_UNCORR_SEVR_NONFATAL 0x0
+#define AER_ROOT_ERR_OFFSET      0x30
+
+/* EA Capability struct offsets */
+#define EA_ENTRY_TYPE_OFFSET       8
+#define EA_ENTRY_TYPE_ENABLE_SHIFT 31
+#define EA_ENTRY_TYPE_ENABLE_MASK  1
 
 /* ACS Capability Register */
 #define ACS_CTRL_SVE_SHIFT  16
@@ -316,12 +381,14 @@
 
 #define MSI_X_TOR_OFFSET            0x4
 
-#define MSI_X_MSG_TBL_ADDR_OFFSET   0x0
-#define MSI_X_MSG_TBL_DATA_OFFSET   0x8
-#define MSI_X_MSG_TBL_MVC_OFFSET    0xC
+#define MSI_X_MSG_TBL_LOWER_ADDR_OFFSET   0x0
+#define MSI_X_MSG_TBL_HIGHER_ADDR_OFFSET  0x4
+#define MSI_X_MSG_TBL_DATA_OFFSET         0x8
+#define MSI_X_MSG_TBL_MVC_OFFSET          0xC
 
 #define MSI_X_TABLE_BIR_MASK        0x7
 #define MSI_X_ENTRY_SIZE            16 /* Size of Single MSI Entry in MSI Table */
+#define MSI_X_ADDR_SHIFT            32
 
 /* PASID Capabilities */
 #define PASID_CAPABILITY_OFFSET     0x4

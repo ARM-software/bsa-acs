@@ -281,7 +281,6 @@ exception_return:
           val_pcie_clear_urd(bdf);
           return;
         }
-
       }
   }
 

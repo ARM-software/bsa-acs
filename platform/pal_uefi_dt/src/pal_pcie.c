@@ -220,12 +220,14 @@ UINT32
 pal_pcie_p2p_support()
 {
   /*
-   * TODO
+   * This is platform specific API which needs to be populated with system p2p capability
    * PCIe support for peer to peer
    * transactions is platform implementation specific
    */
-
-  return 1;
+  if (g_pcie_p2p)
+      return 0;
+  else
+      return NOT_IMPLEMENTED;
 }
 
 /**
@@ -246,7 +248,7 @@ pal_pcie_dev_p2p_support (
   UINT32 Fn)
 {
   /*
-   * TODO
+   * This is platform specific API which needs to be populated with pcie device  p2p capability
    * Root port or Switch support for peer to peer
    * transactions is platform implementation specific
    */
@@ -280,15 +282,16 @@ pal_get_msi_vectors (
 
 /**
     @brief   Get legacy IRQ routing for a PCI device
-
-    @param   Seg      - PCI segment number
-    @param   Bus        PCI bus address
-    @param   Dev        PCI device address
-    @param   Fn         PCI function number
-    @param   Irq_Map    pointer to IRQ map structure
+             This is Platform dependent API and needs to be filled
+             with legacy IRQ map for a pcie devices.
+    @param   bus        PCI bus address
+    @param   dev        PCI device address
+    @param   fn         PCI function number
+    @param   irq_map    pointer to IRQ map structure
 
     @return  irq_map    IRQ routing map
-    @return  status code
+    @return  status code If the device legacy irq map information is filled
+                         return 0, else returns NOT_IMPLEMENTED
 **/
 UINT32
 pal_pcie_get_legacy_irq_map (
@@ -299,7 +302,7 @@ pal_pcie_get_legacy_irq_map (
   PERIPHERAL_IRQ_MAP *IrqMap
   )
 {
-  return 1; /* not implemented */
+  return NOT_IMPLEMENTED;
 }
 
 /** Place holder function. Need to be implemented if needed in later releases
@@ -325,17 +328,12 @@ pal_pcie_get_root_port_bdf (
 }
 
 /**
-  @brief   Platform dependent API checks the Address Translation
-           Cache Support for BDF
+  @brief   Checks the Address Translation Cache Support for BDF
+           Platform dependent API. Fill this with system ATC support
+           information for bdf's
            1. Caller       -  Test Suite
-
-  @param   Seg        PCI segment number
-  @param   Bus        PCI bus address
-  @param   Dev        PCI device address
-  @param   Fn         PCI function number
-  @retval 0 ATC supported
-  @retval 1 ATC not supported
-  **/
+  @return  0 - ATC not supported 1 - ATC supported
+**/
 UINT32
 pal_pcie_is_cache_present (
   UINT32 Seg,
@@ -344,7 +342,10 @@ pal_pcie_is_cache_present (
   UINT32 Fn
   )
 {
-  return 1;
+  if (g_pcie_cache_present)
+      return 1;
+  else
+      return NOT_IMPLEMENTED;
 }
 
 /**
@@ -365,6 +366,19 @@ pal_pcie_is_device_behind_smmu(UINT32 seg, UINT32 bus, UINT32 dev, UINT32 fn)
 }
 
 /**
+  @brief  Returns whether a PCIe Function is an on-chip peripheral or not
+
+  @param  bdf        - Segment/Bus/Dev/Func in the format of PCIE_CREATE_BDF
+  @return Returns TRUE if the Function is on-chip peripheral, FALSE if it is
+          not an on-chip peripheral
+**/
+UINT32
+pal_pcie_is_onchip_peripheral(UINT32 bdf)
+{
+  return 0;
+}
+
+/**
     @brief   Return the DMA addressability of the device
 
     @param   seg        PCI segment number
@@ -377,6 +391,17 @@ pal_pcie_is_device_behind_smmu(UINT32 seg, UINT32 bus, UINT32 dev, UINT32 fn)
 **/
 UINT32
 pal_pcie_is_devicedma_64bit(UINT32 seg, UINT32 bus, UINT32 dev, UINT32 fn)
+{
+  return 0;
+}
+
+/**
+  @brief  Checks the discovered PCIe hierarchy is matching with the
+          topology described in info table.
+  @return Returns 0 if device entries matches , 1 if there is mismatch.
+**/
+UINT32
+pal_pcie_check_device_list(void)
 {
   return 0;
 }

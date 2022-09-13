@@ -33,16 +33,13 @@
 
 #define GET_DEVICE_ID(bus, dev, func) ((bus << 8) | (dev << 3) | func)
 
-#define PCIE_MAX_BUS   256
-#define PCIE_MAX_DEV    32
-#define PCIE_MAX_FUNC    8
-
 #define PCIE_BUS_SHIFT 8
 #define PCIE_CFG_SIZE  4096
 
 #define PCIE_INTERRUPT_LINE  0x3c
 #define PCIE_INTERRUPT_PIN   0x3d
-
+#define PCIE_INTERRUPT_PIN_SHIFT 0x8
+#define PCIE_INTERRUPT_PIN_MASK  0xFF
 #define PCIE_TYPE_ROOT_PORT  0x04 /* Root Port */
 #define PCIE_TYPE_DOWNSTREAM 0x06 /* Downstream Port */
 #define PCIE_TYPE_ENDPOINT   0x0  /* Express Endpoint */
@@ -66,12 +63,13 @@
 #define MAX_BITFIELD_ENTRIES 100
 #define ERR_STRING_SIZE 64
 
-#define MEM_OFFSET_10   0x10
 #define MEM_OFFSET_SMALL   0x10
 #define MEM_OFFSET_MEDIUM  0x1000
 #define MEM_OFFSET_LARGE   0x100000
 #define MEM_SHIFT          20
 #define MEM_BASE_SHIFT     16
+#define BAR_MASK           0xFFFFFFF0
+#define MSI_BIR_MASK       0xFFFFFFF8
 
 /* Allows storage of 2048 valid BDFs */
 #define PCIE_DEVICE_BDF_TABLE_SZ 8192
@@ -204,6 +202,12 @@ val_pcie_get_atomicop_requester_capable(uint32_t bdf);
 
 uint32_t
 val_pcie_is_cache_present(uint32_t bdf);
+
+uint32_t
+val_pcie_data_link_layer_status(uint32_t bdf);
+
+uint32_t
+val_pcie_check_interrupt_status(uint32_t bdf);
 
 uint32_t
 val_pcie_get_max_pasid_width(uint32_t bdf, uint32_t *max_pasid_width);

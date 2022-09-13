@@ -42,7 +42,7 @@ ArmGicSetItsConfigTableBase(
 
   Pages = SIZE_TO_PAGES(ConfigTableSize) + 1;
 
-  Address = (uint64_t)val_aligned_alloc(SIZE_4KB, ConfigTableSize);
+  Address = (uint64_t)val_aligned_alloc(SIZE_4KB, PAGES_TO_SIZE(Pages));
 
   if (!Address) {
     val_print(ACS_PRINT_ERR,  "ITS : Could Not get Mem Config Table. Test may not pass.\n", 0);
@@ -87,14 +87,14 @@ ArmGicSetItsPendingTableBase(
 
   Pages = SIZE_TO_PAGES(PendingTableSize) + 1;
 
-  Address = (uint64_t)val_aligned_alloc(SIZE_64KB, PendingTableSize);
+  Address = (uint64_t)val_aligned_alloc(SIZE_64KB, PAGES_TO_SIZE(Pages));
 
   if (!Address) {
     val_print(ACS_PRINT_ERR, "ITS : Could Not get Memory Pending Table. Test may not pass.\n", 0);
     return 1;
   }
 
-  val_memory_set((VOID *)Address, PAGES_TO_SIZE(Pages), 0);
+  val_memory_set((void *)Address, PAGES_TO_SIZE(Pages), 0);
 
   write_value = val_mmio_read64(GicRedistributorBase + ARM_GICR_PENDBASER);
   write_value = write_value & (~ARM_GICR_PENDBASER_PA_MASK);

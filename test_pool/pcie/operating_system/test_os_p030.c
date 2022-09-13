@@ -55,14 +55,24 @@ payload(void)
   uint32_t test_fails;
   uint32_t test_skip = 1;
   uint64_t bar_base;
+  uint32_t status;
+  uint32_t timeout;
+
   pcie_device_bdf_table *bdf_tbl_ptr;
 
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
   bdf_tbl_ptr = val_pcie_bdf_table_ptr();
 
   /* Install sync and async handlers to handle exceptions.*/
-  val_pe_install_esr(EXCEPT_AARCH64_SYNCHRONOUS_EXCEPTIONS, esr);
-  val_pe_install_esr(EXCEPT_AARCH64_SERROR, esr);
+  status = val_pe_install_esr(EXCEPT_AARCH64_SYNCHRONOUS_EXCEPTIONS, esr);
+  status |= val_pe_install_esr(EXCEPT_AARCH64_SERROR, esr);
+  if (status)
+  {
+      val_print(ACS_PRINT_ERR, "\n      Failed in installing the exception handler", 0);
+      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 01));
+      return;
+  }
+
   branch_to_test = &&exception_return;
 
   bar_data = 0;
@@ -72,6 +82,8 @@ payload(void)
   while (tbl_index < bdf_tbl_ptr->num_entries)
   {
       bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
+      val_print(ACS_PRINT_DEBUG, "\n      tbl_index %x", tbl_index - 1);
+      val_print(ACS_PRINT_DEBUG, "      BDF %x", bdf);
 
       /*
        * For a Function with type 0 config space header, obtain
@@ -87,6 +99,7 @@ payload(void)
           val_pcie_get_mmio_bar(bdf, &bar_base);
 
       /* Skip this function if it doesn't have mmio BAR */
+      val_print(ACS_PRINT_DEBUG, "      Bar Base %x", bar_base);
       if (!bar_base)
          continue;
 
@@ -115,26 +128,29 @@ payload(void)
 
       /*
        * Read memory mapped BAR to cause unsupported request
+       * response. Based on platform configuration, this may
        * even cause an sync/async exception.
        */
-      bar_data = (*(volatile addr_t*)bar_base);
+      bar_data = (*(volatile addr_t *)bar_base);
+      timeout = TIMEOUT_SMALL;
+      while (--timeout > 0);
 
 exception_return:
       /*
-       * Check if unsupported request detected bit isn't set
-       * and if either of UR response or abort isn't received.
+       * Check if either of UR response or abort isn't received.
        */
+      val_print(ACS_PRINT_DEBUG, "    bar_data %x ", bar_data);
       if (!(IS_TEST_PASS(val_get_status(pe_index)) || (bar_data == PCIE_UNKNOWN_RESPONSE)))
       {
            val_print(ACS_PRINT_ERR, "\n       BDF %x MSE functionality failure", bdf);
            test_fails++;
       }
 
-       /* Enable memory space access to decode BAR addresses */
-       val_pcie_enable_msa(bdf);
+      /* Enable memory space access to decode BAR addresses */
+      val_pcie_enable_msa(bdf);
 
-       /* Reset the loop variables */
-       bar_data = 0;
+      /* Reset the loop variables */
+      bar_data = 0;
   }
 
   if (test_skip == 1)

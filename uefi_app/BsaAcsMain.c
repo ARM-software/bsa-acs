@@ -29,6 +29,8 @@
 
 #include "BsaAcs.h"
 
+UINT32 g_pcie_p2p;
+UINT32 g_pcie_cache_present;
 
 UINT32  g_print_level;
 UINT32  g_sw_view[3] = {1, 1, 1}; //Operating System, Hypervisor, Platform Security
@@ -265,6 +267,8 @@ HelpMsg (
          "        To skip a particular test within a module, use the exact testcase number\n"
          "-t      If set, will only run the specified test, all others will be skipped.\n"
          "-m      If set, will only run the specified module, all others will be skipped.\n"
+         "-p2p    Pass this flag to indicate that PCIe Hierarchy Supports Peer-to-Peer\n"
+         "-cache  Pass this flag to indicate that if the test system supports PCIe address translation cache\n"
          "-timeout  Set timeout multiple for wakeup tests\n"
          "        1 - min value  5 - max value\n"
          "-os     Enable the execution of operating system tests\n"
@@ -283,6 +287,8 @@ STATIC CONST SHELL_PARAM_ITEM ParamList[] = {
   {L"-skip", TypeValue}, // -skip # test(s) to skip execution
   {L"-t", TypeValue},    // -t    # Test to be run
   {L"-m", TypeValue},    // -m    # Module to be run
+  {L"-p2p", TypeFlag},   // -p2p  # Peer-to-Peer is supported
+  {L"-cache", TypeFlag}, // -cache# PCIe address translation cache is supported
   {L"-timeout", TypeValue}, // -timeout # Set timeout multiple for wakeup tests
   {L"-help", TypeFlag},  // -help # help : info about commands
   {L"-h", TypeFlag},     // -h    # help : info about commands
@@ -433,6 +439,18 @@ ShellAppMain (
   CmdLineArg  = ShellCommandLineGetValue(ParamPackage, L"-m");
   if (CmdLineArg != NULL) {
     g_single_module = StrDecimalToUintn(CmdLineArg);
+  }
+
+  if (ShellCommandLineGetFlag (ParamPackage, L"-p2p")) {
+    g_pcie_p2p = TRUE;
+  } else {
+    g_pcie_p2p = FALSE;
+  }
+
+  if (ShellCommandLineGetFlag (ParamPackage, L"-cache")) {
+    g_pcie_cache_present = TRUE;
+  } else {
+    g_pcie_cache_present = FALSE;
   }
 
   //
