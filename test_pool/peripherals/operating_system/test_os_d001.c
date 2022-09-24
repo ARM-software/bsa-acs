@@ -45,8 +45,8 @@ payload()
       if (val_peripheral_get_info(USB_PLATFORM_TYPE, count - 1) == PLATFORM_TYPE_DT) {
           interface = val_peripheral_get_info(USB_INTERFACE_TYPE, count - 1);
           if ((interface != USB_TYPE_EHCI) && (interface != USB_TYPE_XHCI)) {
-              val_print(ACS_PRINT_DEBUG, "\n       Detected USB CTRL not EHCI/XHCI 0x%x  ",
-                        interface);
+              val_print(ACS_PRINT_WARN, "\n       Detected USB CTRL %d supports", count - 1);
+              val_print(ACS_PRINT_WARN, " %x interface and not EHCI/XHCI", interface);
               val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
               return;
           }
@@ -69,8 +69,8 @@ payload()
               }
               interface = (interface >> 8) & 0xFF;
               if ((interface < 0x20) || (interface == 0xFF)) {
-                  val_print(ACS_PRINT_DEBUG, "\n       Detected USB CTRL not EHCI/XHCI 0x%x  ",
-                            interface);
+                  val_print(ACS_PRINT_WARN, "\n       Detected USB bdf %x supports", bdf);
+                  val_print(ACS_PRINT_WARN, " %x interface and not EHCI/XHCI", interface);
                   val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
                   return;
               }
