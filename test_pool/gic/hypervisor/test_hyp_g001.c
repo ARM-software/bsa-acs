@@ -105,6 +105,15 @@ payload()
   /* Check for EL2 virtual timer interrupt, if PE supports 8.1 or greater */
   if ((data >> 8) & 0xF) {
     intid = val_timer_get_info(TIMER_INFO_VIR_EL2_INTID, 0);
+
+if (g_build_sbsa) {
+    if (intid != 28) {
+       val_print(ACS_PRINT_ERR, "\n       NS EL2 virtual timer not mapped to PPI ID 28, id %d",
+                                                                    intid);
+       val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+       return;
+    }
+}
     if ((intid > 15 && intid < 32) || val_gic_is_valid_eppi(intid)) {
         if (val_gic_install_isr(intid, isr_vir)) {
             val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
@@ -133,6 +142,13 @@ payload()
   // Check non-secure EL2 physical timer
   val_set_status(index, RESULT_PENDING(TEST_NUM));
   intid = val_timer_get_info(TIMER_INFO_PHY_EL2_INTID, 0);
+if (g_build_sbsa) {
+      val_print(ACS_PRINT_DEBUG,
+          "\n       EL2-Phy timer not mapped to PPI id 26, INTID: %d ", intid);
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
+      return;
+
+}
   if ((intid < 16 || intid > 31) && (!val_gic_is_valid_eppi(intid))) {
       val_print(ACS_PRINT_DEBUG,
           "\n       EL2-Phy timer not mapped to PPI base range, INTID: %d   ", intid);

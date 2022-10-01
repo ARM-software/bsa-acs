@@ -56,8 +56,13 @@ val_wakeup_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   if (g_sw_view[G_SW_OS]) {
       val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
       status |= os_u001_entry(num_pe);
-     // Test needs multi-PE interrupt handling support
+
+ /*B_WAK_09 is required only for SBSA complaince
+if (g_build_sbsa) {
+      // Test needs multi-PE interrupt handling support
      // status |= os_u002_entry(num_pe);
+}
+*/
   }
 
   if (status != ACS_STATUS_PASS)

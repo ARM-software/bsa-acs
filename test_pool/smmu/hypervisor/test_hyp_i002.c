@@ -23,7 +23,7 @@
 #include "val/include/bsa_acs_pcie.h"
 
 #define TEST_NUM   (ACS_SMMU_HYP_TEST_NUM_BASE + 2)
-#define TEST_RULE  "B_SMMU_18 "
+#define TEST_RULE  "B_SMMU_18"
 #define TEST_DESC  "SMMU Revision,S-EL2 support Hyp       "
 
 static
