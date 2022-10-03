@@ -40,8 +40,11 @@ payload()
             wd_num);
 
   if (wd_num == 0) {
+if (g_build_sbsa)
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+else
       val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
-      return;
+  return;
   }
 
   do {
@@ -59,21 +62,21 @@ payload()
       data = val_mmio_read(ctrl_base);
       //Control register bits 31:3 are reserved 0
       if(data >> WD_CSR_RSRV_SHIFT) {
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
           return;
       }
 
       data = val_mmio_read(refresh_base);
       //refresh frame offset 0 must return 0 on reads.
       if(data) {
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
           return;
       }
 
       /* WOR.Upper word  [31:16] is reserved & must be zero */
       data = val_mmio_read(ctrl_base + WD_OR_UPPER_WORD_OFFSET);
       if(data >> WD_OR_RSRV_SHIFT) {
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
           return;
       }
   } while(wd_num);

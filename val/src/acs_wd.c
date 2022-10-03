@@ -54,12 +54,13 @@ val_wd_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
     return ACS_STATUS_SKIP;
   }
 
-
+if (!g_build_sbsa) { /* For SBSA compliance WD is mandatory */
   if (val_wd_get_info(0, WD_INFO_COUNT) == 0) {
     val_print(ACS_PRINT_WARN, "\n       No Watchdog Found, Skipping Watchdog "
                                                     "tests...\n", 0);
     return ACS_STATUS_SKIP;
   }
+}
 
   if (g_sw_view[G_SW_OS]) {
     val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);

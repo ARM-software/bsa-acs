@@ -45,12 +45,6 @@
   ../test_pool/pe/operating_system/test_os_c012.c
   ../test_pool/pe/operating_system/test_os_c013.c
   ../test_pool/pe/operating_system/test_os_c014.c
-  ../test_pool/pe/operating_system/test_os_c015.c
-  ../test_pool/pe/operating_system/test_os_c016.c
-  ../test_pool/pe/operating_system/test_os_c017.c
-  ../test_pool/pe/operating_system/test_os_c018.c
-  ../test_pool/pe/operating_system/test_os_c019.c
-  ../test_pool/pe/operating_system/test_os_c020.c
   ../test_pool/pe/hypervisor/test_hyp_c001.c
   ../test_pool/pe/hypervisor/test_hyp_c002.c
   ../test_pool/pe/hypervisor/test_hyp_c003.c
@@ -86,51 +80,34 @@
   ../test_pool/pcie/operating_system/test_os_p002.c
   ../test_pool/pcie/operating_system/test_os_p003.c
   ../test_pool/pcie/operating_system/test_os_p004.c
-  ../test_pool/pcie/operating_system/test_os_p005.c
   ../test_pool/pcie/operating_system/test_os_p006.c
   ../test_pool/pcie/operating_system/test_os_p008.c
   ../test_pool/pcie/operating_system/test_os_p009.c
-  ../test_pool/pcie/operating_system/test_os_p010.c
   ../test_pool/pcie/operating_system/test_os_p011.c
-  ../test_pool/pcie/operating_system/test_os_p012.c
-  ../test_pool/pcie/operating_system/test_os_p013.c
-  ../test_pool/pcie/operating_system/test_os_p014.c
-  ../test_pool/pcie/operating_system/test_os_p015.c
-  ../test_pool/pcie/operating_system/test_os_p016.c
   ../test_pool/pcie/operating_system/test_os_p017.c
   ../test_pool/pcie/operating_system/test_os_p018.c
   ../test_pool/pcie/operating_system/test_os_p019.c
   ../test_pool/pcie/operating_system/test_os_p020.c
   ../test_pool/pcie/operating_system/test_os_p021.c
   ../test_pool/pcie/operating_system/test_os_p022.c
-  ../test_pool/pcie/operating_system/test_os_p023.c
   ../test_pool/pcie/operating_system/test_os_p024.c
   ../test_pool/pcie/operating_system/test_os_p025.c
   ../test_pool/pcie/operating_system/test_os_p026.c
-  ../test_pool/pcie/operating_system/test_os_p027.c
   ../test_pool/pcie/operating_system/test_os_p028.c
-  ../test_pool/pcie/operating_system/test_os_p029.c
   ../test_pool/pcie/operating_system/test_os_p030.c
   ../test_pool/pcie/operating_system/test_os_p031.c
   ../test_pool/pcie/operating_system/test_os_p032.c
   ../test_pool/pcie/operating_system/test_os_p033.c
-  ../test_pool/pcie/operating_system/test_os_p034.c
   ../test_pool/pcie/operating_system/test_os_p035.c
   ../test_pool/pcie/operating_system/test_os_p036.c
   ../test_pool/smmu/operating_system/test_os_i001.c
   ../test_pool/smmu/operating_system/test_os_i002.c
-  ../test_pool/smmu/operating_system/test_os_i003.c
-  ../test_pool/smmu/operating_system/test_os_i004.c
   ../test_pool/smmu/operating_system/test_os_i005.c
   ../test_pool/smmu/operating_system/test_os_i006.c
-  ../test_pool/smmu/operating_system/test_os_i007.c
-  ../test_pool/smmu/operating_system/test_os_i008.c
-  ../test_pool/smmu/operating_system/test_os_i009.c
   ../test_pool/smmu/hypervisor/test_hyp_i001.c
   ../test_pool/smmu/hypervisor/test_hyp_i002.c
   ../test_pool/smmu/hypervisor/test_hyp_i003.c
   ../test_pool/smmu/hypervisor/test_hyp_i004.c
-  ../test_pool/smmu/hypervisor/test_hyp_i005.c
   ../test_pool/power_wakeup/operating_system/test_os_u001.c
   ../test_pool/power_wakeup/operating_system/test_os_u002.c
   ../test_pool/peripherals/operating_system/test_os_d001.c

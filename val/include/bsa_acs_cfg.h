@@ -35,5 +35,6 @@ extern uint64_t g_exception_ret_addr;
 extern uint64_t g_ret_addr;
 extern uint32_t g_single_test;
 extern uint32_t g_single_module;
+extern uint32_t g_build_sbsa;
 
 #endif

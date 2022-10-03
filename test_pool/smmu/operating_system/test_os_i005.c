@@ -22,47 +22,50 @@
 #include "val/include/bsa_acs_pe.h"
 
 #define TEST_NUM   (ACS_SMMU_TEST_NUM_BASE + 5)
-#define TEST_RULE  "B_SMMU_03"
-#define TEST_DESC  "Check Large Virtual Addr Support      "
+#define TEST_RULE  "B_SMMU_06"
+#define TEST_DESC  "Check Large Physical Addr Support     "
 
 static
 void
 payload()
 {
 
-  uint64_t data_va_range, data_vax;
+  uint64_t data_pa_range, data_oas;
   uint32_t num_smmu;
   uint32_t index;
 
   index = val_pe_get_index_mpid(val_pe_get_mpid());
 
-  data_va_range = VAL_EXTRACT_BITS(val_pe_reg_read(ID_AA64MMFR2_EL1), 16, 19);
-  if (data_va_range == 0) {
-    val_print(ACS_PRINT_DEBUG, "\n       Large VA Not Supported by PE                        ", 0);
+  data_pa_range = VAL_EXTRACT_BITS(val_pe_reg_read(ID_AA64MMFR0_EL1), 0, 3);
+  if (data_pa_range != 0x6) {
+   val_print(ACS_PRINT_DEBUG, "\n       Large PA Not Supported by PE        "
+                                      "                  ", 0);
     val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
     return;
   }
 
   num_smmu = val_smmu_get_info(SMMU_NUM_CTRL, 0);
   if (num_smmu == 0) {
-    val_print(ACS_PRINT_ERR, "\n       No SMMU Controllers are discovered                  ", 0);
+    val_print(ACS_PRINT_DEBUG, "\n       No SMMU Controllers are discovered "
+                                    "                   ", 0);
     val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
     return;
   }
 
   while (num_smmu--) {
       if (val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) == 2) {
-          val_print(ACS_PRINT_WARN, "\n       Large VA Not Supported in SMMUv2", 0);
+          val_print(ACS_PRINT_ERR, "\n       Large PA Not Supported in"
+                                    " SMMUv2", 0);
           val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
           return;
       }
 
-      data_vax = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_IDR5, num_smmu), 10, 11);
+      data_oas = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_IDR5, num_smmu), 0, 2);
 
-      /* If PE Supports Large VA Range then SMMU_IDR5.VAX = 0b01 */
-      if (data_va_range == 1) {
-          if (data_vax != 1) {
-              val_print(ACS_PRINT_ERR, "\n       Large VA Not Supported in SMMU %x", num_smmu);
+      /* If PE Supports Large PA then SMMU_IDR5.OAS = 0b110 */
+      if (data_pa_range == 0x6) {
+          if (data_oas != 0x6) {
+              val_print(ACS_PRINT_WARN, "\n       Large PA Not Supported in SMMU %x", num_smmu);
               val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
               return;
           }

@@ -40,6 +40,7 @@ UINT64  g_stack_pointer;
 UINT64  g_exception_ret_addr;
 UINT64  g_ret_addr;
 UINT32  g_wakeup_timeout;
+UINT32  g_build_sbsa = 0;
 
 UINT32  g_single_test = SINGLE_TEST_SENTINEL;
 UINT32  g_single_module = SINGLE_MODULE_SENTINEL;
@@ -272,6 +273,7 @@ HelpMsg (
          "-dtb    Enable the execution of dtb dump\n"
          "-rciep  Enable running pcie tests for RCiEP\n"
          "-iep    Enable running pcie tests for iEP\n"
+         "-sbsa   Enable sbsa requirements for bsa binary\n"
   );
 }
 
@@ -288,6 +290,7 @@ STATIC CONST SHELL_PARAM_ITEM ParamList[] = {
   {L"-hyp", TypeFlag},   // -hyp  # Binary Flag to enable the execution of hypervisor tests.
   {L"-ps", TypeFlag},    // -ps   # Binary Flag to enable the execution of platform security tests.
   {L"-dtb", TypeValue},  // -dtb  # Binary Flag to enable dtb dump
+  {L"-sbsa", TypeFlag},  // -sbsa # Enable sbsa requirements for bsa binary\n"
   {NULL, TypeMax}
   };
 
@@ -381,6 +384,10 @@ ShellAppMain (
        if (ShellCommandLineGetFlag (ParamPackage, L"-ps"))
            g_sw_view[G_SW_PS] = 1;
   }
+
+  // Options with Flags
+  if (ShellCommandLineGetFlag (ParamPackage, L"-sbsa"))
+      g_build_sbsa  = 1;
 
     // Options with Values
   CmdLineArg  = ShellCommandLineGetValue (ParamPackage, L"-f");

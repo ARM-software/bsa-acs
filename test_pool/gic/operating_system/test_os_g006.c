@@ -64,6 +64,16 @@ payload()
 
   /* Check non-secure physical timer assignment */
   intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
+if (g_build_sbsa) {
+  if (intid != 30) {
+      val_print(ACS_PRINT_ERR,
+          "\n       EL0-Phy timer not mapped to PPI ID 30, INTID: %d   ", intid);
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+      return;
+
+  }
+}
+
   if ((intid < 16 || intid > 31) && (!val_gic_is_valid_eppi(intid)))
       val_print(ACS_PRINT_WARN,
           "\n       EL0-Phy timer not mapped to PPI recommended range, INTID: %d   ", intid);
@@ -78,13 +88,23 @@ payload()
   if (timeout == 0) {
     val_print(ACS_PRINT_ERR,
         "\n       EL0-Phy timer interrupt not received on INTID: %d   ", intid);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
     return;
   }
 
   /* Check non-secure virtual timer assignment */
   val_set_status(0, RESULT_PENDING(TEST_NUM));
   intid = val_timer_get_info(TIMER_INFO_VIR_EL1_INTID, 0);
+if (g_build_sbsa) {
+  if (intid != 27) {
+      val_print(ACS_PRINT_ERR,
+          "\n       EL0-Virtual timer not mapped to PPI ID 27, INTID: %d   ", intid);
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
+      return;
+
+  }
+}
+
   if ((intid < 16 || intid > 31) && (!val_gic_is_valid_eppi(intid)))
       val_print(ACS_PRINT_WARN,
           "\n       EL0-Virtual timer not mapped to PPI recommended range, INTID: %d   ", intid);
@@ -99,7 +119,7 @@ payload()
   if (timeout == 0) {
     val_print(ACS_PRINT_ERR,
         "\n       EL0-Virtual timer interrupt not received on INTID: %d   ", intid);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
     return;
   }
 

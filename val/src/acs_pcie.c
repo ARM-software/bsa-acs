@@ -326,19 +326,6 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       status |= os_p009_entry(num_pe);
       status |= os_p011_entry(num_pe);
 
-#ifdef PCIE_ON_CHIP_DEV_TEST
-      status |= os_p005_entry(num_pe);
-      status |= os_p010_entry(num_pe);
-      status |= os_p013_entry(num_pe);
-      status |= os_p014_entry(num_pe);
-      status |= os_p015_entry(num_pe);
-      status |= os_p016_entry(num_pe);
-      status |= os_p034_entry(num_pe);
-      status |= os_p023_entry(num_pe);
-      status |= os_p012_entry(num_pe);
-      status |= os_p027_entry(num_pe);
-      status |= os_p029_entry(num_pe);
-#endif
       status |= os_p017_entry(num_pe);
       status |= os_p018_entry(num_pe);
       status |= os_p019_entry(num_pe);
