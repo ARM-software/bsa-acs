@@ -317,6 +317,8 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       status |= os_p064_entry(num_pe);
       status |= os_p065_entry(num_pe);
       status |= os_p066_entry(num_pe);
+      status |= os_p067_entry(num_pe);
+      status |= os_p068_entry(num_pe);
 #else
       status |= os_p002_entry(num_pe);
       status |= os_p003_entry(num_pe);
