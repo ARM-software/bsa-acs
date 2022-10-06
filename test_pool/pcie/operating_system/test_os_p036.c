@@ -62,7 +62,11 @@ payload(void)
       if ((dp_type == DP) || (dp_type == iEP_RP) || (dp_type == RP))
       {
           /* Disable the ARI forwarding enable bit */
-          val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &cap_base);
+          if (val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &cap_base) != PCIE_SUCCESS) {
+              val_print(ACS_PRINT_INFO, "PCIe Express Capability not present ", 0);
+              continue;
+          }
+
           val_pcie_read_cfg(bdf, cap_base + DCTL2R_OFFSET, &reg_value);
           reg_value &= DCTL2R_AFE_NORMAL;
           val_pcie_write_cfg(bdf, cap_base + DCTL2R_OFFSET, reg_value);

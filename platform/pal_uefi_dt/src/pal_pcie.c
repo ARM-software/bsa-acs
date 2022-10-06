@@ -512,3 +512,18 @@ pal_pcie_get_rp_transaction_frwd_support(UINT32 seg, UINT32 bus, UINT32 dev, UIN
 {
   return 1;
 }
+
+/**
+  @brief  Returns the memory offset that can be
+          accessed from the BAR base and is within
+          BAR limit value
+
+  @param  type
+  @return memory offset
+**/
+UINT32
+pal_pcie_mem_get_offset(UINT32 type)
+{
+
+  return MEM_OFFSET_SMALL;
+}

@@ -67,6 +67,11 @@
 #define ERR_STRING_SIZE 64
 
 #define MEM_OFFSET_10   0x10
+#define MEM_OFFSET_SMALL   0x10
+#define MEM_OFFSET_MEDIUM  0x1000
+#define MEM_OFFSET_LARGE   0x100000
+#define MEM_SHIFT          20
+#define MEM_BASE_SHIFT     16
 
 /* Allows storage of 2048 valid BDFs */
 #define PCIE_DEVICE_BDF_TABLE_SZ 8192

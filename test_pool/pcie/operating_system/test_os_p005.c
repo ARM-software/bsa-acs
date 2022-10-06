@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020, 2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,9 +20,9 @@
 #include "val/include/bsa_acs_pe.h"
 #include "val/include/bsa_acs_pcie.h"
 
-#define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 4)
+#define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 5)
 #define TEST_RULE  "PCI_IN_13"
-#define TEST_DESC  "Check RootPort NP Memory Access       "
+#define TEST_DESC  "Check RootPort P Memory Access        "
 
 #define KNOWN_DATA  0xABABABAB
 
@@ -97,13 +97,14 @@ payload(void)
   uint32_t dp_type;
   uint32_t pe_index;
   uint32_t tbl_index;
-  uint32_t read_value, old_value, value;
+  uint32_t read_value, value;
+  uint32_t old_value, new_value;
+  uint32_t status;
   uint32_t test_skip = 1;
   uint32_t mem_offset = 0;
-  uint64_t mem_base = 0;
-  uint64_t ori_mem_base = 0;
-  uint64_t mem_lim = 0, new_mem_lim = 0;
-  uint32_t status;
+  uint64_t mem_base = 0, mem_base_upper = 0, ori_mem_base = 0;
+  uint64_t mem_lim = 0, mem_lim_upper = 0, new_mem_lim;
+  uint64_t updated_mem_base = 0, updated_mem_lim = 0;
   pcie_device_bdf_table *bdf_tbl_ptr;
 
   tbl_index = 0;
@@ -113,13 +114,14 @@ payload(void)
   /* Install sync and async handlers to handle exceptions.*/
   status = val_pe_install_esr(EXCEPT_AARCH64_SYNCHRONOUS_EXCEPTIONS, esr);
   status |= val_pe_install_esr(EXCEPT_AARCH64_SERROR, esr);
-  branch_to_test = &&exception_return;
   if (status)
   {
       val_print(ACS_PRINT_ERR, "\n      Failed in installing the exception handler", 0);
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 01));
       return;
   }
+
+  branch_to_test = &&exception_return;
 
   /* Since this is a memory space access test.
    * Enable BME & MSE for all the BDFs.
@@ -142,14 +144,14 @@ payload(void)
       if ((dp_type == RP) || (dp_type == iEP_RP))
       {
         /* Part 1:
-         * Check When Address is within the Range of Non-Prefetchable
+         * Check When Address is within the Range of Prefetchable
          * Memory Range.
         */
         /* Clearing UR in Device Status Register */
         val_pcie_clear_urd(bdf);
 
-        /* Read Function's NP Memory Base Limit Register */
-        val_pcie_read_cfg(bdf, TYPE1_NP_MEM, &read_value);
+        /* Read Function's Memory Base Limit Register */
+        val_pcie_read_cfg(bdf, TYPE1_P_MEM, &read_value);
         val_print(ACS_PRINT_DEBUG, "\n  BDF is 0x%x", bdf);
         if (read_value == 0)
           continue;
@@ -157,22 +159,23 @@ payload(void)
         mem_base = (read_value & MEM_BA_MASK) << MEM_BA_SHIFT;
         mem_lim = (read_value & MEM_LIM_MASK) | MEM_LIM_LOWER_BITS;
 
+        /* If 64 Bit Prefetchable Address */
+        if ((read_value & P_MEM_PAC_MASK) == 0x1) {
+          val_pcie_read_cfg(bdf, TYPE1_P_MEM_BU, &read_value);
+          mem_base_upper = read_value;
+          val_pcie_read_cfg(bdf, TYPE1_P_MEM_LU, &read_value);
+          mem_lim_upper = read_value;
+        }
+
+        mem_base |= (mem_base_upper << P_MEM_BU_SHIFT);
+        mem_lim |= (mem_lim_upper << P_MEM_LU_SHIFT);
+
         val_print(ACS_PRINT_DEBUG, "\n   Memory base is 0x%llx", mem_base);
         val_print(ACS_PRINT_DEBUG, " Memory lim is  0x%llx", mem_lim);
 
         /* If Memory Limit is programmed with value less the Base, then Skip.*/
         if (mem_lim < mem_base)
           continue;
-
-        mem_offset = val_pcie_mem_get_offset(MEM_OFFSET_SMALL);
-
-        if ((mem_base + mem_offset) > mem_lim)
-        {
-            val_print(ACS_PRINT_ERR, "\n Memory offset + base 0x%llx ", mem_base + mem_offset);
-            val_print(ACS_PRINT_ERR, "exceeds the memory limit 0x%llx", mem_lim);
-            val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
-            return;
-        }
 
         /* If test runs for atleast an endpoint */
         test_skip = 0;
@@ -183,11 +186,20 @@ payload(void)
          * Write known value to an address which is in range
          * Base + offset should always be in the range.
          * Read the same
-         */
+        */
+        mem_offset = val_pcie_mem_get_offset(MEM_OFFSET_MEDIUM);
 
-        old_value = (*(volatile uint32_t *)(mem_base + mem_offset));
-        *(volatile uint32_t *)(mem_base + mem_offset) = KNOWN_DATA;
-        read_value = (*(volatile uint32_t *)(mem_base + mem_offset));
+        if ((mem_base + mem_offset) > mem_lim)
+        {
+            val_print(ACS_PRINT_ERR, "\n Memory offset + base 0x%x ", mem_base + mem_offset);
+            val_print(ACS_PRINT_ERR, "exceeds the memory limit 0x%x", mem_lim);
+            val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
+            return;
+        }
+
+        old_value = (*(volatile addr_t *)(mem_base + mem_offset));
+        *(volatile addr_t *)(mem_base + mem_offset) = KNOWN_DATA;
+        read_value = (*(volatile addr_t *)(mem_base + mem_offset));
 
         if ((old_value != read_value && read_value == PCIE_UNKNOWN_RESPONSE) ||
              val_pcie_is_urd(bdf)) {
@@ -205,7 +217,7 @@ payload(void)
             continue;
         }
 
-        /**Check_2: Accessing out of NP memory limit range should return 0xFFFFFFFF
+        /**Check_2: Accessing out of P memory limit range should return 0xFFFFFFFF
          *
          * If the limit exceeds 1MB then modify the range to be 1MB
          * and access out of the limit set
@@ -215,18 +227,39 @@ payload(void)
         if ((mem_lim >> MEM_SHIFT) > (mem_base >> MEM_SHIFT))
         {
            val_print(ACS_PRINT_DEBUG, "\n Entered Check_2 for bdf %x", bdf);
-           new_mem_lim = mem_base + MEM_OFFSET_LARGE;
-           mem_base = mem_base | (mem_base  >> 16);
-           val_pcie_write_cfg(bdf, TYPE1_NP_MEM, mem_base);
-           val_pcie_read_cfg(bdf, TYPE1_NP_MEM, &read_value);
+           new_mem_lim  = mem_base + MEM_OFFSET_LARGE;
+           val_pcie_read_cfg(bdf, TYPE1_P_MEM, &new_value);
+
+          if ((new_value & P_MEM_PAC_MASK) == 0x1)
+               val_pcie_write_cfg(bdf, TYPE1_P_MEM_LU, (mem_base >> 32));
+
+           mem_base = ((uint32_t)mem_base) | ((uint32_t)mem_base >> 16);
+           val_print(ACS_PRINT_INFO, " mem_base new is 0x%llx", mem_base);
+           val_pcie_write_cfg(bdf, TYPE1_P_MEM, mem_base);
+
+           val_pcie_read_cfg(bdf, TYPE1_P_MEM, &read_value);
+           updated_mem_base = (read_value & MEM_BA_MASK) << MEM_BA_SHIFT;
+           updated_mem_lim = (read_value & MEM_LIM_MASK) | MEM_LIM_LOWER_BITS;
+
+           /* If 64 Bit Prefetchable Address */
+           if ((read_value & P_MEM_PAC_MASK) == 0x1) {
+             val_pcie_read_cfg(bdf, TYPE1_P_MEM_BU, &read_value);
+             mem_base_upper = read_value;
+             val_pcie_read_cfg(bdf, TYPE1_P_MEM_LU, &read_value);
+             mem_lim_upper = read_value;
+           }
+
+           updated_mem_base |= (mem_base_upper << P_MEM_BU_SHIFT);
+           updated_mem_lim |= (mem_lim_upper << P_MEM_LU_SHIFT);
 
            value = (*(volatile uint32_t *)(new_mem_lim + MEM_OFFSET_SMALL));
            val_print(ACS_PRINT_DEBUG, "  Value read is 0x%llx", value);
            if (value != PCIE_UNKNOWN_RESPONSE)
            {
                val_print(ACS_PRINT_ERR, "\n Memory range for bdf 0x%x", bdf);
-               val_print(ACS_PRINT_ERR, " is 0x%x", read_value);
-               val_print(ACS_PRINT_ERR, "\n Out of range 0x%x", (new_mem_lim + MEM_OFFSET_SMALL));
+               val_print(ACS_PRINT_ERR, " is 0x%llx", updated_mem_base);
+               val_print(ACS_PRINT_ERR, " 0x%llx", updated_mem_lim);
+               val_print(ACS_PRINT_ERR, "\n Out of range 0x%llx", (new_mem_lim + MEM_OFFSET_SMALL));
                val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 03));
            }
         }
@@ -235,16 +268,16 @@ exception_return:
         /*Write back original value */
         if ((mem_lim >> MEM_SHIFT) > (ori_mem_base >> MEM_SHIFT))
         {
-            val_pcie_write_cfg(bdf, TYPE1_NP_MEM,
-                                           ((mem_lim & MEM_LIM_MASK) | (ori_mem_base  >> 16)));
+            val_pcie_write_cfg(bdf, TYPE1_P_MEM,
+                                              ((mem_lim & MEM_LIM_MASK) | (ori_mem_base  >> 16)));
+            val_pcie_write_cfg(bdf, TYPE1_P_MEM_LU, (mem_lim >> 32));
         }
 
         /* Memory Space might have constraint on RW/RO behaviour
          * So not checking for Read-Write Data mismatch.
         */
         if (IS_TEST_FAIL(val_get_status(pe_index))) {
-          val_print(ACS_PRINT_ERR,
-            "\n       Failed. Exception on Memory Access For Bdf : 0x%x", bdf);
+          val_print(ACS_PRINT_ERR, "\n     Failed exception on Memory Access For Bdf : 0x%x", bdf);
           val_pcie_clear_urd(bdf);
           return;
         }
@@ -259,7 +292,7 @@ exception_return:
 }
 
 uint32_t
-os_p004_entry(uint32_t num_pe)
+os_p005_entry(uint32_t num_pe)
 {
 
   uint32_t status = ACS_STATUS_FAIL;

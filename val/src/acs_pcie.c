@@ -323,6 +323,7 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       status |= os_p002_entry(num_pe);
       status |= os_p003_entry(num_pe);
       status |= os_p004_entry(num_pe);
+      status |= os_p005_entry(num_pe);
       status |= os_p006_entry(num_pe);
       status |= os_p008_entry(num_pe);
       status |= os_p009_entry(num_pe);
@@ -2307,4 +2308,18 @@ val_is_transaction_pending_set(uint32_t bdf)
       return 1;
 
   return 0;
+}
+
+/**
+  @brief  Returns the memory offset that can be
+          accessed from the BAR base and is within
+          BAR limit value
+
+  @param  type
+  @return memory offset
+
+**/
+uint32_t val_pcie_mem_get_offset(uint32_t type)
+{
+  return pal_pcie_mem_get_offset(type);
 }
