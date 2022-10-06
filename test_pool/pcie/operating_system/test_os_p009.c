@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2022, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,7 @@
 
 // Valid PCIe CapID ranges (PCIe 5.0 - v1.0)
 #define PCIE_CAP_ID_END     0x15
-#define PCIE_ECAP_ID_END    0x29
+#define PCIE_ECAP_ID_END    0x2C
 
 /*
  Check if vendor specific data are presented as non-PCIe compliant capabilities
