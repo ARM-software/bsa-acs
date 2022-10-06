@@ -31,6 +31,8 @@ bsa_acs_test-objs += $(TEST_POOL)/pcie/operating_system/test_os_p001.o \
                      $(TEST_POOL)/pcie/operating_system/test_os_p064.o \
                      $(TEST_POOL)/pcie/operating_system/test_os_p065.o \
                      $(TEST_POOL)/pcie/operating_system/test_os_p066.o \
+                     $(TEST_POOL)/pcie/operating_system/test_os_p067.o \
+                     $(TEST_POOL)/pcie/operating_system/test_os_p068.o \
                      $(TEST_POOL)/peripherals/operating_system/test_os_d004.o \
                      $(TEST_POOL)/memory_map/operating_system/test_os_m004.o \
 

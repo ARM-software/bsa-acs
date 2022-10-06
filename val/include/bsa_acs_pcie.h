@@ -255,5 +255,7 @@ uint32_t os_p063_entry(uint32_t num_pe);
 uint32_t os_p064_entry(uint32_t num_pe);
 uint32_t os_p065_entry(uint32_t num_pe);
 uint32_t os_p066_entry(uint32_t num_pe);
+uint32_t os_p067_entry(uint32_t num_pe);
+uint32_t os_p068_entry(uint32_t num_pe);
 
 #endif

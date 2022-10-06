@@ -233,7 +233,7 @@ val_smmu_max_pasids(uint32_t smmu_index)
 {
   uint64_t smmu_base;
 
-  smmu_base = val_smmu_get_info(SMMU_CTRL_BASE, smmu_index);
+  smmu_base = val_iovirt_get_smmu_info(SMMU_CTRL_BASE, smmu_index);
   return pal_smmu_max_pasids(smmu_base);
 }
 

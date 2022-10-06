@@ -262,6 +262,7 @@ void     val_iovirt_free_info_table(void);
 uint32_t val_iovirt_get_rc_smmu_index(uint32_t rc_seg_num, uint32_t rid);
 uint32_t val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view);
 uint64_t val_smmu_get_info(SMMU_INFO_e, uint32_t index);
+uint64_t val_iovirt_get_smmu_info(SMMU_INFO_e type, uint32_t index);
 
 typedef enum {
     DMA_NUM_CTRL = 1,
