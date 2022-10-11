@@ -422,6 +422,21 @@ pal_bsa_pcie_enumerate()
 }
 
 /**
+  @brief  Returns the memory offset that can be
+          accessed from the BAR base and is within
+          BAR limit value
+
+  @param  type
+  @return memory offset
+**/
+UINT32
+pal_pcie_mem_get_offset(UINT32 type)
+{
+
+  return MEM_OFFSET_SMALL;
+}
+
+/**
     @brief   Gets RP support of transaction forwarding.
 
     @param   bus        PCI bus address

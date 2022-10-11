@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,14 +75,20 @@ payload(void)
       test_skip = 0;
 
       /* Enable the ARI forwarding enable bit in RP */
-      val_pcie_find_capability(erp_bdf, PCIE_CAP, CID_PCIECS, &cap_base);
+      if (val_pcie_find_capability(erp_bdf, PCIE_CAP, CID_PCIECS, &cap_base) != PCIE_SUCCESS) {
+          val_print(ACS_PRINT_INFO, "PCIe Express Capability not present ", 0);
+          continue;
+      }
       val_pcie_read_cfg(erp_bdf, cap_base + DCTL2R_OFFSET, &reg_value);
       reg_value &= DCTL2R_MASK;
       reg_value |= (DCTL2R_AFE_MASK << DCTL2R_AFE_SHIFT);
       val_pcie_write_cfg(erp_bdf, cap_base + DCTL2R_OFFSET, reg_value);
 
       /* Enable the ARI forwarding enable bit in Exerciser */
-      val_pcie_find_capability(e_bdf, PCIE_CAP, CID_PCIECS, &cap_base);
+      if (val_pcie_find_capability(e_bdf, PCIE_CAP, CID_PCIECS, &cap_base) != PCIE_SUCCESS) {
+          val_print(ACS_PRINT_INFO, "PCIe Express Capability not present ", 0);
+          continue;
+      }
       val_pcie_read_cfg(e_bdf, cap_base + DCTL2R_OFFSET, &reg_value);
       reg_value &= DCTL2R_MASK;
       reg_value |= (DCTL2R_AFE_MASK << DCTL2R_AFE_SHIFT);

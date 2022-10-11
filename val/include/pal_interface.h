@@ -300,6 +300,7 @@ uint32_t pal_pcie_is_cache_present(uint32_t seg, uint32_t bus, uint32_t dev, uin
 
 void pal_pcie_io_write_cfg(uint32_t bdf, uint32_t offset, uint32_t data);
 uint32_t pal_bsa_pcie_enumerate(void);
+uint32_t pal_pcie_mem_get_offset(uint32_t type);
 
 /**
   @brief  Instance of SMMU INFO block

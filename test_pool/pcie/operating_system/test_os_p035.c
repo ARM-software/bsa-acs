@@ -98,7 +98,10 @@ payload(void)
       if ((dp_type == RCiEP) || (dp_type == EP))
       {
           /* Read FLR capability bit value */
-          val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &cap_base);
+          if (val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &cap_base) != PCIE_SUCCESS) {
+              val_print(ACS_PRINT_INFO, "PCIe Express Capability not present ", 0);
+              continue;
+          }
           val_pcie_read_cfg(bdf, cap_base + DCAPR_OFFSET, &reg_value);
           flr_cap = (reg_value >> DCAPR_FLRC_SHIFT) & DCAPR_FLRC_MASK;
 

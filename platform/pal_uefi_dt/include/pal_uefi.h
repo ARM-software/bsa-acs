@@ -32,6 +32,7 @@ extern UINT32 g_print_level;
 #define PCIE_CAP_NOT_FOUND      0x10000010  /* The specified capability was not found */
 #define PCIE_UNKNOWN_RESPONSE   0xFFFFFFFF  /* Function not found or UR response from completer */
 
+#define MEM_OFFSET_SMALL        0x10    /* Memory Offset from BAR base value that can be accesed*/
 
 typedef struct {
   UINT64   Arg0;
