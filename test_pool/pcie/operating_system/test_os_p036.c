@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2020,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020-2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,6 +61,25 @@ payload(void)
       /* Check entry is Downstream port or RP */
       if ((dp_type == DP) || (dp_type == iEP_RP) || (dp_type == RP))
       {
+          /* Read the secondary and subordinate bus number */
+          val_pcie_read_cfg(bdf, TYPE1_PBN, &reg_value);
+          sec_bus = ((reg_value >> SECBN_SHIFT) & SECBN_MASK);
+          sub_bus = ((reg_value >> SUBBN_SHIFT) & SUBBN_MASK);
+          status = val_pcie_data_link_layer_status(bdf);
+
+          /* Skip the port, if switch is present below it or no device present*/
+          if ((sec_bus != sub_bus) || (status == PCIE_DLL_LINK_STATUS_NOT_ACTIVE))
+              continue;
+
+          if (status == PCIE_DLL_LINK_ACTIVE_NOT_SUPPORTED)
+          {
+              seg_num = PCIE_EXTRACT_BDF_SEG(bdf);
+              dev_bdf = PCIE_CREATE_BDF(seg_num, sec_bus, 0, 0);
+              status = val_pcie_read_cfg(dev_bdf, TYPE01_VIDR, &reg_value);
+              if (status || (reg_value == PCIE_UNKNOWN_RESPONSE))
+                  continue;
+          }
+
           /* Disable the ARI forwarding enable bit */
           if (val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &cap_base) != PCIE_SUCCESS) {
               val_print(ACS_PRINT_INFO, "PCIe Express Capability not present ", 0);
@@ -71,15 +90,6 @@ payload(void)
           reg_value &= DCTL2R_AFE_NORMAL;
           val_pcie_write_cfg(bdf, cap_base + DCTL2R_OFFSET, reg_value);
 
-          /* Read the secondary and subordinate bus number */
-          val_pcie_read_cfg(bdf, TYPE1_PBN, &reg_value);
-          sec_bus = ((reg_value >> SECBN_SHIFT) & SECBN_MASK);
-          sub_bus = ((reg_value >> SUBBN_SHIFT) & SUBBN_MASK);
-          status = val_pcie_data_link_layer_status(bdf);
-
-          /* Skip the port, if switch is present below it or no device present*/
-          if ((sec_bus != sub_bus) || (status != PCIE_DLL_LINK_STATUS_ACTIVE))
-              continue;
 
           /* If test runs for atleast an endpoint */
           test_skip = 0;
