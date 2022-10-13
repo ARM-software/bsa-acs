@@ -95,9 +95,7 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
        status |= hyp_i001_entry(num_pe);
        status |= hyp_i002_entry(num_pe);
        status |= hyp_i003_entry(num_pe);
-if (g_build_sbsa) { /* B_SMMU_21 is only sbsa complaince only */
        status |= hyp_i004_entry(num_pe);
-}
   }
 
 
