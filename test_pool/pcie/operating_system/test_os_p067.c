@@ -32,9 +32,8 @@
     @return  0    device does not support MSI(X)
     @return  1    device supports MSI(X)
 **/
-static
-uint32_t
-check_msi_status (uint32_t dev_index) {
+static uint32_t check_msi_status(uint32_t dev_index)
+{
   uint32_t data;
 
   data = val_peripheral_get_info (ANY_FLAGS, dev_index);
@@ -126,7 +125,7 @@ payload (void)
   uint32_t count_next;
   uint32_t test_skip = 1;
 
-  if(!count) {
+  if (!count) {
      val_set_status (index, RESULT_SKIP(TEST_NUM, 3));
      return;
   }
@@ -159,7 +158,7 @@ payload (void)
               if (val_get_msi_vectors (next_dev_bdf, &next_dev_mvec)) {
                 test_skip = 0;
                 /* Compare two lists of MSI(X) vectors */
-                if(check_list_duplicates (current_dev_mvec, next_dev_mvec)) {
+                if (check_list_duplicates (current_dev_mvec, next_dev_mvec)) {
                   val_print (ACS_STATUS_ERR, "\n       Allocated MSIs are not unique", 0);
                   val_set_status (index, RESULT_FAIL(TEST_NUM, 02));
                   status = 1;

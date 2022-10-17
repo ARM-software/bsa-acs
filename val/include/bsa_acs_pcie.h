@@ -258,11 +258,11 @@ uint32_t os_p035_entry(uint32_t num_pe);
 uint32_t os_p036_entry(uint32_t num_pe);
 uint32_t os_p037_entry(uint32_t num_pe);
 uint32_t os_p038_entry(uint32_t num_pe);
+uint32_t os_p039_entry(uint32_t num_pe);
 
 /* Linux test */
 uint32_t os_p061_entry(uint32_t num_pe);
 uint32_t os_p062_entry(uint32_t num_pe);
-uint32_t os_p063_entry(uint32_t num_pe);
 uint32_t os_p064_entry(uint32_t num_pe);
 uint32_t os_p065_entry(uint32_t num_pe);
 uint32_t os_p066_entry(uint32_t num_pe);

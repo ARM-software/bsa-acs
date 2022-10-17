@@ -319,7 +319,6 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 #ifdef TARGET_LINUX
       status |= os_p061_entry(num_pe);
       status |= os_p062_entry(num_pe);
-      status |= os_p063_entry(num_pe);
       status |= os_p064_entry(num_pe);
       status |= os_p065_entry(num_pe);
       status |= os_p066_entry(num_pe);
@@ -353,6 +352,7 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       status |= os_p036_entry(num_pe);
       status |= os_p037_entry(num_pe);
       status |= os_p038_entry(num_pe);
+      status |= os_p039_entry(num_pe);
 
 #endif
 

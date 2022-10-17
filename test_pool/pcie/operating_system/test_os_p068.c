@@ -27,8 +27,7 @@
 
 #define MIN_PASID_SUPPORT 16
 
-static void
-payload(void)
+static void payload(void)
 {
   int num_per = 0, num_smmu = 0, skip = 1;
   uint32_t max_pasids = 0;
@@ -37,19 +36,20 @@ payload(void)
   num_per = val_peripheral_get_info(NUM_ALL, 0);
   /* For each peripheral check for PASID support */
   /* If PASID is supported, test the max number of PASIDs supported */
-  for(num_per--; num_per >= 0; num_per--)
+  for (num_per--; num_per >= 0; num_per--)
   {
-     if((max_pasids = val_peripheral_get_info(MAX_PASIDS, num_per)) > 0)
+     max_pasids = val_peripheral_get_info(MAX_PASIDS, num_per);
+     if (max_pasids > 0)
      {
         skip = 0;
-        if(max_pasids < MIN_PASID_SUPPORT)
+        if (max_pasids < MIN_PASID_SUPPORT)
         {
            val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
            break;
         }
      }
   }
-  if(num_per < 0)
+  if (num_per < 0)
   {
      /* For each SMMUv3 check for PASID support */
      /* If PASID is supported, test the max number of PASIDs supported */
@@ -58,10 +58,11 @@ payload(void)
      {
          if (val_iovirt_get_smmu_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) == 3)
          {
-             if((max_pasids = val_smmu_max_pasids(num_smmu)) > 0)
+           max_pasids = val_smmu_max_pasids(num_smmu);
+           if (max_pasids > 0)
              {
                  skip = 0;
-                 if(max_pasids < MIN_PASID_SUPPORT)
+                 if (max_pasids < MIN_PASID_SUPPORT)
                  {
                     val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
                     break;
@@ -70,8 +71,8 @@ payload(void)
          }
      }
   }
-  if(num_smmu < 0) {
-      if(skip)
+  if (num_smmu < 0) {
+      if (skip)
           val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
       else
           val_set_status(index, RESULT_PASS(TEST_NUM, 0));
