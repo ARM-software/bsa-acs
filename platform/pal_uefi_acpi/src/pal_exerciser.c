@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018-2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -80,11 +80,11 @@ pal_increment_bus_dev(
 **/
 UINT64
 pal_exerciser_get_ecsr_base (
-  UINT64 EcsrBase,
+  UINT32 Bdf,
   UINT32 BarIndex
   )
 {
-  return pal_mmio_read(EcsrBase + BAR0_OFFSET + (BarIndex * 4));
+  return palPcieGetBase(Bdf, BarIndex);
 }
 
 /**
@@ -183,7 +183,7 @@ pal_exerciser_find_pcie_capability (
   UINT32 *Offset
   )
 {
-  UINT64 NxtPtr;
+  UINT64 NxtPtr = 0;
   UINT32 Data;
   UINT32 TempId;
   UINT64 Ecam;
@@ -232,16 +232,16 @@ UINT32 pal_exerciser_set_param (
   EXERCISER_PARAM_TYPE Type,
   UINT64 Value1,
   UINT64 Value2,
-  UINT32 Bdf,
-  UINT64 Ecam
+  UINT32 Bdf
   )
 {
   UINT32 Data;
+  UINT32 CapabilityOffset = 0;
   UINT64 Base;
-  UINT64 EcsrBase; /* Exerciser Base */
+  UINT64 Ecam;
 
-  EcsrBase = (Ecam + pal_exerciser_get_pcie_config_offset(Bdf));
-  Base = pal_exerciser_get_ecsr_base(EcsrBase, 0); /* BAR0 address */
+  Base = pal_exerciser_get_ecsr_base(Bdf,0);
+  Ecam = pal_pcie_get_mcfg_ecam(); // Getting the ECAM address
 
   switch (Type) {
 
@@ -311,6 +311,18 @@ UINT32 pal_exerciser_set_param (
                 return 1;
           }
 
+     case ERROR_INJECT_TYPE:
+        pal_exerciser_find_pcie_capability(DVSEC, Bdf, PCIE, &CapabilityOffset);
+        Data = pal_mmio_read(Ecam + CapabilityOffset +
+                             pal_exerciser_get_pcie_config_offset(Bdf) + DVSEC_CTRL);
+        Data = ((Value1 << ERR_CODE_SHIFT) | (Value2 << FATAL_SHIFT));
+        pal_mmio_write(Ecam + CapabilityOffset + DVSEC_CTRL +
+                             pal_exerciser_get_pcie_config_offset(Bdf), Data);
+        if (Value1 <= 0x7)
+                return 2;
+        else
+                return 3;
+
       default:
           return 1;
   }
@@ -321,8 +333,7 @@ UINT32 pal_exerciser_set_param (
   @param   Type         - Parameter type that needs to be read from the stimulus hadrware
   @param   Value1       - Parameter 1 that is read from hardware
   @param   Value2       - Parameter 2 that is read from hardware
-  @param   Bdf          - Stimulus hardware bdf number
-  @param   Ecam         - Ecam base for exerciser under test
+  @param   Instance     - Stimulus hardware instance number
   @return  Status       - SUCCESS if the requested paramter type is successfully read
 **/
 UINT32
@@ -330,18 +341,19 @@ pal_exerciser_get_param (
   EXERCISER_PARAM_TYPE Type,
   UINT64 *Value1,
   UINT64 *Value2,
-  UINT32 Bdf,
-  UINT64 Ecam
+  UINT32 Bdf
   )
 {
   UINT32 Status;
   UINT32 Temp;
   UINT64 Base;
-  UINT64 EcsrBase; /* Exerciser Base */
+  UINT32 tx_attr;
+  UINT32 addr_low = 0;
+  UINT32 addr_high = 0;
+  UINT32 data_low = 0;
+  UINT32 data_high = 0;
 
-  EcsrBase = (Ecam + pal_exerciser_get_pcie_config_offset(Bdf));
-  Base = pal_exerciser_get_ecsr_base(EcsrBase, 0); /*BAR0 address */
-
+  Base = pal_exerciser_get_ecsr_base(Bdf,0);
   switch (Type) {
 
       case SNOOP_ATTRIBUTES:
@@ -365,6 +377,46 @@ pal_exerciser_get_param (
           return pal_mmio_read(Base + MSICTL) | MASK_BIT;
       case ATS_RES_ATTRIBUTES:
           *Value1 = pal_mmio_read(Base + ATS_ADDR);
+          return 0;
+      case CFG_TXN_ATTRIBUTES:
+      case TRANSACTION_TYPE:
+      case ADDRESS_ATTRIBUTES:
+      case DATA_ATTRIBUTES:
+          /* Get the first entry and check for validity */
+          tx_attr = pal_mmio_read(Base + TXN_TRACE);
+          if (tx_attr == TXN_INVALID)
+              return 1;
+
+          /* Obtain all the recorded information of the packet in the format.
+               ________________________________
+              |         TX ATTRIBUTES          |
+              |      CFG/MEM ADDRESS_LO        |
+              |      CFG/MEM ADDRESS_HI        |
+              |           DATA_LO              |
+              |           DATA_HI              |
+              |________________________________|
+          */
+          addr_low = pal_mmio_read(Base + TXN_TRACE);
+          addr_high = pal_mmio_read(Base + TXN_TRACE);
+          data_low = pal_mmio_read(Base + TXN_TRACE);
+          data_high = pal_mmio_read(Base + TXN_TRACE);
+
+          if (Type == CFG_TXN_ATTRIBUTES)
+              *Value1 = tx_attr & MASK_BIT;
+
+          /* 0 - Read, 1 - Write */
+          else if (Type == TRANSACTION_TYPE)
+              if (tx_attr & 0x2)
+                  *Value2 = CFG_READ;
+              else
+                  *Value2 = CFG_WRITE;
+
+          else if (Type == ADDRESS_ATTRIBUTES)
+               *Value1 = addr_low | ((UINT64)addr_high << 32);
+
+          else if (Type == DATA_ATTRIBUTES)
+               *Value1 = data_low | ((UINT64)data_high << 32);
+
           return 0;
       default:
           return 1;
@@ -409,25 +461,22 @@ pal_exerciser_get_state (
   @param   Ops          - Operation thta needs to be performed with the stimulus hadrware
   @param   Param        - Additional information to perform the operation
   @param   Bdf          - Stimulus hardware bdf number
-  @param   Ecam         - Ecam base for exerciser under test
   @return  Status       - SUCCESS if the operation is successfully performed using the hardware
 **/
 UINT32
 pal_exerciser_ops (
   EXERCISER_OPS Ops,
   UINT64 Param,
-  UINT32 Bdf,
-  UINT64 Ecam
+  UINT32 Bdf
   )
 {
   UINT64 Base;
-  UINT32 CapabilityOffset;
+  UINT64 Ecam;
+  UINT32 CapabilityOffset = 0;
   UINT32 data;
-  UINT64 EcsrBase; /* Exerciser Base */
 
-  EcsrBase = (Ecam + pal_exerciser_get_pcie_config_offset(Bdf));
-  Base = pal_exerciser_get_ecsr_base(EcsrBase, 0); /*BAR 0 address */
-
+  Base = pal_exerciser_get_ecsr_base(Bdf,0);
+  Ecam = pal_pcie_get_mcfg_ecam(); // Getting the ECAM address
   switch(Ops){
 
     case START_DMA:
@@ -503,8 +552,24 @@ pal_exerciser_ops (
         pal_mmio_write(Base + ATSCTL, ATS_TRIGGER);
         return !(pal_mmio_read(Base + ATSCTL) & ATS_STATUS);
 
+    case START_TXN_MONITOR:
+        pal_mmio_write(Base + TXN_CTRL_BASE, TXN_START);
+        return 0;
+    case STOP_TXN_MONITOR:
+        pal_mmio_write(Base + TXN_CTRL_BASE, TXN_STOP);
+        return 0;
+
+    case INJECT_ERROR:
+        pal_exerciser_find_pcie_capability(DVSEC, Bdf, PCIE, &CapabilityOffset);
+        data = pal_mmio_read(Ecam + pal_exerciser_get_pcie_config_offset(Bdf) +
+                             CapabilityOffset + DVSEC_CTRL);
+        data = data | (1 << ERROR_INJECT_BIT);
+        pal_mmio_write(Ecam + pal_exerciser_get_pcie_config_offset(Bdf) + CapabilityOffset +
+                       DVSEC_CTRL, data);
+        return Param;
+
     default:
-        return 1;
+        return PCIE_CAP_NOT_FOUND;
   }
 }
 
@@ -525,11 +590,11 @@ pal_exerciser_get_data (
   )
 {
   UINT32 Index;
-  UINT64 Base;
-  UINT64 EcsrBase; /* Exerciser Base */
+  UINT64 EcamBase;
+  UINT64 EcamBAR0;
+  UINT64 EcamBAR;
 
-  EcsrBase = (Ecam + pal_exerciser_get_pcie_config_offset(Bdf));
-  Base = pal_exerciser_get_ecsr_base(EcsrBase, 0); /* BAR0 address */
+  EcamBase = (Ecam + pal_exerciser_get_pcie_config_offset(Bdf));
 
   //In the Latest version of BSA 6.0 this part of the test is obsolete hence filling the reg with same data
   UINT32 offset_table[TEST_REG_COUNT] = {0x00,0x08,0x00,0x08,0x00,0x08,0x00,0x08,0x00,0x08};
@@ -541,16 +606,50 @@ pal_exerciser_get_data (
           for (Index = 0; Index < TEST_REG_COUNT; Index++) {
               Data->cfg_space.reg[Index].offset = (offset_table[Index] + pal_exerciser_get_pcie_config_offset (Bdf));
               Data->cfg_space.reg[Index].attribute = attr_table[Index];
-              Data->cfg_space.reg[Index].value = pal_mmio_read(EcsrBase + offset_table[Index]);
+              Data->cfg_space.reg[Index].value = pal_mmio_read(EcamBase + offset_table[Index]);
           }
           return 0;
       case EXERCISER_DATA_BAR0_SPACE:
-          Data->bar_space.base_addr = (void *)Base;
-          if (((Base >> PREFETCHABLE_BIT_SHIFT) & MASK_BIT) == 0x1)
+          EcamBAR0 = pal_exerciser_get_ecsr_base(Bdf, 0);
+          Data->bar_space.base_addr = (void *)EcamBAR0;
+          if (((pal_exerciser_get_ecsr_base(Bdf,0) >> PREFETCHABLE_BIT_SHIFT) & MASK_BIT) == 0x1)
               Data->bar_space.type = MMIO_PREFETCHABLE;
           else
               Data->bar_space.type = MMIO_NON_PREFETCHABLE;
           return 0;
+      case EXERCISER_DATA_MMIO_SPACE:
+          Index = 0;
+          Data->bar_space.base_addr = 0;
+          while (Index < TYPE0_MAX_BARS)
+          {
+              EcamBAR = pal_exerciser_get_ecsr_base(Bdf, Index * 4);
+
+              /* Check if the BAR is Memory Mapped IO type */
+              if (((EcamBAR >> BAR_MIT_SHIFT) & BAR_MIT_MASK) == MMIO)
+              {
+                  Data->bar_space.base_addr = (void *)(EcamBAR);
+                  if (((EcamBAR >> PREFETCHABLE_BIT_SHIFT) & MASK_BIT) == 0x1)
+                      Data->bar_space.type = MMIO_PREFETCHABLE;
+                  else
+                      Data->bar_space.type = MMIO_NON_PREFETCHABLE;
+
+                  Data->bar_space.base_addr = (void *)EcamBAR;
+
+                  return 0;
+              }
+
+              if (((EcamBAR >> BAR_MDT_SHIFT) & BAR_MDT_MASK) == BITS_64)
+              {
+                  /* Adjust the index to skip next sequential BAR */
+                  Index++;
+              }
+
+              /* Adjust index to point to next BAR */
+              Index++;
+          }
+
+          return 1;
+
       default:
           return 1;
     }

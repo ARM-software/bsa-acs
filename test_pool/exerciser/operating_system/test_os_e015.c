@@ -39,6 +39,7 @@ payload(void)
   uint32_t erp_bdf;
   uint32_t reg_value;
   uint32_t instance;
+  uint32_t fail_cnt;
   uint64_t header_type;
   uint32_t bus_value;
   uint32_t test_skip = 1;
@@ -50,7 +51,9 @@ payload(void)
   uint32_t sec_bus;
   uint32_t dp_type;
   uint32_t func_num;
+  uint32_t status;
 
+  fail_cnt = 0;
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
   instance = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
 
@@ -70,9 +73,6 @@ payload(void)
       /* Check if exerciser is child of one of the rootports */
       if (val_pcie_parent_is_rootport(e_bdf, &erp_bdf))
           continue;
-
-      /* If test runs for atleast an endpoint */
-      test_skip = 0;
 
       /* Enable the ARI forwarding enable bit in RP */
       if (val_pcie_find_capability(erp_bdf, PCIE_CAP, CID_PCIECS, &cap_base) != PCIE_SUCCESS) {
@@ -111,17 +111,19 @@ payload(void)
           {
               /* Create bdf for function 0 to 255 below the RP and check request type */
               dev_bdf = PCIE_CREATE_BDF(seg_num, sec_bus, dev_num, func_num);
-              val_exerciser_ops(START_TXN_MONITOR, CFG_READ, instance);
+              status = val_exerciser_ops(START_TXN_MONITOR, CFG_READ, instance);
+              if (status == PCIE_CAP_NOT_FOUND)
+                  goto test_result;
+
+              /* If test runs for atleast an endpoint */
+              test_skip = 0;
               val_pcie_read_cfg(dev_bdf, TYPE01_VIDR, &reg_value);
               val_exerciser_ops(STOP_TXN_MONITOR, CFG_READ, instance);
               val_exerciser_get_param(CFG_TXN_ATTRIBUTES, (uint64_t *)&header_type, 0, instance);
               if (header_type != TYPE0)
               {
-                  val_print(ACS_PRINT_ERR, "\n       RP BDF 0x%x ", erp_bdf);
-                  val_print(ACS_PRINT_ERR, "Transaction not Type0 on sec bus",
-                                                                           0);
-                  val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 1));
-                  return;
+                  val_print(ACS_PRINT_ERR, "\n       BDF 0x%x Sec Bus Type 0 error", erp_bdf);
+                  fail_cnt++;
               }
           }
       }
@@ -148,17 +150,17 @@ payload(void)
           {
               /* Create bdf for function 0 to 255 below the RP and check request type */
               dev_bdf = PCIE_CREATE_BDF(seg_num, sec_bus, dev_num, func_num);
-              val_exerciser_ops(START_TXN_MONITOR, CFG_READ, instance);
+              status = val_exerciser_ops(START_TXN_MONITOR, CFG_READ, instance);
+              if (status == PCIE_CAP_NOT_FOUND)
+                  goto test_result;
+
               val_pcie_read_cfg(dev_bdf, TYPE01_VIDR, &reg_value);
               val_exerciser_ops(STOP_TXN_MONITOR, CFG_READ, instance);
               val_exerciser_get_param(CFG_TXN_ATTRIBUTES, (uint64_t *)&header_type, 0, instance);
               if (header_type != TYPE1)
               {
-                  val_print(ACS_PRINT_ERR, "\n       RP BDF 0x%x ", erp_bdf);
-                  val_print(ACS_PRINT_ERR, "Transaction not Type1 on sec bus",
-                                                                            0);
-                  val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
-                  return;
+                  val_print(ACS_PRINT_ERR, "\n       BDF 0x%x Sec Bus Type 1 error", erp_bdf);
+                  fail_cnt++;
               }
           }
       }
@@ -170,8 +172,11 @@ payload(void)
 
   }
 
+test_result:
   if (test_skip)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+  else if (fail_cnt)
+      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, fail_cnt));
   else
       val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 

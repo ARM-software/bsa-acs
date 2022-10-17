@@ -260,7 +260,7 @@ val_pe_install_esr(uint32_t exception_type, void (*esr)(uint64_t, void *))
       return ACS_STATUS_ERR;
   }
 #ifndef TARGET_LINUX
-  if (pal_target_is_dt())
+  if (pal_target_is_dt() || pal_target_is_bm())
       val_gic_bsa_install_esr(exception_type, esr);
   else
       pal_pe_install_esr(exception_type, esr);
@@ -328,7 +328,7 @@ val_pe_default_esr(uint64_t interrupt_type, void *context)
     val_print(ACS_PRINT_WARN, "\n        Unexpected exception occured", 0);
 
 #ifndef TARGET_LINUX
-    if (pal_target_is_dt()) {
+    if (pal_target_is_dt() || pal_target_is_bm()) {
       val_print(ACS_PRINT_WARN, "\n        FAR reported = 0x%llx", bsa_gic_get_far());
       val_print(ACS_PRINT_WARN, "\n        ESR reported = 0x%llx", bsa_gic_get_esr());
     } else {

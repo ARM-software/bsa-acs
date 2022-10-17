@@ -26,6 +26,7 @@
 #define TEST_RULE  "PCI_SM_02"
 #define TEST_DESC  "Check Function level reset            "
 
+static
 uint32_t is_flr_failed(uint32_t bdf)
 {
   uint32_t reg_value;
@@ -78,6 +79,7 @@ payload(void)
   uint32_t test_fails;
   uint32_t test_skip = 1;
   uint32_t idx;
+  uint32_t status;
   addr_t config_space_addr;
   void *func_config_space;
   pcie_device_bdf_table *bdf_tbl_ptr;
@@ -137,7 +139,14 @@ payload(void)
           val_pcie_write_cfg(bdf, cap_base + DCTLR_OFFSET, reg_value);
 
           /* Wait for 100 ms */
-          val_time_delay_ms(100 * ONE_MILLISECOND);
+          status = val_time_delay_ms(100 * ONE_MILLISECOND);
+          if (!status)
+          {
+              val_print(ACS_PRINT_ERR, "\n       Failed to time delay for BDF 0x%x ", bdf);
+              val_memory_free(func_config_space);
+              val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 01));
+              return;
+          }
 
           /* If test runs for atleast an endpoint */
           test_skip = 0;

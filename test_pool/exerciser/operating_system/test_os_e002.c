@@ -89,14 +89,14 @@ get_target_exer_bdf(uint32_t req_rp_bdf, uint32_t *tgt_e_bdf,
   return ACS_STATUS_FAIL;
 }
 
+static
 uint32_t
 create_va_pa_mapping (uint64_t txn_va, uint64_t txn_pa,
                       smmu_master_attributes_t *smmu_master,
-                      pgt_descriptor_t *pgt_descriptor,
+                      pgt_descriptor_t *pgt_desc,
                       uint32_t e_bdf, uint32_t pgt_ap)
 {
   smmu_master_attributes_t master;
-  pgt_descriptor_t pgt_desc;
   memory_region_descriptor_t mem_desc_array[2], *mem_desc;
   uint64_t ttbr;
   uint32_t num_smmus;
@@ -104,25 +104,25 @@ create_va_pa_mapping (uint64_t txn_va, uint64_t txn_pa,
   uint32_t device_id, its_id;
 
   master = *smmu_master;
-  pgt_desc = *pgt_descriptor;
 
   val_memory_set(&master, sizeof(master), 0);
   val_memory_set(mem_desc_array, sizeof(mem_desc_array), 0);
   mem_desc = &mem_desc_array[0];
 
   /* Get translation attributes via TCR and translation table base via TTBR */
-  if (val_pe_reg_read_tcr(0 /*for TTBR0*/, &pgt_desc.tcr))
+  if (val_pe_reg_read_tcr(0 /*for TTBR0*/, &pgt_desc->tcr))
     return ACS_STATUS_FAIL;
   if (val_pe_reg_read_ttbr(0 /*TTBR0*/, &ttbr))
     return ACS_STATUS_FAIL;
-  pgt_desc.pgt_base = (ttbr & AARCH64_TTBR_ADDR_MASK);
-  pgt_desc.mair = val_pe_reg_read(MAIR_ELx);
-  pgt_desc.stage = PGT_STAGE1;
+
+  pgt_desc->pgt_base = (ttbr & AARCH64_TTBR_ADDR_MASK);
+  pgt_desc->mair = val_pe_reg_read(MAIR_ELx);
+  pgt_desc->stage = PGT_STAGE1;
 
   /* Get memory attributes of the test buffer, we'll use the same attibutes to create
    * our own page table later.
    */
-  if (val_pgt_get_attributes(pgt_desc, (uint64_t)txn_va, &mem_desc->attributes))
+  if (val_pgt_get_attributes(*pgt_desc, (uint64_t)txn_va, &mem_desc->attributes))
     return ACS_STATUS_FAIL;
 
   num_smmus = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
@@ -154,19 +154,22 @@ create_va_pa_mapping (uint64_t txn_va, uint64_t txn_pa,
       mem_desc->attributes |= pgt_ap;
 
       /* Need to know input and output address sizes before creating page table */
-      pgt_desc.ias = val_smmu_get_info(SMMU_IN_ADDR_SIZE, master.smmu_index);
-      if (pgt_desc.ias == 0)
+      pgt_desc->ias = val_smmu_get_info(SMMU_IN_ADDR_SIZE, master.smmu_index);
+      if (!pgt_desc->ias)
         return ACS_STATUS_FAIL;
 
-      pgt_desc.oas = val_smmu_get_info(SMMU_OUT_ADDR_SIZE, master.smmu_index);
-      if (pgt_desc.oas == 0)
+      pgt_desc->oas = val_smmu_get_info(SMMU_OUT_ADDR_SIZE, master.smmu_index);
+      if (!pgt_desc->oas)
         return ACS_STATUS_FAIL;
 
-      if (val_pgt_create(mem_desc, &pgt_desc))
+      /* set pgt_desc.pgt_base to NULL to create new translation table, val_pgt_create
+       will update pgt_desc.pgt_base to point to created translation table */
+      pgt_desc->pgt_base = (uint64_t) NULL;
+      if (val_pgt_create(mem_desc, pgt_desc))
         return ACS_STATUS_FAIL;
 
       /* Configure SMMU tables for this exerciser to use this page table for VA to PA translations*/
-      if (val_smmu_map(master, pgt_desc))
+      if (val_smmu_map(master, *pgt_desc))
       {
           val_print(ACS_PRINT_DEBUG, "\n       SMMU mapping failed (%x)     ", e_bdf);
           return ACS_STATUS_FAIL;
@@ -176,10 +179,9 @@ create_va_pa_mapping (uint64_t txn_va, uint64_t txn_pa,
   return ACS_STATUS_FAIL;
 }
 
+static
 uint32_t
-check_redirected_req_validation (uint32_t req_instance, uint32_t req_e_bdf,
-                                 uint32_t req_rp_bdf, uint32_t tgt_e_bdf,
-                                 uint64_t bar_base)
+check_redirected_req_validation (uint32_t req_instance, uint32_t req_rp_bdf, uint64_t bar_base)
 {
   uint64_t txn_va;
   uint32_t instance;
@@ -296,6 +298,7 @@ test_clean:
   /* Disable all SMMUs */
   for (instance = 0; instance < num_smmus; ++instance)
      val_smmu_disable(instance);
+
   return status;
 }
 
@@ -318,6 +321,14 @@ payload(void)
   uint32_t test_skip;
   uint32_t tbl_index;
   uint64_t bar_base;
+  uint32_t req_e_seg_num;
+  uint32_t req_e_bus_num;
+  uint32_t req_e_dev_num;
+  uint32_t req_e_func_num;
+  uint32_t tgt_e_seg_num;
+  uint32_t tgt_e_bus_num;
+  uint32_t tgt_e_dev_num;
+  uint32_t tgt_e_func_num;
 
   fail_cnt = 0;
   test_skip = 1;
@@ -329,6 +340,12 @@ payload(void)
   bdf_tbl_ptr = val_pcie_bdf_table_ptr();
 
   /* Check If PCIe Hierarchy supports P2P. */
+  if (val_pcie_p2p_support() == NOT_IMPLEMENTED) {
+    val_print(ACS_PRINT_DEBUG, "\n       pal_pcie_p2p_support API is unimplemented ", 0);
+    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+    return;
+  }
+
   if (val_pcie_p2p_support())
   {
     val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
@@ -376,14 +393,62 @@ payload(void)
       test_skip = 0;
 
       /* Check For Redirected Request Validation Functionality */
-      status = check_redirected_req_validation(instance, req_e_bdf, req_rp_bdf,
-                                               tgt_e_bdf, bar_base);
+      status = check_redirected_req_validation(instance, req_rp_bdf, bar_base);
       if (status == ACS_STATUS_SKIP)
           val_print(ACS_PRINT_ERR, "\n       ACS Validation Check Skipped for 0x%x", req_rp_bdf);
       else if (status) {
           fail_cnt++;
           val_print(ACS_PRINT_ERR, "\n       ACS Redirected Req Check Failed for 0x%x", req_rp_bdf);
       }
+
+      /* Check for Redirected Request Validation Functionality for the same device
+       * wih different function
+       */
+      tbl_index = 0;
+      req_e_seg_num = PCIE_EXTRACT_BDF_SEG(req_e_bdf);
+      req_e_bus_num = PCIE_EXTRACT_BDF_BUS(req_e_bdf);
+      req_e_dev_num = PCIE_EXTRACT_BDF_DEV(req_e_bdf);
+      req_e_func_num = PCIE_EXTRACT_BDF_FUNC(req_e_bdf);
+
+      while (tbl_index < bdf_tbl_ptr->num_entries)
+      {
+          tgt_e_bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
+          tgt_e_seg_num = PCIE_EXTRACT_BDF_SEG(tgt_e_bdf);
+          tgt_e_bus_num = PCIE_EXTRACT_BDF_BUS(tgt_e_bdf);
+          tgt_e_dev_num = PCIE_EXTRACT_BDF_DEV(tgt_e_bdf);
+          tgt_e_func_num = PCIE_EXTRACT_BDF_FUNC(tgt_e_bdf);
+
+          /* Check if the requestor and target exerciser belong to same device but
+           * different function.
+           */
+          if ((req_e_seg_num == tgt_e_seg_num) && (req_e_bus_num == tgt_e_bus_num)
+             && (req_e_dev_num == tgt_e_dev_num) && (req_e_func_num != tgt_e_func_num))
+          {
+              /* Read e_bdf BAR Register to get the Address to perform P2P
+               * If No BAR Space, continue.
+               */
+              val_pcie_get_mmio_bar(tgt_e_bdf, &bar_base);
+              if (bar_base == 0)
+                  continue;
+
+              /* Enable Bus Master Enable */
+              val_pcie_enable_bme(tgt_e_bdf);
+              /* Enable Memory Space Access */
+              val_pcie_enable_msa(tgt_e_bdf);
+
+              /* Check For Redirected Request Validation Functionality */
+              status = check_redirected_req_validation(instance, req_rp_bdf, bar_base);
+              if (status == ACS_STATUS_SKIP)
+                  val_print(ACS_PRINT_ERR, "\n       ACS Validation Check Skipped for 0x%x",
+                                                                                req_rp_bdf);
+              else if (status) {
+                  fail_cnt++;
+                  val_print(ACS_PRINT_ERR, "\n       ACS Redirected Req Check Failed for 0x%x",
+                                                                                   req_rp_bdf);
+              }
+           }
+      }
+
 
   }
 

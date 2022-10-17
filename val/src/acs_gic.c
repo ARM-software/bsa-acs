@@ -157,6 +157,10 @@ val_gic_create_info_table(uint64_t *gic_info_table)
 
   if (pal_target_is_dt())
       val_bsa_gic_init();
+
+  if (pal_target_is_bm())
+      val_bsa_gic_init();
+
   return ACS_STATUS_PASS;
 }
 
