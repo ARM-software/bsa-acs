@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020, 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2020, 2021-2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,7 +39,9 @@ UINT8   *gSharedMemory;
 VOID
 pal_mmio_write8(UINT64 addr, UINT8 data)
 {
-  bsa_print(ACS_PRINT_INFO, L" pal_mmio_write8 Address = %llx  Data = %lx \n", addr, data);
+  if (g_print_mmio || (g_curr_module & g_enable_module))
+      bsa_print(ACS_PRINT_INFO, L" pal_mmio_write8 Address = %llx  Data = %lx \n", addr, data);
+
   *(volatile UINT8 *)addr = data;
 }
 
@@ -55,7 +57,9 @@ pal_mmio_write8(UINT64 addr, UINT8 data)
 VOID
 pal_mmio_write16(UINT64 addr, UINT16 data)
 {
-  bsa_print(ACS_PRINT_INFO, L" pal_mmio_write16 Address = %llx  Data = %lx \n", addr, data);
+  if (g_print_mmio || (g_curr_module & g_enable_module))
+      bsa_print(ACS_PRINT_INFO, L" pal_mmio_write16 Address = %llx  Data = %lx \n", addr, data);
+
   *(volatile UINT16 *)addr = data;
 }
 
@@ -71,7 +75,9 @@ pal_mmio_write16(UINT64 addr, UINT16 data)
 VOID
 pal_mmio_write64(UINT64 addr, UINT64 data)
 {
-  bsa_print(ACS_PRINT_INFO, L" pal_mmio_write64 Address = %llx  Data = %llx \n", addr, data);
+  if (g_print_mmio || (g_curr_module & g_enable_module))
+      bsa_print(ACS_PRINT_INFO, L" pal_mmio_write64 Address = %llx  Data = %llx \n", addr, data);
+
   *(volatile UINT64 *)addr = data;
 }
 
@@ -89,7 +95,9 @@ pal_mmio_read8(UINT64 addr)
   UINT8 data;
 
   data = (*(volatile UINT8 *)addr);
-  bsa_print(ACS_PRINT_INFO, L" pal_mmio_read8 Address = %lx  Data = %lx \n", addr, data);
+
+  if (g_print_mmio || (g_curr_module & g_enable_module))
+      bsa_print(ACS_PRINT_INFO, L" pal_mmio_read8 Address = %lx  Data = %lx \n", addr, data);
 
   return data;
 }
@@ -108,7 +116,9 @@ pal_mmio_read16(UINT64 addr)
   UINT16 data;
 
   data = (*(volatile UINT16 *)addr);
-  bsa_print(ACS_PRINT_INFO, L" pal_mmio_read16 Address = %lx  Data = %lx \n", addr, data);
+
+  if (g_print_mmio || (g_curr_module & g_enable_module))
+      bsa_print(ACS_PRINT_INFO, L" pal_mmio_read16 Address = %lx  Data = %lx \n", addr, data);
 
   return data;
 }
@@ -127,7 +137,9 @@ pal_mmio_read64(UINT64 addr)
   UINT64 data;
 
   data = (*(volatile UINT64 *)addr);
-  bsa_print(ACS_PRINT_INFO, L" pal_mmio_read64 Address = %lx  Data = %lx \n", addr, data);
+
+  if (g_print_mmio || (g_curr_module & g_enable_module))
+      bsa_print(ACS_PRINT_INFO, L" pal_mmio_read64 Address = %lx  Data = %lx \n", addr, data);
 
   return data;
 }
@@ -151,7 +163,8 @@ pal_mmio_read(UINT64 addr)
   }
   data = (*(volatile UINT32 *)addr);
 
-  bsa_print(ACS_PRINT_INFO, L" pal_mmio_read Address = %lx  Data = %x \n", addr, data);
+  if (g_print_mmio || (g_curr_module & g_enable_module))
+      bsa_print(ACS_PRINT_INFO, L" pal_mmio_read Address = %lx  Data = %x \n", addr, data);
 
   return data;
 }
@@ -168,7 +181,9 @@ pal_mmio_read(UINT64 addr)
 VOID
 pal_mmio_write(UINT64 addr, UINT32 data)
 {
-  bsa_print(ACS_PRINT_INFO, L" pal_mmio_write Address = %llx  Data = %x \n", addr, data);
+  if (g_print_mmio || (g_curr_module & g_enable_module))
+      bsa_print(ACS_PRINT_INFO, L" pal_mmio_write Address = %llx  Data = %x \n", addr, data);
+
   *(volatile UINT32 *)addr = data;
 }
 
@@ -539,7 +554,7 @@ pal_memcpy (
 
   @param  MicroSeconds  The minimum number of microseconds to delay.
 
-  @return 1 - Success, 0 -Failure
+  @return 0 - Success
 
 **/
 UINT64
@@ -547,8 +562,7 @@ pal_time_delay_ms (
   UINT64 MicroSeconds
   )
 {
-  gBS->Stall(MicroSeconds);
-  return 1;
+  return gBS->Stall(MicroSeconds);
 }
 
 /**
