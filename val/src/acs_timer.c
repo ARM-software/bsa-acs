@@ -55,6 +55,8 @@ val_timer_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
     return ACS_STATUS_SKIP;
   }
 
+  g_curr_module = 1 << TIMER_MODULE;
+
   if (g_sw_view[G_SW_OS]) {
       val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
       status |= os_t001_entry(num_pe);

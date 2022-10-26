@@ -61,6 +61,8 @@ val_pe_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   status = ACS_STATUS_PASS;
 
+  g_curr_module = 1 << PE_MODULE;
+
   if (g_sw_view[G_SW_OS]) {
       val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
       status |= os_c001_entry(num_pe);

@@ -334,6 +334,8 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
   for (instance = 0; instance < num_smmu; ++instance)
       val_smmu_disable(instance);
 
+  g_curr_module = 1 << EXERCISER_MODULE;
+
   if (g_sw_view[G_SW_OS]) {
      val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
 

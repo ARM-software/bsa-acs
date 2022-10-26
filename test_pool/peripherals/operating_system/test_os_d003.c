@@ -26,7 +26,7 @@
 #define TEST_NUM   (ACS_PER_TEST_NUM_BASE + 3)
 #define TEST_RULE  "B_PER_05"
 /*one space character is removed from TEST_DESC, to nullify a space written as part of the test */
-#define TEST_DESC  "Check Arm BSA UART register offsets  "
+#define TEST_DESC  "Check Arm BSA UART register offsets   "
 #define TEST_NUM1  (ACS_PER_TEST_NUM_BASE + 4)
 #define TEST_RULE1 "B_PER_06, B_PER_07"
 #define TEST_DESC1 "Check Arm GENERIC UART Interrupt      "

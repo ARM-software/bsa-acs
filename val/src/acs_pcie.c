@@ -53,7 +53,7 @@ val_pcie_read_cfg(uint32_t bdf, uint32_t offset, uint32_t *data)
 
 
   if ((bus >= PCIE_MAX_BUS) || (dev >= PCIE_MAX_DEV) || (func >= PCIE_MAX_FUNC)) {
-     val_print(ACS_PRINT_ERR, "Invalid Bus/Dev/Func  %x \n", bdf);
+     val_print(ACS_PRINT_ERR, "\n       Invalid Bus/Dev/Func  %x", bdf);
      return PCIE_NO_MAPPING;
   }
 
@@ -83,9 +83,6 @@ val_pcie_read_cfg(uint32_t bdf, uint32_t offset, uint32_t *data)
   /* There are 8 functions / device, 32 devices / Bus and each has a 4KB config space */
   cfg_addr = (bus * PCIE_MAX_DEV * PCIE_MAX_FUNC * 4096) + \
                (dev * PCIE_MAX_FUNC * 4096) + (func * 4096);
-
-  val_print(ACS_PRINT_INFO,
-    "\n       Calculated config address is %lx", ecam_base + cfg_addr + offset);
 
   *data = pal_mmio_read(ecam_base + cfg_addr + offset);
   return 0;
@@ -133,7 +130,7 @@ val_pcie_write_cfg(uint32_t bdf, uint32_t offset, uint32_t data)
 
 
   if ((bus >= PCIE_MAX_BUS) || (dev >= PCIE_MAX_DEV) || (func >= PCIE_MAX_FUNC)) {
-     val_print(ACS_PRINT_ERR, "Invalid Bus/Dev/Func  %x \n", bdf);
+     val_print(ACS_PRINT_ERR, "\n       Invalid Bus/Dev/Func  %x", bdf);
      return;
   }
 
@@ -203,7 +200,7 @@ uint64_t val_pcie_get_bdf_config_addr(uint32_t bdf)
   uint32_t i = 0;
 
   if ((bus >= PCIE_MAX_BUS) || (dev >= PCIE_MAX_DEV) || (func >= PCIE_MAX_FUNC)) {
-     val_print(ACS_PRINT_ERR, "Invalid Bus/Dev/Func  %x \n", bdf);
+     val_print(ACS_PRINT_ERR, "\n       Invalid Bus/Dev/Func  %x", bdf);
      return 0;
   }
 
@@ -297,6 +294,8 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       val_print(ACS_PRINT_WARN, "\n      *** No ECAM region found, Skipping PCIE tests *** \n", 0);
       return ACS_STATUS_SKIP;
   }
+
+  g_curr_module = 1 << PCIE_MODULE;
 
   if (g_sw_view[G_SW_OS]) {
       val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);

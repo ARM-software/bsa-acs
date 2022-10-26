@@ -22,7 +22,7 @@
 #include "val/include/bsa_acs_pcie.h"
 
 #define TEST_NUM   (ACS_PER_TEST_NUM_BASE + 6)
-#define TEST_RULE  "B_PER_06"
+#define TEST_RULE  "B_PER_05"
 #define TEST_DESC  "16550 compatible UART                 "
 
 static

@@ -25,7 +25,8 @@
 #define TEST_RULE  "B_TIME_09"
 #define TEST_DESC  "Restore PE timer on PE wake up        "
 
-static uint32_t intid, cnt_base_n;
+static uint32_t intid;
+static uint64_t cnt_base_n;
 static int irq_received;
 
 static

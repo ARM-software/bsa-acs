@@ -51,12 +51,8 @@ payload(void)
       bdf = bdf_tbl_ptr->device[tbl_index].bdf;
       dp_type = val_pcie_device_port_type(bdf);
 
-      /* Skip this Check for Host Bridge */
-      if (val_pcie_is_host_bridge(bdf))
-        continue;
-
-      /* Check entry is endpoint or rootport */
-      if ((dp_type == EP) || (dp_type == RP))
+      /* Check entry is endpoint */
+      if (dp_type == EP)
       {
          val_print(ACS_PRINT_DEBUG, "\n    BDF 0x%x", bdf);
 

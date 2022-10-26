@@ -58,6 +58,7 @@ payload(void)
       dp_type = val_pcie_device_port_type(bdf);
       if ((dp_type == RP) || (dp_type == iEP_RP)) {
         /* Read Vendor ID of RP with ECAM based mechanism, and compare it with the */
+        val_print(ACS_PRINT_DEBUG, "\n    BDF 0x%x", bdf);
         ecam_base = val_pcie_get_ecam_base(bdf);
 
         /* Read Function's Class Code through ECAM method */

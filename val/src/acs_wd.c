@@ -61,6 +61,7 @@ if (!g_build_sbsa) { /* For SBSA compliance WD is mandatory */
     return ACS_STATUS_SKIP;
   }
 }
+  g_curr_module = 1 << WD_MODULE;
 
   if (g_sw_view[G_SW_OS]) {
     val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);

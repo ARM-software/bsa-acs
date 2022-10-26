@@ -346,30 +346,22 @@ os_u001_entry(uint32_t num_pe)
 
   num_pe = 1;  //This Timer test is run on single processor
 
-  status_test = val_initialize_test(TEST_NUM1, TEST_DESC1, num_pe);
-  if (status_test != ACS_STATUS_SKIP)
-      val_run_test_payload(TEST_NUM1, num_pe, payload1, 0);
-  status = val_check_for_error(TEST_NUM1, num_pe, TEST_RULE1);
-  val_report_status(0, BSA_ACS_END(TEST_NUM1), NULL);
 
-  status_test = val_initialize_test(TEST_NUM2, TEST_DESC2, num_pe);
-  if (status_test != ACS_STATUS_SKIP)
-      val_run_test_payload(TEST_NUM2, num_pe, payload2, 0);
-  status |= val_check_for_error(TEST_NUM2, num_pe, TEST_RULE2);
-  val_report_status(0, BSA_ACS_END(TEST_NUM2), NULL);
-
+  /* EL0 PHY */
   status_test = val_initialize_test(TEST_NUM3, TEST_DESC3, num_pe);
   if (status_test != ACS_STATUS_SKIP)
       val_run_test_payload(TEST_NUM3, num_pe, payload3, 0);
   status |= val_check_for_error(TEST_NUM3, num_pe, TEST_RULE3);
   val_report_status(0, BSA_ACS_END(TEST_NUM3), NULL);
 
+  /* EL0 VIR */
   status_test = val_initialize_test(TEST_NUM4, TEST_DESC4, num_pe);
   if (status_test != ACS_STATUS_SKIP)
       val_run_test_payload(TEST_NUM4, num_pe, payload4, 0);
   status |= val_check_for_error(TEST_NUM4, num_pe, TEST_RULE4);
   val_report_status(0, BSA_ACS_END(TEST_NUM4), NULL);
 
+  /* EL2 PHY */
   /* Run this test if current exception level is EL2 */
   if (val_pe_reg_read(CurrentEL) == AARCH64_EL2) {
       status_test = val_initialize_test(TEST_NUM5, TEST_DESC5, num_pe);
@@ -378,6 +370,20 @@ os_u001_entry(uint32_t num_pe)
       status |= val_check_for_error(TEST_NUM5, num_pe, TEST_RULE5);
       val_report_status(0, BSA_ACS_END(TEST_NUM5), NULL);
   }
+
+  /* Watchdog */
+  status_test = val_initialize_test(TEST_NUM1, TEST_DESC1, num_pe);
+  if (status_test != ACS_STATUS_SKIP)
+      val_run_test_payload(TEST_NUM1, num_pe, payload1, 0);
+  status = val_check_for_error(TEST_NUM1, num_pe, TEST_RULE1);
+  val_report_status(0, BSA_ACS_END(TEST_NUM1), NULL);
+
+  /* System Timer */
+  status_test = val_initialize_test(TEST_NUM2, TEST_DESC2, num_pe);
+  if (status_test != ACS_STATUS_SKIP)
+      val_run_test_payload(TEST_NUM2, num_pe, payload2, 0);
+  status |= val_check_for_error(TEST_NUM2, num_pe, TEST_RULE2);
+  val_report_status(0, BSA_ACS_END(TEST_NUM2), NULL);
 
   return status;
 }

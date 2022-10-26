@@ -55,6 +55,9 @@ val_gic_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   }
 
   status      = ACS_STATUS_PASS;
+
+  g_curr_module = 1 << GIC_MODULE;
+
   gic_version = val_gic_get_info(GIC_INFO_VERSION);
 
   if (g_sw_view[G_SW_OS]) {
