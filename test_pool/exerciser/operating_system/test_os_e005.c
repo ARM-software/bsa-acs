@@ -241,6 +241,9 @@ payload(void)
         if (pgt_desc.oas == 0)
             goto test_fail;
 
+        /* set pgt_desc.pgt_base to NULL to create new translation table, val_pgt_create
+           will update pgt_desc.pgt_base to point to created translation table */
+        pgt_desc.pgt_base = (uint64_t) NULL;
         if (val_pgt_create(mem_desc, &pgt_desc))
             goto test_fail;
 
@@ -317,6 +320,9 @@ payload(void)
     mem_desc->length = test_data_blk_size;
     mem_desc->attributes |= PGT_STAGE1_AP_RW;
 
+    /* set pgt_desc.pgt_base to NULL to create new translation table, val_pgt_create
+       will update pgt_desc.pgt_base to point to created translation table */
+    pgt_desc.pgt_base = (uint64_t) NULL;
     if (val_pgt_create(mem_desc, &pgt_desc))
         goto test_fail;
 

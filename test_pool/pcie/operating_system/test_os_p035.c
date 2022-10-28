@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019-2020,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2020,2021-2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +26,7 @@
 #define TEST_RULE  "PCI_SM_02"
 #define TEST_DESC  "Check Function level reset            "
 
+static
 uint32_t is_flr_failed(uint32_t bdf)
 {
   uint32_t reg_value;
@@ -39,7 +40,8 @@ uint32_t is_flr_failed(uint32_t bdf)
       val_pcie_read_cfg(bdf, TYPE01_BAR + (index * BAR_BASE_SHIFT), &reg_value);
       if ((reg_value >> BAR_BASE_SHIFT) != 0)
       {
-          val_print(ACS_PRINT_ERR, "\n BAR%d base addr not cleared", 0);
+          val_print(ACS_PRINT_ERR, "\n      BAR%d base addr ", index);
+          val_print(ACS_PRINT_ERR, "for BDF 0x%x not cleared", bdf);
           check_failed++;
       }
   }
@@ -78,6 +80,7 @@ payload(void)
   uint32_t test_fails;
   uint32_t test_skip = 1;
   uint32_t idx;
+  uint32_t status;
   addr_t config_space_addr;
   void *func_config_space;
   pcie_device_bdf_table *bdf_tbl_ptr;
@@ -137,7 +140,14 @@ payload(void)
           val_pcie_write_cfg(bdf, cap_base + DCTLR_OFFSET, reg_value);
 
           /* Wait for 100 ms */
-          val_time_delay_ms(100 * ONE_MILLISECOND);
+          status = val_time_delay_ms(100 * ONE_MILLISECOND);
+          if (status)
+          {
+              val_print(ACS_PRINT_ERR, "\n       Failed to time delay for BDF 0x%x ", bdf);
+              val_memory_free(func_config_space);
+              val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 01));
+              return;
+          }
 
           /* If test runs for atleast an endpoint */
           test_skip = 0;

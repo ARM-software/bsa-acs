@@ -22,6 +22,7 @@ addr_t val_memory_ioremap(void *addr, uint32_t size, uint64_t attr);
 
 void val_memory_unmap(void *ptr);
 void *val_memory_alloc(uint32_t size);
+void *val_memory_calloc(uint32_t num, uint32_t size);
 void *val_memory_alloc_cacheable(uint32_t bdf, uint32_t size, void **pa);
 void val_memory_free(void *addr);
 int val_memory_compare(void *src, void *dest, uint32_t len);

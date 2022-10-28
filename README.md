@@ -4,19 +4,19 @@
 ## Base System Architecture
 **Base System Architecture** (BSA) specification describes a hardware system architecture based on the Arm 64-bit architecture. System software such as operating systems, hypervisors, and firmware rely on this. It addresses PE features and key aspects of system architecture.
 
-For more information, see [BSA specification](https://developer.arm.com/documentation/den0094/latest)
+For more information, see [BSA specification](https://developer.arm.com/documentation/den0094/b/?lang=en)
 
 
 ## BSA - Architecture Compliance Suite
 
 BSA **Architecture Compliance Suite** (ACS) is a collection of self-checking, portable C-based tests.
-This suite includes a set of examples of the invariant behaviors that are provided by the [BSA](https://developer.arm.com/documentation/den0094/latest) specification, so that you can verify if these behaviour have been interpreted correctly.
+This suite includes a set of examples of the invariant behaviors that are provided by the [BSA](https://developer.arm.com/documentation/den0094/b/?lang=en) specification, so that you can verify if these behaviour have been interpreted correctly.
 Most of the tests are executed from UEFI (Unified Extensible Firmware Interface) Shell by executing the BSA UEFI shell application.
 A few tests are executed by running the BSA ACS Linux application which in turn depends on the BSA ACS Linux kernel module.
 
 
 ## Release details
- - Code quality: v1.0
+ - Code quality: v1.0.2
  - The tests are written for version 1.0 of the BSA specification.
  - The compliance suite is not a substitute for design verification.
  - To review the BSA ACS logs, Arm licensees can contact Arm directly through their partner managers.
@@ -33,17 +33,19 @@ A few tests are executed by running the BSA ACS Linux application which in turn 
 ## ACS build steps - UEFI Shell application
 
 ### Prebuilt images
-Prebuilt images for each release are available in the prebuilt_images folder of the release branch. You can choose to use these images or build your own image by following the steps below. If you choose to use the prebuilt image, see the Test suite execution section below for details on how to run the application.
+Prebuilt images for each release are available in the prebuilt_images folder of the main branch. You can choose to use these images or build your own image by following the steps below. If you choose to use the prebuilt image, see the Test suite execution section below for details on how to run the application.
 
 ### 1. Building from source
     Before you start the ACS build, ensure that the following requirements are met.
 
 - Any mainstream Linux-based OS distribution running on a x86 or AArch64 machine.
-- git clone the edk2-stable202102 tag of [EDK2 tree](https://github.com/tianocore/edk2).
+- git clone the [EDK2 tree](https://github.com/tianocore/edk2). Recommended edk2 tag is edk2-stable202208
 - git clone the [EDK2 port of libc](https://github.com/tianocore/edk2-libc) to local <edk2_path>.
 - GCC 7.5 or a later toolchain for Linux from [here](https://releases.linaro.org/components/toolchain/binaries/).
-- Install the build prerequisite packages to build EDK2.
-Note: The details of the packages are beyond the scope of this document.
+- Install the build prerequisite packages to build EDK2.<br /> 
+Note:<br />
+- The details of the packages are beyond the scope of this document.
+- GCC 7.5 is recommended toolchain, build issues are observed with toolchain version 10.xx and above. 
 
 #### 1.1 Target Platform
 ##### To start the ACS build for platform using ACPI table, perform the following steps:
@@ -80,7 +82,7 @@ Note: The details of the packages are beyond the scope of this document.
 
 ####    1.2 Build environment
 ##### If the build environment is Linux, perform the following steps:
-1.  export GCC49_AARCH64_PREFIX= GCC7.5 toolchain path pointing to /bin/aarch64-linux-gnu- in case of x86 machine. For an AArch64 build it should point to /usr/bin/
+1.  export GCC49_AARCH64_PREFIX= GCC7.5 toolchain path pointing to /bin/aarch64-linux-gnu- in case of x86 machine.<br /> For an AArch64 build it should point to /usr/bin/
 2.  export PACKAGES_PATH= path pointing to edk2-libc
 3.  source edksetup.sh
 4.  make -C BaseTools/Source/C
@@ -156,9 +158,9 @@ On an emulation platform where secondary storage is not available, perform the f
 5. Copy the UART console output to a log file for analysis and certification.
 
 
-## Linux OS-based tests
-Certain Peripheral, PCIe and Memory map tests require Linux operating system with kernel version 5.13 or above.
-This chapter provides information on executing tests from the Linux application.
+## ACS build steps - Linux application
+
+Certain Peripheral, PCIe and Memory map tests require Linux operating system.This chapter provides information on building and executing these tests from the Linux application.
 
 ### 1. Build steps and environment setup
 This section lists the porting and build steps for the kernel module.
@@ -166,17 +168,22 @@ The patch for the kernel tree and the Linux PAL are hosted separately on [linux-
 
 ### 1.1 Building the kernel module
 #### Prerequisites
-- Linux kernel source version 5.13.
+- Linux kernel source version 5.11, 5.13, 5.15, 6.0.
 - Linaro GCC tool chain 7.5 or above.
-- Build environment for AArch64 Linux kernel.
+- Build environment for AArch64 Linux kernel.<br />
+NOTE: <br />
+- Linux version 6.0 is recommened version.
+- GCC 7.5 is recommended toolchain, build issues are observed with toolchain version 10.xx and above. 
 
 #### Porting steps for Linux kernel
 1. git clone https://git.gitlab.arm.com/linux-arm/linux-acs.git bsa-acs-drv
 2. git clone https://github.com/ARM-software/bsa-acs.git bsa-acs
-3. git clone https://github.com/torvalds/linux.git -b v5.11
+3. git clone https://github.com/torvalds/linux.git -b v6.0
 4. export CROSS_COMPILE=<GCC7.5 toolchain path> pointing to /bin/aarch64-linux-gnu-
-5. git apply <local_dir>/bsa-acs-drv/kernel/src/0001-BSA-ACS-Linux-5.13.patch to your kernel source tree.
+5. git apply <local_dir>/bsa-acs-drv/kernel/src/0001-BSA-ACS-Linux-6.0.patch to your kernel source tree.
 6. make ARCH=arm64 defconfig && make -j $(nproc) ARCH=arm64
+
+NOTE: The steps mentions Linux version 6.0, as it is latest version which is verified at ACS end.
 
 #### 1.2 Build steps for BSA kernel module
 1. cd <local_dir>/bsa-acs-drv/files
@@ -211,7 +218,6 @@ The Arm SystemReady ACS test suite may run at a higher privilege level. An attac
 
 ## Limitations
 
- - PCIE iEP rules are out of scope for current release.
  - ITS rules are available only for systems that present firmware compliant to SBBR.
  - Some PCIe and Exerciser test are dependent on PCIe features supported by the test system.
    Please fill the required API's with test system information.
@@ -237,4 +243,4 @@ BSA ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2021, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2021-2022, Arm Limited and Contributors. All rights reserved.*

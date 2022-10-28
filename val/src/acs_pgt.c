@@ -74,7 +74,7 @@ uint32_t fill_translation_table(tt_descriptor_t tt_desc, memory_region_descripto
         {
             //Create level 3 page descriptor entry
             *table_desc = PGT_ENTRY_PAGE_MASK | PGT_ENTRY_VALID_MASK;
-            *table_desc |= (output_address & ~(page_size - 1));
+            *table_desc |= (output_address & ~(uint64_t)(page_size - 1));
             *table_desc |= mem_desc->attributes;
             val_print(PGT_DEBUG_LEVEL, "\n       page_descriptor = 0x%llx     ", *table_desc);
             continue;
@@ -126,8 +126,9 @@ uint32_t fill_translation_table(tt_descriptor_t tt_desc, memory_region_descripto
         }
 
         *table_desc = PGT_ENTRY_TABLE_MASK | PGT_ENTRY_VALID_MASK;
-        *table_desc |= (uint64_t)val_memory_virt_to_phys(tt_base_next_level) & ~(page_size - 1);
-        val_print(PGT_DEBUG_LEVEL, "\n       table_descriptor = 0x%llx     ", *table_desc);
+        *table_desc |= (uint64_t)val_memory_virt_to_phys(tt_base_next_level) &
+                       ~(uint64_t)(page_size - 1);
+        val_print(PGT_DEBUG_LEVEL, "\n      table_descriptor = 0x%llx     ", *table_desc);
     }
     return 0;
 }
@@ -154,6 +155,8 @@ uint32_t log2_page_size(uint64_t size)
 
 /**
   @brief Create stage 1 or stage 2 page table, with given memory addresses and attributes
+         Note: This API updates existing translation table if pgt_desc->pgt_base is not NULL
+               else it created new table and updated pgt_desc->pgt_base with the address.
   @param mem_desc - Array of memory addresses and attributes needed for page table creation.
   @param pgt_desc - Data structure for output page table base and input translation attributes.
   @return status
@@ -173,15 +176,22 @@ uint32_t val_pgt_create(memory_region_descriptor_t *mem_desc, pgt_descriptor_t *
     val_print(PGT_DEBUG_LEVEL, "\n       val_pgt_create: nbits_per_level = %d    ", bits_per_level);
     val_print(PGT_DEBUG_LEVEL, "\n       val_pgt_create: page_size_log2 = %d     ", page_size_log2);
 
-    tt_base = (uint64_t*) val_memory_alloc_pages(1);
-    if (tt_base == NULL)
-    {
-        val_print(ACS_PRINT_ERR, "\n       val_pgt_create: page allocation failed     ", 0);
-        return ACS_STATUS_ERR;
+    /* check whether input page descriptor has base addr of translation table
+       to use. If the pgt_base member is NULL allocate a page to create a new
+       table, else update existing translation table */
+    if (pgt_desc->pgt_base == (uint64_t) NULL) {
+        tt_base = (uint64_t *) val_memory_alloc_pages(1);
+        if (tt_base == NULL) {
+            val_print(ACS_PRINT_ERR, "\n      val_pgt_create: page allocation failed     ", 0);
+            return ACS_STATUS_ERR;
+        }
+        val_memory_set(tt_base, page_size, 0);
     }
-    val_memory_set(tt_base, page_size, 0);
+    else
+        tt_base = (uint64_t *) pgt_desc->pgt_base;
+
     tt_desc.tt_base = tt_base;
-    pgt_addr_mask = ((0x1ull << (48 - page_size_log2)) - 1) << page_size_log2;
+    pgt_addr_mask = ((0x1ull << (pgt_desc->ias - page_size_log2)) - 1) << page_size_log2;
 
     for (mem_desc_iter = mem_desc; mem_desc_iter->length != 0; ++mem_desc_iter)
     {

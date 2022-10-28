@@ -29,6 +29,8 @@
 
 #include "BsaAcs.h"
 
+UINT32 g_pcie_p2p;
+UINT32 g_pcie_cache_present;
 
 UINT32  g_print_level;
 UINT32  g_sw_view[3] = {1, 1, 1}; //Operating System, Hypervisor, Platform Security
@@ -41,7 +43,9 @@ UINT64  g_exception_ret_addr;
 UINT64  g_ret_addr;
 UINT32  g_wakeup_timeout;
 UINT32  g_build_sbsa = 0;
-
+UINT32  g_print_mmio;
+UINT32  g_curr_module;
+UINT32  g_enable_module;
 UINT32  g_single_test = SINGLE_TEST_SENTINEL;
 UINT32  g_single_module = SINGLE_MODULE_SENTINEL;
 
@@ -258,6 +262,12 @@ HelpMsg (
          "Options:\n"
          "-v      Verbosity of the prints\n"
          "        1 prints all, 5 prints only the errors\n"
+         "        Note: pal_mmio prints can be enabled for specific modules by passing\n"
+         "              module numbers along with global verbosity level 1\n"
+         "              Module numbers are PE 0, MEM 1, GIC 2, SMMU 3, TIMER 4, WAKEUP 5   ...\n"
+         "              PERIPHERAL 6, Watchdog 7, PCIe 8, Exerciser 9   ...\n"
+         "              E.g., To enable mmio prints for PE and TIMER pass -v 104 \n"
+         "-mmio   Pass this flag to enable pal_mmio_read/write prints, use with -v 1\n"
          "-f      Name of the log file to record the test results in\n"
          "-skip   Test(s) to be skipped\n"
          "        Refer to section 4 of BSA ACS User Guide\n"
@@ -265,6 +275,8 @@ HelpMsg (
          "        To skip a particular test within a module, use the exact testcase number\n"
          "-t      If set, will only run the specified test, all others will be skipped.\n"
          "-m      If set, will only run the specified module, all others will be skipped.\n"
+         "-p2p    Pass this flag to indicate that PCIe Hierarchy Supports Peer-to-Peer\n"
+         "-cache  Pass this flag to indicate that if the test system supports PCIe address translation cache\n"
          "-timeout  Set timeout multiple for wakeup tests\n"
          "        1 - min value  5 - max value\n"
          "-os     Enable the execution of operating system tests\n"
@@ -283,6 +295,8 @@ STATIC CONST SHELL_PARAM_ITEM ParamList[] = {
   {L"-skip", TypeValue}, // -skip # test(s) to skip execution
   {L"-t", TypeValue},    // -t    # Test to be run
   {L"-m", TypeValue},    // -m    # Module to be run
+  {L"-p2p", TypeFlag},   // -p2p  # Peer-to-Peer is supported
+  {L"-cache", TypeFlag}, // -cache# PCIe address translation cache is supported
   {L"-timeout", TypeValue}, // -timeout # Set timeout multiple for wakeup tests
   {L"-help", TypeFlag},  // -help # help : info about commands
   {L"-h", TypeFlag},     // -h    # help : info about commands
@@ -291,6 +305,7 @@ STATIC CONST SHELL_PARAM_ITEM ParamList[] = {
   {L"-ps", TypeFlag},    // -ps   # Binary Flag to enable the execution of platform security tests.
   {L"-dtb", TypeValue},  // -dtb  # Binary Flag to enable dtb dump
   {L"-sbsa", TypeFlag},  // -sbsa # Enable sbsa requirements for bsa binary\n"
+  {L"-mmio", TypeFlag}, // -mmio # Enable pal_mmio prints
   {NULL, TypeMax}
   };
 
@@ -316,7 +331,7 @@ ShellAppMain (
   UINT32             Status;
   UINT32             i,j=0;
   VOID               *branch_label;
-
+  UINT32             ReadVerbosity;
 
   //
   // Process Command Line arguments
@@ -361,10 +376,21 @@ ShellAppMain (
   if (CmdLineArg == NULL) {
     g_print_level = G_PRINT_LEVEL;
   } else {
-    g_print_level = StrDecimalToUintn(CmdLineArg);
+    ReadVerbosity = StrDecimalToUintn(CmdLineArg);
+    while (ReadVerbosity/10) {
+      g_enable_module |= (1 << ReadVerbosity%10);
+      ReadVerbosity /= 10;
+    }
+    g_print_level = ReadVerbosity;
     if (g_print_level > 5) {
       g_print_level = G_PRINT_LEVEL;
     }
+  }
+
+  if (ShellCommandLineGetFlag (ParamPackage, L"-mmio")) {
+    g_print_mmio = TRUE;
+  } else {
+    g_print_mmio = FALSE;
   }
 
   // Options with Flags
@@ -433,6 +459,18 @@ ShellAppMain (
   CmdLineArg  = ShellCommandLineGetValue(ParamPackage, L"-m");
   if (CmdLineArg != NULL) {
     g_single_module = StrDecimalToUintn(CmdLineArg);
+  }
+
+  if (ShellCommandLineGetFlag (ParamPackage, L"-p2p")) {
+    g_pcie_p2p = TRUE;
+  } else {
+    g_pcie_p2p = FALSE;
+  }
+
+  if (ShellCommandLineGetFlag (ParamPackage, L"-cache")) {
+    g_pcie_cache_present = TRUE;
+  } else {
+    g_pcie_cache_present = FALSE;
   }
 
   //

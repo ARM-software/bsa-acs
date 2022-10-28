@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2020,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020, 2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,9 +22,9 @@
 #include "val/include/bsa_acs_pe.h"
 #include "val/include/bsa_acs_memory.h"
 
-#define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 18)
-#define TEST_RULE  "PCI_PP_05"
-#define TEST_DESC  "Check RP Adv Error Report             "
+#define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 39)
+#define TEST_RULE  "PCI_MSI_01"
+#define TEST_DESC  "Check MSI support for PCIe dev        "
 
 static
 void
@@ -35,27 +35,14 @@ payload(void)
   uint32_t pe_index;
   uint32_t tbl_index;
   uint32_t dp_type;
-  uint32_t cap_base = 0;
+  uint32_t cap_base;
   uint32_t test_fails;
   uint32_t test_skip = 1;
   pcie_device_bdf_table *bdf_tbl_ptr;
 
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
-
-  /* Check If PCIe Hierarchy supports P2P */
-  if (val_pcie_p2p_support() == NOT_IMPLEMENTED) {
-    val_print(ACS_PRINT_DEBUG, "\n       pal_pcie_p2p_support API is unimplemented ", 0);
-    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
-    return;
-  }
-
-  if (val_pcie_p2p_support())
-  {
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
-      return;
-  }
-
   bdf_tbl_ptr = val_pcie_bdf_table_ptr();
+
   test_fails = 0;
 
   /* Check for all the function present in bdf table */
@@ -64,39 +51,36 @@ payload(void)
       bdf = bdf_tbl_ptr->device[tbl_index].bdf;
       dp_type = val_pcie_device_port_type(bdf);
 
-      /* Check entry is RP */
-      if (dp_type == RP)
+      /* Check entry is endpoint */
+      if (dp_type == EP)
       {
-          /* Test runs for atleast an endpoint */
-          test_skip = 0;
+         val_print(ACS_PRINT_DEBUG, "\n    BDF 0x%x", bdf);
 
-          /* It ACS Not Supported, Fail. */
-          if (val_pcie_find_capability(bdf, PCIE_ECAP, ECID_ACS, &cap_base) != PCIE_SUCCESS) {
-              val_print(ACS_PRINT_ERR, "\n       BDF 0x%x: ACS Cap unsupported",
-                                                                bdf);
-              test_fails++;
-              continue;
-          }
+         val_print(ACS_PRINT_DEBUG, " MSI cap %d",
+                                    val_pcie_find_capability(bdf, PCIE_CAP, CID_MSI, &cap_base));
+         val_print(ACS_PRINT_DEBUG, " MSIX cap %d",
+                                   val_pcie_find_capability(bdf, PCIE_CAP, CID_MSIX, &cap_base));
 
-          /* If AER Not Supported, Fail. */
-          if (val_pcie_find_capability(bdf, PCIE_ECAP, ECID_AER, &cap_base) != PCIE_SUCCESS) {
-              val_print(ACS_PRINT_DEBUG, "\n       BDF 0x%x: AER Cap "
-                                                        "unsupported", bdf);
+         /* If test runs for atleast an endpoint */
+         test_skip = 0;
+
+         /* If MSI or MSI-X not supported, but INTx supported test fails */
+         if ((val_pcie_find_capability(bdf, PCIE_CAP, CID_MSI, &cap_base) == PCIE_CAP_NOT_FOUND)
+          && (val_pcie_find_capability(bdf, PCIE_CAP, CID_MSIX, &cap_base) == PCIE_CAP_NOT_FOUND))
               test_fails++;
-          }
       }
   }
 
   if (test_skip == 1)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
   else if (test_fails)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, test_fails));
   else
-      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
+      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
 }
 
 uint32_t
-os_p018_entry(uint32_t num_pe)
+os_p039_entry(uint32_t num_pe)
 {
 
   uint32_t status = ACS_STATUS_FAIL;

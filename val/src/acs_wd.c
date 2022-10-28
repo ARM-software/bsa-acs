@@ -61,6 +61,7 @@ if (!g_build_sbsa) { /* For SBSA compliance WD is mandatory */
     return ACS_STATUS_SKIP;
   }
 }
+  g_curr_module = 1 << WD_MODULE;
 
   if (g_sw_view[G_SW_OS]) {
     val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
@@ -234,5 +235,12 @@ val_wd_set_ws0(uint32_t index, uint32_t timeout)
 uint64_t
 val_get_counter_frequency(void)
 {
-  return val_timer_get_info(TIMER_INFO_CNTFREQ, 0);;
+  uint64_t counter_freq;
+
+  /* Option to override system counter frequency value */
+  counter_freq = pal_timer_get_counter_frequency();
+  if (counter_freq == 0)
+      counter_freq = val_timer_get_info(TIMER_INFO_CNTFREQ, 0);
+
+  return counter_freq;
 }

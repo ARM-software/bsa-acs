@@ -56,6 +56,8 @@ val_memory_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   status = ACS_STATUS_PASS;
 
+  g_curr_module = 1 << MEM_MODULE;
+
   if (g_sw_view[G_SW_OS]) {
       val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
 #ifndef TARGET_LINUX
@@ -283,6 +285,20 @@ val_memory_alloc(uint32_t size)
 }
 
 /**
+  @brief  Allocates requested zero buffer in bytes in a contiguous memory
+          and returns the base address of the range.
+
+  @param  Size         allocation size in bytes
+
+  @return pointer to allocated memory
+**/
+void *
+val_memory_calloc(uint32_t num, uint32_t size)
+{
+  return pal_mem_calloc(num, size);
+}
+
+/**
   @brief  Allocates requested buffer size in bytes in a cacheable memory
           and returns the base address of the range.
 
@@ -447,20 +463,8 @@ val_memory_free_pages(void *addr, uint32_t num_pages)
 void
 *val_aligned_alloc(uint32_t alignment, uint32_t size)
 {
-  void *Mem = NULL;
-  void *Aligned_Ptr = NULL;
 
-  /* Generate mask for the Alignment parameter*/
-  uint64_t Mask = ~(uint64_t)(alignment - 1);
+  return pal_aligned_alloc(alignment, size);
 
-  /* Allocate memory with extra bytes, so we can return an aligned address*/
-  Mem = (void *)pal_mem_alloc(size + alignment);
-
-  if (Mem == NULL)
-    return 0;
-
-  /* Add the alignment to allocated memory address and align it to target alignment*/
-  Aligned_Ptr = (void *)(((uint64_t) Mem + alignment-1) & Mask);
-
-  return Aligned_Ptr;
 }
+

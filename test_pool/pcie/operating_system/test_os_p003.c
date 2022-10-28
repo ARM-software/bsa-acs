@@ -23,7 +23,8 @@
 #define TEST_RULE  "PCI_IN_04"
 #define TEST_DESC  "All EP/Sw under RP in same ECAM Region"
 
-uint8_t func_ecam_is_rp_ecam(uint32_t dsf_bdf)
+
+static uint8_t func_ecam_is_rp_ecam(uint32_t dsf_bdf)
 {
 
   uint8_t dsf_bus;

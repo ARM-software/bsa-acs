@@ -161,6 +161,20 @@ pal_timer_create_info_table(TIMER_INFO_TABLE *TimerTable)
 }
 
 /**
+  @brief  This API gets the counter frequency value from user
+
+  @param  None
+
+  @return Counter frequency value
+**/
+
+UINT64
+pal_timer_get_counter_frequency(VOID)
+{
+  return PLATFORM_OVERRIDE_TIMER_CNTFRQ;
+}
+
+/**
   @brief This API overrides the watch dog timer specified by WdTable
          Note: Only one watchdog information can be assigned as an override
 

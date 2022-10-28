@@ -28,6 +28,9 @@ int  g_print_level = 3;
 unsigned int  g_sw_view[3] = {1, 1, 1}; //Operating System, Hypervisor, Platform Security
 int  g_skip_test_num[3] = {10000, 10000, 10000};
 unsigned long int  g_exception_ret_addr;
+unsigned int g_print_mmio;
+unsigned int g_curr_module;
+unsigned int g_enable_module;
 
 int
 initialize_test_environment(unsigned int print_level)

@@ -128,4 +128,19 @@ val_run_test_payload(uint32_t test_num, uint32_t num_pe, void (*payload)(void), 
 void
 val_data_cache_ops_by_va(addr_t addr, uint32_t type);
 
+/* Module specific print APIs */
+
+typedef enum {
+    PE_MODULE,
+    MEM_MODULE,
+    GIC_MODULE,
+    SMMU_MODULE,
+    TIMER_MODULE,
+    WAKEUP_MODULE,
+    PERIPHERAL_MODULE,
+    WD_MODULE,
+    PCIE_MODULE,
+    EXERCISER_MODULE
+} MODULE_ID_e;
+
 #endif

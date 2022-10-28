@@ -27,7 +27,6 @@ obj-m += bsa_acs_test.o
 bsa_acs_test-objs += $(TEST_POOL)/pcie/operating_system/test_os_p001.o \
                      $(TEST_POOL)/pcie/operating_system/test_os_p061.o \
                      $(TEST_POOL)/pcie/operating_system/test_os_p062.o \
-                     $(TEST_POOL)/pcie/operating_system/test_os_p063.o \
                      $(TEST_POOL)/pcie/operating_system/test_os_p064.o \
                      $(TEST_POOL)/pcie/operating_system/test_os_p065.o \
                      $(TEST_POOL)/pcie/operating_system/test_os_p066.o \

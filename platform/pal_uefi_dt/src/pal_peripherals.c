@@ -548,6 +548,7 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
   peripheralInfoTable->header.num_usb = 0;
   peripheralInfoTable->header.num_sata = 0;
   peripheralInfoTable->header.num_uart = 0;
+  peripheralInfoTable->header.num_all = 0;
 
   /* check for any USB Controllers */
   do {
@@ -559,6 +560,7 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
           per_info->bdf   = DeviceBdf;
           bsa_print(ACS_PRINT_INFO, L"  Found a USB controller %4x \n", per_info->base0);
           peripheralInfoTable->header.num_usb++;
+          peripheralInfoTable->header.num_all++;
           per_info++;
        }
        StartBdf = incrementBusDev(DeviceBdf);
@@ -581,6 +583,7 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
           per_info->bdf   = DeviceBdf;
           bsa_print(ACS_PRINT_INFO, L"  Found a SATA controller %4x \n", per_info->base0);
           peripheralInfoTable->header.num_sata++;
+          peripheralInfoTable->header.num_all++;
           per_info++;
        }
        //Increment and check if we have more controllers
@@ -598,6 +601,7 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
 
   if (spcr) {
     peripheralInfoTable->header.num_uart++;
+    peripheralInfoTable->header.num_all++;
     per_info->base0 = spcr->BaseAddress.Address;
     per_info->width = 1 << (spcr->BaseAddress.AccessSize + 2);  // Convert GAS to 8/16/32
     per_info->irq   = spcr->GlobalSystemInterrupt;
@@ -612,6 +616,7 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
 
   if (PLATFORM_GENERIC_UART_BASE) {
     peripheralInfoTable->header.num_uart++;
+    peripheralInfoTable->header.num_all++;
     per_info->base0 = PLATFORM_GENERIC_UART_BASE;
     per_info->irq   = PLATFORM_GENERIC_UART_INTID;
     per_info->type  = PERIPHERAL_TYPE_UART;
