@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2019, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2019, 2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@
 #include "include/pal_uefi.h"
 #include "include/pal_dt.h"
 #include "include/pal_dt_spec.h"
-#include "include/platform_override.h"
+#include "../include/platform_override.h"
 #include "include/pal_iovirt.h"
 
 #define ADD_PTR(t, p, l) ((t*)((UINT8*)p + l))

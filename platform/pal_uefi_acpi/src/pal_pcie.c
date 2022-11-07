@@ -29,7 +29,7 @@
 #include "Include/IndustryStandard/Pci22.h"
 #include <Protocol/PciIo.h>
 
-#include "include/platform_override.h"
+#include "../include/platform_override.h"
 #include "include/pal_uefi.h"
 #include "include/bsa_pcie_enum.h"
 

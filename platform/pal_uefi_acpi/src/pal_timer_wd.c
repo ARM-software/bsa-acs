@@ -24,7 +24,7 @@
 #include "Include/IndustryStandard/Acpi61.h"
 
 #include "include/pal_uefi.h"
-#include "include/platform_override.h"
+#include "../include/platform_override.h"
 
 static EFI_ACPI_6_1_GENERIC_TIMER_DESCRIPTION_TABLE *gGtdtHdr;
 
