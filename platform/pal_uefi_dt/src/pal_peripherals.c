@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2020, 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2020-2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,7 +31,7 @@
 
 #include "include/pal_uefi.h"
 #include "include/bsa_pcie_enum.h"
-#include "include/platform_override.h"
+#include "../include/platform_override.h"
 #include "include/pal_dt.h"
 #include "include/pal_dt_spec.h"
 
