@@ -359,7 +359,7 @@ pal_pe_data_cache_ops_by_va(UINT64 addr, UINT32 type)
 VOID
 pal_pe_info_table_pmu_gsiv_dt(PE_INFO_TABLE *PeTable)
 {
-  int i, offset, prop_len;
+  int i, arr_idx, offset, prop_len;
   UINT64 dt_ptr = 0;
   UINT32 *Pintr;
   int index = 0;
@@ -379,12 +379,12 @@ pal_pe_info_table_pmu_gsiv_dt(PE_INFO_TABLE *PeTable)
 
   Ptr = PeTable->pe_info;
 
-  for (i = 0; i < (sizeof(pmu_dt_arr)/PMU_COMPATIBLE_STR_LEN); i++) {
+  for (arr_idx = 0; arr_idx < (sizeof(pmu_dt_arr)/PMU_COMPATIBLE_STR_LEN); arr_idx++) {
 
       /* Search for pmu nodes*/
-      offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, pmu_dt_arr[i]);
+      offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, pmu_dt_arr[arr_idx]);
       if (offset < 0) {
-          bsa_print(ACS_PRINT_DEBUG, L"  PMU compatible value not found for index:%d\n", i);
+          bsa_print(ACS_PRINT_DEBUG, L"  PMU compatible value not found for index:%d\n", arr_idx);
           continue; /* Search for next compatible item*/
       }
 
@@ -463,7 +463,7 @@ pal_pe_info_table_pmu_gsiv_dt(PE_INFO_TABLE *PeTable)
               }
           }
           offset =
-              fdt_node_offset_by_compatible((const void *)dt_ptr, offset, pmu_dt_arr[i]);
+              fdt_node_offset_by_compatible((const void *)dt_ptr, offset, pmu_dt_arr[arr_idx]);
       }
   }
 }
