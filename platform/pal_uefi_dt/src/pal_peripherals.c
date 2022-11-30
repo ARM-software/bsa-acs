@@ -170,11 +170,11 @@ pal_peripheral_usb_create_info_table_dt(PERIPHERAL_INFO_TABLE *peripheralInfoTab
           per_info->flags = 0; /* NA in DT*/
           per_info->platform_type = PLATFORM_TYPE_DT;
 
-          if (!(pal_strncmp(uart_dt_compatible[i], "generic-ohci", sizeof("generic-ohci"))))
+          if (!(pal_strncmp(usb_dt_compatible[i], "generic-ohci", sizeof("generic-ohci"))))
             per_info->interface_type = USB_TYPE_OHCI;
-          else if (!(pal_strncmp(uart_dt_compatible[i], "generic-ehci", sizeof("generic-ehci"))))
+          else if (!(pal_strncmp(usb_dt_compatible[i], "generic-ehci", sizeof("generic-ehci"))))
             per_info->interface_type = USB_TYPE_EHCI;
-          else if (!(pal_strncmp(uart_dt_compatible[i], "generic-xhci", sizeof("generic-xhci"))))
+          else if (!(pal_strncmp(usb_dt_compatible[i], "generic-xhci", sizeof("generic-xhci"))))
             per_info->interface_type = USB_TYPE_XHCI;
 
           peripheralInfoTable->header.num_usb++;
