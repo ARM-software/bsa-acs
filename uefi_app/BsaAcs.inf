@@ -94,7 +94,6 @@
   ../test_pool/pcie/operating_system/test_os_p024.c
   ../test_pool/pcie/operating_system/test_os_p025.c
   ../test_pool/pcie/operating_system/test_os_p026.c
-  ../test_pool/pcie/operating_system/test_os_p028.c
   ../test_pool/pcie/operating_system/test_os_p030.c
   ../test_pool/pcie/operating_system/test_os_p031.c
   ../test_pool/pcie/operating_system/test_os_p032.c
