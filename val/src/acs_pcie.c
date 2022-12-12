@@ -301,7 +301,7 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
 
       status |= os_p001_entry(num_pe);
-      if (status != ACS_STATUS_PASS) {
+      if (status == ACS_STATUS_FAIL) {
         val_print(ACS_PRINT_WARN, "\n      *** Skipping remaining PCIE tests *** \n", 0);
         return status;
       }
