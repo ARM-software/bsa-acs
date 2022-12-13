@@ -61,6 +61,9 @@ payload(void)
         val_print(ACS_PRINT_DEBUG, "\n    BDF 0x%x", bdf);
         ecam_base = val_pcie_get_ecam_base(bdf);
 
+        /* If test runs for atleast an endpoint */
+        test_skip = 0;
+
         /* Read Function's Class Code through ECAM method */
         ecam_cc = val_mmio_read(ecam_base +
                   PCIE_EXTRACT_BDF_BUS(bdf) * PCIE_MAX_DEV * PCIE_MAX_FUNC * PCIE_CFG_SIZE +
@@ -71,13 +74,10 @@ payload(void)
         /* Read Function's Class Code through Pciio Protocol method */
         Status = val_pcie_io_read_cfg(bdf, TYPE01_RIDR, &pciio_proto_cc);
         if (Status == PCIE_NO_MAPPING) {
-          val_print(ACS_PRINT_ERR, "\n       Reading Class code using PciIo protocol failed ", 0);
-          val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 01));
-          return;
+          val_print(ACS_PRINT_ERR, "\n       PciIo protocol failed for BDF 0x%x", bdf);
+          fail_cnt++;
+          continue;
         }
-
-        /* If test runs for atleast an endpoint */
-        test_skip = 0;
 
         if (ecam_cc != pciio_proto_cc)
         {
