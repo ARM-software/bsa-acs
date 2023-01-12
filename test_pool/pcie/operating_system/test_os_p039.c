@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2020, 2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020-2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,6 +38,8 @@ payload(void)
   uint32_t cap_base;
   uint32_t test_fails;
   uint32_t test_skip = 1;
+  uint32_t int_pin;
+  uint32_t reg_value;
   pcie_device_bdf_table *bdf_tbl_ptr;
 
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
@@ -56,6 +58,10 @@ payload(void)
       {
          val_print(ACS_PRINT_DEBUG, "\n    BDF 0x%x", bdf);
 
+         val_pcie_read_cfg(bdf, TYPE01_ILR, &reg_value);
+         int_pin = VAL_EXTRACT_BITS(reg_value, TYPE01_IPR_SHIFT, TYPE01_IPR_SHIFT + 7);
+         val_print(ACS_PRINT_DEBUG, " int pin value %d", int_pin);
+
          val_print(ACS_PRINT_DEBUG, " MSI cap %d",
                                     val_pcie_find_capability(bdf, PCIE_CAP, CID_MSI, &cap_base));
          val_print(ACS_PRINT_DEBUG, " MSIX cap %d",
@@ -66,7 +72,8 @@ payload(void)
 
          /* If MSI or MSI-X not supported, but INTx supported test fails */
          if ((val_pcie_find_capability(bdf, PCIE_CAP, CID_MSI, &cap_base) == PCIE_CAP_NOT_FOUND)
-          && (val_pcie_find_capability(bdf, PCIE_CAP, CID_MSIX, &cap_base) == PCIE_CAP_NOT_FOUND))
+          && (val_pcie_find_capability(bdf, PCIE_CAP, CID_MSIX, &cap_base) == PCIE_CAP_NOT_FOUND)
+           && ((int_pin >= 1) && (int_pin <= 4)))
               test_fails++;
       }
   }
