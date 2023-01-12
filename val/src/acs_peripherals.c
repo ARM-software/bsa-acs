@@ -259,41 +259,51 @@ val_peripheral_dump_info(void)
 {
 
   uint32_t bus, dev, func, seg = 0;
-  uint32_t dev_bdf;
+  uint32_t dev_bdf, ecam_index, num_ecam;
   uint32_t reg_value, base_cc;
   uint32_t dply = 0, ntwk = 0, strg = 0;
+  uint32_t start_bus, end_bus;
 
-  if (val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0) == 0)
+  num_ecam = val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
+  if (num_ecam == 0)
   {
       val_print(ACS_PRINT_DEBUG, "\n No ECAM is present", 0);
       return;
   }
 
-  for (bus = 0; bus < PCIE_MAX_BUS; bus++)
+  for (ecam_index = 0; ecam_index < num_ecam; ecam_index++)
   {
-      for (dev = 0; dev < PCIE_MAX_DEV; dev++)
+      seg = val_pcie_get_info(PCIE_INFO_SEGMENT, ecam_index);
+      start_bus = val_pcie_get_info(PCIE_INFO_START_BUS, ecam_index);
+      end_bus = val_pcie_get_info(PCIE_INFO_END_BUS, ecam_index);
+
+      for (bus = start_bus; bus <= end_bus; bus++)
       {
-          for (func = 0; func < PCIE_MAX_FUNC; func++)
+          for (dev = 0; dev < PCIE_MAX_DEV; dev++)
           {
-              dev_bdf = PCIE_CREATE_BDF(seg, bus, dev, func);
-              val_pcie_read_cfg(dev_bdf, TYPE01_VIDR, &reg_value);
-              if (reg_value == PCIE_UNKNOWN_RESPONSE)
-                  continue;
-              val_pcie_read_cfg(dev_bdf, TYPE01_RIDR, &reg_value);
-              val_print(ACS_PRINT_DEBUG, "\n BDF is %x", dev_bdf);
-              val_print(ACS_PRINT_DEBUG, "\n Class code is %x", reg_value);
-              base_cc = reg_value >> TYPE01_BCC_SHIFT;
-              if (base_cc == CNTRL_CC)
-                  ntwk++;
-              if (base_cc == DP_CNTRL_CC)
-                  dply++;
-              if (base_cc == MAS_CC)
-                  strg++;
-              else
-                  continue;
+              for (func = 0; func < PCIE_MAX_FUNC; func++)
+              {
+                  dev_bdf = PCIE_CREATE_BDF(seg, bus, dev, func);
+                  val_pcie_read_cfg(dev_bdf, TYPE01_VIDR, &reg_value);
+                  if (reg_value == PCIE_UNKNOWN_RESPONSE)
+                      continue;
+                  val_pcie_read_cfg(dev_bdf, TYPE01_RIDR, &reg_value);
+                  val_print(ACS_PRINT_DEBUG, "\n BDF is %x", dev_bdf);
+                  val_print(ACS_PRINT_DEBUG, "\n Class code is %x", reg_value);
+                  base_cc = reg_value >> TYPE01_BCC_SHIFT;
+                  if (base_cc == CNTRL_CC)
+                      ntwk++;
+                  if (base_cc == DP_CNTRL_CC)
+                      dply++;
+                  if (base_cc == MAS_CC)
+                      strg++;
+                  else
+                      continue;
+              }
           }
       }
   }
+
 
   val_print(ACS_PRINT_DEBUG, " Peripheral: Num of Network ctrl      :    %d \n", ntwk);
   val_print(ACS_PRINT_DEBUG, " Peripheral: Num of Storage ctrl      :    %d \n", strg);
