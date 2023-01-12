@@ -75,8 +75,7 @@ val_pcie_read_cfg(uint32_t bdf, uint32_t offset, uint32_t *data)
   }
 
   if (ecam_base == 0) {
-      val_print(ACS_PRINT_ERR, "\n       Read PCIe_CFG: ECAM Base is zero   "
-                                                        "   ", 0);
+      val_print(ACS_PRINT_ERR, "\n       Read PCIe_CFG: ECAM Base is zero %x", bdf);
       return PCIE_NO_MAPPING;
   }
 
@@ -152,7 +151,7 @@ val_pcie_write_cfg(uint32_t bdf, uint32_t offset, uint32_t data)
   }
 
   if (ecam_base == 0) {
-      val_print(ACS_PRINT_ERR, "\n       Read PCIe_CFG: ECAM Base is zero ", 0);
+      val_print(ACS_PRINT_ERR, "\n       Write PCIe_CFG: ECAM Base is zero %x", bdf);
       return;
   }
 
@@ -223,7 +222,7 @@ uint64_t val_pcie_get_bdf_config_addr(uint32_t bdf)
   }
 
   if (ecam_base == 0) {
-      val_print(ACS_PRINT_ERR, "\n       Read PCIe_CFG: ECAM Base is zero ", 0);
+      val_print(ACS_PRINT_ERR, "\n       BDF config Read PCIe_CFG: ECAM Base is zero %x", bdf);
       return 0;
   }
 
@@ -502,7 +501,7 @@ val_pcie_create_info_table(uint64_t *pcie_info_table)
 
   /* Create the list of valid Pcie Device Functions */
   if (val_pcie_create_device_bdf_table()) {
-      val_print(ACS_PRINT_ERR, " Create Bdf table failed.\n", 0);
+      val_print(ACS_PRINT_ERR, "   Create Bdf table failed.\n", 0);
       return;
   }
 
@@ -660,16 +659,19 @@ val_pcie_create_device_bdf_table()
       }
   }
 
-  val_print(ACS_PRINT_INFO,
-    "  Number of valid BDFs is %x\n", g_pcie_bdf_table->num_entries);
-
   /* Sanity Check : Confirm all EP (normal, integrated) have a rootport */
   if (val_pcie_populate_device_rootport())
   {
       /* Discard the bdf table */
       g_pcie_bdf_table->num_entries = 0;
+      val_print(ACS_PRINT_TEST,
+        " PCIE_INFO: Number of BDFs found      :    %x\n", g_pcie_bdf_table->num_entries);
+
       return 1;
   }
+  val_print(ACS_PRINT_TEST,
+    " PCIE_INFO: Number of BDFs found      :    %x\n", g_pcie_bdf_table->num_entries);
+
   return 0;
 }
 
@@ -2105,7 +2107,7 @@ val_pcie_get_rootport(uint32_t bdf, uint32_t *rp_bdf)
   }
 
   /* Return failure */
-  val_print(ACS_PRINT_ERR, "\n  PCIe Hierarchy fail: RP of bdf 0x%x not found", bdf);
+  val_print(ACS_PRINT_DEBUG, "   PCIe Hierarchy fail: RP of bdf 0x%x not found\n", bdf);
   *rp_bdf = 0;
   return 1;
 

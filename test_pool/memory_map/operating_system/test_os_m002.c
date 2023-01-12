@@ -28,7 +28,7 @@
 
 #define LOOP_VAR   3          /* Number of Addresses to check */
 
-static void *branch_to_test;
+static uint64_t branch_to_test;
 uint32_t loop_var = LOOP_VAR;
 uint32_t instance = 0;
 uint32_t timeout;
@@ -42,7 +42,7 @@ void
 esr(uint64_t interrupt_type, void *context)
 {
   /* Update the ELR to point to next instrcution */
-  val_pe_update_elr(context, (uint64_t)branch_to_test);
+  val_pe_update_elr(context, branch_to_test);
 
   val_print(ACS_PRINT_DEBUG, "\n       Received DAbort Exception ", 0);
 }
@@ -60,7 +60,7 @@ payload()
   val_pe_install_esr(EXCEPT_AARCH64_SERROR, esr);
   val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
 
-  branch_to_test = &&exception_taken_d;
+  branch_to_test = (uint64_t)&&exception_taken_d;
   while (loop_var) {
       timeout = TIMEOUT_SMALL;
       /* Get the address of device memory region */
@@ -86,7 +86,7 @@ exception_taken_d:
 normal_mem_test:
   loop_var = LOOP_VAR;
   instance = 0;
-  branch_to_test = &&exception_taken_n;
+  branch_to_test = (uint64_t)&&exception_taken_n;
   while (loop_var) {
       timeout = TIMEOUT_SMALL;
       /* Get the address of normal memory region */

@@ -42,7 +42,7 @@ dt_dump_pe_table(PE_INFO_TABLE *PeTable)
 
   while (Index < PeTable->header.num_of_pe) {
     bsa_print(ACS_PRINT_DEBUG, L" PE NUM      :%x\n", PeTable->pe_info[Index].pe_num);
-    bsa_print(ACS_PRINT_DEBUG, L" MPIDR       :%x\n", PeTable->pe_info[Index].mpidr);
+    bsa_print(ACS_PRINT_DEBUG, L" MPIDR       :%llx\n", PeTable->pe_info[Index].mpidr);
 //    bsa_print(ACS_PRINT_DEBUG, L"    ATTR     :%x\n", PeTable->pe_info[Index].attr);
     bsa_print(ACS_PRINT_DEBUG, L" PMU GSIV    :%x\n", PeTable->pe_info[Index].pmu_gsiv);
     Index++;

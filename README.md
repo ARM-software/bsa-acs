@@ -16,7 +16,7 @@ A few tests are executed by running the BSA ACS Linux application which in turn 
 
 
 ## Release details
- - Code quality: v1.0.2
+ - Code quality: v1.0.3
  - The tests are written for version 1.0 of the BSA specification.
  - The compliance suite is not a substitute for design verification.
  - To review the BSA ACS logs, Arm licensees can contact Arm directly through their partner managers.
