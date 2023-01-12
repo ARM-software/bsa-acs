@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021-2022, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,13 @@ payload()
   uint32_t dev_index = 0;
   uint32_t device_id, req_id;
   uint32_t stream_id, its_id;
+  uint32_t smmu_id;
   uint32_t cap_base;
   uint32_t test_skip = 1;
   pcie_device_bdf_table *bdf_tbl_ptr;
   int32_t prev_its_id = -1, i, j;
   uint32_t *streamID = NULL;
+  uint32_t *smmu_index = NULL;
 
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
   bdf_tbl_ptr = val_pcie_bdf_table_ptr();
@@ -60,6 +62,14 @@ payload()
   if (!streamID) {
       val_print(ACS_PRINT_DEBUG, "\n       Stream ID memory allocation failed", 0);
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 1));
+      return;
+  }
+
+  /* Allocate memory to store smmu_index */
+  smmu_index = val_memory_alloc(bdf_tbl_ptr->num_entries * sizeof(uint32_t));
+  if (!smmu_index) {
+      val_print(ACS_PRINT_DEBUG, "\n       Smmu index memory allocation failed", 0);
+      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
       return;
   }
 
@@ -89,9 +99,12 @@ payload()
         val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
         /* Free allocated memory before return*/
         val_memory_free(streamID);
+        val_memory_free(smmu_index);
         return;
     }
 
+    smmu_id = val_iovirt_get_rc_smmu_index(PCIE_EXTRACT_BDF_SEG(bdf),
+                                                    PCIE_CREATE_BDF_PACKED(bdf));
     /* Update ITS id for first group */
     if (prev_its_id == -1)
       prev_its_id = its_id;
@@ -99,6 +112,7 @@ payload()
     /* Update streamID & index for the last device before checking streamID uniqueness*/
     if (tbl_index == (bdf_tbl_ptr->num_entries - 1)) {
       streamID[dev_index] = stream_id;
+      smmu_index[dev_index] = smmu_id;
       dev_index++;
     }
 
@@ -106,12 +120,13 @@ payload()
     if ((prev_its_id != its_id) || (tbl_index == (bdf_tbl_ptr->num_entries - 1))) {
       for (i = 0; i < (dev_index - 1); i++) {
           for (j = (i + 1); j < dev_index; j++) {
-            if (streamID[i] == streamID[j]) {
+            if ((streamID[i] == streamID[j]) && (smmu_index[i] == smmu_index[j])) {
                 val_print(ACS_PRINT_DEBUG,
                         "\n       Stream ID is not unique for bdf : 0x%x", bdf);
                 val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 3));
                 /* Free allocated memory before return*/
                 val_memory_free(streamID);
+                val_memory_free(smmu_index);
                 return;
             }
           }
@@ -125,11 +140,13 @@ payload()
 
     /* Update streamID & index */
     streamID[dev_index] = stream_id;
+    smmu_index[dev_index] = smmu_id;
     dev_index++;
   }
 
   /* Free allocated memory before return*/
   val_memory_free(streamID);
+  val_memory_free(smmu_index);
 
   if (test_skip == 1)
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 3));
