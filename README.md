@@ -243,4 +243,4 @@ BSA ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2021-2022, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2021-2023, Arm Limited and Contributors. All rights reserved.*
