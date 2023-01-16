@@ -32,3 +32,10 @@ This version is used in SystemReady SR and ES v1.1.0 images.
 * Command line parameter to log mmio prints
 * RCiEP and iEP rules test moved to SBSA
 * Bug Fixes
+
+v23.01_1.0.3
+This version is used in SystemReady SR 2.0.0_BETA-0 and ES v1.2.0 images.
+
+* Exerciser test suite using exerciser info table.
+* Memory test 2 gcc warning suppress
+* Bug Fixes
