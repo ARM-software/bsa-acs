@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021-2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -105,10 +105,10 @@ if (!g_build_sbsa) {  /* B_GIC_01 and B_GIC_02 only for BSA */
 
 its_test:
   if ((val_gic_get_info(GIC_INFO_NUM_ITS) == 0) || (pal_target_is_dt())) {
-      val_print(ACS_PRINT_DEBUG, "\n       No ITS, Skipping all ITS tests \n", 0);
+      val_print(ACS_PRINT_DEBUG, "\n       No ITS, Skipping all DeviceID & ITS tests \n", 0);
       goto test_done;
   }
-  val_print(ACS_PRINT_ERR, "\n      *** Starting ITS tests ***\n", 0);
+  val_print(ACS_PRINT_ERR, "\n      *** Starting DeviceID generation and ITS tests ***\n", 0);
   if (g_sw_view[G_SW_OS]) {
       val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
       status |= os_its001_entry(num_pe);

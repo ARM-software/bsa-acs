@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -434,6 +434,6 @@ val_iovirt_get_rc_smmu_index(uint32_t rc_seg_num, uint32_t rid)
       }
   }
 
-  val_print(ACS_PRINT_INFO, "RC with segment number %d is not behind any SMMU", rc_seg_num);
+  val_print(ACS_PRINT_INFO, "\n       RC with segment number %d is not behind SMMU", rc_seg_num);
   return ACS_INVALID_INDEX;
 }
