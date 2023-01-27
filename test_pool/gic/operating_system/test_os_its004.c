@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ payload()
   uint32_t stream_id, its_id;
   uint32_t cap_base;
   uint32_t test_skip = 1;
+  uint32_t test_fail = 0;
   uint32_t curr_grp_did_cons, curr_grp_sid_cons;
   uint32_t curr_grp_its_id = -1;
   pcie_device_bdf_table *bdf_tbl_ptr;
@@ -87,32 +88,31 @@ payload()
       /* No SMMU, Check only for device_id */
       if (curr_grp_did_cons != (device_id - req_id)) {
         /* DeviceID Constant Base Failure */
-        val_print(ACS_PRINT_DEBUG,
+        val_print(ACS_PRINT_ERR,
                   "\n       ReqID-DeviceID Association Fail for Bdf : %x", bdf);
-        val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
-        return;
+        test_fail++;
       }
     } else {
       /* Check for stream_id & device_id */
       if (curr_grp_sid_cons != (stream_id - req_id)) {
         /* StreamID Constant Base Failure */
-        val_print(ACS_PRINT_DEBUG, "\n       ReqID-StreamID Association Fail for Bdf : %x", bdf);
-        val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 3));
-        return;
+        val_print(ACS_PRINT_ERR, "\n       ReqID-StreamID Association Fail for Bdf : %x", bdf);
+        test_fail++;
       }
 
       if (curr_grp_did_cons != (device_id - stream_id)) {
         /* DeviceID Constant Base Failure */
-        val_print(ACS_PRINT_DEBUG,
+        val_print(ACS_PRINT_ERR,
                   "\n       StreamID-DeviceID Association Fail for Bdf : %x", bdf);
-        val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 4));
-        return;
+        test_fail++;
       }
     }
   }
 
   if (test_skip == 1)
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+  else if (test_fail)
+      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
   else
       val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 }

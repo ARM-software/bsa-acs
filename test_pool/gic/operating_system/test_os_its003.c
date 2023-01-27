@@ -41,6 +41,7 @@ payload()
   int32_t prev_its_id = -1, i, j;
   uint32_t *streamID = NULL;
   uint32_t *smmu_index = NULL;
+  uint32_t test_fail = 0;
 
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
   bdf_tbl_ptr = val_pcie_bdf_table_ptr();
@@ -96,7 +97,7 @@ payload()
     if (status) {
         val_print(ACS_PRINT_DEBUG,
             "\n       Could not get device info for BDF : 0x%x", bdf);
-        val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
+        val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 3));
         /* Free allocated memory before return*/
         val_memory_free(streamID);
         val_memory_free(smmu_index);
@@ -123,11 +124,7 @@ payload()
             if ((streamID[i] == streamID[j]) && (smmu_index[i] == smmu_index[j])) {
                 val_print(ACS_PRINT_DEBUG,
                         "\n       Stream ID is not unique for bdf : 0x%x", bdf);
-                val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 3));
-                /* Free allocated memory before return*/
-                val_memory_free(streamID);
-                val_memory_free(smmu_index);
-                return;
+                test_fail++;
             }
           }
       }
@@ -150,6 +147,8 @@ payload()
 
   if (test_skip == 1)
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 3));
+  else if (test_fail)
+      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 4));
   else
       val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 }
