@@ -493,7 +493,7 @@ val_pcie_create_info_table(uint64_t *pcie_info_table)
 
   num_ecam = val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
 
-  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of ECAM regions    :    %lx \n", num_ecam);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of ECAM regions    :    %ld \n", num_ecam);
   if (num_ecam == 0)
       return;
 
@@ -665,12 +665,12 @@ val_pcie_create_device_bdf_table()
       /* Discard the bdf table */
       g_pcie_bdf_table->num_entries = 0;
       val_print(ACS_PRINT_TEST,
-        " PCIE_INFO: Number of BDFs found      :    %x\n", g_pcie_bdf_table->num_entries);
+        " PCIE_INFO: Number of BDFs found      :    %d\n", g_pcie_bdf_table->num_entries);
 
       return 1;
   }
   val_print(ACS_PRINT_TEST,
-    " PCIE_INFO: Number of BDFs found      :    %x\n", g_pcie_bdf_table->num_entries);
+    " PCIE_INFO: Number of BDFs found      :    %d\n", g_pcie_bdf_table->num_entries);
 
   return 0;
 }
