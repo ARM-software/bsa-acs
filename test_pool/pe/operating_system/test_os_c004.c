@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2020, 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2020, 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,16 +26,19 @@ static
 void
 payload()
 {
-  uint64_t data = 0;
+  uint64_t data;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
+  uint32_t tgran4;
 
   data = val_pe_reg_read(ID_AA64MMFR0_EL1);
+  tgran4 = VAL_EXTRACT_BITS(data, 28, 31);
 
   /* PEs must support 4kb granule for Stage 1.
-   * Check For TGran4[31:28] == 0.
+   * As per the ArmArm I.a value of TGran4[31:28]
+   * must be 0 if 4KB granule is supported or
+   * must be 1 if LPA2 is implemented, 4KB granule supports 52 bit input and output addresses.
    */
-
-  if (VAL_EXTRACT_BITS(data, 28, 31) == 0)
+  if ((tgran4 == 0x0) || (tgran4 == 0x1))
     val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   else
     val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
