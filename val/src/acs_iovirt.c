@@ -380,7 +380,7 @@ val_iovirt_create_info_table(uint64_t *iovirt_info_table)
 
   g_num_smmus = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
   val_print(ACS_PRINT_TEST,
-            " SMMU_INFO: Number of SMMU CTRL       :    %x \n", g_num_smmus);
+            " SMMU_INFO: Number of SMMU CTRL       :    %d \n", g_num_smmus);
 }
 
 /**
