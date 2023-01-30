@@ -41,19 +41,20 @@ payload()
   int32_t prev_its_id = -1, i, j;
   uint32_t *streamID = NULL;
   uint32_t *smmu_index = NULL;
+  uint32_t *dev_bdf = NULL;
   uint32_t test_fail = 0;
 
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
   bdf_tbl_ptr = val_pcie_bdf_table_ptr();
 
-  if (!bdf_tbl_ptr) {
-      val_print(ACS_PRINT_DEBUG, "\n       No BDF table created", 0);
+  if ((!bdf_tbl_ptr) || (!bdf_tbl_ptr->num_entries)) {
+      val_print(ACS_PRINT_DEBUG, "\n       No entries in BDF table", 0);
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
-  if (!bdf_tbl_ptr->num_entries) {
-      val_print(ACS_PRINT_DEBUG, "\n       No entries in BDF table", 0);
+  if (val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0) == 0) {
+      val_print(ACS_PRINT_DEBUG, "\n       No SMMU, Skipping Test", 0);
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
       return;
   }
@@ -74,6 +75,14 @@ payload()
       return;
   }
 
+  /* Allocate memory to store dev_bdf */
+  dev_bdf = val_memory_alloc(bdf_tbl_ptr->num_entries * sizeof(uint32_t));
+  if (!dev_bdf) {
+      val_print(ACS_PRINT_DEBUG, "\n       Dev BDF memory allocation failed", 0);
+      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 3));
+      return;
+  }
+
   /* Check for all the function present in bdf table */
   for (tbl_index = 0; tbl_index < bdf_tbl_ptr->num_entries; tbl_index++)
   {
@@ -84,8 +93,13 @@ payload()
         (val_pcie_find_capability(bdf, PCIE_CAP, CID_MSIX, &cap_base) == PCIE_CAP_NOT_FOUND))
       continue;
 
-    /* If test runs for atleast an endpoint */
-    test_skip = 0;
+    smmu_id = val_iovirt_get_rc_smmu_index(PCIE_EXTRACT_BDF_SEG(bdf),
+                                                    PCIE_CREATE_BDF_PACKED(bdf));
+    if (smmu_id == ACS_INVALID_INDEX) {
+        val_print(ACS_PRINT_DEBUG,
+            "\n       BDF : 0x%llx Not Behind an SMMU, Skipping Device", bdf);
+        continue;
+    }
 
     /* If MSI Supported then Check for Valid DeviceID */
     req_id = GET_DEVICE_ID(PCIE_EXTRACT_BDF_BUS(bdf),
@@ -97,15 +111,17 @@ payload()
     if (status) {
         val_print(ACS_PRINT_DEBUG,
             "\n       Could not get device info for BDF : 0x%x", bdf);
-        val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 3));
+        val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 4));
         /* Free allocated memory before return*/
         val_memory_free(streamID);
         val_memory_free(smmu_index);
+        val_memory_free(dev_bdf);
         return;
     }
 
-    smmu_id = val_iovirt_get_rc_smmu_index(PCIE_EXTRACT_BDF_SEG(bdf),
-                                                    PCIE_CREATE_BDF_PACKED(bdf));
+    /* If test runs for atleast an endpoint */
+    test_skip = 0;
+
     /* Update ITS id for first group */
     if (prev_its_id == -1)
       prev_its_id = its_id;
@@ -114,6 +130,7 @@ payload()
     if (tbl_index == (bdf_tbl_ptr->num_entries - 1)) {
       streamID[dev_index] = stream_id;
       smmu_index[dev_index] = smmu_id;
+      dev_bdf[dev_index] = bdf;
       dev_index++;
     }
 
@@ -122,8 +139,14 @@ payload()
       for (i = 0; i < (dev_index - 1); i++) {
           for (j = (i + 1); j < dev_index; j++) {
             if ((streamID[i] == streamID[j]) && (smmu_index[i] == smmu_index[j])) {
+                val_print(ACS_PRINT_ERR,
+                        "\n       StreamID not unique for dev bdf 0x%llx & ", dev_bdf[i]);
+                val_print(ACS_PRINT_ERR,
+                        "0x%llx", dev_bdf[j]);
                 val_print(ACS_PRINT_DEBUG,
-                        "\n       Stream ID is not unique for bdf : 0x%x", bdf);
+                        "\n       StreamID values in order : 0x%llx & ", streamID[i]);
+                val_print(ACS_PRINT_DEBUG,
+                        "0x%llx", streamID[j]);
                 test_fail++;
             }
           }
@@ -138,17 +161,19 @@ payload()
     /* Update streamID & index */
     streamID[dev_index] = stream_id;
     smmu_index[dev_index] = smmu_id;
+    dev_bdf[dev_index] = bdf;
     dev_index++;
   }
 
   /* Free allocated memory before return*/
   val_memory_free(streamID);
   val_memory_free(smmu_index);
+  val_memory_free(dev_bdf);
 
   if (test_skip == 1)
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 3));
   else if (test_fail)
-      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 4));
+      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 5));
   else
       val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 }
