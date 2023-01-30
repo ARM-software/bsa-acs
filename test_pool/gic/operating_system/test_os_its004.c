@@ -32,11 +32,14 @@ payload()
   uint32_t tbl_index;
   uint32_t device_id, req_id;
   uint32_t stream_id, its_id;
+  uint32_t smmu_id;
   uint32_t cap_base;
   uint32_t test_skip = 1;
   uint32_t test_fail = 0;
+  uint32_t streamid_check = 1;
   uint32_t curr_grp_did_cons, curr_grp_sid_cons;
   uint32_t curr_grp_its_id = -1;
+  uint32_t curr_smmu_id = -1;
   pcie_device_bdf_table *bdf_tbl_ptr;
 
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
@@ -52,9 +55,6 @@ payload()
         (val_pcie_find_capability(bdf, PCIE_CAP, CID_MSIX, &cap_base) == PCIE_CAP_NOT_FOUND))
       continue;
 
-    /* If test runs for atleast an endpoint */
-    test_skip = 0;
-
     /* If MSI Supported then Check for Valid DeviceID */
     req_id = PCIE_CREATE_BDF_PACKED(bdf);
 
@@ -67,24 +67,36 @@ payload()
         return;
     }
 
-    /* Store the Current group SID Constant offset & Dev ID Constant offset using first device */
-    if (its_id != curr_grp_its_id) {
-      curr_grp_its_id = its_id;
+    smmu_id = val_iovirt_get_rc_smmu_index(PCIE_EXTRACT_BDF_SEG(bdf),
+                                                    PCIE_CREATE_BDF_PACKED(bdf));
+    if (smmu_id == ACS_INVALID_INDEX) {
+        val_print(ACS_PRINT_INFO,
+            "\n       BDF : 0x%llx Not Behind an SMMU, Skipping StreamID check", bdf);
+        streamid_check = 0;
+    }
 
-      /* stream_id returned is 0 when Root Complex is not behind an SMMU */
-      if (stream_id != 0) {
+    /* If test runs for atleast an endpoint */
+    test_skip = 0;
+
+    /* Store the Current group SID Constant offset & Dev ID Constant offset using first device */
+    if ((its_id != curr_grp_its_id) || (smmu_id != curr_smmu_id)) {
+      curr_grp_its_id = its_id;
+      curr_smmu_id = smmu_id;
+
+      /* streamid_check is 0 when Root Complex is not behind an SMMU */
+      if (streamid_check != 0) {
         /* Device behind SMMU */
         curr_grp_sid_cons = stream_id - req_id;
         curr_grp_did_cons = device_id - stream_id;
       } else {
-        /* No SMMU, stream_id returned is 0 */
+        /* No SMMU, stream_id check not needed */
         curr_grp_sid_cons = 0;
         curr_grp_did_cons = device_id - req_id;
       }
       continue;
     }
 
-    if (stream_id == 0) {
+    if (streamid_check == 0) {
       /* No SMMU, Check only for device_id */
       if (curr_grp_did_cons != (device_id - req_id)) {
         /* DeviceID Constant Base Failure */
