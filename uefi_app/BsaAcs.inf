@@ -1,5 +1,5 @@
 ## @file
-#  Copyright (c) 2016-2022 Arm Limited or its affiliates. All rights reserved.
+#  Copyright (c) 2016-2023 Arm Limited or its affiliates. All rights reserved.
 #  SPDX-License-Identifier : Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,6 @@
   ../test_pool/pe/operating_system/test_os_c002.c
   ../test_pool/pe/operating_system/test_os_c003.c
   ../test_pool/pe/operating_system/test_os_c004.c
-  ../test_pool/pe/operating_system/test_os_c005.c
   ../test_pool/pe/operating_system/test_os_c006.c
   ../test_pool/pe/operating_system/test_os_c007.c
   ../test_pool/pe/operating_system/test_os_c008.c
