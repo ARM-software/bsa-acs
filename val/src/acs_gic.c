@@ -82,6 +82,8 @@ val_gic_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   if (g_sw_view[G_SW_HYP]) {
       val_print(ACS_PRINT_ERR, "\nHypervisor View:\n", 0);
       status |= hyp_g001_entry(num_pe);
+      status |= hyp_g002_entry(num_pe);
+      status |= hyp_g003_entry(num_pe);
   }
 
   /* Run GICv2m only if GIC Version is v2m. */
