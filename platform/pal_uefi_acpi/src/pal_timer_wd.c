@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018-2022, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -150,8 +150,8 @@ pal_timer_create_info_table(TIMER_INFO_TABLE *TimerTable)
       TimerTable->header.el2_virt_timer_gsiv = *(++virtualpl2);
       TimerTable->header.el2_virt_timer_flag = *(++virtualpl2);
       if (TimerTable->header.el2_virt_timer_gsiv == 0) {
-         bsa_print(ACS_PRINT_WARN, L" \n GTDT don't have el2 virt timer info");
-         bsa_print(ACS_PRINT_WARN, L" \n using bsa recommended value 28");
+         bsa_print(ACS_PRINT_DEBUG, L"  GTDT don't have el2 virt timer info\n");
+         bsa_print(ACS_PRINT_DEBUG, L"  using bsa recommended value 28\n");
          TimerTable->header.el2_virt_timer_gsiv = PLATFORM_OVERRIDE_EL2_VIR_TIMER_GSIV;
       }
 
