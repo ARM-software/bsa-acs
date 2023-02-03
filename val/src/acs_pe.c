@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2022, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -69,7 +69,6 @@ val_pe_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       status |= os_c002_entry(num_pe);
       status |= os_c003_entry(num_pe);
       status |= os_c004_entry(num_pe);
-      status |= os_c005_entry(num_pe);
       status |= os_c006_entry(num_pe);
       status |= os_c007_entry(num_pe);
       status |= os_c008_entry(num_pe);

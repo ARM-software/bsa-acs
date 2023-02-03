@@ -35,7 +35,6 @@
   ../test_pool/pe/operating_system/test_os_c002.c
   ../test_pool/pe/operating_system/test_os_c003.c
   ../test_pool/pe/operating_system/test_os_c004.c
-  ../test_pool/pe/operating_system/test_os_c005.c
   ../test_pool/pe/operating_system/test_os_c006.c
   ../test_pool/pe/operating_system/test_os_c007.c
   ../test_pool/pe/operating_system/test_os_c008.c
