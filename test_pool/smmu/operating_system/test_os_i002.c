@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,6 +35,7 @@ payload()
   uint32_t is_smmu_16k = 0;
   uint32_t is_smmu_64k = 0;
   uint32_t index;
+  uint64_t data_oas = 0;
 
   index = val_pe_get_index_mpid(val_pe_get_mpid());
 
@@ -59,13 +60,44 @@ payload()
           is_smmu_4k = VAL_EXTRACT_BITS(data_smmu_idr, 4, 4);
           is_smmu_16k = VAL_EXTRACT_BITS(data_smmu_idr, 5, 5);
           is_smmu_64k = VAL_EXTRACT_BITS(data_smmu_idr, 6, 6);
+          data_oas = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_IDR5, num_smmu), 0, 2);
+      }
+
+      /* If PE Supports 4KB granule size and implements FEAT_LPA2
+       * then TGran4 == 0x1 or TGran4_2 == 0x3*/
+      if ((VAL_EXTRACT_BITS(data_pe_mmfr0, 28, 31) == 0x1) ||
+          (VAL_EXTRACT_BITS(data_pe_mmfr0, 40, 43) == 0x3)) {
+          /*PE FEAT_LPA2 is implemeted, SMMU should support 4KB granule size and 52-bit
+           * addressing. i.e data_oas == 0x6*/
+          if ((is_smmu_4k != 1) && (data_oas != 0x6)) {
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+              val_print(ACS_PRINT_ERR, "\n       PE supports 4kB granule and FEAT_LPA2 is "
+                                       "implemented, but SMMU %x does not support 52 bit "
+                                       "addressing", num_smmu);
+              return;
+          }
+      }
+
+      /* If PE supports 16KB granule size and implements FEAT_LPA2
+       * then TGran16 == 0x2 or TGran16_2 == 0x3 */
+      if ((VAL_EXTRACT_BITS(data_pe_mmfr0, 20, 23) == 0x2) ||
+          (VAL_EXTRACT_BITS(data_pe_mmfr0, 32, 35) == 0x3)) {
+          /*PE FEAT_LPA2 is implemeted, SMMU should support 16KB granule size and 52-bit
+           * addressing. i.e data_oas == 0x6*/
+          if ((is_smmu_16k != 1) && (data_oas != 0x6)) {
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+              val_print(ACS_PRINT_ERR, "\n       PE supports 16kB granule and FEAT_LPA2 is "
+                                       "implemented, but SMMU %x does not support 52 bit "
+                                       " addressing", num_smmu);
+              return;
+          }
       }
 
       /* If PE Supports 4KB Gran, (TGran4 == 0) or (TGran4_2 == 0x2) */
       if ((VAL_EXTRACT_BITS(data_pe_mmfr0, 28, 31) == 0x0) ||
           (VAL_EXTRACT_BITS(data_pe_mmfr0, 40, 43) == 0x2)) {
           if (is_smmu_4k != 1) {
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
               val_print(ACS_PRINT_ERR, "\n       PE supports 4kB granules, "
                                        "but SMMU %x does not", num_smmu);
               return;
@@ -76,7 +108,7 @@ payload()
       if ((VAL_EXTRACT_BITS(data_pe_mmfr0, 20, 23) == 0x1) ||
           (VAL_EXTRACT_BITS(data_pe_mmfr0, 32, 35) == 0x2)) {
           if (is_smmu_16k != 1) {
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
               val_print(ACS_PRINT_ERR, "\n       PE supports 16kB granules, "
                                        "but SMMU %x does not", num_smmu);
               return;
@@ -87,7 +119,7 @@ payload()
       if ((VAL_EXTRACT_BITS(data_pe_mmfr0, 24, 27) == 0x0) ||
           (VAL_EXTRACT_BITS(data_pe_mmfr0, 36, 39) == 0x2)) {
           if (is_smmu_64k != 1) {
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
+              val_set_status(index, RESULT_FAIL(TEST_NUM, 5));
               val_print(ACS_PRINT_ERR, "\n       PE supports 64kB granules, "
                                        "but SMMU %x does not", num_smmu);
               return;
