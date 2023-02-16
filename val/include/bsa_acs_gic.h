@@ -107,7 +107,10 @@ addr_t
 val_get_gicd_base(void);
 
 addr_t
-val_get_gicr_base(uint32_t *rdbase_len);
+val_get_gicr_base(uint32_t *rdbase_len, uint32_t gicr_rd_index);
+
+addr_t
+val_gic_get_pe_rdbase(uint64_t mpidr);
 
 addr_t
 val_get_gich_base(void);

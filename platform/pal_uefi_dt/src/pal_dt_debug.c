@@ -70,7 +70,8 @@ dt_dump_gic_table(GIC_INFO_TABLE *GicTable)
   bsa_print(ACS_PRINT_DEBUG, L" ************GIC TABLE************ \n");
   bsa_print(ACS_PRINT_DEBUG, L" GIC version %d \n", GicTable->header.gic_version);
   bsa_print(ACS_PRINT_DEBUG, L" GIC num D %d \n", GicTable->header.num_gicd);
-  bsa_print(ACS_PRINT_DEBUG, L" GIC num RD %d \n", GicTable->header.num_gicrd);
+  bsa_print(ACS_PRINT_DEBUG, L" GIC num GICC RD %d \n", GicTable->header.num_gicc_rd);
+  bsa_print(ACS_PRINT_DEBUG, L" GIC num GICR RD %d \n", GicTable->header.num_gicr_rd);
 //  bsa_print(ACS_PRINT_DEBUG, L" GIC num ITS %d \n", GicTable->header.num_its);
 
   while (GicTable->gic_info[Index].type != 0xFF) {
