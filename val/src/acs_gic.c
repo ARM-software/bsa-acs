@@ -297,7 +297,7 @@ val_gic_get_pe_rdbase(uint64_t mpidr)
   /* If System doesn't have GICR RD strcture, then use GICCC RD base */
   if (g_gic_info_table->header.num_gicr_rd == 0) {
       gicrd_base = val_get_gicr_base(&gicrd_baselen, 0);
-      val_print(ACS_PRINT_ERR, "       gicrd_base 0x%lx\n", gicrd_base);
+      val_print(ACS_PRINT_DEBUG, "       gicrd_base 0x%lx\n", gicrd_base);
 
       /* If information is present in GICC Structure */
       if (gicrd_baselen == 0)
@@ -313,8 +313,8 @@ val_gic_get_pe_rdbase(uint64_t mpidr)
   /* Use GICR RD base structure */
   while (gicr_rdindex < g_gic_info_table->header.num_gicr_rd) {
       gicrd_base = val_get_gicr_base(&gicrd_baselen, gicr_rdindex);
-      val_print(ACS_PRINT_ERR, "       gicr_rdindex %d", gicr_rdindex);
-      val_print(ACS_PRINT_ERR, "       gicrd_base 0x%lx\n", gicrd_base);
+      val_print(ACS_PRINT_DEBUG, "       gicr_rdindex %d", gicr_rdindex);
+      val_print(ACS_PRINT_DEBUG, "       gicrd_base 0x%lx\n", gicrd_base);
 
       pe_gicrd_base = gicrd_base;
       while (pe_gicrd_base < (gicrd_base + gicrd_baselen))
