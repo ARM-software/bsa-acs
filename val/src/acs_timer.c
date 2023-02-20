@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2019, 2021-2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2019, 2021-2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,10 +66,7 @@ val_timer_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       status |= os_t005_entry(num_pe);
   }
 
-  if (status != ACS_STATUS_PASS)
-    val_print(ACS_PRINT_TEST, "\n      *** One or more tests have Failed/Skipped.*** \n", 0);
-  else
-    val_print(ACS_PRINT_TEST, "\n       All Timer tests passed!! \n", 0);
+  val_print_test_end(status, "Timer");
 
   return status;
 }

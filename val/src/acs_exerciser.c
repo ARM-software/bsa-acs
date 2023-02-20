@@ -400,10 +400,7 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
 
   val_smmu_stop();
 
-  if (status != ACS_STATUS_PASS)
-    val_print(ACS_PRINT_TEST, "\n      *** One or more tests have Failed/Skipped.*** \n", 0);
-  else
-    val_print(ACS_PRINT_TEST, "\n       All Exerciser tests passed!! \n", 0);
+  val_print_test_end(status, "Exerciser");
 
   return status;
 }

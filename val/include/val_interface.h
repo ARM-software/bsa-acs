@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2022, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,6 +59,7 @@ void val_free_shared_mem(void);
 void val_print(uint32_t level, char8_t *string, uint64_t data);
 void val_print_raw(uint64_t uart_addr, uint32_t level, char8_t *string,
                                                                 uint64_t data);
+void val_print_test_end(uint32_t status, char8_t *string);
 void val_set_test_data(uint32_t index, uint64_t addr, uint64_t test_data);
 void val_get_test_data(uint32_t index, uint64_t *data0, uint64_t *data1);
 uint32_t val_strncmp(char8_t *str1, char8_t *str2, uint32_t len);

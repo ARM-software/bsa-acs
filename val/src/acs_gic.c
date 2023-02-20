@@ -123,10 +123,7 @@ its_test:
   }
 
 test_done:
-  if (status != ACS_STATUS_PASS)
-    val_print(ACS_PRINT_TEST, "\n      *** One or more tests have Failed/Skipped.*** \n", 0);
-  else
-    val_print(ACS_PRINT_TEST, "\n       All GIC tests Passed!! \n", 0);
+  val_print_test_end(status, "GIC");
 
   return status;
 

@@ -96,10 +96,7 @@ if (!g_build_sbsa) { /* B_PE_15 is only in BSA checklist */
       status |= ps_c001_entry(num_pe);
   }
 
-  if (status != ACS_STATUS_PASS)
-      val_print(ACS_PRINT_TEST, "\n      *** One or more tests have Failed/Skipped.*** \n", 0);
-  else
-      val_print(ACS_PRINT_TEST, "\n       All PE tests have passed!! \n", 0);
+  val_print_test_end(status, "PE");
 
   return status;
 
