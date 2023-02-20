@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2022, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -159,7 +159,8 @@ uint32_t pal_pe_install_esr(uint32_t exception_type, void (*esr)(uint64_t, void 
 typedef struct {
   uint32_t gic_version;
   uint32_t num_gicd;
-  uint32_t num_gicrd;
+  uint32_t num_gicc_rd;
+  uint32_t num_gicr_rd;
   uint32_t num_its;
   uint32_t num_msi_frame;
   uint32_t num_gich;

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2022, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -108,7 +108,8 @@ VOID     pal_pe_data_cache_ops_by_va(UINT64 addr, UINT32 type);
 typedef struct {
   UINT32   gic_version;
   UINT32   num_gicd;
-  UINT32   num_gicrd;
+  UINT32   num_gicc_rd;
+  UINT32   num_gicr_rd;
   UINT32   num_its;
   UINT32   num_msi_frame;
   UINT32   num_gich;

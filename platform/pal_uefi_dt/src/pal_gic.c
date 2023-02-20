@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -174,7 +174,8 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
 
   GicEntry = GicTable->gic_info;
   GicTable->header.gic_version = 0;
-  GicTable->header.num_gicrd = 0;
+  GicTable->header.num_gicc_rd = 0;
+  GicTable->header.num_gicr_rd = 0;
   GicTable->header.num_gicd = 0;
   GicTable->header.num_its = 0;
   GicTable->header.num_msi_frame = 0;
@@ -208,8 +209,8 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
         GicEntry->type = ENTRY_TYPE_GICC_GICRD;
         GicEntry->base = Entry->GICRBaseAddress;
         GicEntry->length = 0;
-        bsa_print(ACS_PRINT_INFO, L"  GIC RD base %x \n", GicEntry->base);
-        GicTable->header.num_gicrd++;
+        bsa_print(ACS_PRINT_INFO, L"  GICC RD base %x \n", GicEntry->base);
+        GicTable->header.num_gicc_rd++;
         GicEntry++;
       }
 
@@ -235,8 +236,8 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
         GicEntry->type = ENTRY_TYPE_GICR_GICRD;
         GicEntry->base = ((EFI_ACPI_6_1_GICR_STRUCTURE *)Entry)->DiscoveryRangeBaseAddress;
         GicEntry->length = ((EFI_ACPI_6_1_GICR_STRUCTURE *)Entry)->DiscoveryRangeLength;
-        bsa_print(ACS_PRINT_INFO, L"  GIC RD base Structure %x \n", GicEntry->base);
-        GicTable->header.num_gicrd++;
+        bsa_print(ACS_PRINT_INFO, L"  GICR RD base %x \n", GicEntry->base);
+        GicTable->header.num_gicr_rd++;
         GicEntry++;
     }
 
@@ -536,8 +537,8 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
           } else
               GicEntry->length = fdt32_to_cpu(Preg_val[Index++]);
 
-          bsa_print(ACS_PRINT_DEBUG, L"  GIC RD base %lx \n", GicEntry->base);
-          GicTable->header.num_gicrd++;
+          bsa_print(ACS_PRINT_DEBUG, L"  GICR RD base %lx \n", GicEntry->base);
+          GicTable->header.num_gicr_rd++;
           GicEntry++;
     }
   }

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,8 +41,13 @@ payload()
   uint32_t enable_grp1ns;
   uint32_t data;
   uint32_t are_ns = val_gic_get_info(GIC_INFO_AFFINITY_NS);
-  uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
-  uint32_t rdbase_len;
+  uint32_t index, mpid;
+  uint64_t pe_rdbase;
+
+  mpid = val_pe_get_mpid();
+  val_print(ACS_PRINT_DEBUG, "\n       PE MPIDR 0x%x", mpid);
+
+  index = val_pe_get_index_mpid(mpid);
 
   // Location of the Group 1 NS enable bit depends on whether affinity routing is enabled
   if (are_ns)
@@ -58,11 +63,20 @@ payload()
   }
   else {
     if (are_ns) {
-        // Read out the bottom 8 bits of GICR_ISENABLER0 if ARE_NS == 1
-        data = val_mmio_read(val_get_gicr_base(&rdbase_len) + RD_FRAME_SIZE + GICR_ISENABLER) |
-                                                                                            0xFFFF;
-        val_mmio_write(val_get_gicr_base(&rdbase_len) + RD_FRAME_SIZE + GICR_ISENABLER, data);
-        data = VAL_EXTRACT_BITS(val_gic_get_info(GIC_INFO_SGI_NON_SECURE), 0, 7);
+        /* Derive RDbase for PE */
+        pe_rdbase = val_gic_get_pe_rdbase(mpid);
+        val_print(ACS_PRINT_DEBUG, "\n       PE RD base address %llx", pe_rdbase);
+        if (pe_rdbase == 0) {
+            val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+            return;
+        }
+        /* Read out the bottom 8 bits of GICR_ISENABLER0 */
+        data = val_mmio_read(pe_rdbase + RD_FRAME_SIZE + GICR_ISENABLER) | 0xFFFF;
+
+        val_mmio_write(pe_rdbase + RD_FRAME_SIZE + GICR_ISENABLER, data);
+        data = val_mmio_read(pe_rdbase + RD_FRAME_SIZE + GICR_ISENABLER) | 0xFFFF;
+        val_print(ACS_PRINT_DEBUG, "  data 0x%x", data);
+        data = VAL_EXTRACT_BITS(data, 0, 7);
         if (data == 0xFF) {
             val_set_status(index, RESULT_PASS(TEST_NUM, 1));
             return;
@@ -72,7 +86,7 @@ payload()
                 "\n       GICR_ISENABLER0: %X\n ", data);
             val_print(ACS_PRINT_ERR,
                 "\n       INTID 0 - 7 not implemented as non-secure SGIs", 0);
-            val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+            val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
             return;
         }
     }
@@ -90,7 +104,7 @@ payload()
                 "\n       GICD_IENABLER<n>: %X\n ", data);
             val_print(ACS_PRINT_ERR,
                 "\n       INTID 0 - 7 not implemented as non-secure SGIs", 0);
-            val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+            val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
             return;
         }
     }

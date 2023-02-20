@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -120,7 +120,7 @@ WakeUpRD(void)
   uint64_t                cpuRd_base;
   uint32_t                tmp;
 
-  rd_base = val_get_gicr_base(&rdbase_len);
+  rd_base = val_get_gicr_base(&rdbase_len, 0);
   cpuRd_base = CurrentCpuRDBase(rd_base, rdbase_len);
   if (cpuRd_base == 0) {
     return;
@@ -145,7 +145,7 @@ uint64_t v3_get_pe_gicr_base(void)
   uint32_t                rdbase_len;
   uint64_t                rd_base;
 
-  rd_base = val_get_gicr_base(&rdbase_len);
+  rd_base = val_get_gicr_base(&rdbase_len, 0);
 
   return CurrentCpuRDBase(rd_base, rdbase_len);
 }
@@ -198,7 +198,7 @@ v3_DisableInterruptSource(uint32_t int_id)
   if (IsSpi(int_id)) {
       val_mmio_write(val_get_gicd_base() + GICD_ICENABLER + (4 * regOffset), 1 << regShift);
   } else {
-    rd_base = val_get_gicr_base(&rdbase_len);
+    rd_base = val_get_gicr_base(&rdbase_len, 0);
     cpuRd_base = CurrentCpuRDBase(rd_base, rdbase_len);
     if (cpuRd_base == 0) {
       return;
@@ -233,7 +233,7 @@ v3_EnableInterruptSource(uint32_t int_id)
   if (IsSpi(int_id)) {
       val_mmio_write(val_get_gicd_base() + GICD_ISENABLER + (4 * regOffset), 1 << regShift);
   } else {
-    rd_base = val_get_gicr_base(&rdbase_len);
+    rd_base = val_get_gicr_base(&rdbase_len, 0);
     cpuRd_base = CurrentCpuRDBase(rd_base, rdbase_len);
     if (cpuRd_base == 0) {
       return;
@@ -272,7 +272,7 @@ v3_SetInterruptPriority(uint32_t int_id, uint32_t priority)
                     (val_mmio_read(val_get_gicd_base() + GICD_IPRIORITYR + (4 * regOffset)) &
                      ~(0xff << regShift)) | priority << regShift);
   } else {
-    rd_base = val_get_gicr_base(&rdbase_len);
+    rd_base = val_get_gicr_base(&rdbase_len, 0);
     cpuRd_base = CurrentCpuRDBase(rd_base, rdbase_len);
     if (cpuRd_base == 0) {
       return;
