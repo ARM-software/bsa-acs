@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2022, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,6 +38,37 @@ val_print(uint32_t level, char8_t *string, uint64_t data)
 
   if (level >= g_print_level)
       pal_print(string, data);
+
+}
+
+/**
+  @brief  This API calls PAL layer to print tests status
+          to the output console.
+          1. Caller       - Application layer
+          2. Prerequisite - None.
+
+  @param status the status of the tests
+  @param string formatted ASCII string
+
+  @return        None
+ **/
+void
+val_print_test_end(uint32_t status, char8_t *string)
+{
+  pal_print("\n      ", 0);
+
+  if (status != ACS_STATUS_PASS) {
+      pal_print("One or more ", 0);
+      pal_print(string, 0);
+      pal_print(" tests failed or were skipped.", 0);
+  }
+  else {
+      pal_print("All ", 0);
+      pal_print(string, 0);
+      pal_print(" tests passed.", 0);
+  }
+
+  pal_print("\n", 0);
 
 }
 

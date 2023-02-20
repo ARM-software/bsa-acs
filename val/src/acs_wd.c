@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -69,10 +69,7 @@ if (!g_build_sbsa) { /* For SBSA compliance WD is mandatory */
     status |= os_w002_entry(num_pe);
   }
 
-  if (status != ACS_STATUS_PASS)
-    val_print(ACS_PRINT_TEST, "\n      *** One or more tests have Failed/Skipped.*** \n", 0);
-  else
-    val_print(ACS_PRINT_TEST, "\n       All Watchdog tests passed!! \n", 0);
+  val_print_test_end(status, "Watchdog");
 
   return status;
 }
