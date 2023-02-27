@@ -126,6 +126,7 @@ payload (void)
   uint32_t test_skip = 1;
 
   if (!count) {
+     val_print(ACS_PRINT_DEBUG, "\n       No peripherals found. Skipping test", 0);
      val_set_status (index, RESULT_SKIP(TEST_NUM, 3));
      return;
   }
@@ -145,7 +146,7 @@ payload (void)
       /* Get BDF of a device */
       current_dev_bdf = val_peripheral_get_info (ANY_BDF, count - 1);
       if (current_dev_bdf) {
-        val_print (ACS_PRINT_INFO, "       Checking PCI device with BDF %4X\n", current_dev_bdf);
+        val_print (ACS_PRINT_DEBUG, "\n       Checking PCI device with BDF 0x%X", current_dev_bdf);
         /* Read MSI(X) vectors */
         if (val_get_msi_vectors (current_dev_bdf, &current_dev_mvec)) {
 

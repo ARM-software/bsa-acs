@@ -34,6 +34,7 @@ static void payload(void)
   uint32_t index = val_pe_get_index_mpid (val_pe_get_mpid());
 
   num_per = val_peripheral_get_info(NUM_ALL, 0);
+
   /* For each peripheral check for PASID support */
   /* If PASID is supported, test the max number of PASIDs supported */
   for (num_per--; num_per >= 0; num_per--)
@@ -44,17 +45,20 @@ static void payload(void)
         skip = 0;
         if (max_pasids < MIN_PASID_SUPPORT)
         {
+           val_print(ACS_PRINT_ERR, "\n       Max PASID support less than 16 bits  ", 0);
            val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
            break;
         }
      }
   }
+
   if (num_per < 0)
   {
      /* For each SMMUv3 check for PASID support */
      /* If PASID is supported, test the max number of PASIDs supported */
+
      num_smmu = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
-          for (num_smmu--; num_smmu >= 0; num_smmu--)
+     for (num_smmu--; num_smmu >= 0; num_smmu--)
      {
          if (val_iovirt_get_smmu_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) == 3)
          {
@@ -64,6 +68,7 @@ static void payload(void)
                  skip = 0;
                  if (max_pasids < MIN_PASID_SUPPORT)
                  {
+                    val_print(ACS_PRINT_ERR, "\n      Max PASID support less than 16 bits  ", 0);
                     val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
                     break;
                  }
@@ -71,6 +76,7 @@ static void payload(void)
          }
      }
   }
+
   if (num_smmu < 0) {
       if (skip)
           val_set_status(index, RESULT_SKIP(TEST_NUM, 3));

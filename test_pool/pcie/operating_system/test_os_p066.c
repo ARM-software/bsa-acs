@@ -45,11 +45,14 @@ payload(void)
     while (tbl_index < bdf_tbl_ptr->num_entries)
     {
         dev_bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
+        val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", dev_bdf);
 
         dev_type = val_pcie_get_device_type(dev_bdf);
         /* Allow only type-1 headers and skip others */
-        if (dev_type != 3)
-            continue;
+        if (dev_type != 3) {
+          val_print(ACS_PRINT_DEBUG, "\n       Skipping Non Type-1 headers", 0);
+          continue;
+        }
 
         ret = val_pcie_read_cfg(dev_bdf, BAR0, &bar_data);
         if (bar_data) {

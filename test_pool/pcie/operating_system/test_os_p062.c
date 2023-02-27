@@ -43,7 +43,7 @@ payload(void)
   target_dev_index = val_dma_get_info(DMA_NUM_CTRL, 0);
 
   if (!target_dev_index) {
-      val_print(ACS_PRINT_TEST, "\n       No DMA controllers detected...    ", 0);
+      val_print(ACS_PRINT_DEBUG, "\n       No DMA controllers detected...    ", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
       return;
   }

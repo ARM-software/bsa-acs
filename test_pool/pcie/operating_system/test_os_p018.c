@@ -45,13 +45,14 @@ payload(void)
   /* Check If PCIe Hierarchy supports P2P */
   if (val_pcie_p2p_support() == NOT_IMPLEMENTED) {
     val_print(ACS_PRINT_DEBUG, "\n       pal_pcie_p2p_support API is unimplemented ", 0);
-    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
     return;
   }
 
   if (val_pcie_p2p_support())
   {
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+      val_print(ACS_PRINT_DEBUG, "\n       PCIe hierarchy does not support P2P. Skipping test", 0);
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
       return;
   }
 
@@ -69,26 +70,27 @@ payload(void)
       {
           /* Test runs for atleast an endpoint */
           test_skip = 0;
+          val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", bdf);
 
           /* It ACS Not Supported, Fail. */
           if (val_pcie_find_capability(bdf, PCIE_ECAP, ECID_ACS, &cap_base) != PCIE_SUCCESS) {
-              val_print(ACS_PRINT_ERR, "\n       BDF 0x%x: ACS Cap unsupported",
-                                                                bdf);
+              val_print(ACS_PRINT_ERR, "\n       BDF 0x%x: ACS Cap unsupported", bdf);
               test_fails++;
               continue;
           }
 
           /* If AER Not Supported, Fail. */
           if (val_pcie_find_capability(bdf, PCIE_ECAP, ECID_AER, &cap_base) != PCIE_SUCCESS) {
-              val_print(ACS_PRINT_DEBUG, "\n       BDF 0x%x: AER Cap "
-                                                        "unsupported", bdf);
+              val_print(ACS_PRINT_ERR, "\n       BDF 0x%x: AER Cap unsupported", bdf);
               test_fails++;
           }
       }
   }
 
-  if (test_skip == 1)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
+  if (test_skip == 1) {
+      val_print(ACS_PRINT_DEBUG, "\n       No RP type device found. Skipping test", 0);
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 3));
+  }
   else if (test_fails)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, test_fails));
   else

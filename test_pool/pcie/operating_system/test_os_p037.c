@@ -58,7 +58,7 @@ payload(void)
       dp_type = val_pcie_device_port_type(bdf);
       if ((dp_type == RP) || (dp_type == iEP_RP)) {
         /* Read Vendor ID of RP with ECAM based mechanism, and compare it with the */
-        val_print(ACS_PRINT_DEBUG, "\n    BDF 0x%x", bdf);
+        val_print(ACS_PRINT_DEBUG, "\n       BDF 0x%x", bdf);
         ecam_base = val_pcie_get_ecam_base(bdf);
 
         /* If test runs for atleast an endpoint */
@@ -81,14 +81,16 @@ payload(void)
 
         if (ecam_cc != pciio_proto_cc)
         {
-          val_print(ACS_PRINT_ERR, "\n        Config Txn Error : 0x%x ", bdf);
+          val_print(ACS_PRINT_ERR, "\n       Config Txn Error : 0x%x ", bdf);
           fail_cnt++;
         }
       }
   }
 
-  if (test_skip == 1)
+  if (test_skip == 1) {
+      val_print(ACS_PRINT_DEBUG, "\n       No RP/ iEP_RP type device found. Skipping test", 0);
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+  }
   else if (fail_cnt)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, fail_cnt));
   else

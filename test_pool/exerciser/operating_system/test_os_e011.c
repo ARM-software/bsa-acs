@@ -87,10 +87,11 @@ payload (void)
 
     /* Get the exerciser BDF */
     e_bdf = val_exerciser_get_bdf(instance);
+    val_print(ACS_PRINT_DEBUG, "\n       Exerciser BDF - 0x%x", e_bdf);
 
     /* Search for MSI-X Capability */
     if (val_pcie_find_capability(e_bdf, PCIE_CAP, CID_MSIX, &msi_cap_offset)) {
-      val_print(ACS_PRINT_INFO, "\n       No MSI-X Capability, Skipping for 0x%x", e_bdf);
+      val_print(ACS_PRINT_DEBUG, "\n       No MSI-X Capability, Skipping for 0x%x", e_bdf);
       continue;
     }
 
@@ -130,8 +131,7 @@ payload (void)
           continue;
       }
 
-      val_print(ACS_PRINT_DEBUG, "\n       ITS Check for ITS ID : %x        "
-                                    "      ", its_id);
+      val_print(ACS_PRINT_DEBUG, "\n       ITS Check for ITS ID : %x       ", its_id);
       status = val_gic_request_msi(e_bdf, device_id, its_id, base_lpi_id + instance, msi_index);
       if (status) {
           val_print(ACS_PRINT_ERR,

@@ -173,6 +173,7 @@ payload (void)
 
     /* Get the exerciser BDF */
     e_bdf = val_exerciser_get_bdf(instance);
+    val_print(ACS_PRINT_DEBUG, "\n       Exerciser BDF - 0x%x", e_bdf);
 
     /* Find SMMU node index for this exerciser instance */
     smmu_index = val_iovirt_get_rc_smmu_index(PCIE_EXTRACT_BDF_SEG(e_bdf),

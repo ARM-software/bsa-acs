@@ -167,6 +167,7 @@ payload(void)
 
     /* Get exerciser bdf */
     e_bdf = val_exerciser_get_bdf(instance);
+    val_print(ACS_PRINT_DEBUG, "\n       Exerciser BDF - 0x%x", e_bdf);
 
     /* Find SMMU node index for this pcie endpoint */
     master.smmu_index = val_iovirt_get_rc_smmu_index(PCIE_EXTRACT_BDF_SEG(e_bdf),
@@ -180,7 +181,7 @@ payload(void)
 
     if (smmu_ssid_bits < MIN_PASID_BITS || smmu_ssid_bits > MAX_PASID_BITS)
     {
-        val_print(ACS_PRINT_ERR, "SMMU substreamid support error %d\n", smmu_ssid_bits);
+        val_print(ACS_PRINT_ERR, "\n       SMMU substreamid support error %d", smmu_ssid_bits);
         goto test_fail;
     }
 
@@ -202,7 +203,8 @@ payload(void)
     }
     if (exerciser_ssid_bits < MIN_PASID_BITS)
     {
-        val_print(ACS_PRINT_ERR, "exerciser substreamid support error %d\n", exerciser_ssid_bits);
+        val_print(ACS_PRINT_ERR,
+                "\n       exerciser substreamid support error %d", exerciser_ssid_bits);
         goto test_fail;
     }
 
@@ -234,18 +236,27 @@ payload(void)
 
         /* Need to know input and output address sizes before creating page table */
         pgt_desc.ias = val_smmu_get_info(SMMU_IN_ADDR_SIZE, master.smmu_index);
-        if (pgt_desc.ias == 0)
+        if (pgt_desc.ias == 0) {
+            val_print(ACS_PRINT_ERR,
+                     "\n       Input address size 0 for SMMU %d", master.smmu_index);
             goto test_fail;
+        }
 
         pgt_desc.oas = val_smmu_get_info(SMMU_OUT_ADDR_SIZE, master.smmu_index);
-        if (pgt_desc.oas == 0)
+        if (pgt_desc.oas == 0) {
+            val_print(ACS_PRINT_ERR,
+                     "\n       Output address size 0 for SMMU %d", master.smmu_index);
             goto test_fail;
+        }
 
         /* set pgt_desc.pgt_base to NULL to create new translation table, val_pgt_create
            will update pgt_desc.pgt_base to point to created translation table */
         pgt_desc.pgt_base = (uint64_t) NULL;
-        if (val_pgt_create(mem_desc, &pgt_desc))
+        if (val_pgt_create(mem_desc, &pgt_desc)) {
+            val_print(ACS_PRINT_ERR,
+                     "\n       Unable to create page table with given attributes", 0);
             goto test_fail;
+        }
 
         pgt_base_pasid1 = pgt_desc.pgt_base;
 
@@ -323,8 +334,11 @@ payload(void)
     /* set pgt_desc.pgt_base to NULL to create new translation table, val_pgt_create
        will update pgt_desc.pgt_base to point to created translation table */
     pgt_desc.pgt_base = (uint64_t) NULL;
-    if (val_pgt_create(mem_desc, &pgt_desc))
-        goto test_fail;
+    if (val_pgt_create(mem_desc, &pgt_desc)) {
+            val_print(ACS_PRINT_ERR,
+                     "\n       Unable to create page table with given attributes", 0);
+            goto test_fail;
+        }
 
     pgt_base_pasid2 = pgt_desc.pgt_base;
 

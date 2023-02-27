@@ -95,8 +95,10 @@ payload(void)
       }
   }
 
-  if (test_skip == 1)
+  if (test_skip == 1) {
+      val_print(ACS_PRINT_DEBUG, "\n       No RP/ iEP_RP type device found. Skipping test", 0);
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+  }
   else if (test_fail)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, test_fail));
   else

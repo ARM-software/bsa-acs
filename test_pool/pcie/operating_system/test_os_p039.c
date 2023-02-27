@@ -56,7 +56,7 @@ payload(void)
       /* Check entry is endpoint */
       if (dp_type == EP)
       {
-         val_print(ACS_PRINT_DEBUG, "\n    BDF 0x%x", bdf);
+         val_print(ACS_PRINT_DEBUG, "\n       BDF 0x%x", bdf);
 
          val_pcie_read_cfg(bdf, TYPE01_ILR, &reg_value);
          int_pin = VAL_EXTRACT_BITS(reg_value, TYPE01_IPR_SHIFT, TYPE01_IPR_SHIFT + 7);
@@ -73,8 +73,10 @@ payload(void)
          /* If MSI or MSI-X not supported, but INTx supported test fails */
          if ((val_pcie_find_capability(bdf, PCIE_CAP, CID_MSI, &cap_base) == PCIE_CAP_NOT_FOUND)
           && (val_pcie_find_capability(bdf, PCIE_CAP, CID_MSIX, &cap_base) == PCIE_CAP_NOT_FOUND)
-           && ((int_pin >= 1) && (int_pin <= 4)))
-              test_fails++;
+           && ((int_pin >= 1) && (int_pin <= 4))) {
+            val_print(ACS_PRINT_ERR, "\n       INTx supported but MSI/MSI-X not supported", 0);
+            test_fails++;
+           }
       }
   }
 

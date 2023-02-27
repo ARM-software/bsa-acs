@@ -112,10 +112,14 @@ payload(void)
           continue;
 
       e_bdf = val_exerciser_get_bdf(instance);
+      val_print(ACS_PRINT_DEBUG, "\n       Exerciser BDF - 0x%x", e_bdf);
 
       /* Check if exerciser is child of one of the rootports */
-      if (val_pcie_parent_is_rootport(e_bdf, &erp_bdf))
+      if (val_pcie_parent_is_rootport(e_bdf, &erp_bdf)) {
+          val_print(ACS_PRINT_DEBUG,
+              "\n       Exerciser not a downstream device to RP. Skipping 0x%x", e_bdf);
           continue;
+      }
 
       /* Find right sibling of the exerciser rootport */
       if (!get_rp_right_sibling(erp_bdf, &erp_rs_bdf))

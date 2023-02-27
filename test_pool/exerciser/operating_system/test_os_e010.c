@@ -55,10 +55,15 @@ payload(void)
           continue;
 
       e_bdf = val_exerciser_get_bdf(instance);
+      val_print(ACS_PRINT_DEBUG, "\n       Exerciser BDF - 0x%x", e_bdf);
 
       /* Check if exerciser is child of one of the rootports */
-      if (val_pcie_parent_is_rootport(e_bdf, &erp_bdf))
+      if (val_pcie_parent_is_rootport(e_bdf, &erp_bdf)) {
+          val_print(ACS_PRINT_DEBUG,
+              "\n       Exerciser not a downstream device to RP. Skipping 0x%x", e_bdf);
           continue;
+      }
+
       /*
        * Generate a config request from PE to the Secondary bus
        * of the exerciser's root port. Exerciser should see this
@@ -67,6 +72,7 @@ payload(void)
       status = val_exerciser_ops(START_TXN_MONITOR, CFG_READ, instance);
       if (status == PCIE_CAP_NOT_FOUND)
       {
+          val_print(ACS_PRINT_DEBUG, "\n       Unable to start transaction monitoring", 0);
           val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
           return;
       }
@@ -75,6 +81,7 @@ payload(void)
       status = val_exerciser_ops(STOP_TXN_MONITOR, CFG_READ, instance);
       if (status == PCIE_CAP_NOT_FOUND)
       {
+          val_print(ACS_PRINT_DEBUG, "\n       Unable to stop transaction monitoring", 0);
           val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 02));
           return;
       }

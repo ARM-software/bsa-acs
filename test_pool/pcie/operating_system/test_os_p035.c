@@ -100,9 +100,12 @@ payload(void)
       /* Check entry is  RCiEP or normal EP */
       if ((dp_type == RCiEP) || (dp_type == EP))
       {
+
+          val_print(ACS_PRINT_DEBUG, "\n       BDF 0x%x ", bdf);
+
           /* Read FLR capability bit value */
           if (val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &cap_base) != PCIE_SUCCESS) {
-              val_print(ACS_PRINT_INFO, "PCIe Express Capability not present ", 0);
+              val_print(ACS_PRINT_DEBUG, "\n       PCIe Express Capability not present ", 0);
               continue;
           }
           val_pcie_read_cfg(bdf, cap_base + DCAPR_OFFSET, &reg_value);
@@ -119,15 +122,14 @@ payload(void)
           /* If memory allocation fail, fail the test */
           if (func_config_space == NULL)
           {
-              val_print(ACS_PRINT_ERR, "\n Memory allocation fail", 0);
+              val_print(ACS_PRINT_ERR, "\n       Memory allocation fail", 0);
               val_set_status(pe_index, RESULT_FAIL(TEST_NUM, test_fails));
               return;
           }
 
           /* Get function configuration space address */
           config_space_addr = val_pcie_get_bdf_config_addr(bdf);
-          val_print(ACS_PRINT_INFO, "\n    BDF 0x%x ", bdf);
-          val_print(ACS_PRINT_INFO, "config space addr 0x%x", config_space_addr);
+          val_print(ACS_PRINT_INFO, "  config space addr 0x%x", config_space_addr);
 
           /* Save the function config space to restore after FLR */
           for (idx = 0; idx < PCIE_CFG_SIZE / 4; idx++) {
@@ -156,7 +158,7 @@ payload(void)
           val_pcie_read_cfg(bdf, 0, &reg_value);
           if ((reg_value & TYPE01_VIDR_MASK) == TYPE01_VIDR_MASK)
           {
-              val_print(ACS_PRINT_ERR, "\n BDF 0x%x not present", bdf);
+              val_print(ACS_PRINT_ERR, "\n       BDF 0x%x not present", bdf);
               test_fails++;
               val_memory_free(func_config_space);
               continue;
@@ -174,8 +176,11 @@ payload(void)
       }
   }
 
-  if (test_skip == 1)
+  if (test_skip == 1) {
+      val_print(ACS_PRINT_DEBUG,
+        "\n       No RCiEP/ EP type device found with PCIe Express Cap support. Skipping test", 0);
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+  }
   else if (test_fails)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, test_fails));
   else
