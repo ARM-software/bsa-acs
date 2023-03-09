@@ -366,6 +366,7 @@ val_iovirt_get_device_info(uint32_t rid, uint32_t segment, uint32_t *device_id,
 void
 val_iovirt_create_info_table(uint64_t *iovirt_info_table)
 {
+  uint32_t i, smmu_ver;
 
   if (iovirt_info_table == NULL)
   {
@@ -381,6 +382,12 @@ val_iovirt_create_info_table(uint64_t *iovirt_info_table)
   g_num_smmus = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
   val_print(ACS_PRINT_TEST,
             " SMMU_INFO: Number of SMMU CTRL       :    %d \n", g_num_smmus);
+  for (i = 0; i < g_num_smmus; i++) {
+    smmu_ver = val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, i);
+    val_print(ACS_PRINT_TEST,
+            " SMMU_INFO: SMMU index %.2d ", i);
+    val_print(ACS_PRINT_TEST, "version     :    v%d \n", smmu_ver);
+  }
 }
 
 /**

@@ -57,6 +57,7 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 {
   uint32_t status, i;
   uint32_t num_smmu;
+  uint32_t ver_smmu;
 
   status = ACS_STATUS_PASS;
 
@@ -84,6 +85,7 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   g_curr_module = 1 << SMMU_MODULE;
 
+  ver_smmu = val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, 0);
   if (g_sw_view[G_SW_OS]) {
        val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
        status |= os_i001_entry(num_pe);
@@ -96,7 +98,8 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
        val_print(ACS_PRINT_ERR, "\nHypervisor View:\n", 0);
        status |= hyp_i001_entry(num_pe);
        status |= hyp_i002_entry(num_pe);
-       status |= hyp_i003_entry(num_pe);
+       if (ver_smmu == 2)
+           status |= hyp_i003_entry(num_pe);
        status |= hyp_i004_entry(num_pe);
   }
 
