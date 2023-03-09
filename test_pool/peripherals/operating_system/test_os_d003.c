@@ -1,6 +1,6 @@
 
 /** @file
- * Copyright (c) 2016-2018, 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,6 @@
 
 #define TEST_NUM   (ACS_PER_TEST_NUM_BASE + 3)
 #define TEST_RULE  "B_PER_05"
-/*one space character is removed from TEST_DESC, to nullify a space written as part of the test */
 #define TEST_DESC  "Check Arm BSA UART register offsets   "
 #define TEST_NUM1  (ACS_PER_TEST_NUM_BASE + 4)
 #define TEST_RULE1 "B_PER_06, B_PER_07"
@@ -175,8 +174,6 @@ payload()
           validate_register_access(BSA_UARTFR, WIDTH_BIT8 | WIDTH_BIT16 | WIDTH_BIT32);
           validate_register_access(BSA_UARTRIS, WIDTH_BIT16 | WIDTH_BIT32);
           validate_register_access(BSA_UARTMIS, WIDTH_BIT16 | WIDTH_BIT32);
-          /* Writing bits 11:8 as F and writing space character (0x20) to UART data register */
-          uart_reg_write(BSA_UARTDR, WIDTH_BIT32, 0xF20);
 
           val_set_status(index, RESULT_PASS(TEST_NUM, 1));
       }
@@ -223,7 +220,8 @@ payload1()
               }
 
               uart_enable_txintr();
-              val_print_raw(l_uart_base, g_print_level, "\n    Test Message  ", 0);
+              val_print_raw(l_uart_base, g_print_level,
+                            "\n       Test Message                          ", 0);
 
               while ((--timeout > 0) && (IS_RESULT_PENDING(val_get_status(index)))) {
               };
