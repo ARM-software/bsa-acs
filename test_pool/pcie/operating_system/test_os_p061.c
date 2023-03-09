@@ -74,7 +74,7 @@ payload(void)
   status |= val_pe_install_esr(EXCEPT_AARCH64_SERROR, esr);
   if (status)
   {
-      val_print(ACS_PRINT_ERR, "\n      Failed in installing the exception handler", 0);
+      val_print(ACS_PRINT_ERR, "\n       Failed in installing the exception handler", 0);
       val_set_status(index, RESULT_FAIL(TEST_NUM, 01));
       return;
   }
@@ -104,19 +104,23 @@ next_bdf:
           if (bar_value == 0)
           {
               /** This BAR is not implemented **/
+              val_print(ACS_PRINT_DEBUG, "\n       BAR is not implemented for BDF 0x%x", bdf);
               tbl_index++;
               goto next_bdf;
           }
 
           /* Skip for IO address space */
           if (bar_value & 0x1) {
+              val_print(ACS_PRINT_DEBUG, "\n       BAR is used for IO address space request", 0);
+              val_print(ACS_PRINT_DEBUG, " for BDF 0x%x", bdf);
               tbl_index++;
               goto next_bdf;
           }
 
           if (BAR_REG(bar_value) == BAR_64_BIT)
           {
-              val_print(ACS_PRINT_INFO, "BAR supports 64-bit address decoding capability \n", 0);
+              val_print(ACS_PRINT_INFO,
+                  "\n       BAR supports 64-bit address decoding capability", 0);
               val_pcie_read_cfg(bdf, offset+4, &bar_value_1);
               base = bar_value_1;
 
@@ -139,7 +143,8 @@ next_bdf:
           }
 
           else {
-              val_print(ACS_PRINT_INFO, "The BAR supports 32-bit address decoding capability\n", 0);
+              val_print(ACS_PRINT_INFO,
+                  "\n       The BAR supports 32-bit address decoding capability", 0);
 
               /* BAR supports 32-bit address. Write all 1's
                * to BARn and identify the size requested
@@ -158,7 +163,7 @@ next_bdf:
 
           /* Check if bar supports the remap size */
           if (bar_size < 1024) {
-              val_print(ACS_PRINT_ERR, "Bar size less than remap requested size", 0);
+              val_print(ACS_PRINT_ERR, "\n       Bar size less than remap requested size", 0);
               goto next_bar;
           }
 

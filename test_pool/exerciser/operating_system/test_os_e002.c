@@ -342,13 +342,14 @@ payload(void)
   /* Check If PCIe Hierarchy supports P2P. */
   if (val_pcie_p2p_support() == NOT_IMPLEMENTED) {
     val_print(ACS_PRINT_DEBUG, "\n       pal_pcie_p2p_support API is unimplemented ", 0);
-    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
     return;
   }
 
   if (val_pcie_p2p_support())
   {
-    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+    val_print(ACS_PRINT_DEBUG, "\n       PCIe Heirarchy does not support P2P", 0);
+    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
     return;
   }
 
@@ -372,7 +373,8 @@ payload(void)
           continue;
 
       req_e_bdf = val_exerciser_get_bdf(instance);
-
+      val_print(ACS_PRINT_DEBUG, "\n       Requester exerciser BDF - 0x%x", req_e_bdf);
+      
       /* Get RP of the exerciser */
       if (val_pcie_get_rootport(req_e_bdf, &req_rp_bdf))
           continue;
@@ -453,7 +455,7 @@ payload(void)
   }
 
   if (test_skip == 1)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 3));
   else if (fail_cnt)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, fail_cnt));
   else

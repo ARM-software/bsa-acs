@@ -57,6 +57,7 @@ payload(void)
   while (tbl_index < bdf_tbl_ptr->num_entries)
   {
       bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
+      val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", bdf);
 
       /* Read Interrupt Line Register */
       val_pcie_read_cfg(bdf, TYPE01_ILR, &reg_value);
@@ -68,7 +69,17 @@ payload(void)
       status = val_pci_get_legacy_irq_map(bdf, intr_map);
       if (status) {
         // Skip the test if the Legacy IRQ map does not exist
-        val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
+          if (status == NOT_IMPLEMENTED) {
+            val_print (ACS_PRINT_DEBUG,
+                        "\n       pal_pcie_get_legacy_irq_map unimplemented. Skipping test", 0);
+            val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
+        }
+        else {
+            val_print (ACS_PRINT_DEBUG,
+                        "\n       PCIe Legacy IRQs unmapped. Skipping test", 0);
+            val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 3));
+        }
+
         return;
       }
 
@@ -101,6 +112,8 @@ payload(void)
       }
 
       if (trigger_type != INTR_TRIGGER_INFO_LEVEL_HIGH) {
+        val_print(ACS_PRINT_ERR,
+            "\n       Legacy interrupt programmed with incorrect trigger type", 0);
         val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 5));
         return;
       }

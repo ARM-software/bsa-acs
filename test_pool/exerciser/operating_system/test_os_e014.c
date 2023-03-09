@@ -143,6 +143,7 @@ payload(void)
           continue;
 
       req_e_bdf = val_exerciser_get_bdf(instance);
+      val_print(ACS_PRINT_DEBUG, "\n       Requester exerciser BDF - 0x%x", req_e_bdf);
 
       /* Get RP of the exerciser */
       if (val_pcie_get_rootport(req_e_bdf, &req_rp_bdf))
@@ -153,6 +154,7 @@ payload(void)
       if (get_target_exer_bdf(req_rp_bdf, &tgt_e_bdf, &tgt_rp_bdf, &bar_base))
           continue;
 
+      val_print(ACS_PRINT_DEBUG, "\n       Target exerciser BDF - 0x%x", tgt_e_bdf);
       test_skip = 0;
 
       /* Check if P2P transaction causes any deadlock */
