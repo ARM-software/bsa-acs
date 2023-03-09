@@ -58,7 +58,7 @@ val_pcie_read_cfg(uint32_t bdf, uint32_t offset, uint32_t *data)
   }
 
   if (g_pcie_info_table == NULL) {
-      val_print(ACS_PRINT_ERR, "\n       Read_PCIe_CFG: PCIE info table is not created", 0);
+      val_print(ACS_PRINT_ERR, "\n       PCIe_CFG_RD PCIE info table is not created", 0);
       return PCIE_NO_MAPPING;
   }
 
@@ -75,7 +75,7 @@ val_pcie_read_cfg(uint32_t bdf, uint32_t offset, uint32_t *data)
   }
 
   if (ecam_base == 0) {
-      val_print(ACS_PRINT_ERR, "\n       Read PCIe_CFG: ECAM Base is zero %x", bdf);
+      val_print(ACS_PRINT_ERR, "\n       PCIe_CFG_RD ECAM Base is zero %.8x", bdf);
       return PCIE_NO_MAPPING;
   }
 
@@ -151,7 +151,7 @@ val_pcie_write_cfg(uint32_t bdf, uint32_t offset, uint32_t data)
   }
 
   if (ecam_base == 0) {
-      val_print(ACS_PRINT_ERR, "\n       Write PCIe_CFG: ECAM Base is zero %x", bdf);
+      val_print(ACS_PRINT_ERR, "\n       PCIe_CFG_WR ECAM Base is zero %.8x", bdf);
       return;
   }
 
