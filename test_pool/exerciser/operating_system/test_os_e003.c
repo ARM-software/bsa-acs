@@ -233,10 +233,14 @@ cfgspace_transactions_order_check(void)
 
     /* Get exerciser bdf */
     bdf = val_exerciser_get_bdf(instance);
+    val_print(ACS_PRINT_DEBUG, "\n       Exerciser BDF - 0x%x", bdf);
 
     /* If exerciser doesn't have PCI_CAP skip the bdf */
-    if (val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &cid_offset) == PCIE_CAP_NOT_FOUND)
+    if (val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &cid_offset) == PCIE_CAP_NOT_FOUND) {
+        val_print(ACS_PRINT_DEBUG,
+            "\n        PCIe Express Capability not found. Skipping exerciser 0x%x", bdf);
         continue;
+    }
 
     bdf_addr = val_pcie_get_bdf_config_addr(bdf);
 
@@ -244,7 +248,7 @@ cfgspace_transactions_order_check(void)
     baseptr = (char *)val_memory_ioremap((void *)bdf_addr, 512, DEVICE_nGnRnE);
 
     if (!baseptr) {
-        val_print(ACS_PRINT_ERR, "\n       Failed in config ioremap for instance %x", instance);
+        val_print(ACS_PRINT_DEBUG, "\n       Failed in config ioremap for instance 0x%x", instance);
         continue;
     }
 
@@ -270,6 +274,7 @@ void
 barspace_transactions_order_check(void)
 {
   uint32_t instance;
+  uint32_t bdf;
   exerciser_data_t e_data;
   char *baseptr;
   uint32_t status;
@@ -283,25 +288,32 @@ barspace_transactions_order_check(void)
     if (val_exerciser_init(instance))
         continue;
 
+    /* Get exerciser bdf */
+    bdf = val_exerciser_get_bdf(instance);
+    val_print(ACS_PRINT_DEBUG, "\n       Exerciser BDF - 0x%x", bdf);
+
     /* Get BAR 0 details for this instance */
     status = val_exerciser_get_data(EXERCISER_DATA_MMIO_SPACE, &e_data, instance);
     if (status == NOT_IMPLEMENTED) {
         val_print(ACS_PRINT_ERR, "\n      pal_exerciser_get_data() for MMIO not implemented", 0);
         continue;
     } else if (status) {
-        val_print(ACS_PRINT_ERR, "\n       Exerciser %d data read error     ", instance);
+        val_print(ACS_PRINT_ERR, "\n       Exerciser 0x%x data read error     ", bdf);
         continue;
     }
 
     /* If BAR region is not Prefetchable, skip the exerciser */
-    if (e_data.bar_space.type != MMIO_PREFETCHABLE)
+    if (e_data.bar_space.type != MMIO_PREFETCHABLE) {
+        val_print(ACS_PRINT_DEBUG,
+                "\n       BAR region is not prefetchable. Skipping exerciser 0x%x", bdf);
         continue;
+    }
 
     /* Map mmio space to ARM device memory in MMU page tables */
     baseptr = (char *)val_memory_ioremap((void *)e_data.bar_space.base_addr, 512, DEVICE_nGnRnE);
 
     if (!baseptr) {
-        val_print(ACS_PRINT_ERR, "\n       Failed in BAR ioremap for instance %x", instance);
+        val_print(ACS_PRINT_ERR, "\n       Failed in BAR ioremap for instance 0x%x", instance);
         continue;
     }
 

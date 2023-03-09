@@ -47,6 +47,7 @@ payload(void)
   /* Check If PCIe Hierarchy supports P2P */
   if (val_pcie_p2p_support())
   {
+      val_print(ACS_PRINT_DEBUG, "\n       PCIe hierarchy does not support P2P. Skipping test", 0);
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
@@ -65,6 +66,7 @@ payload(void)
       {
           /* Test runs for atleast an endpoint */
           test_skip = 0;
+          val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", bdf);
 
           /* Read the ACS Capability */
           if (val_pcie_find_capability(bdf, PCIE_ECAP, ECID_ACS, &cap_base) != PCIE_SUCCESS) {
@@ -121,8 +123,10 @@ payload(void)
       }
   }
 
-  if (test_skip == 1)
+  if (test_skip == 1) {
+      val_print(ACS_PRINT_DEBUG, "\n       No RP type device found. Skipping device", 0);
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
+  }
   else if (test_fails)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, test_fails));
   else

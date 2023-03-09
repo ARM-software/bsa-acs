@@ -123,7 +123,8 @@ check_source_validation (uint32_t req_instance, uint32_t req_rp_bdf, uint64_t ba
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)bar_base, 1, req_instance);
 
   if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance)) {
-      val_print(ACS_PRINT_ERR, "\nSrc Validation 1st DMA failure from exerciser %4x", req_instance);
+      val_print(ACS_PRINT_ERR,
+              "\n       Src Validation 1st DMA failure from exerciser 0x%4x", req_instance);
       return ACS_STATUS_FAIL;
   }
 
@@ -144,7 +145,8 @@ check_source_validation (uint32_t req_instance, uint32_t req_rp_bdf, uint64_t ba
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)bar_base, 1, req_instance);
 
   if (!val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance)) {
-      val_print(ACS_PRINT_ERR, "\nSrc Validation 2nd DMA failure from exerciser %4x", req_instance);
+      val_print(ACS_PRINT_ERR,
+              "\n       Src Validation 2nd DMA failure from exerciser 0x%4x", req_instance);
       return ACS_STATUS_FAIL;
   }
 
@@ -179,7 +181,8 @@ check_transaction_blocking (uint32_t req_instance, uint32_t req_rp_bdf, uint64_t
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)bar_base, 1, req_instance);
 
   if (!val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance)) {
-      val_print(ACS_PRINT_ERR, "\n Traxn blocking DMA failure from exerciser %4x", req_instance);
+      val_print(ACS_PRINT_ERR,
+                "\n       Traxn blocking DMA failure from exerciser 0x%4x", req_instance);
       return ACS_STATUS_FAIL;
   }
 
@@ -224,13 +227,14 @@ payload(void)
   /* Check If PCIe Hierarchy supports P2P. */
   if (val_pcie_p2p_support() == NOT_IMPLEMENTED) {
     val_print(ACS_PRINT_DEBUG, "\n       pal_pcie_p2p_support API is unimplemented ", 0);
-    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
+    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
     return;
   }
 
   if (val_pcie_p2p_support())
   {
-    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+    val_print(ACS_PRINT_DEBUG, "\n       PCIe hierarchy does not support P2P ", 0);
+    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
     return;
   }
 
@@ -242,6 +246,7 @@ payload(void)
           continue;
 
       req_e_bdf = val_exerciser_get_bdf(instance);
+      val_print(ACS_PRINT_DEBUG, "\n       Requester exerciser BDF - 0x%x", req_e_bdf);
 
       /* Get RP of the exerciser */
       if (val_pcie_get_rootport(req_e_bdf, &req_rp_bdf))
@@ -263,6 +268,8 @@ payload(void)
          Break from the test if no such exerciser if found */
       if (get_target_exer_bdf(req_rp_bdf, &tgt_e_bdf, &tgt_rp_bdf, &bar_base))
           continue;
+
+      val_print(ACS_PRINT_DEBUG, "\n       Target exerciser BDF - 0x%x", tgt_e_bdf);
 
       /* Enable Source Validation & Transaction Blocking */
       val_pcie_read_cfg(tgt_rp_bdf, cap_base + ACSCR_OFFSET, &reg_value);
@@ -299,7 +306,7 @@ payload(void)
   }
 
   if (test_skip == 1)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 3));
   else if (fail_cnt)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, fail_cnt));
   else

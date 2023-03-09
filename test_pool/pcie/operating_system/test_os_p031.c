@@ -47,6 +47,7 @@ payload(void)
   while (tbl_index < bdf_tbl_ptr->num_entries)
   {
       bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
+      val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", bdf);
 
       /* Read 32-bits from Cache Line Size register offset */
       val_pcie_read_cfg(bdf, TYPE01_CLSR, &reg_value);
@@ -64,7 +65,7 @@ payload(void)
       if (((reg_value & BIST_BC_MASK) == 0x00) &&
          (((reg_value & BIST_CC_MASK) != 0x00) || ((reg_value & BIST_SB_MASK) != 0x00)))
       {
-          val_print(ACS_PRINT_ERR, "\n        BDF 0x%x", bdf);
+          val_print(ACS_PRINT_ERR, "\n       BDF 0x%x", bdf);
           val_print(ACS_PRINT_ERR, " BIST Reg Value : %d", reg_value);
           test_fails++;
       }

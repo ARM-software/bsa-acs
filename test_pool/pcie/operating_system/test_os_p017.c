@@ -76,6 +76,7 @@ payload(void)
               test_fails++;
               continue;
           }
+
           val_pcie_read_cfg(bdf, cap_base + ACSCR_OFFSET, &acs_data);
 
           /* Extract ACS directed translated p2p bit */
@@ -88,8 +89,11 @@ payload(void)
       }
   }
 
-  if (test_skip == 1)
+  if (test_skip == 1) {
+      val_print(ACS_PRINT_DEBUG,
+           "\n       No RP type device found with P2P and ATS Support. Skipping test", 0);
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+  }
   else if (test_fails)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, test_fails));
   else

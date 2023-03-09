@@ -90,6 +90,7 @@ payload (void)
 
     /* Get the exerciser BDF */
     e_bdf = val_exerciser_get_bdf(instance);
+    val_print(ACS_PRINT_DEBUG, "\n       Exerciser BDF - 0x%x", e_bdf);
 
     /* Search for MSI-X Capability */
     if (val_pcie_find_capability(e_bdf, PCIE_CAP, CID_MSIX, &msi_cap_offset)) {

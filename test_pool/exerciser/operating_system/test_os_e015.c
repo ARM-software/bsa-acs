@@ -64,6 +64,7 @@ payload(void)
           continue;
 
       e_bdf = val_exerciser_get_bdf(instance);
+      val_print(ACS_PRINT_DEBUG, "\n       Exerciser BDF - 0x%x", e_bdf);
 
       /* ARI Capability not applicable for RCiEP */
       dp_type = val_pcie_device_port_type(e_bdf);
@@ -71,12 +72,15 @@ payload(void)
           continue;
 
       /* Check if exerciser is child of one of the rootports */
-      if (val_pcie_parent_is_rootport(e_bdf, &erp_bdf))
+      if (val_pcie_parent_is_rootport(e_bdf, &erp_bdf)) {
+          val_print(ACS_PRINT_DEBUG,
+              "\n       Exerciser not a downstream device to RP. Skipping 0x%x", e_bdf);
           continue;
+      }
 
       /* Enable the ARI forwarding enable bit in RP */
       if (val_pcie_find_capability(erp_bdf, PCIE_CAP, CID_PCIECS, &cap_base) != PCIE_SUCCESS) {
-          val_print(ACS_PRINT_INFO, "PCIe Express Capability not present ", 0);
+          val_print(ACS_PRINT_DEBUG, "\n       PCIe Express Capability not present ", 0);
           continue;
       }
       val_pcie_read_cfg(erp_bdf, cap_base + DCTL2R_OFFSET, &reg_value);
@@ -86,7 +90,7 @@ payload(void)
 
       /* Enable the ARI forwarding enable bit in Exerciser */
       if (val_pcie_find_capability(e_bdf, PCIE_CAP, CID_PCIECS, &cap_base) != PCIE_SUCCESS) {
-          val_print(ACS_PRINT_INFO, "PCIe Express Capability not present ", 0);
+          val_print(ACS_PRINT_DEBUG, "\n       PCIe Express Capability not present ", 0);
           continue;
       }
       val_pcie_read_cfg(e_bdf, cap_base + DCTL2R_OFFSET, &reg_value);

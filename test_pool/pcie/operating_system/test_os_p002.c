@@ -72,6 +72,7 @@ payload(void)
       val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
       return;
   }
+
   branch_to_test = &&exception_return;
 
   num_ecam = val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);

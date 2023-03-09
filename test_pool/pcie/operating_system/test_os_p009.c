@@ -102,6 +102,7 @@ payload(void)
 
         // Only check for Root Ports
         if (dp_type == RP) {
+            val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", bdf);
             if (check_pcie_cfg_space(bdf)) {
                 val_print(ACS_PRINT_ERR,
                     "\n       Invalid PCIe capability found on dev: %d", tbl_index);

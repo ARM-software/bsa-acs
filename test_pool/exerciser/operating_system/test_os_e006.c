@@ -38,7 +38,7 @@ static void intr_handler(void)
 {
     if (e_intr_pending == 0)
     {
-        val_print(ACS_PRINT_ERR, "\n  Multiple interrupts received", 0);
+        val_print(ACS_PRINT_ERR, "\n       Multiple interrupts received", 0);
         test_fail++;
         return;
     }
@@ -61,7 +61,7 @@ static void intr_handler(void)
     /* Clear the interrupt pending state */
     e_intr_pending = 0;
 
-    val_print(ACS_PRINT_INFO, " \n  Received legacy interrupt %d", e_intr_line);
+    val_print(ACS_PRINT_INFO, " \n       Received legacy interrupt %d", e_intr_line);
 
 }
 
@@ -99,6 +99,7 @@ payload (void)
 
     /* Get the exerciser BDF */
     e_bdf = val_exerciser_get_bdf(instance);
+    val_print(ACS_PRINT_DEBUG, "\n       Exerciser BDF - 0x%x", e_bdf);
 
     /* Check if the PCI interrupt request pins is connected INTA#-through-INTD */
     val_pcie_read_cfg(e_bdf, PCIE_INTERRUPT_LINE, &e_intr_pin);

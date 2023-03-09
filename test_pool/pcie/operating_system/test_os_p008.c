@@ -83,13 +83,12 @@ payload(void)
 
       /* Get the least highest of max bus number */
       bus_index = (PCIE_EXTRACT_BDF_BUS(bdf) < end_bus) ? PCIE_EXTRACT_BDF_BUS(bdf):end_bus;
-      val_print(ACS_PRINT_INFO, "Maximum bus value is 0x%x", bus_index);
+      val_print(ACS_PRINT_INFO, "\n       Maximum bus value is 0x%x", bus_index);
       bus_index += 1;
 
       /* Bus value should not exceed 255 */
       if (bus_index > end_bus) {
-          val_print(ACS_PRINT_ERR, "\n       Bus index exceeded END_BUS Number",
-                                                                            0);
+          val_print(ACS_PRINT_DEBUG, "\n       Bus index exceeded END_BUS Number", 0);
           val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
           return;
       }

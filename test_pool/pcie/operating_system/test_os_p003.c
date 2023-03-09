@@ -93,6 +93,8 @@ payload(void)
        * is same as its RootPort ECAM.
        */
       bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
+      val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", bdf);
+
       dp_type = val_pcie_device_port_type(bdf);
       if (dp_type == EP || dp_type == iEP_EP ||
                dp_type == UP || dp_type == DP) {
@@ -100,15 +102,20 @@ payload(void)
           test_skip = 0;
 
           if (func_ecam_is_rp_ecam(bdf)) {
-              val_print(ACS_PRINT_ERR, "\n        bdf: 0x%x ", bdf);
+              val_print(ACS_PRINT_ERR, "\n       bdf: 0x%x ", bdf);
               val_print(ACS_PRINT_ERR, "dp_type: 0x%x ", dp_type);
+              val_print(ACS_PRINT_ERR, "\n       RP and EP does not share same ECAM region", 0);
               fail_cnt++;
           }
       }
   }
 
-  if (test_skip == 1)
+  if (test_skip == 1) {
+      val_print(ACS_PRINT_DEBUG,
+          "\n       No iEP_EP/ EP/ DP/ UP type device found. Skipping test", 0);
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+  }
+
   else if (fail_cnt)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, fail_cnt));
   else

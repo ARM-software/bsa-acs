@@ -61,6 +61,8 @@ payload(void)
       /* Check entry is Downstream port or RP */
       if ((dp_type == DP) || (dp_type == iEP_RP) || (dp_type == RP))
       {
+          val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", bdf);
+
           /* Read the secondary and subordinate bus number */
           val_pcie_read_cfg(bdf, TYPE1_PBN, &reg_value);
           sec_bus = ((reg_value >> SECBN_SHIFT) & SECBN_MASK);
@@ -82,7 +84,7 @@ payload(void)
 
           /* Disable the ARI forwarding enable bit */
           if (val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &cap_base) != PCIE_SUCCESS) {
-              val_print(ACS_PRINT_INFO, "PCIe Express Capability not present ", 0);
+              val_print(ACS_PRINT_INFO, "  PCIe Express Capability not present ", 0);
               continue;
           }
 
@@ -100,7 +102,7 @@ payload(void)
           if (status || (reg_value == PCIE_UNKNOWN_RESPONSE))
           {
               test_fails++;
-              val_print(ACS_PRINT_ERR, "\n    Dev 0x%x found under", dev_bdf);
+              val_print(ACS_PRINT_ERR, "\n       Dev 0x%x found under", dev_bdf);
               val_print(ACS_PRINT_ERR, " RP bdf 0x%x", bdf);
           }
 
@@ -116,7 +118,7 @@ payload(void)
               if (reg_value != PCIE_UNKNOWN_RESPONSE)
               {
                   test_fails++;
-                  val_print(ACS_PRINT_ERR, "\n    Dev 0x%x found under", dev_bdf);
+                  val_print(ACS_PRINT_ERR, "\n       Dev 0x%x found under", dev_bdf);
                   val_print(ACS_PRINT_ERR, " RP bdf 0x%x", bdf);
               }
           }

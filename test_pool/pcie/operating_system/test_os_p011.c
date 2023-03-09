@@ -59,6 +59,7 @@ payload(void)
       if ((dp_type == RP) || (dp_type == iEP_RP)) {
 
         /* If test runs for atleast an endpoint */
+        val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", bdf);
         test_skip = 0;
 
         /* Get the offset for bus number register in the config header which has
@@ -130,8 +131,10 @@ payload(void)
       }
   }
 
-  if (test_skip)
+  if (test_skip) {
+      val_print(ACS_PRINT_DEBUG, "\n       No RP/ iEP_RP type device found. Skipping test", 0);
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+  }
   if (test_fail)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 1));
   else

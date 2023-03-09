@@ -48,6 +48,7 @@ payload(void)
   while (tbl_index < bdf_tbl_ptr->num_entries)
   {
       bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
+      val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", bdf);
 
       /* Read 32-bits from Capabilities pointer register offset */
       val_pcie_read_cfg(bdf, TYPE01_CPR, &reg_value);
@@ -61,7 +62,7 @@ payload(void)
       /* Check Capabilities Pointer is not NULL and is between 40h and FCh */
       if (!((cap_ptr_value != 0x00) && ((cap_ptr_value >= 0x40) && (cap_ptr_value <= 0xFC))))
       {
-          val_print(ACS_PRINT_ERR, "\n        BDF 0x%x", bdf);
+          val_print(ACS_PRINT_ERR, "\n       BDF 0x%x", bdf);
           val_print(ACS_PRINT_ERR, " Cap Ptr Value: 0x%x", cap_ptr_value);
           test_fails++;
       }
