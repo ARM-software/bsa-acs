@@ -22,6 +22,8 @@
 
 #include "include/bsa_acs_wakeup.h"
 
+extern int32_t gPsciConduit;
+
 /**
   @brief   This API executes all the wakeup tests sequentially
            1. Caller       -  Application layer.
@@ -80,13 +82,13 @@ if (g_build_sbsa) {
 
   @return PSCI Version
 **/
-uint32_t val_get_psci_ver(void)
+static uint32_t val_get_psci_ver(void)
 {
   ARM_SMC_ARGS smc_args;
 
   smc_args.Arg0 = ARM_SMC_ID_PSCI_VERSION;
 
-  pal_pe_call_smc(&smc_args);
+  pal_pe_call_smc(&smc_args, gPsciConduit);
 
   val_print(ACS_PRINT_DEBUG, "\n       PSCI VERSION = %X", smc_args.Arg0);
 
@@ -100,14 +102,14 @@ uint32_t val_get_psci_ver(void)
 
   @return PSCI features
 **/
-uint32_t val_get_psci_features(uint64_t psci_func_id)
+static uint32_t val_get_psci_features(uint64_t psci_func_id)
 {
   ARM_SMC_ARGS smc_args;
 
   smc_args.Arg0 = ARM_SMC_ID_PSCI_FEATURES;
   smc_args.Arg1 = psci_func_id;
 
-  pal_pe_call_smc(&smc_args);
+  pal_pe_call_smc(&smc_args, gPsciConduit);
 
   val_print(ACS_PRINT_DEBUG, "\n       PSCI FEATURS = %d", smc_args.Arg0);
 
@@ -146,7 +148,7 @@ val_suspend_pe(uint64_t entry, uint32_t context_id)
   smc_args.Arg1 = power_state;
   smc_args.Arg2 = entry;
   smc_args.Arg3 = context_id;
-  pal_pe_call_smc(&smc_args);
+  pal_pe_call_smc(&smc_args, gPsciConduit);
 
   return smc_args.Arg0;
 }

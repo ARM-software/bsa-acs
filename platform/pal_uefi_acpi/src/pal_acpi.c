@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2020, 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2020, 2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -269,4 +269,37 @@ pal_get_iort_ptr()
 
   return 0;
 
+}
+
+/**
+  @brief   Iterate through the tables pointed by XSDT and return FADT Table address
+  @param   None
+  @return  64-bit address of FADT table
+  @retval  0:  FADT table could not be found
+**/
+UINT64
+pal_get_fadt_ptr (
+  VOID
+  )
+{
+  EFI_ACPI_DESCRIPTION_HEADER   *Xsdt;
+  UINT64                        *Entry64;
+  UINT32                        Entry64Num;
+  UINT32                        Idx;
+
+  Xsdt = (EFI_ACPI_DESCRIPTION_HEADER *) pal_get_xsdt_ptr();
+  if (Xsdt == NULL) {
+      bsa_print(ACS_PRINT_ERR, L" XSDT not found \n");
+      return 0;
+  }
+
+  Entry64 = (UINT64 *)(Xsdt + 1);
+  Entry64Num = (Xsdt->Length - sizeof (EFI_ACPI_DESCRIPTION_HEADER)) >> 3;
+  for (Idx = 0; Idx < Entry64Num; Idx++) {
+    if (*(UINT32 *)(UINTN)(Entry64[Idx]) == EFI_ACPI_6_1_FIXED_ACPI_DESCRIPTION_TABLE_SIGNATURE) {
+      return (UINT64)(Entry64[Idx]);
+    }
+  }
+
+  return 0;
 }

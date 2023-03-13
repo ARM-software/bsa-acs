@@ -32,6 +32,9 @@ static   EFI_ACPI_6_1_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER *gMadtHdr;
 UINT8   *gSecondaryPeStack;
 UINT64  gMpidrMax;
 static UINT32 g_num_pe;
+extern INT32 gPsciConduit;
+UINT32
+pal_strncmp(CHAR8 *str1, CHAR8 *str2, UINT32 len);
 
 static char pmu_dt_arr[][PMU_COMPATIBLE_STR_LEN] = {
     "arm,armv8-pmuv3",
@@ -52,6 +55,13 @@ static char pmu_dt_arr[][PMU_COMPATIBLE_STR_LEN] = {
     "arm,arm1136-pmu"
 };
 
+static char psci_dt_arr[][PSCI_COMPATIBLE_STR_LEN] = {
+    "arm,psci-1.0",
+    "arm,psci",
+    "arm,psci-0.2",
+};
+
+
 #define SIZE_STACK_SECONDARY_PE  0x100                //256 bytes per core
 #define UPDATE_AFF_MAX(src,dest,mask)  ((dest & mask) > (src & mask) ? (dest & mask) : (src & mask))
 
@@ -59,9 +69,62 @@ UINT64
 pal_get_madt_ptr();
 VOID
 ArmCallSmc (
-  IN OUT ARM_SMC_ARGS *Args
+  IN OUT ARM_SMC_ARGS *Args,
+  IN     INT32        Conduit
   );
 
+/**
+  @brief   Queries the DT PSCI node to check whether PSCI is implemented and,
+           if so, using which conduit (HVC or SMC).
+  @param
+  @retval  CONDUIT_UNKNOWN:       The FADT table could not be discovered.
+  @retval  CONDUIT_NONE:          PSCI is not implemented
+  @retval  CONDUIT_SMC:           PSCI is implemented and uses SMC as
+                                  the conduit.
+  @retval  CONDUIT_HVC:           PSCI is implemented and uses HVC as
+                                  the conduit.
+**/
+INT32
+pal_psci_get_conduit (
+  VOID
+  )
+{
+  UINT64 dt_ptr = 0;
+  int prop_len, i, offset = 0;
+  CHAR8  *Pmethod;
+
+  dt_ptr = pal_get_dt_ptr();
+  if (dt_ptr == 0) {
+      bsa_print(ACS_PRINT_ERR, L" dt_ptr is NULL \n");
+      return CONDUIT_NONE;
+  }
+
+  /* Search for psci node*/
+  for (i = 0; i < sizeof(psci_dt_arr)/PSCI_COMPATIBLE_STR_LEN ; i++) {
+      offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, psci_dt_arr[i]);
+      if (offset >= 0)
+        break;
+  }
+  if (offset < 0) {
+      bsa_print(ACS_PRINT_ERR, L"  psci node offset not found \n");
+      return CONDUIT_UNKNOWN;
+  }
+
+  Pmethod = (CHAR8 *)fdt_getprop_namelen((void *)dt_ptr, offset, "method", 6, &prop_len);
+  if ((prop_len > 0) && (Pmethod != NULL)) {
+      bsa_print(ACS_PRINT_DEBUG, L"  method field length %d\n", prop_len);
+      if (pal_strncmp(Pmethod, "hvc", 4) == 0) {
+          bsa_print(ACS_PRINT_DEBUG, L"  psci method hvc \n");
+          return CONDUIT_HVC;
+      }
+      if (pal_strncmp(Pmethod, "smc", 4) == 0) {
+          bsa_print(ACS_PRINT_DEBUG, L"  psci method smc \n");
+          return CONDUIT_SMC;
+      }
+  }
+
+  return CONDUIT_NONE;
+}
 
 /**
   @brief   Return the base address of the region allocated for Stack use for the Secondary
@@ -245,13 +308,14 @@ pal_pe_install_esr(UINT32 ExceptionType,  VOID (*esr)(UINT64, VOID *))
           for both input and output values.
 
   @param  Argumets to pass to the EL3 firmware
+  @param  Conduit  SMC or HVC
 
   @return  None
 **/
 VOID
-pal_pe_call_smc(ARM_SMC_ARGS *ArmSmcArgs)
+pal_pe_call_smc(ARM_SMC_ARGS *ArmSmcArgs, INT32 Conduit)
 {
-  ArmCallSmc (ArmSmcArgs);
+  ArmCallSmc (ArmSmcArgs, Conduit);
 }
 
 VOID
@@ -269,7 +333,7 @@ VOID
 pal_pe_execute_payload(ARM_SMC_ARGS *ArmSmcArgs)
 {
   ArmSmcArgs->Arg2 = (UINT64)ModuleEntryPoint;
-  pal_pe_call_smc(ArmSmcArgs);
+  pal_pe_call_smc(ArmSmcArgs, gPsciConduit);
 }
 
 /**

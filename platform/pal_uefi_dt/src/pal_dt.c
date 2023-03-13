@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2020, 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2020, 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +27,7 @@
 #include "Include/Guid/Acpi.h"
 #include <Protocol/AcpiTable.h>
 #include "Include/IndustryStandard/Acpi61.h"
+#include <Protocol/HardwareInterrupt.h>
 
 #include "include/pal_uefi.h"
 #include "include/pal_dt.h"
@@ -42,7 +43,19 @@
 UINT32
 pal_target_is_dt()
 {
-  return 1;
+  EFI_STATUS  Status;
+  EFI_HARDWARE_INTERRUPT_PROTOCOL *Interrupt = NULL;
+
+  // Find the interrupt controller protocol.
+  Status = gBS->LocateProtocol (&gHardwareInterruptProtocolGuid, NULL, (VOID **)&Interrupt);
+  if (EFI_ERROR(Status)) {
+      bsa_print(ACS_PRINT_INFO, L"  Using ACS interrupt API's \n");
+      return 1; /* Not able to locate HW Interrupt Protocol, use ACS interrupt handlers API */
+  }
+  else {
+      bsa_print(ACS_PRINT_INFO, L"  Using F/W interrupt API's \n");
+      return 0; /* Use F/W interrupt handlers */
+  }
 }
 
 /**

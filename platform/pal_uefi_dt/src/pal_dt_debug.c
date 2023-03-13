@@ -45,6 +45,7 @@ dt_dump_pe_table(PE_INFO_TABLE *PeTable)
     bsa_print(ACS_PRINT_DEBUG, L" MPIDR       :%llx\n", PeTable->pe_info[Index].mpidr);
 //    bsa_print(ACS_PRINT_DEBUG, L"    ATTR     :%x\n", PeTable->pe_info[Index].attr);
     bsa_print(ACS_PRINT_DEBUG, L" PMU GSIV    :%x\n", PeTable->pe_info[Index].pmu_gsiv);
+    bsa_print(ACS_PRINT_DEBUG, L" GIC MAINT GSIV    :%x\n", PeTable->pe_info[Index].gmain_gsiv);
     Index++;
   }
   bsa_print(ACS_PRINT_DEBUG, L" ************************************* \n");

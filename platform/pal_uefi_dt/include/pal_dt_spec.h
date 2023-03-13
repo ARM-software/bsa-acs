@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +31,9 @@
 #define PROPERTY_MASK_PE_AFF3  0xFF  /* Affinity bits 3 mask MPIDR_EL1[39:32] */
 #define PROPERTY_MASK_PE_AFF0_AFF2  0xFFFFFF  /* Affinity bits 0, 1, 2 mask MPIDR_EL1[23:0] */
 #define PMU_COMPATIBLE_STR_LEN      24
+
+/* PSCI related */
+#define PSCI_COMPATIBLE_STR_LEN 15
 
 /*  WD related */
 /* Interrupt Flags for WD*/

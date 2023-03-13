@@ -415,7 +415,7 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
   GIC_INFO_ENTRY           *GicEntry = NULL;
   UINT64 dt_ptr, cpuif_base, cpuif_length;
   UINT32 *Preg_val, *Prdregions_val;
-  UINT32 num_of_pe, num_of_rd, Index = 0;
+  UINT32 num_of_pe, num_of_rd = 0, Index = 0;
   int prop_len, i;
   int addr_cell, size_cell;
   int offset, parent_offset, num_gic_interfaces;
@@ -567,6 +567,9 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
       }
   } else
     bsa_print(ACS_PRINT_WARN, L"  GIC CPUIF not present\n");
+
+  bsa_print(ACS_PRINT_INFO, L"  Number of gic interface %d\n", num_gic_interfaces);
+  bsa_print(ACS_PRINT_INFO, L"  Number of RD %d\n", num_of_rd);
 
   num_gic_interfaces -= (num_of_rd + 1);
   bsa_print(ACS_PRINT_INFO, L"  Number of gic interface %d\n", num_gic_interfaces);
