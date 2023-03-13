@@ -133,6 +133,9 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
     return;
   }
 
+  /* initialise number of PEs to zero */
+  PeTable->header.num_of_pe = 0;
+
   gMadtHdr = (EFI_ACPI_6_1_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER *) pal_get_madt_ptr();
 
   if (gMadtHdr != NULL) {
@@ -142,8 +145,6 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
     bsa_print(ACS_PRINT_ERR, L" MADT not found \n");
     return;
   }
-
-  PeTable->header.num_of_pe = 0;
 
   Entry = (EFI_ACPI_6_1_GIC_STRUCTURE *) (gMadtHdr + 1);
   Length = sizeof (EFI_ACPI_6_1_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER);

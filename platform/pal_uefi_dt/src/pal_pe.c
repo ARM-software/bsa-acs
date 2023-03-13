@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -487,14 +487,14 @@ pal_pe_create_info_table_dt(PE_INFO_TABLE *PeTable)
   int prop_len, addr_cell, size_cell;
   int offset, parent_offset;
 
+  /* initialise number of PEs to zero */
+  PeTable->header.num_of_pe = 0;
 
   dt_ptr = pal_get_dt_ptr();
   if (dt_ptr == 0) {
     bsa_print(ACS_PRINT_ERR, L" dt_ptr is NULL\n");
     return;
   }
-
-  PeTable->header.num_of_pe = 0;
 
   /* Find the first cpu node offset in DT blob */
   offset = fdt_node_offset_by_prop_value((const void *) dt_ptr, -1, "device_type", "cpu", 4);
