@@ -367,6 +367,7 @@ void
 val_iovirt_create_info_table(uint64_t *iovirt_info_table)
 {
   uint32_t i, smmu_ver;
+  uint32_t smmu_minor;
 
   if (iovirt_info_table == NULL)
   {
@@ -386,7 +387,13 @@ val_iovirt_create_info_table(uint64_t *iovirt_info_table)
     smmu_ver = val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, i);
     val_print(ACS_PRINT_TEST,
             " SMMU_INFO: SMMU index %.2d ", i);
-    val_print(ACS_PRINT_TEST, "version     :    v%d \n", smmu_ver);
+    val_print(ACS_PRINT_TEST, "version     :    v%d", smmu_ver);
+
+    if (smmu_ver == 3) {
+      smmu_minor = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_AIDR, i), 0, 3);
+      val_print(ACS_PRINT_TEST, ".%d", smmu_minor);
+    }
+    val_print(ACS_PRINT_TEST, " \n", smmu_ver);
   }
 }
 
