@@ -71,7 +71,7 @@ payload()
                                                     PCIE_CREATE_BDF_PACKED(bdf));
     if (smmu_id == ACS_INVALID_INDEX) {
         val_print(ACS_PRINT_INFO,
-            "\n       BDF : 0x%llx Not Behind an SMMU, Skipping StreamID check", bdf);
+            "\n       Skipping StreamID Association check, Bdf : 0x%llx Not Behind an SMMU", bdf);
         streamid_check = 0;
     }
 
@@ -97,6 +97,8 @@ payload()
     }
 
     if (streamid_check == 0) {
+      val_print(ACS_PRINT_DEBUG,
+                "\n       Checking ReqID-DeviceID Association, Bdf : 0x%llx", bdf);
       /* No SMMU, Check only for device_id */
       if (curr_grp_did_cons != (device_id - req_id)) {
         /* DeviceID Constant Base Failure */
@@ -105,6 +107,8 @@ payload()
         test_fail++;
       }
     } else {
+      val_print(ACS_PRINT_DEBUG,
+                "\n       Checking ReqID-StreamID-DeviceID Association, Bdf : %x", bdf);
       /* Check for stream_id & device_id */
       if (curr_grp_sid_cons != (stream_id - req_id)) {
         /* StreamID Constant Base Failure */
