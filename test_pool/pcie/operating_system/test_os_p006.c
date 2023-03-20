@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,7 +44,7 @@ payload(void)
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
 
   /* Allocate memory for interrupt mappings */
-  intr_map = val_memory_alloc(sizeof(PERIPHERAL_IRQ_MAP));
+  intr_map = val_aligned_alloc(MEM_ALIGN_4K, sizeof(PERIPHERAL_IRQ_MAP));
   if (!intr_map) {
     val_print(ACS_PRINT_ERR, "\n       Memory allocation error", 0);
     val_set_status(pe_index, RESULT_FAIL (TEST_NUM, 1));
@@ -118,6 +118,8 @@ payload(void)
         return;
       }
   }
+
+  val_memory_free_aligned(intr_map);
 
   if (test_skip == 1)
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));

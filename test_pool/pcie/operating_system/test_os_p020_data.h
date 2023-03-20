@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019-2020,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2020, 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,7 @@ pcie_cfgreg_bitfield_entry bf_info_table20[] = {
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x04,                                    // Offset from ECAM base
-       PCIe_ALL,                                // Applicable to all PCIe Functions
+       (RP | EP),                               // Applicable to all PCIe Functions
        3,                                       // Start bit position
        3,                                       // End bit position
        0,                                       // Hardwired to 0b
@@ -45,7 +45,7 @@ pcie_cfgreg_bitfield_entry bf_info_table20[] = {
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x04,                                    // Offset from ECAM base
-       PCIe_ALL,                                // Applicable to all PCIe Functions
+       (RP | EP),                               // Applicable to all PCIe Functions
        4,                                       // Start bit position
        4,                                       // End bit position
        0,                                       // Hardwired to 0b
@@ -60,7 +60,7 @@ pcie_cfgreg_bitfield_entry bf_info_table20[] = {
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x04,                                    // Offset from ECAM base
-       PCIe_ALL,                                // Applicable to all PCIe Functions
+       (RP | EP),                               // Applicable to all PCIe Functions
        5,                                       // Start bit position
        5,                                       // End bit position
        0,                                       // Hardwired to 0b
@@ -75,7 +75,7 @@ pcie_cfgreg_bitfield_entry bf_info_table20[] = {
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x04,                                    // Offset from ECAM base
-       PCIe_ALL,                                // Applicable to all PCIe Functions
+       (RP | EP),                               // Applicable to all PCIe Functions
        7,                                       // Start bit position
        7,                                       // End bit position
        0,                                       // Hardwired to 0b
@@ -90,7 +90,7 @@ pcie_cfgreg_bitfield_entry bf_info_table20[] = {
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x04,                                    // Offset from ECAM base
-       PCIe_ALL,                                // Applicable to all PCIe Functions
+       (RP | EP),                               // Applicable to all PCIe Functions
        9,                                       // Start bit position
        9,                                       // End bit position
        0,                                       // Hardwired to 0b
@@ -99,43 +99,13 @@ pcie_cfgreg_bitfield_entry bf_info_table20[] = {
        "CR FBBTE attribute mismatch"            // FBBTE invalid attribute
     },
 
-    // Bit-field entry 6: Command register, bit[10] = interrupt disable
-    {
-       HEADER,                                  // Part of Header type register
-       0,                                       // Not applicable
-       0,                                       // Not applicable
-       0x04,                                    // Offset from ECAM base
-       (iEP_RP | iEP_EP),                       // Applicable to integrated endpoint pair
-       10,                                      // Start bit position
-       10,                                      // End bit position
-       0,                                       // Hardwired to 0b
-       READ_ONLY,                               // Attribute is Read-only
-       "CR ID value mismatch",                  // Interrupt disable invalid configured value
-       "CR ID attribute mismatch"               // Interrupt disable invalid attribute
-    },
-
-    // Bit-field entry 7: Status register, bit[3] = Interrupt Status
+    // Bit-field entry 6: Status register, bit[4] = Capabilities List
     {
        HEADER,                                  // Part of Header type register
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x06,                                    // Offset from ECAM base
-       (iEP_RP | iEP_EP),                       // Applicable to integrated endpoint pair
-       3,                                       // Start bit position
-       3,                                       // End bit position
-       0,                                       // Hardwired to 1b
-       READ_ONLY,                               // Attribute is Read-only
-       "SR IS value mismatch",                  // Interrupt Status invalid configured value
-       "SR IS attribute mismatch"               // Interrupt Status invalid attribute
-    },
-
-    // Bit-field entry 8: Status register, bit[4] = Capabilities List
-    {
-       HEADER,                                  // Part of Header type register
-       0,                                       // Not applicable
-       0,                                       // Not applicable
-       0x06,                                    // Offset from ECAM base
-       PCIe_ALL,                                // Applicable to all PCIe Functions
+       (RP | EP),                               // Applicable to all PCIe Functions
        4,                                       // Start bit position
        4,                                       // End bit position
        1,                                       // Hardwired to 1b
@@ -144,13 +114,13 @@ pcie_cfgreg_bitfield_entry bf_info_table20[] = {
        "SR CL attribute mismatch"               // Capabilities List invalid attribute
     },
 
-    // Bit-field entry 9: Status register, bit[5] = 66 MHz Capable
+    // Bit-field entry 7: Status register, bit[5] = 66 MHz Capable
     {
        HEADER,                                  // Part of Header type register
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x06,                                    // Offset from ECAM base
-       PCIe_ALL,                                // Applicable to all PCIe Functions
+       (RP | EP),                               // Applicable to all PCIe Functions
        5,                                       // Start bit position
        5,                                       // End bit position
        0,                                       // Hardwired to 0b
@@ -159,13 +129,13 @@ pcie_cfgreg_bitfield_entry bf_info_table20[] = {
        "SR 66MHz capable attribute mismatch"    // 66MHz Capable invalid attribute
     },
 
-    // Bit-field entry 10: Status register, bit[7] = Fast Back-to-Back Transactions Capable
+    // Bit-field entry 8: Status register, bit[7] = Fast Back-to-Back Transactions Capable
     {
        HEADER,                                  // Part of Header type register
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x06,                                    // Offset from ECAM base
-       PCIe_ALL,                                // Applicable to all PCIe Functions
+       (RP | EP),                               // Applicable to all PCIe Functions
        7,                                       // Start bit position
        7,                                       // End bit position
        0,                                       // Hardwired to 0b
@@ -174,13 +144,13 @@ pcie_cfgreg_bitfield_entry bf_info_table20[] = {
        "SR FBBTC attribute mismatch"            // FBBTC invalid attribute
     },
 
-    // Bit-field entry 11: Status register, bit[9:10] = DEVSEL timing
+    // Bit-field entry 9: Status register, bit[9:10] = DEVSEL timing
     {
        HEADER,                                  // Part of Header type register
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x06,                                    // Offset from ECAM base
-       PCIe_ALL,                                // Applicable to all PCIe Functions
+       (RP | EP),                               // Applicable to all PCIe Functions
        9,                                       // Start bit position
        10,                                      // End bit position
        0,                                       // Hardwired to 0b
@@ -189,13 +159,13 @@ pcie_cfgreg_bitfield_entry bf_info_table20[] = {
        "SR DT attribute mismatch"               // DEVSEL Timing invalid attribute
     },
 
-    // Bit-field entry 12: Latency Timer register, bit[0:7] = latency timer register
+    // Bit-field entry 10: Latency Timer register, bit[0:7] = latency timer register
     {
        HEADER,                                  // Part of Header type register
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x0D,                                    // Offset from ECAM base
-       PCIe_ALL,                                // Applicable to all PCIe Functions
+       (RP | EP),                               // Applicable to all PCIe Functions
        0,                                       // Start bit position
        7,                                       // End bit position
        0,                                       // Hardwired to 0b

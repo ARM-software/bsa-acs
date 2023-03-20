@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2020-2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2020-2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,6 +54,7 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
 {
   UINT32   DeviceBdf = 0;
   UINT32   StartBdf  = 0;
+  UINT32   bar_index = 0;
   PERIPHERAL_INFO_BLOCK *per_info = NULL;
   EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE *spcr = NULL;
 
@@ -69,6 +70,7 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
   peripheralInfoTable->header.num_sata = 0;
   peripheralInfoTable->header.num_uart = 0;
   peripheralInfoTable->header.num_all = 0;
+  per_info->base0 = 0;
 
   /* check for any USB Controllers */
   do {
@@ -76,7 +78,12 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
        DeviceBdf = palPcieGetBdf(USB_CLASSCODE, StartBdf);
        if (DeviceBdf != 0) {
           per_info->type  = PERIPHERAL_TYPE_USB;
-          per_info->base0 = palPcieGetBase(DeviceBdf, BAR0);
+          for (bar_index = 0; bar_index < TYPE0_MAX_BARS; bar_index++)
+          {
+              per_info->base0 = palPcieGetBase(DeviceBdf, bar_index);
+              if (per_info->base0 != 0)
+                  break;
+          }
           per_info->bdf   = DeviceBdf;
           per_info->platform_type = PLATFORM_TYPE_ACPI;
           bsa_print(ACS_PRINT_INFO, L"  Found a USB controller %4x\n",
@@ -96,7 +103,12 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
        DeviceBdf = palPcieGetBdf(SATA_CLASSCODE, StartBdf);
        if (DeviceBdf != 0) {
           per_info->type  = PERIPHERAL_TYPE_SATA;
-          per_info->base0 = palPcieGetBase(DeviceBdf, BAR0);
+          for (bar_index = 0; bar_index < TYPE0_MAX_BARS; bar_index++)
+          {
+              per_info->base0 = palPcieGetBase(DeviceBdf, bar_index);
+              if (per_info->base0 != 0)
+                  break;
+          }
           per_info->bdf   = DeviceBdf;
           per_info->platform_type = PLATFORM_TYPE_ACPI;
           bsa_print(ACS_PRINT_INFO, L"  Found a SATA controller %4x\n",
@@ -372,4 +384,17 @@ pal_memory_get_unpopulated_addr(UINT64 *addr, UINT32 instance)
   }
 
   return PCIE_NO_MAPPING;
+}
+
+
+/**
+  @brief  Platform specific code for UART initialisation
+
+  @param   None
+  @return  None
+**/
+VOID
+pal_peripheral_uart_setup(VOID)
+{
+  return;
 }

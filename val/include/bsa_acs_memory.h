@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@
 #ifndef __BSA_ACS_MEMORY_H__
 #define __BSA_ACS_MEMORY_H__
 
-addr_t val_memory_ioremap(void *addr, uint32_t size, uint64_t attr);
+addr_t val_memory_ioremap(void *addr, uint32_t size, uint32_t attr);
 
 void val_memory_unmap(void *ptr);
 void *val_memory_alloc(uint32_t size);
@@ -35,6 +35,7 @@ void *val_memory_alloc_pages(uint32_t num_pages);
 void val_memory_free_pages(void *page_base, uint32_t num_pages);
 addr_t val_memory_get_addr(MEMORY_INFO_e mem_type, uint32_t instance, uint64_t *attr);
 void *val_aligned_alloc(uint32_t alignment, uint32_t size);
+void val_memory_free_aligned(void *addr);
 
 uint32_t os_m001_entry(uint32_t num_pe);
 uint32_t os_m002_entry(uint32_t num_pe);

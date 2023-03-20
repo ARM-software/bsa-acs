@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2019, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2019,2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,6 +48,7 @@ typedef struct
 
   @return 0 if Success
 **/
+static
 uint32_t fill_translation_table(tt_descriptor_t tt_desc, memory_region_descriptor_t *mem_desc)
 {
     uint64_t block_size = 0x1ull << tt_desc.size_log2;
@@ -140,7 +141,7 @@ uint32_t fill_translation_table(tt_descriptor_t tt_desc, memory_region_descripto
 
   @return log2 page size
 **/
-uint32_t log2_page_size(uint64_t size)
+static uint32_t log2_page_size(uint64_t size)
 {
     int bit = 0;
     while (size != 0)
@@ -230,7 +231,7 @@ uint32_t val_pgt_create(memory_region_descriptor_t *mem_desc, pgt_descriptor_t *
         {
             val_print(ACS_PRINT_ERR,
                       "\n       val_pgt_create: input page_size 0x%x unsupported    ",
-                      (0x1 << pgt_desc->tcr.tg_size_log2));
+                      ((uint64_t)0x1 << pgt_desc->tcr.tg_size_log2));
             return ACS_STATUS_ERR;
         }
 
@@ -274,7 +275,7 @@ uint64_t val_pgt_get_attributes(pgt_descriptor_t pgt_desc, uint64_t virtual_addr
     if (!pgt_desc.pgt_base)
         return ACS_STATUS_ERR;
 
-    ias = 64 - pgt_desc.tcr.tsz;
+    ias = (uint32_t)64 - pgt_desc.tcr.tsz;
 
     bits_per_level = page_size_log2 - 3;
     num_pgt_levels = (ias - page_size_log2 + bits_per_level - 1)/bits_per_level;

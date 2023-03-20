@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2020-2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020-2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,7 +59,7 @@ payload(void)
       dp_type = val_pcie_device_port_type(bdf);
 
       /* Check entry is Downstream port or RP */
-      if ((dp_type == DP) || (dp_type == iEP_RP) || (dp_type == RP))
+      if ((dp_type == DP) || (dp_type == RP))
       {
           val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", bdf);
 

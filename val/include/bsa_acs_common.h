@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -127,6 +127,9 @@ val_run_test_payload(uint32_t test_num, uint32_t num_pe, void (*payload)(void), 
 
 void
 val_data_cache_ops_by_va(addr_t addr, uint32_t type);
+
+void
+val_test_entry(void);
 
 /* Module specific print APIs */
 

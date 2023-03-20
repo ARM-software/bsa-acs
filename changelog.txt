@@ -39,3 +39,12 @@ This version is used in SystemReady SR 2.0.0_BETA-0 and ES v1.2.0 images.
 * Exerciser test suite using exerciser info table.
 * Memory test 2 gcc warning suppress
 * Bug Fixes
+
+v23.03_1.0.4
+
+* Baremetal support for BSA 1.0 spec
+* Reference Makefiles for compilation
+* Initialise SMMU eventq handler
+* Better messaging and info details
+* Support to run specific tests and modules
+* Documentation

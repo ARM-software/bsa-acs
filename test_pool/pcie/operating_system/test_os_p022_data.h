@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019-2020,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2020,2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,7 @@ pcie_cfgreg_bitfield_entry bf_info_table22[] = {
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x1B,                                    // Offset from ECAM base
-       (RP | iEP_RP),                           // Applicable to Rootports
+       RP,                                      // Applicable to Rootports
        0,                                       // Start bit position
        7,                                       // End bit position
        0,                                       // Hardwired to 0b
@@ -45,7 +45,7 @@ pcie_cfgreg_bitfield_entry bf_info_table22[] = {
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x1E,                                    // Offset from ECAM base
-       (RP | iEP_RP),                           // Applicable to Rootports
+       RP,                                      // Applicable to Rootports
        5,                                       // Start bit position
        5,                                       // End bit position
        0,                                       // Hardwired to 0b
@@ -60,7 +60,7 @@ pcie_cfgreg_bitfield_entry bf_info_table22[] = {
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x1E,                                    // Offset from ECAM base
-       (RP | iEP_RP),                           // Applicable to Rootports
+       RP,                                      // Applicable to Rootports
        7,                                       // Start bit position
        7,                                       // End bit position
        0,                                       // Hardwired to 0b
@@ -75,7 +75,7 @@ pcie_cfgreg_bitfield_entry bf_info_table22[] = {
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x1E,                                    // Offset from ECAM base
-       (RP | iEP_RP),                           // Applicable to Rootports
+       RP,                                      // Applicable to Rootports
        9,                                       // Start bit position
        10,                                      // End bit position
        0,                                       // Hardwired to 0b
@@ -90,7 +90,7 @@ pcie_cfgreg_bitfield_entry bf_info_table22[] = {
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x3E,                                    // Offset from ECAM base
-       (RP | iEP_RP),                           // Applicable to Rootports
+       RP,                                      // Applicable to Rootports
        5,                                       // Start bit position
        5,                                       // End bit position
        0,                                       // Hardwired to 0b
@@ -105,7 +105,7 @@ pcie_cfgreg_bitfield_entry bf_info_table22[] = {
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x3E,                                    // Offset from ECAM base
-       (RP | iEP_RP),                           // Applicable to Rootports
+       RP,                                      // Applicable to Rootports
        7,                                       // Start bit position
        7,                                       // End bit position
        0,                                       // Hardwired to 0b
@@ -120,7 +120,7 @@ pcie_cfgreg_bitfield_entry bf_info_table22[] = {
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x3E,                                    // Offset from ECAM base
-       (RP | iEP_RP),                           // Applicable to Rootports
+       RP,                                      // Applicable to Rootports
        8,                                       // Start bit position
        8,                                       // End bit position
        0,                                       // Hardwired to 0b
@@ -135,7 +135,7 @@ pcie_cfgreg_bitfield_entry bf_info_table22[] = {
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x3E,                                    // Offset from ECAM base
-       (RP | iEP_RP),                           // Applicable to Rootports
+       RP,                                      // Applicable to Rootports
        9,                                       // Start bit position
        9,                                       // End bit position
        0,                                       // Hardwired to 0b
@@ -150,7 +150,7 @@ pcie_cfgreg_bitfield_entry bf_info_table22[] = {
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x3E,                                    // Offset from ECAM base
-       (RP | iEP_RP),                           // Applicable to Rootports
+       RP,                                      // Applicable to Rootports
        10,                                      // Start bit position
        10,                                      // End bit position
        0,                                       // Hardwired to 0b
@@ -165,7 +165,7 @@ pcie_cfgreg_bitfield_entry bf_info_table22[] = {
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x3E,                                    // Offset from ECAM base
-       (RP | iEP_RP),                           // Applicable to Rootports
+       RP,                                      // Applicable to Rootports
        11,                                      // Start bit position
        11,                                      // End bit position
        0,                                       // Hardwired to 0b

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020, 2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2020, 2022-2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -266,8 +266,11 @@ pal_print_raw(UINT64 addr, CHAR8 *string, UINT64 data)
 VOID
 pal_mem_free(VOID *Buffer)
 {
-
-  gBS->FreePool (Buffer);
+  UINT32 Status;
+  Status = gBS->FreePool(Buffer);
+  if (EFI_ERROR(Status)) {
+    bsa_print(ACS_PRINT_ERR, L"\n       Failed to free memory    ");
+  }
 }
 
 /**
@@ -636,7 +639,7 @@ VOID *
 pal_aligned_alloc( UINT32 alignment, UINT32 size)
 {
   VOID *Mem = NULL;
-  VOID *Aligned_Ptr = NULL;
+  VOID **Aligned_Ptr = NULL;
 
   /* Generate mask for the Alignment parameter*/
   UINT64 Mask = ~(UINT64)(alignment - 1);
@@ -648,9 +651,31 @@ pal_aligned_alloc( UINT32 alignment, UINT32 size)
     return 0;
 
   /* Add the alignment to allocated memory address and align it to target alignment*/
-  Aligned_Ptr = (VOID *)(((UINT64) Mem + alignment-1) & Mask);
+  Aligned_Ptr = (VOID **)(((UINT64) Mem + alignment - 1) & Mask);
+
+  /* Using a double pointer to store the address of allocated
+     memory location so that it can be used to free the memory later*/
+  Aligned_Ptr[-1] = Mem;
 
   return Aligned_Ptr;
+}
+
+/**
+  @brief  Free the Aligned memory allocated by UEFI Framework APIs
+
+  @param  Buffer        the base address of the aligned memory range
+
+  @return None
+*/
+
+VOID
+pal_mem_free_aligned(VOID *Buffer)
+{
+    UINT32 Status;
+    Status = gBS->FreePool(((VOID **)Buffer)[-1]);
+    if (EFI_ERROR (Status)) {
+        bsa_print(ACS_PRINT_ERR, L"\n       Failed to free aligned memory    ");
+    }
 }
 
 /**

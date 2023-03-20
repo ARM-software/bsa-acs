@@ -314,6 +314,7 @@ typedef enum {
 
 uint32_t val_power_enter_semantic(BSA_POWER_SEM_e semantic);
 uint32_t val_wakeup_execute_tests(uint32_t num_pe, uint32_t *g_sw_view);
+void     val_debug_brk(uint32_t data);
 
 typedef enum {
     PER_FLAG_MSI_ENABLED = 0x2
@@ -357,6 +358,7 @@ uint32_t val_peripheral_execute_tests(uint32_t num_pe, uint32_t *g_sw_view);
 uint64_t val_peripheral_get_info(PERIPHERAL_INFO_e info_type, uint32_t index);
 uint32_t val_peripheral_is_pcie(uint32_t bdf);
 void     val_peripheral_dump_info(void);
+void     val_peripheral_uart_setup(void);
 
 /* Memory Tests APIs */
 typedef enum {
@@ -369,6 +371,11 @@ typedef enum {
 
 #define MEM_ATTR_UNCACHED  0x2000
 #define MEM_ATTR_CACHED    0x1000
+#define MEM_ALIGN_4K       0x1000
+#define MEM_ALIGN_8K       0x2000
+#define MEM_ALIGN_16K      0x4000
+#define MEM_ALIGN_32K      0x8000
+#define MEM_ALIGN_64K      0x10000
 
 /* Identify memory type using MAIR attribute, refer to ARM ARM VMSA for details */
 

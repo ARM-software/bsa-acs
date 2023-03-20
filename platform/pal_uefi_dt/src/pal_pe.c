@@ -67,6 +67,7 @@ static char psci_dt_arr[][PSCI_COMPATIBLE_STR_LEN] = {
 
 UINT64
 pal_get_madt_ptr();
+
 VOID
 ArmCallSmc (
   IN OUT ARM_SMC_ARGS *Args,

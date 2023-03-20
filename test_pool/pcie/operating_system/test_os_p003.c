@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021,2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,7 +45,7 @@ static uint8_t func_ecam_is_rp_ecam(uint32_t dsf_bdf)
       dp_type = val_pcie_device_port_type(bdf);
 
       /* Check if this table entry is a Root Port */
-      if (dp_type == RP || dp_type == iEP_RP) {
+      if (dp_type == RP) {
           if (PCIE_EXTRACT_BDF_SEG(bdf) != PCIE_EXTRACT_BDF_SEG(dsf_bdf))
               continue;
 
@@ -96,8 +96,7 @@ payload(void)
       val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", bdf);
 
       dp_type = val_pcie_device_port_type(bdf);
-      if (dp_type == EP || dp_type == iEP_EP ||
-               dp_type == UP || dp_type == DP) {
+      if (dp_type == EP || dp_type == UP || dp_type == DP) {
           /* If test runs for atleast an endpoint */
           test_skip = 0;
 
@@ -112,7 +111,7 @@ payload(void)
 
   if (test_skip == 1) {
       val_print(ACS_PRINT_DEBUG,
-          "\n       No iEP_EP/ EP/ DP/ UP type device found. Skipping test", 0);
+          "\n       No EP/ DP/ UP type device found. Skipping test", 0);
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
   }
 

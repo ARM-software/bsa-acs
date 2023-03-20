@@ -4,19 +4,19 @@
 ## Base System Architecture
 **Base System Architecture** (BSA) specification describes a hardware system architecture based on the Arm 64-bit architecture. System software such as operating systems, hypervisors, and firmware rely on this. It addresses PE features and key aspects of system architecture.
 
-For more information, see [BSA specification](https://developer.arm.com/documentation/den0094/b/?lang=en)
+For more information, see [BSA specification](https://developer.arm.com/documentation/den0094/c/?lang=en)
 
 
 ## BSA - Architecture Compliance Suite
 
 BSA **Architecture Compliance Suite** (ACS) is a collection of self-checking, portable C-based tests.
-This suite includes a set of examples of the invariant behaviors that are provided by the [BSA](https://developer.arm.com/documentation/den0094/b/?lang=en) specification, so that you can verify if these behaviour have been interpreted correctly.
+This suite includes a set of examples of the invariant behaviors that are provided by the [BSA](https://developer.arm.com/documentation/den0094/c/?lang=en) specification, so that you can verify if these behaviour have been interpreted correctly.
 Most of the tests are executed from UEFI (Unified Extensible Firmware Interface) Shell by executing the BSA UEFI shell application.
 A few tests are executed by running the BSA ACS Linux application which in turn depends on the BSA ACS Linux kernel module.
 
 
 ## Release details
- - Code quality: v1.0.3
+ - Code quality: v1.0.4
  - The tests are written for version 1.0 of the BSA specification.
  - The compliance suite is not a substitute for design verification.
  - To review the BSA ACS logs, Arm licensees can contact Arm directly through their partner managers.
@@ -30,6 +30,12 @@ A few tests are executed by running the BSA ACS Linux application which in turn 
   - For information on the test scenarios currently implemented for platform using Device tree, see [Scenario Document](docs/Arm_Base_System_Architecture_Scenario_IR.pdf).
   - For information on the test scenarios currently implemented for platform using ACPI table, see [Scenario Document](docs/Arm_Base_System_Architecture_Scenario_ES.pdf).
 
+## BSA ACS Baremetal Reference Code
+Bare-metal reference code is added as part of this release. For more information, see
+  - [Arm BSA ACS Bare-metal User Guide](platform/pal_baremetal/docs/Arm_BSA_ACS_Bare-metal_User_Guide.pdf).
+  - [Bare-metal Code](platform/pal_baremetal/). <br />
+Note: The Baremetal PCIe enumeration code provided as part of the BSA ACS should be used and should not be replaced. This code is vital in analyzing of the test result.
+
 ## ACS build steps - UEFI Shell application
 
 ### Prebuilt images
@@ -42,10 +48,10 @@ Prebuilt images for each release are available in the prebuilt_images folder of 
 - git clone the [EDK2 tree](https://github.com/tianocore/edk2). Recommended edk2 tag is edk2-stable202208
 - git clone the [EDK2 port of libc](https://github.com/tianocore/edk2-libc) to local <edk2_path>.
 - GCC 7.5 or a later toolchain for Linux from [here](https://releases.linaro.org/components/toolchain/binaries/).
-- Install the build prerequisite packages to build EDK2.<br /> 
+- Install the build prerequisite packages to build EDK2.<br />
 Note:<br />
 - The details of the packages are beyond the scope of this document.
-- GCC 7.5 is recommended toolchain, build issues are observed with toolchain version 10.xx and above. 
+- GCC 7.5 is recommended toolchain, build issues are observed with toolchain version 10.xx and above.
 
 #### 1.1 Target Platform
 ##### To start the ACS build for platform using ACPI table, perform the following steps:
@@ -173,7 +179,7 @@ The patch for the kernel tree and the Linux PAL are hosted separately on [linux-
 - Build environment for AArch64 Linux kernel.<br />
 NOTE: <br />
 - Linux version 6.0 is recommened version.
-- GCC 7.5 is recommended toolchain, build issues are observed with toolchain version 10.xx and above. 
+- GCC 7.5 is recommended toolchain, build issues are observed with toolchain version 10.xx and above.
 
 #### Porting steps for Linux kernel
 1. git clone https://git.gitlab.arm.com/linux-arm/linux-acs.git bsa-acs-drv
@@ -229,6 +235,17 @@ The Arm SystemReady ACS test suite may run at a higher privilege level. An attac
    - Incoming Transaction Monitoring(order, type).
    - Initiating transacions from and to the exerciser.
    - Ability to check on BDF and register address seen for each configuration address along with access type.
+
+### BSA ACS version mapping
+--------------------------------------------------------------------------------------------
+|    BSA Spec Version   |   BSA ACS Version   |      BSA Tag ID     |    Pre-Si Support    |
+|-----------------------|:-------------------:|:-------------------:|:--------------------:|
+|       BSA v1.0        |        v1.0.4       |   v23.03_REL1.0.4   |       Yes            |
+|       BSA v1.0        |        v1.0.3       |   v23.01_REL1.0.3   |       No             |
+|       BSA v1.0        |        v1.0.2       |   v22.10_REL1.0.2   |       No             |
+|       BSA v1.0        |        v1.0.1       |   v22.06_REL1.0.1   |       No             |
+|       BSA v1.0        |        v1.0         |   v21.09_REL1.0     |       No             |
+--------------------------------------------------------------------------------------------
 
 ## License
 BSA ACS is distributed under Apache v2.0 License.

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018-2020,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2018-2020,2021,2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,7 @@
 #include "val/include/bsa_acs_exerciser.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 5)
-#define TEST_RULE  "PCI_PAS_1, RE_SMU_4"
+#define TEST_RULE  "PCI_PAS_1"
 #define TEST_DESC  "Generate PASID transactions           "
 
 #define TEST_DATA_NUM_PAGES  2

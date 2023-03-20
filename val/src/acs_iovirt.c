@@ -380,7 +380,7 @@ val_iovirt_create_info_table(uint64_t *iovirt_info_table)
 
   pal_iovirt_create_info_table(g_iovirt_info_table);
 
-  g_num_smmus = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
+  g_num_smmus = (uint32_t)val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
   val_print(ACS_PRINT_TEST,
             " SMMU_INFO: Number of SMMU CTRL       :    %d \n", g_num_smmus);
   for (i = 0; i < g_num_smmus; i++) {
@@ -441,7 +441,7 @@ val_iovirt_get_rc_smmu_index(uint32_t rc_seg_num, uint32_t rid)
 
   smmu_base = pal_iovirt_get_rc_smmu_base(g_iovirt_info_table, rc_seg_num, rid);
   if (smmu_base) {
-      num_smmu = val_smmu_get_info(SMMU_NUM_CTRL, 0);
+      num_smmu = (uint32_t)val_smmu_get_info(SMMU_NUM_CTRL, 0);
       while (num_smmu--) {
           if (smmu_base == val_smmu_get_info(SMMU_CTRL_BASE, num_smmu))
               return num_smmu;

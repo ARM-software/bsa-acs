@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -85,7 +85,7 @@ uint32_t val_its_gicr_lpi_support(uint64_t rd_base)
   return (val_mmio_read(rd_base + ARM_GICR_TYPER) & ARM_GICR_TYPER_PLPIS);
 }
 
-uint32_t
+static uint32_t
 ArmGicSetItsCommandQueueBase(
     uint32_t     its_index
   )
@@ -118,7 +118,7 @@ ArmGicSetItsCommandQueueBase(
 }
 
 
-uint32_t ArmGicSetItsTables(uint32_t its_index)
+static uint32_t ArmGicSetItsTables(uint32_t its_index)
 {
   uint32_t                Pages;
   uint32_t                TableSize, entry_size;
@@ -188,7 +188,7 @@ uint32_t ArmGicSetItsTables(uint32_t its_index)
 }
 
 
-void EnableITS(uint64_t GicItsBase)
+static void EnableITS(uint64_t GicItsBase)
 {
   /* Set GITS_CTLR.Enable as 1 to enable the ITS */
   uint32_t    value;
@@ -197,7 +197,7 @@ void EnableITS(uint64_t GicItsBase)
   val_mmio_write(GicItsBase + ARM_GITS_CTLR, (value | ARM_GITS_CTLR_ENABLE));
 }
 
-void
+static void
 WriteCmdQMAPD(
    uint32_t     its_index,
    uint64_t     *CMDQ_BASE,
@@ -216,7 +216,7 @@ WriteCmdQMAPD(
     g_cwriter_ptr[its_index] = g_cwriter_ptr[its_index] + ITS_NEXT_CMD_PTR;
 }
 
-void
+static void
 WriteCmdQMAPC(
    uint32_t     its_index,
    uint64_t     *CMDQ_BASE,
@@ -235,7 +235,7 @@ WriteCmdQMAPC(
     g_cwriter_ptr[its_index] = g_cwriter_ptr[its_index] + ITS_NEXT_CMD_PTR;
 }
 
-void
+static void
 WriteCmdQMAPI(
    uint32_t     its_index,
    uint64_t     *CMDQ_BASE,
@@ -252,7 +252,7 @@ WriteCmdQMAPI(
     g_cwriter_ptr[its_index] = g_cwriter_ptr[its_index] + ITS_NEXT_CMD_PTR;
 }
 
-void
+static void
 WriteCmdQINV(
    uint32_t     its_index,
    uint64_t     *CMDQ_BASE,
@@ -268,7 +268,7 @@ WriteCmdQINV(
     g_cwriter_ptr[its_index] = g_cwriter_ptr[its_index] + ITS_NEXT_CMD_PTR;
 }
 
-void
+static void
 WriteCmdQDISCARD(
    uint32_t     its_index,
    uint64_t     *CMDQ_BASE,
@@ -285,7 +285,7 @@ WriteCmdQDISCARD(
 }
 
 
-void
+static void
 WriteCmdQSYNC(
    uint32_t     its_index,
    uint64_t     *CMDQ_BASE,
@@ -300,7 +300,7 @@ WriteCmdQSYNC(
     g_cwriter_ptr[its_index] = g_cwriter_ptr[its_index] + ITS_NEXT_CMD_PTR;
 }
 
-void PollTillCommandQueueDone(uint32_t its_index)
+static void PollTillCommandQueueDone(uint32_t its_index)
 {
   uint32_t    count;
   uint64_t    creadr_value;
@@ -336,7 +336,7 @@ void PollTillCommandQueueDone(uint32_t its_index)
 
 }
 
-uint64_t GetRDBaseFormat(uint32_t its_index)
+static uint64_t GetRDBaseFormat(uint32_t its_index)
 {
   uint32_t    value;
   uint64_t    pe_num;
@@ -481,7 +481,7 @@ uint64_t val_its_get_translater_addr(uint32_t its_index)
 }
 
 
-uint32_t
+static uint32_t
 SetInitialConfiguration(
   uint32_t     its_index
   )
@@ -517,7 +517,8 @@ uint32_t val_its_init(void)
   uint32_t    Status;
   uint32_t    index;
 
-  g_cwriter_ptr = (uint32_t *)pal_mem_alloc(sizeof(uint32_t) * (g_gic_its_info->GicNumIts));
+  g_cwriter_ptr = (uint32_t *)pal_aligned_alloc(MEM_ALIGN_4K,
+                                                sizeof(uint32_t) * (g_gic_its_info->GicNumIts));
 
   if (g_cwriter_ptr == NULL) {
     val_print(ACS_PRINT_ERR, "ITS : Could Not Allocate Memory CWriteR. Test may not pass.\n", 0);

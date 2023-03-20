@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019-2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,28 +24,13 @@
 
 pcie_cfgreg_bitfield_entry bf_info_table21[] = {
 
-    // Bit-field entry 1: CardBus CIS Pointer, bit[0:31] = cardbus cis pointer
-    {
-       HEADER,                                  // Part of Header type register
-       0,                                       // Not applicable
-       0,                                       // Not applicable
-       0x28,                                    // Offset from ECAM base
-       (RCiEP | RCEC  | iEP_EP),                // Applicable to Endpoints and RCEC Functions
-       0,                                       // Start bit position
-       31,                                      // End bit position
-       0,                                       // Hardwired to 0b
-       READ_ONLY,                               // Attribute is Read-only
-       "CCP value mismatch",                    // CardBus CIS pointer invalid configured value
-       "CCP attribute mismatch"                 // CardBus CIS pointer invalid attribute
-    },
-
-    // Bit-field entry 2: Min Grant, bit[0:7] = Min Gnt
+    // Bit-field entry 1: Min Grant, bit[0:7] = Min Gnt
     {
        HEADER,                                  // Part of Header type register
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x3E,                                    // Offset from ECAM base
-       (RCiEP | RCEC | EP | iEP_EP),            // Applicable to Endpoints and RCEC Functions
+       EP,                                      // Applicable to Endpoints and RCEC Functions
        0,                                       // Start bit position
        7,                                       // End bit position
        0,                                       // Hardwired to 0b
@@ -54,13 +39,13 @@ pcie_cfgreg_bitfield_entry bf_info_table21[] = {
        "MinGnt attribute mismatch"              // MinGnt invalid attribute
     },
 
-    // Bit-field entry 3: Max Latency, bit[0:7] = Max latency
+    // Bit-field entry 2: Max Latency, bit[0:7] = Max latency
     {
        HEADER,                                  // Part of Header type register
        0,                                       // Not applicable
        0,                                       // Not applicable
        0x3F,                                    // Offset from ECAM base
-       (RCiEP | RCEC | EP | iEP_EP),            // Applicable to Endpoints and RCEC Functions
+       EP,                                      // Applicable to Endpoints and RCEC Functions
        0,                                       // Start bit position
        7,                                       // End bit position
        0,                                       // Hardwired to 0b

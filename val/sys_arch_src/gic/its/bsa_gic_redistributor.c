@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021,2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,7 @@
 
 static uint64_t ConfigBase;
 
-uint32_t
+static uint32_t
 ArmGicSetItsConfigTableBase(
     uint64_t    GicDistributorBase,
     uint64_t    GicRedistributorBase
@@ -63,7 +63,7 @@ ArmGicSetItsConfigTableBase(
 }
 
 
-uint32_t
+static uint32_t
 ArmGicSetItsPendingTableBase(
     uint64_t    GicDistributorBase,
     uint64_t    GicRedistributorBase

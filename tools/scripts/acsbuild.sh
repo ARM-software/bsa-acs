@@ -5,4 +5,9 @@ then
     return 0
 fi
 
+if [ "$1" == "ENABLE_OOB" ]; then
+    build -a AARCH64 -t GCC49 -p ShellPkg/ShellPkg.dsc -m ShellPkg/Application/bsa-acs/baremetal_app/BsaAcs.inf -D ENABLE_OOB
+    return 0;
+fi
+
     build -a AARCH64 -t GCC49 -p ShellPkg/ShellPkg.dsc -m ShellPkg/Application/bsa-acs/uefi_app/BsaAcs.inf

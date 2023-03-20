@@ -39,7 +39,7 @@ val_peripheral_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   status = ACS_STATUS_PASS;
 
-  for (i=0 ; i<MAX_TEST_SKIP_NUM ; i++){
+  for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_PER_TEST_NUM_BASE) {
           val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all Peripheral tests \n", 0);
           return ACS_STATUS_SKIP;
@@ -64,7 +64,8 @@ val_peripheral_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       status |= os_d002_entry(num_pe);
       status |= os_d003_entry(num_pe);
       status |= os_d005_entry(num_pe);
-#else
+#endif
+#if defined(TARGET_LINUX) || defined(ENABLE_OOB) || defined(TARGET_EMULATION)
       status |= os_d004_entry(num_pe);
 #endif
   }
@@ -86,7 +87,7 @@ val_peripheral_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   @result  Index of peripheral matching type and instance
 **/
 
-uint32_t
+static uint32_t
 val_peripheral_get_entry_index(uint32_t type, uint32_t instance)
 {
   uint32_t  i = 0;
@@ -374,3 +375,7 @@ uint32_t val_peripheral_is_pcie(uint32_t bdf)
   return pal_peripheral_is_pcie(seg, bus, dev, func);
 }
 
+void val_peripheral_uart_setup(void)
+{
+  pal_peripheral_uart_setup();
+}

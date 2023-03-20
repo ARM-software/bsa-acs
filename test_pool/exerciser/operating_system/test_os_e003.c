@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2020-2022, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,7 @@
 #include "val/include/bsa_acs_exerciser.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 3)
-#define TEST_RULE  "PCI_IC_05, RE_ORD_1, RE_ORD_2"
+#define TEST_RULE  "PCI_IC_15"
 #define TEST_DESC  "Arrival order Check                   "
 
 /* This test checks for the Arrival Order & Gathering Check */

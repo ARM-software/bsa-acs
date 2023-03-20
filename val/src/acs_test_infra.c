@@ -263,7 +263,7 @@ val_initialize_test(uint32_t test_num, char8_t *desc, uint32_t num_pe)
   for (i = 0; i < num_pe; i++)
       val_set_status(i, RESULT_PENDING(test_num));
 
-  for (i=0 ; i<MAX_TEST_SKIP_NUM ; i++){
+  for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == test_num) {
           val_print(ACS_PRINT_TEST, "\n       USER OVERRIDE  - Skip Test        ", 0);
           val_set_status(index, RESULT_SKIP(test_num, 0));
@@ -397,7 +397,7 @@ val_get_test_data(uint32_t index, uint64_t *data0, uint64_t *data1)
   @return        None
  **/
 
-void
+static void
 val_wait_for_test_completion(uint32_t test_num, uint32_t num_pe, uint32_t timeout)
 {
 

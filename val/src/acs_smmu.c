@@ -61,7 +61,7 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   status = ACS_STATUS_PASS;
 
-  for (i=0 ; i<MAX_TEST_SKIP_NUM ; i++){
+  for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_SMMU_TEST_NUM_BASE) {
           val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all SMMU tests \n", 0);
           return ACS_STATUS_SKIP;
@@ -119,7 +119,7 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   @return 0 for success
 **/
-uint32_t
+static uint32_t
 val_smmu_start_monitor_dev(uint32_t ctrl_index)
 {
   void *ap = NULL;
@@ -143,7 +143,7 @@ val_smmu_start_monitor_dev(uint32_t ctrl_index)
 
   @return 0 for success
 **/
-uint32_t
+static uint32_t
 val_smmu_stop_monitor_dev(uint32_t ctrl_index)
 {
   void *ap = NULL;
@@ -168,7 +168,7 @@ val_smmu_stop_monitor_dev(uint32_t ctrl_index)
   @param   dma_addr   - The input address to be checked
   @return  Success if the input address is found in the range
 **/
-uint32_t
+static uint32_t
 val_smmu_check_device_iova(uint32_t ctrl_index, addr_t dma_addr)
 {
   void *ap = NULL;

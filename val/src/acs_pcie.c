@@ -17,6 +17,7 @@
 
 #include "include/bsa_acs_val.h"
 #include "include/bsa_acs_common.h"
+#include "include/bsa_acs_pcie_enumeration.h"
 
 #include "include/bsa_acs_pcie.h"
 #include "sys_arch_src/pcie/pcie.h"
@@ -62,12 +63,12 @@ val_pcie_read_cfg(uint32_t bdf, uint32_t offset, uint32_t *data)
       return PCIE_NO_MAPPING;
   }
 
-  while (i < val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0))
+  while (i < (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0))
   {
 
-      if ((bus >= val_pcie_get_info(PCIE_INFO_START_BUS, i)) &&
-           (bus <= val_pcie_get_info(PCIE_INFO_END_BUS, i)) &&
-           (segment == val_pcie_get_info(PCIE_INFO_SEGMENT, i))) {
+      if ((bus >= (uint32_t)val_pcie_get_info(PCIE_INFO_START_BUS, i)) &&
+           (bus <= (uint32_t)val_pcie_get_info(PCIE_INFO_END_BUS, i)) &&
+           (segment == (uint32_t)val_pcie_get_info(PCIE_INFO_SEGMENT, i))) {
           ecam_base = val_pcie_get_info(PCIE_INFO_ECAM, i);
           break;
       }
@@ -138,12 +139,12 @@ val_pcie_write_cfg(uint32_t bdf, uint32_t offset, uint32_t data)
       return;
   }
 
-  while (i < val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0))
+  while (i < (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0))
   {
 
-      if ((bus >= val_pcie_get_info(PCIE_INFO_START_BUS, i)) &&
-           (bus <= val_pcie_get_info(PCIE_INFO_END_BUS, i)) &&
-           (segment == val_pcie_get_info(PCIE_INFO_SEGMENT, i))) {
+      if ((bus >= (uint32_t)val_pcie_get_info(PCIE_INFO_START_BUS, i)) &&
+           (bus <= (uint32_t)val_pcie_get_info(PCIE_INFO_END_BUS, i)) &&
+           (segment == (uint32_t)val_pcie_get_info(PCIE_INFO_SEGMENT, i))) {
           ecam_base = val_pcie_get_info(PCIE_INFO_ECAM, i);
           break;
       }
@@ -208,13 +209,13 @@ uint64_t val_pcie_get_bdf_config_addr(uint32_t bdf)
       return 0;
   }
 
-  num_ecam = val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
+  num_ecam = (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
   while (i < num_ecam)
   {
 
-      if ((bus >= val_pcie_get_info(PCIE_INFO_START_BUS, i)) &&
-           (bus <= val_pcie_get_info(PCIE_INFO_END_BUS, i)) &&
-           (segment == val_pcie_get_info(PCIE_INFO_SEGMENT, i))) {
+      if ((bus >= (uint32_t)val_pcie_get_info(PCIE_INFO_START_BUS, i)) &&
+           (bus <= (uint32_t)val_pcie_get_info(PCIE_INFO_END_BUS, i)) &&
+           (segment == (uint32_t)val_pcie_get_info(PCIE_INFO_SEGMENT, i))) {
           ecam_base = val_pcie_get_info(PCIE_INFO_ECAM, i);
           break;
       }
@@ -267,7 +268,7 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   status = ACS_STATUS_PASS;
 
-  for (i=0 ; i<MAX_TEST_SKIP_NUM ; i++){
+  for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_PCIE_TEST_NUM_BASE) {
           val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all PCIe tests \n", 0);
           return ACS_STATUS_SKIP;
@@ -288,7 +289,7 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
     return ACS_STATUS_SKIP;
   }
 
-  num_ecam = val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
+  num_ecam = (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
   if (!num_ecam) {
       val_print(ACS_PRINT_WARN, "\n      *** No ECAM region found, Skipping PCIE tests *** \n", 0);
       return ACS_STATUS_SKIP;
@@ -314,7 +315,7 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   }
 
   if (g_sw_view[G_SW_OS]) {
-#ifdef TARGET_LINUX
+#if defined(TARGET_LINUX) || defined(ENABLE_OOB) || defined(TARGET_EMULATION)
       status |= os_p061_entry(num_pe);
       status |= os_p062_entry(num_pe);
       status |= os_p064_entry(num_pe);
@@ -322,7 +323,8 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       status |= os_p066_entry(num_pe);
       status |= os_p067_entry(num_pe);
       status |= os_p068_entry(num_pe);
-#else
+#endif
+#ifndef TARGET_LINUX
       status |= os_p002_entry(num_pe);
       status |= os_p003_entry(num_pe);
       status |= os_p004_entry(num_pe);
@@ -367,7 +369,7 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   @param   None
   @return  None
 **/
-void
+static void
 val_pcie_print_device_info(void)
 {
   uint32_t bdf;
@@ -415,11 +417,11 @@ val_pcie_print_device_info(void)
   val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of iEP_EP          : %4d \n", num_iep);
   val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of iEP_RP          : %4d \n", num_irp);
 
-  while (ecam_index < val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0))
+  while (ecam_index < (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0))
   {
       ecam_base = val_pcie_get_info(PCIE_INFO_ECAM, ecam_index);
-      ecam_start_bus = val_pcie_get_info(PCIE_INFO_START_BUS, ecam_index);
-      ecam_end_bus = val_pcie_get_info(PCIE_INFO_END_BUS, ecam_index);
+      ecam_start_bus = (uint32_t)val_pcie_get_info(PCIE_INFO_START_BUS, ecam_index);
+      ecam_end_bus = (uint32_t)val_pcie_get_info(PCIE_INFO_END_BUS, ecam_index);
       tbl_index = 0;
 
       val_print(ACS_PRINT_INFO, "  ECAM %d:", ecam_index);
@@ -488,7 +490,7 @@ val_pcie_create_info_table(uint64_t *pcie_info_table)
 
   pal_pcie_create_info_table(g_pcie_info_table);
 
-  num_ecam = val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
+  num_ecam = (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
 
   val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of ECAM regions    :    %ld \n", num_ecam);
   if (num_ecam == 0)
@@ -575,7 +577,8 @@ val_pcie_create_device_bdf_table()
       return PCIE_SUCCESS;
 
   /* Allocate memory to store BDFs for the valid pcie device functions */
-  g_pcie_bdf_table = (pcie_device_bdf_table *) pal_mem_alloc(PCIE_DEVICE_BDF_TABLE_SZ);
+  g_pcie_bdf_table = (pcie_device_bdf_table *) pal_aligned_alloc(MEM_ALIGN_8K,
+                                                                 PCIE_DEVICE_BDF_TABLE_SZ);
   if (!g_pcie_bdf_table)
   {
       val_print(ACS_PRINT_ERR,
@@ -585,7 +588,7 @@ val_pcie_create_device_bdf_table()
 
   g_pcie_bdf_table->num_entries = 0;
 
-  num_ecam = val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
+  num_ecam = (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
   if (num_ecam == 0)
   {
       val_print(ACS_PRINT_ERR,
@@ -596,9 +599,9 @@ val_pcie_create_device_bdf_table()
   for (ecam_index = 0; ecam_index < num_ecam; ecam_index++)
   {
       /* Derive ecam specific information */
-      seg_num = val_pcie_get_info(PCIE_INFO_SEGMENT, ecam_index);
-      start_bus = val_pcie_get_info(PCIE_INFO_START_BUS, ecam_index);
-      end_bus = val_pcie_get_info(PCIE_INFO_END_BUS, ecam_index);
+      seg_num = (uint32_t)val_pcie_get_info(PCIE_INFO_SEGMENT, ecam_index);
+      start_bus = (uint32_t)val_pcie_get_info(PCIE_INFO_START_BUS, ecam_index);
+      end_bus = (uint32_t)val_pcie_get_info(PCIE_INFO_END_BUS, ecam_index);
 
       /* Iterate over all buses, devices and functions in this ecam */
       for (bus_index = start_bus; bus_index <= end_bus; bus_index++)
@@ -638,7 +641,7 @@ val_pcie_create_device_bdf_table()
                       dp_type = val_pcie_device_port_type(bdf);
 
                       /* RCiEP rules are for SBSA L6 */
-                      if (dp_type == RCiEP)
+                      if ((dp_type == RCiEP) || (dp_type == RCEC))
                           continue;
 
                       /* iEP rules are for SBSA L6 */
@@ -693,9 +696,9 @@ addr_t val_pcie_get_ecam_base(uint32_t bdf)
 
   seg_num = PCIE_EXTRACT_BDF_SEG(bdf);
 
-  while (ecam_index < val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0))
+  while (ecam_index < (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0))
   {
-      if (seg_num == val_pcie_get_info(PCIE_INFO_SEGMENT, ecam_index))
+      if (seg_num == (uint32_t)val_pcie_get_info(PCIE_INFO_SEGMENT, ecam_index))
       {
           if (val_pcie_function_header_type(bdf) == TYPE0_HEADER)
           {
@@ -710,8 +713,8 @@ addr_t val_pcie_get_ecam_base(uint32_t bdf)
               sec_bus = ((reg_value >> SECBN_SHIFT) & SECBN_MASK);
               sub_bus = ((reg_value >> SUBBN_SHIFT) & SUBBN_MASK);
 
-              if ((sec_bus >= val_pcie_get_info(PCIE_INFO_START_BUS, ecam_index)) &&
-                  (sub_bus <= val_pcie_get_info(PCIE_INFO_END_BUS, ecam_index)))
+              if ((sec_bus >= (uint32_t)val_pcie_get_info(PCIE_INFO_START_BUS, ecam_index)) &&
+                  (sub_bus <= (uint32_t)val_pcie_get_info(PCIE_INFO_END_BUS, ecam_index)))
               {
                   ecam_base = val_pcie_get_info(PCIE_INFO_ECAM, ecam_index);
                   break;
@@ -1083,7 +1086,7 @@ val_pcie_increment_bdf(uint32_t bdf)
   uint32_t bus;
   uint32_t dev;
   uint32_t func;
-  int32_t ecam_cnt;
+  uint32_t ecam_cnt;
   uint32_t ecam_index = 0;
 
   seg = PCIE_EXTRACT_BDF_SEG(bdf);
@@ -1092,9 +1095,9 @@ val_pcie_increment_bdf(uint32_t bdf)
   func = PCIE_EXTRACT_BDF_FUNC(bdf);
 
   /* Derive the ecam index to which sbdf belongs */
-  ecam_cnt = val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
+  ecam_cnt = (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
   while (ecam_cnt--) {
-      if (seg == val_pcie_get_info(PCIE_INFO_SEGMENT, ecam_cnt)) {
+      if (seg == (uint32_t)val_pcie_get_info(PCIE_INFO_SEGMENT, ecam_cnt)) {
           ecam_index = ecam_cnt;
           break;
       }
@@ -1113,12 +1116,12 @@ val_pcie_increment_bdf(uint32_t bdf)
           dev++;
       } else {
           dev = 0;
-          if (bus < val_pcie_get_info(PCIE_INFO_END_BUS, ecam_index)) {
+          if (bus < (uint32_t)val_pcie_get_info(PCIE_INFO_END_BUS, ecam_index)) {
               bus++;
           } else {
-              if ((ecam_index+1) < val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0)) {
-                  bus = val_pcie_get_info(PCIE_INFO_START_BUS, ecam_index+1);
-                  seg = val_pcie_get_info(PCIE_INFO_SEGMENT, ecam_index+1);
+              if ((ecam_index+1) < (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0)) {
+                  bus = (uint32_t)val_pcie_get_info(PCIE_INFO_START_BUS, ecam_index+1);
+                  seg = (uint32_t)val_pcie_get_info(PCIE_INFO_SEGMENT, ecam_index+1);
               }
               else {
                   return 0;
@@ -1805,7 +1808,7 @@ val_pcie_register_bitfields_check(uint64_t *bf_info_table, uint32_t num_bitfield
 {
 
   uint32_t bdf;
-  uint16_t dp_type;
+  uint32_t dp_type;
   uint32_t tbl_index;
   uint32_t num_fails;
   uint32_t num_pass;
@@ -2332,11 +2335,11 @@ val_pcie_get_ecam_index(uint32_t bdf, uint32_t *ecam_index)
   seg_num = PCIE_EXTRACT_BDF_SEG(bdf);
   bus_num = PCIE_EXTRACT_BDF_BUS(bdf);
 
-  while (index < val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0))
+  while (index < (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0))
   {
-      if (seg_num == val_pcie_get_info(PCIE_INFO_SEGMENT, index) &&
-         (bus_num >= val_pcie_get_info(PCIE_INFO_START_BUS, index)) &&
-         (bus_num <= val_pcie_get_info(PCIE_INFO_END_BUS, index)))
+      if (seg_num == (uint32_t)val_pcie_get_info(PCIE_INFO_SEGMENT, index) &&
+         (bus_num >= (uint32_t)val_pcie_get_info(PCIE_INFO_START_BUS, index)) &&
+         (bus_num <= (uint32_t)val_pcie_get_info(PCIE_INFO_END_BUS, index)))
       {
           if (val_pcie_function_header_type(bdf) == TYPE0_HEADER)
           {
@@ -2351,8 +2354,8 @@ val_pcie_get_ecam_index(uint32_t bdf, uint32_t *ecam_index)
               sec_bus = ((reg_value >> SECBN_SHIFT) & SECBN_MASK);
               sub_bus = ((reg_value >> SUBBN_SHIFT) & SUBBN_MASK);
 
-              if ((sec_bus >= val_pcie_get_info(PCIE_INFO_START_BUS, index)) &&
-                  (sub_bus <= val_pcie_get_info(PCIE_INFO_END_BUS, index)))
+              if ((sec_bus >= (uint32_t)val_pcie_get_info(PCIE_INFO_START_BUS, index)) &&
+                  (sub_bus <= (uint32_t)val_pcie_get_info(PCIE_INFO_END_BUS, index)))
               {
                     *ecam_index = index;
                     return 0;

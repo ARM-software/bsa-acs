@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2022, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +34,8 @@ UINT32 g_pcie_cache_present;
 
 UINT32  g_print_level;
 UINT32  g_sw_view[3] = {1, 1, 1}; //Operating System, Hypervisor, Platform Security
-UINT32  g_skip_test_num[9] = {10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000};
+UINT32  *g_skip_test_num;
+UINT32  g_num_skip;
 UINT32  g_bsa_tests_total;
 UINT32  g_bsa_tests_pass;
 UINT32  g_bsa_tests_fail;
@@ -329,7 +330,7 @@ ShellAppMain (
   CONST CHAR16       *CmdLineArg;
   CHAR16             *ProbParam;
   UINT32             Status;
-  UINT32             i,j=0;
+  UINT32             i;
   VOID               *branch_label;
   UINT32             ReadVerbosity;
 
@@ -347,17 +348,33 @@ ShellAppMain (
 
   // Options with Values
   if (ShellCommandLineGetFlag (ParamPackage, L"-skip")) {
-      CmdLineArg  = ShellCommandLineGetValue (ParamPackage, L"-skip");
-      if (CmdLineArg == NULL) {
-        Print(L" No valid test number or module number specified for -skip\n");
-      } else {
-        for (i = 0 ; i < StrLen(CmdLineArg) ; i++) {
-          g_skip_test_num[0] = StrDecimalToUintn((CONST CHAR16 *)(CmdLineArg+0));
-            if (*(CmdLineArg+i) == L',') {
-              g_skip_test_num[++j] = StrDecimalToUintn((CONST CHAR16 *)(CmdLineArg+i+1));
-          }
+    CmdLineArg  = ShellCommandLineGetValue (ParamPackage, L"-skip");
+    if (CmdLineArg == NULL)
+    {
+      Print(L"Invalid parameter passed for -skip\n", 0);
+      HelpMsg();
+      return SHELL_INVALID_PARAMETER;
+    }
+    else
+    {
+      Status = gBS->AllocatePool(EfiBootServicesData,
+                                 StrLen(CmdLineArg),
+                                 (VOID **) &g_skip_test_num);
+      if (EFI_ERROR(Status))
+      {
+        Print(L"Allocate memory for -skip failed \n", 0);
+        return 0;
+      }
+
+      g_skip_test_num[0] = StrDecimalToUintn((CONST CHAR16 *)(CmdLineArg+0));
+      for (i = 0; i < StrLen(CmdLineArg); i++) {
+      if(*(CmdLineArg+i) == L',') {
+          g_skip_test_num[++g_num_skip] = StrDecimalToUintn((CONST CHAR16 *)(CmdLineArg+i+1));
         }
       }
+
+      g_num_skip++;
+    }
   }
 
   // Options with Values
@@ -536,7 +553,7 @@ ShellAppMain (
   val_print(ACS_PRINT_TEST, "\n      *** Starting Timer tests ***  ", 0);
   Status |= val_timer_execute_tests(val_pe_get_num(), g_sw_view);
 
-  val_print(ACS_PRINT_TEST, "\n      *** Starting Power and Wakeup semantic tests ***  ", 0);
+  val_print(ACS_PRINT_TEST, "\n      *** Starting Wakeup semantic tests ***  ", 0);
   Status |= val_wakeup_execute_tests(val_pe_get_num(), g_sw_view);
 
   val_print(ACS_PRINT_TEST, "\n      *** Starting Peripheral tests ***  ", 0);

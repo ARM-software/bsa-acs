@@ -44,7 +44,7 @@ val_pe_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 {
   uint32_t status, i;
 
-  for (i=0 ; i<MAX_TEST_SKIP_NUM ; i++){
+  for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_PE_TEST_NUM_BASE) {
         val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all PE tests \n", 0);
         return ACS_STATUS_SKIP;
@@ -268,7 +268,7 @@ val_pe_reg_read(uint32_t reg_id)
           return AA64ReadDbgbcr15El1();
       default:
            val_report_status(val_pe_get_index_mpid(val_pe_get_mpid()),
-                                                 RESULT_FAIL(0, 0x78), NULL);
+                                                 RESULT_FAIL(0, 0xFF), NULL);
            break;
   }
 
@@ -329,7 +329,7 @@ val_pe_reg_write(uint32_t reg_id, uint64_t write_data)
           break;
       default:
            val_report_status(val_pe_get_index_mpid(val_pe_get_mpid()),
-                                                  RESULT_FAIL(0, 0x78), NULL);
+                                                  RESULT_FAIL(0, 0xFF), NULL);
   }
 
 }
@@ -459,7 +459,7 @@ uint32_t val_pe_reg_read_tcr(uint32_t ttbr1, PE_TCR_BF *tcr)
     uint32_t el = AA64ReadCurrentEL() & AARCH64_EL_MASK;
     uint8_t tg_ttbr0[3] = {12 /*4KB*/, 16 /*64KB*/, 14 /*16KB*/};
     uint8_t tg_ttbr1[4] = {0 /* N/A */, 14 /*16KB*/, 12 /*4KB*/, 16 /* 64KB*/};
-    uint64_t e2h;
+    uint64_t e2h = 0;
 
     if ((tcr == NULL) ||
         (el != AARCH64_EL1 && el != AARCH64_EL2))

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2022-2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,7 +56,7 @@ payload(void)
        */
       bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
       dp_type = val_pcie_device_port_type(bdf);
-      if ((dp_type == RP) || (dp_type == iEP_RP)) {
+      if (dp_type == RP) {
         /* Read Vendor ID of RP with ECAM based mechanism, and compare it with the */
         val_print(ACS_PRINT_DEBUG, "\n       BDF 0x%x", bdf);
         ecam_base = val_pcie_get_ecam_base(bdf);
@@ -88,7 +88,7 @@ payload(void)
   }
 
   if (test_skip == 1) {
-      val_print(ACS_PRINT_DEBUG, "\n       No RP/ iEP_RP type device found. Skipping test", 0);
+      val_print(ACS_PRINT_DEBUG, "\n       No RP type device found. Skipping test", 0);
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 01));
   }
   else if (fail_cnt)

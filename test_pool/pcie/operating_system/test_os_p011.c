@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2020-2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020-2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ payload(void)
       bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
       dp_type = val_pcie_device_port_type(bdf);
 
-      if ((dp_type == RP) || (dp_type == iEP_RP)) {
+      if (dp_type == RP) {
 
         /* If test runs for atleast an endpoint */
         val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", bdf);
@@ -132,7 +132,7 @@ payload(void)
   }
 
   if (test_skip) {
-      val_print(ACS_PRINT_DEBUG, "\n       No RP/ iEP_RP type device found. Skipping test", 0);
+      val_print(ACS_PRINT_DEBUG, "\n       No RP type device found. Skipping test", 0);
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
   }
   if (test_fail)

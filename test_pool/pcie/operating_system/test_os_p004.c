@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021-2022, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,7 +139,7 @@ payload(void)
       bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
       dp_type = val_pcie_device_port_type(bdf);
 
-      if ((dp_type == RP) || (dp_type == iEP_RP))
+      if (dp_type == RP)
       {
         /* Part 1:
          * Check When Address is within the Range of Non-Prefetchable
@@ -261,7 +261,7 @@ exception_return:
 
   if (test_skip == 1) {
       val_print(ACS_PRINT_DEBUG,
-        "\n       No RP/ iEP_RP type device found with valid Memory Base/Limit Reg.", 0);
+        "\n       No RP type device found with valid Memory Base/Limit Reg.", 0);
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
   }
   else
