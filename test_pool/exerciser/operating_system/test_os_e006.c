@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018-2020,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2018-2020,2021,2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -81,7 +81,7 @@ payload (void)
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
 
   /* Allocate memory for interrupt mappings */
-  e_intr_map = val_memory_alloc(sizeof(PERIPHERAL_IRQ_MAP));
+  e_intr_map = val_aligned_alloc(MEM_ALIGN_4K, sizeof(PERIPHERAL_IRQ_MAP));
   if (!e_intr_map) {
     val_print(ACS_PRINT_ERR, "\n       Memory allocation error", 00);
     val_set_status(pe_index, RESULT_FAIL (TEST_NUM, 2));
@@ -108,7 +108,7 @@ payload (void)
         continue;
 
     /* Get the legacy IRQ map */
-    status = val_pci_get_legacy_irq_map(e_bdf, e_intr_map);
+    status = val_exerciser_get_legacy_irq_map(e_bdf, e_intr_map);
     if (!status) {
 
         /* Get the number of IRQ for the specified INTx# */
@@ -181,7 +181,8 @@ payload (void)
   else
       val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
 
-  val_memory_free(e_intr_map);
+
+  val_memory_free_aligned(e_intr_map);
   return;
 
 }

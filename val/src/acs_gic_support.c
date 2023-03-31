@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,7 +51,7 @@ val_gic_reg_read(uint32_t reg_id)
           return GicReadIchMisr();
       default:
            val_report_status(val_pe_get_index_mpid(val_pe_get_mpid()),
-                                                  RESULT_FAIL(0, 0x78), NULL);
+                                                  RESULT_FAIL(0, 0xFF), NULL);
   }
 
   return 0x0;
@@ -75,7 +75,7 @@ val_gic_reg_write(uint32_t reg_id, uint64_t write_data)
           if (val_gic_get_info(GIC_INFO_VERSION) >= 3)
               GicWriteIchHcr(write_data);
           else
-              val_mmio_write(val_get_gich_base() + 0, write_data); /* 0 is GICH_HCR offset */
+              val_mmio_write64(val_get_gich_base() + 0, write_data); /* 0 is GICH_HCR offset */
           break;
       case ICC_IGRPEN1_EL1:
           GicWriteIccIgrpen1(write_data);
@@ -88,7 +88,7 @@ val_gic_reg_write(uint32_t reg_id, uint64_t write_data)
           break;
       default:
            val_report_status(val_pe_get_index_mpid(val_pe_get_mpid()),
-                                                  RESULT_FAIL(0, 0x78), NULL);
+                                                  RESULT_FAIL(0, 0xFF), NULL);
   }
 
 }
@@ -101,7 +101,7 @@ val_gic_reg_write(uint32_t reg_id, uint64_t write_data)
   @param   int_id Interrupt ID to check
   @return  1 - If Valid LPI, 0 - Otherwise
 **/
-uint32_t
+static uint32_t
 val_gic_is_valid_lpi(uint32_t int_id)
 {
   uint32_t max_lpi_id = 0;
@@ -148,7 +148,8 @@ val_gic_install_isr(uint32_t int_id, void (*isr)(void))
       if (int_id > 31 && int_id < 1024) {
           /**** UEFI GIC code is not enabling interrupt in the Distributor ***/
           /**** So, do this here as a fail-safe. Remove if PAL guarantees this ***/
-          val_mmio_write(val_get_gicd_base() + GICD_ISENABLER + (4 * reg_offset), 1 << reg_shift);
+          val_mmio_write(val_get_gicd_base() + GICD_ISENABLER + (4 * reg_offset),
+                         (uint32_t)1 << reg_shift);
       }
 #endif
   }
@@ -217,7 +218,7 @@ uint32_t val_gic_its_configure()
     goto its_fail;
 
   /* Allocate memory to store ITS info */
-  g_gic_its_info = (GIC_ITS_INFO *) val_memory_alloc(1024);
+  g_gic_its_info = (GIC_ITS_INFO *) val_aligned_alloc(MEM_ALIGN_4K, 1024);
   if (!g_gic_its_info) {
       val_print(ACS_PRINT_ERR, "  ITS Configure: memory allocation failed\n",
                                                                           0);
@@ -238,7 +239,7 @@ uint32_t val_gic_its_configure()
       if (g_gic_its_info->GicRdBase == 0) {
         if (g_gic_entry->type == ENTRY_TYPE_GICR_GICRD)
           g_gic_its_info->GicRdBase = val_its_get_curr_rdbase(g_gic_entry->base,
-                                                              g_gic_entry->length);
+                                                              (uint32_t)g_gic_entry->length);
         else
           g_gic_its_info->GicRdBase = val_its_get_curr_rdbase(g_gic_entry->base, 0);
       }
@@ -281,7 +282,7 @@ its_fail:
 
   val_print(ACS_PRINT_DEBUG, "  ITS Init failed: ", 0);
   val_print(ACS_PRINT_DEBUG, "LPI Interrupt related test may not pass\n", 0);
-  val_memory_free((void *)g_gic_its_info);
+  val_memory_free_aligned((void *)g_gic_its_info);
 
   return ACS_STATUS_ERR;
 }
@@ -293,6 +294,7 @@ its_fail:
   @param   its_id ID of the ITS Block
   @return  Index in ITS Info Block
 **/
+static
 uint32_t get_its_index(uint32_t its_id)
 {
   uint32_t  index;
@@ -313,7 +315,7 @@ uint32_t get_its_index(uint32_t its_id)
   @param   msi_index MSI Index in MSI-X table in Config space
   @return  None
 **/
-void clear_msi_x_table(uint32_t bdf, uint32_t msi_index)
+static void clear_msi_x_table(uint32_t bdf, uint32_t msi_index)
 {
 
   uint32_t msi_cap_offset, msi_table_bar_index;
@@ -362,7 +364,8 @@ void clear_msi_x_table(uint32_t bdf, uint32_t msi_index)
   @param   msi_data MSI Data to be programmed
   @return  Status
 **/
-uint32_t fill_msi_x_table(uint32_t bdf, uint32_t msi_index, uint64_t msi_addr, uint32_t msi_data)
+static uint32_t fill_msi_x_table(uint32_t bdf, uint32_t msi_index, uint64_t msi_addr,
+                                 uint32_t msi_data)
 {
 
   uint32_t msi_cap_offset, msi_table_bar_index;
@@ -380,7 +383,7 @@ uint32_t fill_msi_x_table(uint32_t bdf, uint32_t msi_index, uint64_t msi_addr, u
 
   /* Enable MSI-X in MSI-X Capability */
   val_pcie_read_cfg(bdf, msi_cap_offset, &read_value);
-  val_pcie_write_cfg(bdf, msi_cap_offset, read_value | (1 << MSI_X_ENABLE_SHIFT));
+  val_pcie_write_cfg(bdf, msi_cap_offset, (read_value | ((uint32_t)1 << MSI_X_ENABLE_SHIFT)));
 
   /* Read MSI-X Table Address from the BAR Register */
   val_pcie_read_cfg(bdf, msi_cap_offset + MSI_X_TOR_OFFSET, &table_offset_reg);
@@ -399,9 +402,9 @@ uint32_t fill_msi_x_table(uint32_t bdf, uint32_t msi_index, uint64_t msi_addr, u
 
   /* Fill MSI Table with msi_addr, msi_data */
   val_mmio_write(table_address + msi_index*MSI_X_ENTRY_SIZE + MSI_X_MSG_TBL_LOWER_ADDR_OFFSET,
-                                                                                      msi_addr);
+                                                                          (uint32_t)msi_addr);
   val_mmio_write(table_address + msi_index*MSI_X_ENTRY_SIZE + MSI_X_MSG_TBL_HIGHER_ADDR_OFFSET,
-                                                                  msi_addr >> MSI_X_ADDR_SHIFT);
+                                                     (uint32_t)(msi_addr >> MSI_X_ADDR_SHIFT));
   val_mmio_write(table_address + msi_index*MSI_X_ENTRY_SIZE + MSI_X_MSG_TBL_DATA_OFFSET, msi_data);
   val_mmio_write(table_address + msi_index*MSI_X_ENTRY_SIZE + MSI_X_MSG_TBL_MVC_OFFSET, 0x0);
 

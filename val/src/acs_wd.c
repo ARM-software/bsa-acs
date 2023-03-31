@@ -38,7 +38,7 @@ val_wd_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   status = ACS_STATUS_PASS;
 
-  for (i=0 ; i<MAX_TEST_SKIP_NUM ; i++){
+  for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_WD_TEST_NUM_BASE) {
           val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all Watchdog tests \n", 0);
           return ACS_STATUS_SKIP;
@@ -151,7 +151,7 @@ val_wd_free_info_table()
   @param   index   - identifies the watchdog instance to enable
   @return  None
  **/
-void
+static void
 val_wd_enable(uint32_t index)
 {
 
@@ -164,7 +164,7 @@ val_wd_enable(uint32_t index)
   @param   index   - identifies the watchdog instance to enable
   @return  None
  **/
-void
+static void
 val_wd_disable(uint32_t index)
 {
 

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +43,7 @@ uint32_t val_gic_v2m_parse_info(void)
   }
 
   /* Allocate memory to store MSI Frame info */
-  g_v2m_msi_info = (GICv2m_MSI_FRAME_INFO *) val_memory_alloc(1024);
+  g_v2m_msi_info = (GICv2m_MSI_FRAME_INFO *) val_aligned_alloc(MEM_ALIGN_4K, 1024);
   if (!g_v2m_msi_info) {
       val_print(ACS_PRINT_DEBUG, "\n       GICv2m : MSI Frame Info Failed.", 0);
       return ACS_STATUS_SKIP;

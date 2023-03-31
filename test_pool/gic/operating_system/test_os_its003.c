@@ -60,7 +60,7 @@ payload()
   }
 
   /* Allocate memory to store stream ID */
-  streamID = val_memory_alloc(bdf_tbl_ptr->num_entries * sizeof(uint32_t));
+  streamID = val_aligned_alloc(MEM_ALIGN_4K, bdf_tbl_ptr->num_entries * sizeof(uint32_t));
   if (!streamID) {
       val_print(ACS_PRINT_DEBUG, "\n       Stream ID memory allocation failed", 0);
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 1));
@@ -68,7 +68,7 @@ payload()
   }
 
   /* Allocate memory to store smmu_index */
-  smmu_index = val_memory_alloc(bdf_tbl_ptr->num_entries * sizeof(uint32_t));
+  smmu_index = val_aligned_alloc(MEM_ALIGN_4K, bdf_tbl_ptr->num_entries * sizeof(uint32_t));
   if (!smmu_index) {
       val_print(ACS_PRINT_DEBUG, "\n       Smmu index memory allocation failed", 0);
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
@@ -76,7 +76,7 @@ payload()
   }
 
   /* Allocate memory to store dev_bdf */
-  dev_bdf = val_memory_alloc(bdf_tbl_ptr->num_entries * sizeof(uint32_t));
+  dev_bdf = val_aligned_alloc(MEM_ALIGN_4K, bdf_tbl_ptr->num_entries * sizeof(uint32_t));
   if (!dev_bdf) {
       val_print(ACS_PRINT_DEBUG, "\n       Dev BDF memory allocation failed", 0);
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 3));
@@ -113,9 +113,9 @@ payload()
             "\n       Could not get device info for BDF : 0x%x", bdf);
         val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 4));
         /* Free allocated memory before return*/
-        val_memory_free(streamID);
-        val_memory_free(smmu_index);
-        val_memory_free(dev_bdf);
+        val_memory_free_aligned(streamID);
+        val_memory_free_aligned(smmu_index);
+        val_memory_free_aligned(dev_bdf);
         return;
     }
 
@@ -166,9 +166,10 @@ payload()
   }
 
   /* Free allocated memory before return*/
-  val_memory_free(streamID);
-  val_memory_free(smmu_index);
-  val_memory_free(dev_bdf);
+
+  val_memory_free_aligned(streamID);
+  val_memory_free_aligned(smmu_index);
+  val_memory_free_aligned(dev_bdf);
 
   if (test_skip == 1)
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 3));

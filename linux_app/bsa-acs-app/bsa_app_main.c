@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2020-2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2020-2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,8 @@
 
 int  g_print_level = 3;
 unsigned int  g_sw_view[3] = {1, 1, 1}; //Operating System, Hypervisor, Platform Security
-int  g_skip_test_num[3] = {10000, 10000, 10000};
+unsigned int  *g_skip_test_num;
+unsigned int  g_num_skip = 3;
 unsigned long int  g_exception_ret_addr;
 unsigned int g_print_mmio;
 unsigned int g_curr_module;
@@ -74,6 +75,8 @@ main (int argc, char **argv)
       {NULL, 0, NULL, 0}
     };
 
+    g_skip_test_num = (unsigned int *) malloc(g_num_skip * sizeof(unsigned int));
+
     /* Process Command Line arguments */
     while ((c = getopt_long(argc, argv, "hv:e:", long_opt, NULL)) != -1)
     {
@@ -88,7 +91,7 @@ main (int argc, char **argv)
          break;
        case 'n':/*SKIP tests */
          pt = strtok(optarg, ",");
-         while((pt!=NULL) && (i<3)){
+         while ((pt != NULL) && (i < g_num_skip)) {
            int a = atoi(pt);
            g_skip_test_num[i++] = a;
            pt = strtok(NULL, ",");

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,6 +71,9 @@ val_smmu_map(smmu_master_attributes_t master,
 
 void
 val_smmu_unmap(smmu_master_attributes_t master);
+
+void
+val_smmu_dump_eventq(void);
 
 uint32_t
 os_i001_entry(uint32_t num_pe);

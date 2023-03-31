@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2020-2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2020-2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -311,7 +311,7 @@ void
 val_pe_context_restore(uint64_t sp)
 {
     sp = 0;
-    *(uint64_t *)(g_stack_pointer+8) = g_ret_addr;
+    *(uint64_t *)(g_stack_pointer+8+sp) = g_ret_addr;
 }
 
 /**

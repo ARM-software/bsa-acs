@@ -39,7 +39,7 @@ val_wakeup_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   status = ACS_STATUS_PASS;
 
-  for (i=0 ; i<MAX_TEST_SKIP_NUM ; i++){
+  for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_WAKEUP_TEST_NUM_BASE) {
           val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all Wakeup tests \n", 0);
           return ACS_STATUS_SKIP;

@@ -78,13 +78,6 @@ uart_reg_write(uint32_t offset, uint32_t width_mask, uint32_t data)
 }
 
 void
-uart_setup()
-{
-
-
-}
-
-void
 uart_enable_txintr()
 {
   uint32_t data;
@@ -168,7 +161,7 @@ payload()
               return;
           }
 
-          uart_setup();
+          val_peripheral_uart_setup();
 
           /*Make sure  write to a read only register doesn't cause any exceptions*/
           validate_register_access(BSA_UARTFR, WIDTH_BIT8 | WIDTH_BIT16 | WIDTH_BIT32);
@@ -219,6 +212,7 @@ payload1()
                  return;
               }
 
+              val_peripheral_uart_setup();
               uart_enable_txintr();
               val_print_raw(l_uart_base, g_print_level,
                             "\n       Test Message                          ", 0);

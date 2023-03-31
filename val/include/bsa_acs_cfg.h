@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2022-2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,15 +18,10 @@
 #ifndef __BSA_ACS_CFG_H__
 #define __BSA_ACS_CFG_H__
 
-#ifndef TARGET_LINUX
-#define MAX_TEST_SKIP_NUM  9
-#else
-#define MAX_TEST_SKIP_NUM  3
-#endif
-
 extern uint32_t g_print_level;
 extern uint32_t g_execute_secure;
-extern uint32_t g_skip_test_num[MAX_TEST_SKIP_NUM];
+extern uint32_t *g_skip_test_num;
+extern uint32_t g_num_skip;
 extern uint32_t g_bsa_tests_total;
 extern uint32_t g_bsa_tests_pass;
 extern uint32_t g_bsa_tests_fail;

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021,2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,7 +55,7 @@ get_target_exer_bdf(uint32_t req_rp_bdf, uint32_t *tgt_e_bdf,
           continue;
 
       /* Get RP of the exerciser */
-      if (val_pcie_get_rootport(e_bdf, &erp_bdf))
+      if (val_exerciser_get_rootport(e_bdf, &erp_bdf))
           continue;
 
       if (req_rp_bdf != erp_bdf)
@@ -146,7 +146,7 @@ payload(void)
       val_print(ACS_PRINT_DEBUG, "\n       Requester exerciser BDF - 0x%x", req_e_bdf);
 
       /* Get RP of the exerciser */
-      if (val_pcie_get_rootport(req_e_bdf, &req_rp_bdf))
+      if (val_exerciser_get_rootport(req_e_bdf, &req_rp_bdf))
           continue;
 
       /* Find another exerciser on other rootport,

@@ -249,7 +249,7 @@ v3_EnableInterruptSource(uint32_t int_id)
   @param  priority
   @return none
 **/
-void
+static void
 v3_SetInterruptPriority(uint32_t int_id, uint32_t priority)
 {
   uint32_t                regOffset;

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018-2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2018-2021,2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@
 #include "val/include/bsa_acs_pcie_enumeration.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 7)
-#define TEST_RULE  "PCI_IC_01, PCI_IC_03, PCI_IC_06, PCI_IC_07, PCI_IC_08"
+#define TEST_RULE  "PCI_IC_11, PCI_IC_13, PCI_IC_16, PCI_IC_17, PCI_IC_18"
 #define TEST_DESC  "Check PCIe I/O Coherency              "
 
 #define TEST_DATA_BLK_SIZE  (4*1024)

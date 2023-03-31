@@ -32,22 +32,50 @@
 #define PCIE_MAX_BUS   256
 #define PCIE_MAX_DEV    32
 #define PCIE_MAX_FUNC    8
+#define MAX_IRQ_CNT    0xFFFF    // This value is arbitrary and may have to be adjusted
 
 #elif TARGET_EMULATION
 #include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
+#include "../platform/pal_baremetal/FVP/RDN2/include/platform_override_fvp.h"
   typedef uint64_t addr_t;
   typedef char     char8_t;
   typedef uint64_t dma_addr_t;
 
-#define TIMEOUT_LARGE    PLATFORM_OVERRIDE_TIMEOUT_LARGE
-#define TIMEOUT_MEDIUM   PLATFORM_OVERRIDE_TIMEOUT_MEDIUM
-#define TIMEOUT_SMALL    PLATFORM_OVERRIDE_TIMEOUT_SMALL
+#define TIMEOUT_LARGE    PLATFORM_BM_OVERRIDE_TIMEOUT_LARGE
+#define TIMEOUT_MEDIUM   PLATFORM_BM_OVERRIDE_TIMEOUT_MEDIUM
+#define TIMEOUT_SMALL    PLATFORM_BM_OVERRIDE_TIMEOUT_SMALL
 
-#define PCIE_MAX_BUS    PLATFORM_OVERRIDE_PCIE_MAX_BUS
-#define PCIE_MAX_DEV    PLATFORM_OVERRIDE_PCIE_MAX_DEV
-#define PCIE_MAX_FUNC   PLATFORM_OVERRIDE_PCIE_MAX_FUNC
+#define PCIE_MAX_BUS     PLATFORM_BM_OVERRIDE_PCIE_MAX_BUS
+#define PCIE_MAX_DEV     PLATFORM_BM_OVERRIDE_PCIE_MAX_DEV
+#define PCIE_MAX_FUNC    PLATFORM_BM_OVERRIDE_PCIE_MAX_FUNC
+
+
+#define MAX_IRQ_CNT      PLATFORM_BM_OVERRIDE_MAX_IRQ_CNT
+
+#elif ENABLE_OOB
+  typedef INT8   int8_t;
+  typedef INT32  int32_t;
+  typedef CHAR8  char8_t;
+  typedef CHAR16 char16_t;
+  typedef UINT8  uint8_t;
+  typedef UINT16 uint16_t;
+  typedef UINT32 uint32_t;
+  typedef UINT64 uint64_t;
+  typedef UINT64 addr_t;
+  typedef UINT64 dma_addr_t;
+#include "../../platform/pal_baremetal/FVP/RDN2/include/platform_override_fvp.h"
+
+#define TIMEOUT_LARGE    PLATFORM_BM_OVERRIDE_TIMEOUT_LARGE
+#define TIMEOUT_MEDIUM   PLATFORM_BM_OVERRIDE_TIMEOUT_MEDIUM
+#define TIMEOUT_SMALL    PLATFORM_BM_OVERRIDE_TIMEOUT_SMALL
+
+#define PCIE_MAX_BUS    PLATFORM_BM_OVERRIDE_PCIE_MAX_BUS
+#define PCIE_MAX_DEV    PLATFORM_BM_OVERRIDE_PCIE_MAX_DEV
+#define PCIE_MAX_FUNC   PLATFORM_BM_OVERRIDE_PCIE_MAX_FUNC
+
+#define MAX_IRQ_CNT     PLATFORM_BM_OVERRIDE_MAX_IRQ_CNT
 
 #else
 #include "../platform/include/platform_override.h"
@@ -60,6 +88,7 @@
   typedef UINT32 uint32_t;
   typedef UINT64 uint64_t;
   typedef UINT64 addr_t;
+  typedef UINT64 dma_addr_t;
 
 #if PLATFORM_OVERRIDE_TIMEOUT
     #define TIMEOUT_LARGE    PLATFORM_OVERRIDE_TIMEOUT_LARGE
@@ -71,14 +100,20 @@
     #define TIMEOUT_SMALL    0x1000
 #endif
 
-#if PLATFORM_OVERRIDE_MAX_BDF
-    #define PCIE_MAX_BUS    PLATFORM_OVERRIDE_PCIE_MAX_BUS
-    #define PCIE_MAX_DEV    PLATFORM_OVERRIDE_PCIE_MAX_DEV
-    #define PCIE_MAX_FUNC   PLATFORM_OVERRIDE_PCIE_MAX_FUNC
-#else
+#ifndef PLATFORM_OVERRIDE_MAX_BDF
     #define PCIE_MAX_BUS   256
     #define PCIE_MAX_DEV    32
     #define PCIE_MAX_FUNC    8
+#else
+    #define PCIE_MAX_BUS    PLATFORM_OVERRIDE_PCIE_MAX_BUS
+    #define PCIE_MAX_DEV    PLATFORM_OVERRIDE_PCIE_MAX_DEV
+    #define PCIE_MAX_FUNC   PLATFORM_OVERRIDE_PCIE_MAX_FUNC
+#endif
+
+#ifdef PLATFORM_OVERRIDE_IRQ
+    #define MAX_IRQ_CNT    PLATFORM_OVERRIDE_MAX_IRQ_CNT
+#else
+    #define MAX_IRQ_CNT    0xFFFF
 #endif
 
 #endif
@@ -536,7 +571,7 @@ typedef struct {
 
 void  pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *per_info_table);
 uint32_t pal_peripheral_is_pcie(uint32_t seg, uint32_t bus, uint32_t dev, uint32_t fn);
-
+void pal_peripheral_uart_setup(void);
 /**
   @brief MSI(X) controllers info structure
 **/
@@ -560,7 +595,6 @@ typedef struct PERIPHERAL_VECTOR_LIST_STRUCT
 uint32_t pal_get_msi_vectors (uint32_t seg, uint32_t bus, uint32_t dev, uint32_t fn, PERIPHERAL_VECTOR_LIST **mvector);
 
 #define LEGACY_PCI_IRQ_CNT 4  // Legacy PCI IRQ A, B, C. and D
-#define MAX_IRQ_CNT 0xFFFF    // This value is arbitrary and may have to be adjusted
 
 typedef struct {
   uint32_t  irq_list[MAX_IRQ_CNT];
@@ -680,6 +714,7 @@ uint32_t pal_mem_page_size(void);
 void    *pal_mem_alloc_pages(uint32_t num_pages);
 void     pal_mem_free_pages(void *page_base, uint32_t num_pages);
 void    *pal_aligned_alloc(uint32_t alignment, uint32_t size);
+void     pal_mem_free_aligned(void *buffer);
 
 uint32_t pal_mmio_read(uint64_t addr);
 uint64_t pal_mmio_read64(uint64_t addr);
@@ -837,6 +872,8 @@ uint32_t pal_exerciser_get_state(EXERCISER_STATE *state, uint32_t bdf);
 uint32_t pal_exerciser_ops(EXERCISER_OPS ops, uint64_t param, uint32_t instance);
 uint32_t pal_exerciser_get_data(EXERCISER_DATA_TYPE type, exerciser_data_t *data, uint32_t bdf,
                                                                                   uint64_t ecam);
+uint32_t pal_exerciser_get_legacy_irq_map(uint32_t seg, uint32_t bus, uint32_t dev, uint32_t fn,
+                                                                    PERIPHERAL_IRQ_MAP *irq_map);
 
 #endif
 

@@ -38,7 +38,7 @@ val_gic_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   uint32_t status, i;
   uint32_t gic_version, num_msi_frame;
 
-  for (i=0 ; i<MAX_TEST_SKIP_NUM ; i++){
+  for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_GIC_TEST_NUM_BASE) {
           val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all GIC tests \n", 0);
           return ACS_STATUS_SKIP;
@@ -492,7 +492,7 @@ uint32_t val_gic_get_interrupt_state(uint32_t int_id)
 {
   uint32_t reg_offset = int_id / 32;
   uint32_t reg_shift  = int_id % 32;
-  uint32_t mask = (1 << reg_shift);
+  uint32_t mask = ((uint32_t)1 << reg_shift);
   uint32_t active, pending;
 
   pending = val_mmio_read(val_get_gicd_base() + GICD_ISPENDR + (4 * reg_offset));
@@ -516,8 +516,10 @@ void val_gic_clear_interrupt(uint32_t int_id)
     if (val_gic_is_valid_espi(int_id))
       val_bsa_gic_clear_espi_interrupt(int_id);
     else if ((int_id > 31) && (int_id < 1020)) {
-        val_mmio_write(val_get_gicd_base() + GICD_ICPENDR0 + (4 * reg_offset), (1 << reg_shift));
-        val_mmio_write(val_get_gicd_base() + GICD_ICACTIVER0 + (4 * reg_offset), (1 << reg_shift));
+        val_mmio_write(val_get_gicd_base() + GICD_ICPENDR0 + (4 * reg_offset),
+                        ((uint32_t)1 << reg_shift));
+        val_mmio_write(val_get_gicd_base() + GICD_ICACTIVER0 + (4 * reg_offset),
+                       ((uint32_t)1 << reg_shift));
     }
     else
         val_print(ACS_PRINT_ERR, "\n    Invalid SPI interrupt ID number %d", int_id);
@@ -562,7 +564,7 @@ uint32_t val_gic_get_intr_trigger_type(uint32_t int_id, INTR_TRIGGER_INFO_TYPE_e
 
   reg_value = val_mmio_read(val_get_gicd_base() + GICD_ICFGR + (4 * reg_offset));
 
-  if ((reg_value & (1 << config_bit_shift)) == 0)
+  if ((reg_value & ((uint32_t)1 << config_bit_shift)) == 0)
     *trigger_type = INTR_TRIGGER_INFO_LEVEL_HIGH;
   else
     *trigger_type = INTR_TRIGGER_INFO_EDGE_RISING;
@@ -596,7 +598,7 @@ uint32_t val_gic_get_espi_intr_trigger_type(uint32_t int_id,
 
   reg_value = val_mmio_read(val_get_gicd_base() + GICD_ICFGRE + (4 * reg_offset));
 
-  if ((reg_value & (1 << config_bit_shift)) == 0)
+  if ((reg_value & ((uint32_t)1 << config_bit_shift)) == 0)
     *trigger_type = INTR_TRIGGER_INFO_LEVEL_HIGH;
   else
     *trigger_type = INTR_TRIGGER_INFO_EDGE_RISING;

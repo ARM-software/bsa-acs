@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019-2020,2021-2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -117,7 +117,7 @@ payload(void)
 
           /* Allocate 4KB of space for saving function configuration space */
           func_config_space = NULL;
-          func_config_space = val_memory_alloc(PCIE_CFG_SIZE);
+          func_config_space = val_aligned_alloc(MEM_ALIGN_4K, PCIE_CFG_SIZE);
 
           /* If memory allocation fail, fail the test */
           if (func_config_space == NULL)
@@ -146,7 +146,7 @@ payload(void)
           if (status)
           {
               val_print(ACS_PRINT_ERR, "\n       Failed to time delay for BDF 0x%x ", bdf);
-              val_memory_free(func_config_space);
+              val_memory_free_aligned(func_config_space);
               val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 01));
               return;
           }
@@ -160,7 +160,7 @@ payload(void)
           {
               val_print(ACS_PRINT_ERR, "\n       BDF 0x%x not present", bdf);
               test_fails++;
-              val_memory_free(func_config_space);
+              val_memory_free_aligned(func_config_space);
               continue;
           }
 
@@ -172,7 +172,7 @@ payload(void)
               *((uint32_t *)config_space_addr + idx) = *((uint32_t *)func_config_space + idx);
           }
 
-          val_memory_free(func_config_space);
+          val_memory_free_aligned(func_config_space);
       }
   }
 

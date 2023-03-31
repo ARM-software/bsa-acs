@@ -97,6 +97,16 @@ typedef enum {
     INVALID_CFG = 0x19
 } EXERCISER_ERROR_CODE;
 
+typedef struct {
+  uint32_t bdf;
+  uint32_t rp_bdf;
+} device_attr;
+
+typedef struct {
+  uint32_t num_entries;
+  device_attr device[];         ///< in the format of Segment/Bus/Dev/Func
+} exerciser_device_bdf_table;
+
 uint32_t val_exerciser_create_info_table(void);
 uint32_t val_exerciser_init(uint32_t instance);
 uint32_t val_exerciser_get_info(EXERCISER_INFO_TYPE type, uint32_t instance);
@@ -109,6 +119,9 @@ uint32_t val_exerciser_get_data(EXERCISER_DATA_TYPE type, exerciser_data_t *data
 uint32_t val_exerciser_execute_tests(uint32_t *g_sw_view);
 uint32_t val_exerciser_get_bdf(uint32_t instance);
 uint32_t val_get_exerciser_err_info(uint32_t type);
+uint32_t val_exerciser_get_rootport(uint32_t bdf, uint32_t *rp_bdf);
+uint32_t val_exerciser_create_device_bdf_table(void);
+uint32_t val_exerciser_get_legacy_irq_map (uint32_t bdf, PERIPHERAL_IRQ_MAP *irq_map);
 
 uint32_t os_e001_entry(void);
 uint32_t os_e002_entry(void);

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,7 @@
 #include "include/bsa_drv_intf.h"
 
 
-extern int  g_skip_test_num[3];
+extern unsigned int  *g_skip_test_num;
 extern unsigned int  g_sw_view[3];
 
 /**

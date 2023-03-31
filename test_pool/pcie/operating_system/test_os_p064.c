@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018,2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@
 #include "val/include/bsa_acs_iovirt.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 64)
-#define TEST_RULE  "PCI_IC_02"
+#define TEST_RULE  "PCI_IC_12"
 #define TEST_DESC  "PCIe RC,PE - Same Inr Shareable Domain"
 
 #define INNER_SHAREABLE 1

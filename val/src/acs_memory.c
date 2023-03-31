@@ -37,7 +37,7 @@ val_memory_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   uint32_t status, i;
 
-  for (i = 0 ; i < MAX_TEST_SKIP_NUM ; i++) {
+  for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_MEMORY_MAP_TEST_BASE) {
         val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all Memory tests \n", 0);
         return ACS_STATUS_SKIP;
@@ -60,8 +60,10 @@ val_memory_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   if (g_sw_view[G_SW_OS]) {
       val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
+#if defined(ENABLE_OOB) || defined(TARGET_EMULATION)
+      status |= os_m001_entry(num_pe);
+#endif
 #ifndef TARGET_LINUX
-//    status |= os_m001_entry(num_pe);
       status |= os_m002_entry(num_pe);
       status |= os_m003_entry(num_pe);
 #else
@@ -121,7 +123,7 @@ val_memory_create_info_table(uint64_t *memory_info_table)
   @param   instance - instance is '0' based and incremented to get different ranges
   @return  index
 **/
-uint32_t
+static uint32_t
 val_memory_get_entry_index(uint32_t type, uint32_t instance)
 {
   uint32_t  i = 0;
@@ -247,7 +249,7 @@ val_get_max_memory()
   @return  Mapped Address Starting Pointer
 **/
 addr_t
-val_memory_ioremap(void *addr, uint32_t size, uint64_t attr)
+val_memory_ioremap(void *addr, uint32_t size, uint32_t attr)
 {
   return (pal_memory_ioremap(addr, size, attr));
 }
@@ -465,3 +467,15 @@ void
 
 }
 
+/**
+  @brief  Free Allocated buffer size by val_aligned_alloc.
+
+  @param  *addr   pointer to allocated memory
+
+  @return None
+**/
+void
+val_memory_free_aligned(void *addr)
+{
+  pal_mem_free_aligned(addr);
+}

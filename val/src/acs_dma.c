@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018,2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018,2021,2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -157,7 +157,7 @@ val_dma_get_info(DMA_INFO_e type, uint32_t index)
 
   if (g_dma_info_table == NULL)
   {
-      val_print(ACS_PRINT_ERR, "GET_DMA_INFO: DMA info table is not created \n", 0);
+      val_print(ACS_PRINT_DEBUG, "GET_DMA_INFO: DMA info table is not created \n", 0);
       return 0;
   }
   if (index > g_dma_info_table->num_dma_ctrls)

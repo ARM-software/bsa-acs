@@ -21,16 +21,12 @@
 #include "include/bsa_acs_smmu.h"
 #include "include/bsa_acs_iovirt.h"
 
-EXERCISER_INFO_TABLE g_exercier_info_table;
+EXERCISER_INFO_TABLE g_exerciser_info_table;
+exerciser_device_bdf_table *g_exerciser_bdf_table;
+
 extern uint32_t pcie_bdf_table_list_flag;
 
-/**
-  @brief   This API popultaes information from all the PCIe stimulus generation IP available
-           in the system into exerciser_info_table structure
-  @param   exerciser_info_table - Table pointer to be filled by this API
-  @return  exerciser_info_table - Contains info to communicate with stimulus generation hardware
-**/
-uint32_t val_exerciser_create_info_table(void)
+uint32_t val_exerciser_create_device_bdf_table(void)
 {
   uint32_t num_ecam;
   uint32_t seg_num;
@@ -43,8 +39,10 @@ uint32_t val_exerciser_create_info_table(void)
   uint32_t bdf;
   uint32_t reg_value;
   uint32_t cid_offset;
-  uint32_t p_cap;
 
+  g_exerciser_bdf_table = (exerciser_device_bdf_table *) pal_aligned_alloc(MEM_ALIGN_8K,
+                                                                PCIE_DEVICE_BDF_TABLE_SZ);
+  g_exerciser_bdf_table->num_entries = 0;
   num_ecam = val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
   if (num_ecam == 0)
   {
@@ -86,32 +84,55 @@ uint32_t val_exerciser_create_info_table(void)
                           continue;
 
                       /* Skip if the device is a PCI legacy device */
-                      p_cap = val_pcie_find_capability(
-                        bdf,
-                        PCIE_CAP,
-                        CID_PCIECS,
-                        &cid_offset);
-
-                      if (p_cap != PCIE_SUCCESS)
+                      if (val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS,  &cid_offset)
+                                                                           != PCIE_SUCCESS)
                           continue;
 
-                      /* Store the Function's BDF if there was a valid response */
-                      if (pal_is_bdf_exerciser(bdf))
-                      {
-                          g_exercier_info_table.e_info[g_exercier_info_table.num_exerciser].bdf
-                                                                                          = bdf;
-                          g_exercier_info_table.e_info[g_exercier_info_table.num_exerciser++]
-                                                                               .initialized = 0;
-                          val_print(ACS_PRINT_INFO, "\n       exerciser Bdf %x", bdf);
-                      }
+                      g_exerciser_bdf_table->device[g_exerciser_bdf_table->num_entries++].bdf = bdf;
+
                   }
               }
           }
       }
   }
 
-  val_print(ACS_PRINT_INFO, "\n       exerciser cards in the system %x \n",
-            g_exercier_info_table.num_exerciser);
+  return 0;
+}
+
+/**
+  @brief   This API popultaes information from all the PCIe stimulus generation IP available
+           in the system into exerciser_info_table structure
+  @param   exerciser_info_table - Table pointer to be filled by this API
+  @return  exerciser_info_table - Contains info to communicate with stimulus generation hardware
+**/
+uint32_t val_exerciser_create_info_table(void)
+{
+  uint32_t bdf;
+  uint32_t tbl_index;
+
+  val_exerciser_create_device_bdf_table();
+
+  if ((val_exerciser_create_device_bdf_table()) || (g_exerciser_bdf_table->num_entries == 0))
+  {
+    val_print(ACS_PRINT_DEBUG, " No PCIe devices found\n", 0);
+    return 1;
+  }
+
+  for (tbl_index = 0; tbl_index < g_exerciser_bdf_table->num_entries; tbl_index++)
+  {
+    bdf = g_exerciser_bdf_table->device[tbl_index].bdf;
+    /* Store the Function's BDF if there was a valid response */
+    if (pal_is_bdf_exerciser(bdf))
+    {
+        g_exerciser_info_table.e_info[g_exerciser_info_table.num_exerciser].bdf = bdf;
+        g_exerciser_info_table.e_info[g_exerciser_info_table.num_exerciser].initialized = 0;
+        g_exerciser_info_table.num_exerciser++;
+    }
+
+  }
+
+  val_print(ACS_PRINT_ERR, " \nPCIE_INFO: Number of exerciser cards : %4d \n",
+                                                             g_exerciser_info_table.num_exerciser);
   return 0;
 }
 
@@ -184,7 +205,7 @@ uint32_t val_exerciser_get_info(EXERCISER_INFO_TYPE type, uint32_t instance)
 {
     switch (type) {
     case EXERCISER_NUM_CARDS:
-         return g_exercier_info_table.num_exerciser;
+         return g_exerciser_info_table.num_exerciser;
     default:
          return 0;
     }
@@ -202,7 +223,7 @@ uint32_t val_exerciser_set_param(EXERCISER_PARAM_TYPE type, uint64_t value1, uin
                                  uint32_t instance)
 {
     return pal_exerciser_set_param(type, value1, value2,
-                                   g_exercier_info_table.e_info[instance].bdf);
+                                   g_exerciser_info_table.e_info[instance].bdf);
 }
 
 /**
@@ -212,7 +233,7 @@ uint32_t val_exerciser_set_param(EXERCISER_PARAM_TYPE type, uint64_t value1, uin
 **/
 uint32_t val_exerciser_get_bdf(uint32_t instance)
 {
-    return g_exercier_info_table.e_info[instance].bdf;
+    return g_exerciser_info_table.e_info[instance].bdf;
 }
 /**
   @brief   This API reads the configuration parameters of the PCIe stimulus generation hardware
@@ -226,7 +247,7 @@ uint32_t val_exerciser_get_param(EXERCISER_PARAM_TYPE type, uint64_t *value1, ui
                                  uint32_t instance)
 {
     return pal_exerciser_get_param(type, value1, value2,
-                                   g_exercier_info_table.e_info[instance].bdf);
+                                   g_exerciser_info_table.e_info[instance].bdf);
 
 }
 
@@ -239,7 +260,7 @@ uint32_t val_exerciser_get_param(EXERCISER_PARAM_TYPE type, uint64_t *value1, ui
 **/
 uint32_t val_exerciser_set_state(EXERCISER_STATE state, uint64_t *value, uint32_t instance)
 {
-    return pal_exerciser_set_state(state, value, g_exercier_info_table.e_info[instance].bdf);
+    return pal_exerciser_set_state(state, value, g_exerciser_info_table.e_info[instance].bdf);
 }
 
 /**
@@ -250,7 +271,7 @@ uint32_t val_exerciser_set_state(EXERCISER_STATE state, uint64_t *value, uint32_
 **/
 uint32_t val_exerciser_get_state(EXERCISER_STATE *state, uint32_t instance)
 {
-    return pal_exerciser_get_state(state, g_exercier_info_table.e_info[instance].bdf);
+    return pal_exerciser_get_state(state, g_exerciser_info_table.e_info[instance].bdf);
 }
 
 /**
@@ -265,9 +286,9 @@ uint32_t val_exerciser_init(uint32_t instance)
   uint64_t cfg_addr;
   EXERCISER_STATE state;
 
-  if (!g_exercier_info_table.e_info[instance].initialized)
+  if (!g_exerciser_info_table.e_info[instance].initialized)
   {
-      Bdf = g_exercier_info_table.e_info[instance].bdf;
+      Bdf = g_exerciser_info_table.e_info[instance].bdf;
       if (pal_exerciser_get_state(&state, Bdf) || (state != EXERCISER_ON)) {
           val_print(ACS_PRINT_ERR, "\n   Exerciser Bdf %lx not ready", Bdf);
           return 1;
@@ -284,7 +305,7 @@ uint32_t val_exerciser_init(uint32_t instance)
       pal_mmio_write((Ecam + cfg_addr + COMMAND_REG_OFFSET),
                   (pal_mmio_read((Ecam + cfg_addr) + COMMAND_REG_OFFSET) | BUS_MEM_EN_MASK));
 
-      g_exercier_info_table.e_info[instance].initialized = 1;
+      g_exerciser_info_table.e_info[instance].initialized = 1;
   }
   else
            val_print(ACS_PRINT_INFO, "\n       Already initialized %2d",
@@ -300,7 +321,7 @@ uint32_t val_exerciser_init(uint32_t instance)
 **/
 uint32_t val_exerciser_ops(EXERCISER_OPS ops, uint64_t param, uint32_t instance)
 {
-    return pal_exerciser_ops(ops, param, g_exercier_info_table.e_info[instance].bdf);
+    return pal_exerciser_ops(ops, param, g_exerciser_info_table.e_info[instance].bdf);
 }
 
 /**
@@ -313,9 +334,94 @@ uint32_t val_exerciser_ops(EXERCISER_OPS ops, uint64_t param, uint32_t instance)
 uint32_t val_exerciser_get_data(EXERCISER_DATA_TYPE type, exerciser_data_t *data,
                                 uint32_t instance)
 {
-    uint32_t bdf = g_exercier_info_table.e_info[instance].bdf;
+    uint32_t bdf = g_exerciser_info_table.e_info[instance].bdf;
     uint64_t ecam = val_pcie_get_ecam_base(bdf);
     return pal_exerciser_get_data(type, data, bdf, ecam);
+}
+
+/**
+  @brief  Returns BDF of the upstream Root Port of a pcie device function.
+
+  @param  bdf       - Function's Segment/Bus/Dev/Func in PCIE_CREATE_BDF format
+  @param  usrp_bdf  - Upstream Rootport bdf in PCIE_CREATE_BDF format
+  @return 0 for success, 1 for failure.
+**/
+uint32_t
+val_exerciser_get_rootport(uint32_t bdf, uint32_t *rp_bdf)
+{
+
+  uint32_t index;
+  uint32_t seg_num;
+  uint32_t sec_bus;
+  uint32_t sub_bus;
+  uint32_t reg_value;
+  uint32_t dp_type;
+
+  index = 0;
+
+  dp_type = val_pcie_device_port_type(bdf);
+
+  val_print(ACS_PRINT_DEBUG, " DP type 0x%x ", dp_type);
+
+  /* If the device is RP or iEP_RP, set its rootport value to same */
+  if ((dp_type == RP) || (dp_type == iEP_RP))
+  {
+      *rp_bdf = bdf;
+      return 0;
+  }
+
+  /* If the device is RCiEP and RCEC, set RP as 0xff */
+  if ((dp_type == RCiEP) || (dp_type == RCEC))
+  {
+      *rp_bdf = 0xffffffff;
+      return 1;
+  }
+
+  while (index < g_exerciser_bdf_table->num_entries)
+  {
+      *rp_bdf = g_exerciser_bdf_table->device[index++].bdf;
+
+      /*
+       * Extract Secondary and Subordinate Bus numbers of the
+       * upstream Root port and check if the input function's
+       * bus number falls within that range.
+       */
+      val_pcie_read_cfg(*rp_bdf, TYPE1_PBN, &reg_value);
+      seg_num = PCIE_EXTRACT_BDF_SEG(*rp_bdf);
+      sec_bus = ((reg_value >> SECBN_SHIFT) & SECBN_MASK);
+      sub_bus = ((reg_value >> SUBBN_SHIFT) & SUBBN_MASK);
+      dp_type = val_pcie_device_port_type(*rp_bdf);
+
+      if (((dp_type == RP) || (dp_type == iEP_RP)) &&
+          (sec_bus <= PCIE_EXTRACT_BDF_BUS(bdf)) &&
+          (sub_bus >= PCIE_EXTRACT_BDF_BUS(bdf)) &&
+          (seg_num == PCIE_EXTRACT_BDF_SEG(bdf)))
+          return 0;
+  }
+
+  /* Return failure */
+  val_print(ACS_PRINT_ERR, "\n       PCIe Hierarchy fail: RP of bdf 0x%x not found", bdf);
+  *rp_bdf = 0;
+  return 1;
+
+}
+
+/**
+  @brief   This API returns legacy interrupts routing map
+           1. Caller       -  Test Suite
+  @param   bdf      - PCIe BUS/Device/Function
+  @param   irq_map  - Pointer to IRQ map structure
+
+  @return  status code
+**/
+uint32_t
+val_exerciser_get_legacy_irq_map (uint32_t bdf, PERIPHERAL_IRQ_MAP *irq_map)
+{
+  return pal_exerciser_get_legacy_irq_map (PCIE_EXTRACT_BDF_SEG (bdf),
+                                      PCIE_EXTRACT_BDF_BUS (bdf),
+                                      PCIE_EXTRACT_BDF_DEV (bdf),
+                                      PCIE_EXTRACT_BDF_FUNC (bdf),
+                                      irq_map);
 }
 
 /**
@@ -333,7 +439,7 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
 
   status = ACS_STATUS_PASS;
 
-  for (i = 0; i < MAX_TEST_SKIP_NUM; i++){
+  for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_EXERCISER_TEST_NUM_BASE) {
           val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all Exerciser tests \n", 0);
           return ACS_STATUS_SKIP;
@@ -365,7 +471,7 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
 
   val_print(ACS_PRINT_INFO, "  Initializing SMMU\n", 0);
 
-  num_smmu = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
+  num_smmu = (uint32_t)val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
   val_smmu_init();
 
   /* Disable All SMMU's */

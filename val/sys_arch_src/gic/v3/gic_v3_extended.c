@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -166,7 +166,7 @@ v3_set_extended_interrupt_priority(uint32_t int_id, uint32_t priority)
   @param  interrupt id
   @return none
 **/
-void
+static void
 v3_route_extended_interrupt(uint32_t int_id)
 {
   uint64_t   gicd_base;

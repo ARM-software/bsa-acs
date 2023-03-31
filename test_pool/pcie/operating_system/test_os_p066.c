@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018,2021,2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,6 @@ static
 void
 payload(void)
 {
-    uint32_t index;
     uint32_t tbl_index;
     uint32_t status = 0;
     uint32_t ret;
@@ -37,6 +36,7 @@ payload(void)
     uint32_t data;
     uint32_t dev_type;
     uint64_t dev_bdf;
+    uint32_t index = val_pe_get_index_mpid (val_pe_get_mpid());
     pcie_device_bdf_table *bdf_tbl_ptr;
 
     bdf_tbl_ptr = val_pcie_bdf_table_ptr();

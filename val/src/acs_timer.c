@@ -39,7 +39,7 @@ val_timer_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   status = ACS_STATUS_PASS;
 
-  for (i=0 ; i<MAX_TEST_SKIP_NUM ; i++){
+  for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_TIMER_TEST_NUM_BASE) {
           val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all Timer tests \n", 0);
           return ACS_STATUS_SKIP;
@@ -106,22 +106,27 @@ val_timer_get_info(TIMER_INFO_e info_type, uint64_t instance)
           val_platform_timer_get_entry_index (instance, &block_num, &block_index);
           if (block_num != 0xFFFF)
               return ((g_timer_info_table->gt_info[block_num].flags[block_index] >> 16) & 1);
+          break;
       case TIMER_INFO_SYS_CNTL_BASE:
           val_platform_timer_get_entry_index (instance, &block_num, &block_index);
           if (block_num != 0xFFFF)
               return g_timer_info_table->gt_info[block_num].block_cntl_base;
+          break;
       case TIMER_INFO_SYS_CNT_BASE_N:
           val_platform_timer_get_entry_index (instance, &block_num, &block_index);
           if (block_num != 0xFFFF)
               return g_timer_info_table->gt_info[block_num].GtCntBase[block_index];
+          break;
       case TIMER_INFO_FRAME_NUM:
           val_platform_timer_get_entry_index (instance, &block_num, &block_index);
           if (block_num != 0xFFFF)
               return g_timer_info_table->gt_info[block_num].frame_num[block_index];
+          break;
       case TIMER_INFO_SYS_INTID:
           val_platform_timer_get_entry_index (instance, &block_num, &block_index);
           if (block_num != 0xFFFF)
             return g_timer_info_table->gt_info[block_num].gsiv[block_index];
+          break;
       case TIMER_INFO_PHY_EL1_FLAGS:
           return g_timer_info_table->header.ns_el1_timer_flag;
       case TIMER_INFO_VIR_EL1_FLAGS:
@@ -133,6 +138,7 @@ val_timer_get_info(TIMER_INFO_e info_type, uint64_t instance)
     default:
       return 0;
   }
+  return 0x0;
 }
 
 /**
@@ -169,7 +175,7 @@ val_platform_timer_get_entry_index(uint64_t instance, uint32_t *block, uint32_t 
 
   @return  None
 **/
-void
+static void
 ArmGenericTimerEnableTimer (
   ARM_ARCH_TIMER_REGS reg
  )
@@ -190,7 +196,7 @@ ArmGenericTimerEnableTimer (
 
   @return  None
 **/
-void
+static void
 ArmGenericTimerDisableTimer (
   ARM_ARCH_TIMER_REGS reg
  )
