@@ -44,6 +44,8 @@ v23.03_1.0.4
 
 * Baremetal support for BSA 1.0 spec
 * Reference Makefiles for compilation
+* Test enhancements and Bug fixes
+* Removed the limitation on skipping limited tests
 * Initialise SMMU eventq handler
 * Better messaging and info details
 * Support to run specific tests and modules
