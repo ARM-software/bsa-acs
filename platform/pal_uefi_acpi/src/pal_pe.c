@@ -34,6 +34,9 @@ extern INT32 gPsciConduit;
 #define SIZE_STACK_SECONDARY_PE  0x100		//256 bytes per core
 #define UPDATE_AFF_MAX(src,dest,mask)  ((dest & mask) > (src & mask) ? (dest & mask) : (src & mask))
 
+#define ENABLED_BIT(flags)  (flags & 0x1)
+#define ONLINE_CAP_BIT(flags)  ((flags > 3) & 0x1)
+
 UINT64
 pal_get_madt_ptr();
 
@@ -163,7 +166,7 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
   UINT32                        TableLength = 0;
   UINT32                        Length = 0;
   UINT64                        MpidrAff0Max = 0, MpidrAff1Max = 0, MpidrAff2Max = 0, MpidrAff3Max = 0;
-
+  UINT32                        Flags;
 
   if (PeTable == NULL) {
     bsa_print(ACS_PRINT_ERR, L" Input PE Table Pointer is NULL. Cannot create PE INFO \n");
@@ -191,19 +194,31 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
 
     if (Entry->Type == EFI_ACPI_6_1_GIC) {
       //Fill in the cpu num and the mpidr in pe info table
-      Ptr->mpidr      = Entry->MPIDR;
-      Ptr->pe_num     = PeTable->header.num_of_pe;
-      Ptr->pmu_gsiv   = Entry->PerformanceInterruptGsiv;
-      Ptr->gmain_gsiv = Entry->VGICMaintenanceInterrupt;
-      bsa_print(ACS_PRINT_DEBUG, L"  MPIDR %llx PE num %x \n", Ptr->mpidr, Ptr->pe_num);
-      pal_pe_data_cache_ops_by_va((UINT64)Ptr, CLEAN_AND_INVALIDATE);
-      Ptr++;
-      PeTable->header.num_of_pe++;
+      Flags           = Entry->Flags;
+      bsa_print(ACS_PRINT_INFO, L"  Flags %x \n", Flags);
+      bsa_print(ACS_PRINT_DEBUG, L"  PE Enabled %d, Online Capable %d\n", ENABLED_BIT(Flags), ONLINE_CAP_BIT(Flags));
 
-      MpidrAff0Max = UPDATE_AFF_MAX(MpidrAff0Max, Entry->MPIDR, 0x000000ff);
-      MpidrAff1Max = UPDATE_AFF_MAX(MpidrAff1Max, Entry->MPIDR, 0x0000ff00);
-      MpidrAff2Max = UPDATE_AFF_MAX(MpidrAff2Max, Entry->MPIDR, 0x00ff0000);
-      MpidrAff3Max = UPDATE_AFF_MAX(MpidrAff3Max, Entry->MPIDR, 0xff00000000);
+      /* As per MADT (GICC CPU Interface Flags) Processor is usable when
+           Enabled bit is set
+           Enabled bit is clear and Online Capable bit is set
+           if both bits are clear, PE is not usable
+      */
+      if ((ENABLED_BIT(Flags) == 1) || (ONLINE_CAP_BIT(Flags) == 1))
+      {
+          Ptr->mpidr      = Entry->MPIDR;
+          Ptr->pe_num     = PeTable->header.num_of_pe;
+          Ptr->pmu_gsiv   = Entry->PerformanceInterruptGsiv;
+          Ptr->gmain_gsiv = Entry->VGICMaintenanceInterrupt;
+          bsa_print(ACS_PRINT_DEBUG, L"  MPIDR %llx PE num %x \n", Ptr->mpidr, Ptr->pe_num);
+          pal_pe_data_cache_ops_by_va((UINT64)Ptr, CLEAN_AND_INVALIDATE);
+          Ptr++;
+          PeTable->header.num_of_pe++;
+
+          MpidrAff0Max = UPDATE_AFF_MAX(MpidrAff0Max, Entry->MPIDR, 0x000000ff);
+          MpidrAff1Max = UPDATE_AFF_MAX(MpidrAff1Max, Entry->MPIDR, 0x0000ff00);
+          MpidrAff2Max = UPDATE_AFF_MAX(MpidrAff2Max, Entry->MPIDR, 0x00ff0000);
+          MpidrAff3Max = UPDATE_AFF_MAX(MpidrAff3Max, Entry->MPIDR, 0xff00000000);
+      }
     }
 
     Length += Entry->Length;
