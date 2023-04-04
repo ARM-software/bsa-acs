@@ -33,6 +33,7 @@ payload()
   uint32_t device_id, req_id;
   uint32_t stream_id, its_id;
   uint32_t smmu_id;
+  uint32_t seg_num = 0;
   uint32_t cap_base;
   uint32_t test_skip = 1;
   uint32_t test_fail = 0;
@@ -40,6 +41,7 @@ payload()
   uint32_t curr_grp_did_cons, curr_grp_sid_cons;
   uint32_t curr_grp_its_id = -1;
   uint32_t curr_smmu_id = -1;
+  uint32_t curr_seg_num = -1;
   pcie_device_bdf_table *bdf_tbl_ptr;
 
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
@@ -57,9 +59,10 @@ payload()
 
     /* If MSI Supported then Check for Valid DeviceID */
     req_id = PCIE_CREATE_BDF_PACKED(bdf);
+    seg_num = PCIE_EXTRACT_BDF_SEG(bdf);
 
     status = val_iovirt_get_device_info(PCIE_CREATE_BDF_PACKED(bdf),
-                                        PCIE_EXTRACT_BDF_SEG(bdf), &device_id,
+                                        seg_num, &device_id,
                                         &stream_id, &its_id);
     if (status) {
         val_print(ACS_PRINT_DEBUG, "\n       Could not get device info for BDF : 0x%x", bdf);
@@ -67,21 +70,23 @@ payload()
         return;
     }
 
-    smmu_id = val_iovirt_get_rc_smmu_index(PCIE_EXTRACT_BDF_SEG(bdf),
-                                                    PCIE_CREATE_BDF_PACKED(bdf));
+    smmu_id = val_iovirt_get_rc_smmu_index(seg_num, PCIE_CREATE_BDF_PACKED(bdf));
     if (smmu_id == ACS_INVALID_INDEX) {
         val_print(ACS_PRINT_INFO,
             "\n       Skipping StreamID Association check, Bdf : 0x%llx Not Behind an SMMU", bdf);
         streamid_check = 0;
+    } else {
+        streamid_check = 1;
     }
 
     /* If test runs for atleast an endpoint */
     test_skip = 0;
 
     /* Store the Current group SID Constant offset & Dev ID Constant offset using first device */
-    if ((its_id != curr_grp_its_id) || (smmu_id != curr_smmu_id)) {
+    if ((its_id != curr_grp_its_id) || (smmu_id != curr_smmu_id) || (seg_num != curr_seg_num)) {
       curr_grp_its_id = its_id;
       curr_smmu_id = smmu_id;
+      curr_seg_num = seg_num;
 
       /* streamid_check is 0 when Root Complex is not behind an SMMU */
       if (streamid_check != 0) {
