@@ -49,7 +49,7 @@ check_pcie_cfg_space(uint32_t bdf)
     while (next_cap) {
 
         val_pcie_read_cfg(bdf, next_cap, &reg_value);
-        next_cap = VAL_EXTRACT_BITS(reg_value, 7, 15);
+        next_cap = VAL_EXTRACT_BITS(reg_value, 8, 15);
         cid = VAL_EXTRACT_BITS(reg_value, 0, 7);
 
         // Check PCIe Cap IDs are in range
