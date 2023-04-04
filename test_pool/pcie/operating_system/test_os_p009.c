@@ -23,9 +23,9 @@
 #define TEST_RULE  "PCI_IN_20"
 #define TEST_DESC  "Vendor specfic data are PCIe compliant"
 
-// Valid PCIe CapID ranges (PCIe 5.0 - v1.0)
+// Valid PCIe CapID ranges (PCIe 6.0 - v1.0)
 #define PCIE_CAP_ID_END     0x15
-#define PCIE_ECAP_ID_END    0x2C
+#define PCIE_ECAP_ID_END    0x34
 
 /*
  Check if vendor specific data are presented as non-PCIe compliant capabilities
@@ -88,6 +88,9 @@ payload(void)
     uint32_t tbl_index;
     uint32_t bdf;
     uint32_t dp_type;
+    uint32_t test_skip = 1;
+    uint32_t test_fail = 0;
+
     pcie_device_bdf_table *bdf_tbl_ptr;
 
     pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
@@ -102,19 +105,24 @@ payload(void)
 
         // Only check for Root Ports
         if (dp_type == RP) {
+            test_skip = 0;
             val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", bdf);
             if (check_pcie_cfg_space(bdf)) {
                 val_print(ACS_PRINT_ERR,
                     "\n       Invalid PCIe capability found on dev: %d", tbl_index);
-                val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 2));
-                return;
+                test_fail++;
             }
         }
     }
 
-    val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
-    return;
+    if (test_skip)
+        val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+    else if (test_fail)
+        val_set_status(pe_index, RESULT_FAIL(TEST_NUM, test_fail));
+    else
+        val_set_status(pe_index, RESULT_PASS(TEST_NUM, 1));
 
+    return;
 }
 
 uint32_t
