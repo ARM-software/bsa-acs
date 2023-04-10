@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -87,7 +87,7 @@ payload()
       return;
     }
 
-    /* Part 2 : SETSPI Should Support 16 Bit Access. */
+    /* Part 2 : SETSPI must Support 16 Bit Access. */
     /* Generate the Interrupt by writing the int_id to SETSPI_NS Register */
     val_mmio_write16(frame_base + GICv2m_MSI_SETSPI, int_id);
 

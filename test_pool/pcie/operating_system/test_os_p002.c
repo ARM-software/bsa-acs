@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021,2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -137,7 +137,7 @@ payload(void)
                else{
                   val_pcie_read_cfg(bdf, PCIE_ECAP_START, &data);
 
-                  /* Returned data should be FF's, otherwise the test should fail */
+                  /* Returned data must be FF's, otherwise the test must fail */
                   if (data != PCIE_UNKNOWN_RESPONSE) {
                      val_print(ACS_PRINT_ERR, "\n      Incorrect data for Bdf 0x%x    ", bdf);
                      val_set_status(index, RESULT_FAIL(TEST_NUM,
@@ -147,7 +147,7 @@ payload(void)
 
                   val_pcie_read_cfg(bdf, PCIE_ECAP_END, &data);
 
-                  /* Returned data should be FF's, otherwise the test should fail */
+                  /* Returned data must be FF's, otherwise the test must fail */
                   if (data != PCIE_UNKNOWN_RESPONSE) {
                      val_print(ACS_PRINT_ERR, "\n      Incorrect data for Bdf 0x%x    ", bdf);
                      val_set_status(index, RESULT_FAIL(TEST_NUM,

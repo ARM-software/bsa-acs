@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -86,12 +86,12 @@ payload()
       data1 = val_mmio_read64(cnt_base_n + CNTPCT_LOWER);
       val_print(ACS_PRINT_DEBUG, "\n       CNTPCT Read value = 0x%llx       ", data1);
 
-      // Writes to Read-Only registers should be ignore
+      // Writes to Read-Only registers must be ignored
       val_mmio_write64(cnt_base_n + CNTPCT_LOWER, (data1 - ARBIT_VALUE));
 
       if (val_mmio_read64(cnt_base_n + CNTPCT_LOWER) < data1) {
           val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
-          val_print(ACS_PRINT_DEBUG, "\n       CNTBaseN: CNTPCT reg should be read-only ", 0);
+          val_print(ACS_PRINT_DEBUG, "\n       CNTBaseN: CNTPCT reg must be read-only ", 0);
           return;
       }
 
@@ -99,12 +99,12 @@ payload()
       data1 = val_mmio_read64(cnt_base_n + CNTVCT_LOWER);
       val_print(ACS_PRINT_DEBUG, "\n       CNTVCT Read value = 0x%llx       ", data1);
 
-      // Writes to Read-Only registers should be ignore
+      // Writes to Read-Only registers must be ignored
       val_mmio_write64(cnt_base_n + CNTVCT_LOWER, (data1 - ARBIT_VALUE));
 
       if (val_mmio_read64(cnt_base_n + CNTVCT_LOWER) < data1) {
           val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
-          val_print(ACS_PRINT_DEBUG, "\n       CNTBaseN: CNTVCT reg should be read-only ", 0);
+          val_print(ACS_PRINT_DEBUG, "\n       CNTBaseN: CNTVCT reg must be read-only ", 0);
           return;
       }
 
@@ -113,12 +113,12 @@ payload()
       val_print(ACS_PRINT_DEBUG, "\n       CNTFRQ Read value = 0x%x         ",
                                                                         data);
 
-      // Writes to Read-Only registers should be ignore
+      // Writes to Read-Only registers must be ignored
       val_mmio_write(cnt_base_n + CNTBaseN_CNTFRQ, (data - ARBIT_VALUE));
 
       if (val_mmio_read(cnt_base_n + CNTBaseN_CNTFRQ) != data) {
           val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
-          val_print(ACS_PRINT_DEBUG, "\n       CNTBaseN: CNTFRQ reg should be read-only ", 0);
+          val_print(ACS_PRINT_DEBUG, "\n       CNTBaseN: CNTFRQ reg must be read-only ", 0);
           return;
       }
 

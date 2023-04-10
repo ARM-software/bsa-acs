@@ -19,7 +19,7 @@
  * outer shareable by the PE page tables. CPU Write to this region with
  * new data. Perform actions to maintain  software coherency.
  * Read the same data locations from the Exerciser with NS=1. The
- * exerciser should get the latest data. The exerciser updates the
+ * exerciser must get the latest data. The exerciser updates the
  * location with newest data. PE reads the location and must get NEWEST VAL.
  */
 

@@ -192,7 +192,7 @@ check_redirected_req_validation (uint32_t req_instance, uint32_t req_rp_bdf, uin
   pgt_descriptor_t pgt_desc;
 
   /* Sequence 1 : No Write Permission, Trigger a DMA Write to bar address
-   * It should Result into ACS Violation
+   * It must Result into ACS Violation
    */
 
   /* Create VA-PA Mapping in SMMU with PGT permissions as Read Only */
@@ -222,10 +222,10 @@ check_redirected_req_validation (uint32_t req_instance, uint32_t req_rp_bdf, uin
   val_pcie_clear_device_status_error(req_rp_bdf);
   val_pcie_clear_sig_target_abort(req_rp_bdf);
 
-  /* DMA Should fail because Write permission not given */
+  /* DMA must fail because Write permission not given */
   if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance) == 0) {
       val_print(ACS_PRINT_DEBUG,
-                "\n       Seq1:DMA Write Should not happen For : %4x", req_instance);
+                "\n       Seq1:DMA Write must not happen For : %4x", req_instance);
       goto test_fail;
   }
 
@@ -247,7 +247,7 @@ check_redirected_req_validation (uint32_t req_instance, uint32_t req_rp_bdf, uin
      val_smmu_disable(instance);
 
   /* Sequence 2 : Read Write Permission, Trigger a DMA Write to bar address
-   * It should NOT Result into ACS Violation
+   * It must NOT Result into ACS Violation
    */
 
   /* Create VA-PA Mapping in SMMU with PGT permissions as Read Write */
@@ -266,9 +266,9 @@ check_redirected_req_validation (uint32_t req_instance, uint32_t req_rp_bdf, uin
   val_pcie_clear_device_status_error(req_rp_bdf);
   val_pcie_clear_sig_target_abort(req_rp_bdf);
 
-  /* DMA Should fail not because Write permission given */
+  /* DMA must fail not because Write permission given */
   if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance) != 0) {
-      val_print(ACS_PRINT_DEBUG, "\n       Seq2:DMA Write Should happen For : %4x", req_instance);
+      val_print(ACS_PRINT_DEBUG, "\n       Seq2:DMA Write must happen For : %4x", req_instance);
       goto test_fail;
   }
 

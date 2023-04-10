@@ -67,7 +67,7 @@ payload()
     data = val_pe_reg_read(ID_AA64MMFR1_EL1);
 
     /* Check for EL2 virtual timer interrupt, if PE supports 8.1 or greater.
-     * ID_AA64MMFR1_EL1 VH, bits [11:8] should be 0x1 */
+     * ID_AA64MMFR1_EL1 VH, bits [11:8] must be 0x1 */
     if (!((data >> 8) & 0xF)) {
         val_print(ACS_PRINT_DEBUG, "\n       v8.1 VHE not supported on this PE ", 0);
         val_set_status(index, RESULT_SKIP(TEST_NUM, 2));

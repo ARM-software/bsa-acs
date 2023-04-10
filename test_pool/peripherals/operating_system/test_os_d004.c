@@ -66,7 +66,7 @@ payload(void)
           if (!(MEM_NORMAL_WB_IN_OUT(attr) && MEM_SH_INNER(sh)))
           {
               val_print(ACS_PRINT_INFO,
-                       "\n       DMA controler %d: IO Coherent DMA memory should"
+                       "\n       DMA controler %d: IO Coherent DMA memory must"
                        " be inner/outer writeback, inner shareable\n",
                        target_dev_index);
               val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
@@ -90,7 +90,7 @@ payload(void)
                 MEM_DEVICE(attr)))
           {
               val_print(ACS_PRINT_INFO,
-              "\n       DMA controler %d: DMA memory should be inner/outer writeback inner "
+              "\n       DMA controler %d: DMA memory must be inner/outer writeback inner "
               "shareable, inner/outer non-cacheable, or device type\n",
               target_dev_index);
               val_set_status(index, RESULT_FAIL(TEST_NUM, 2));

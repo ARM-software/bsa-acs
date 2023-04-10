@@ -24,7 +24,7 @@
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 14)
 #define TEST_RULE  "PCI_PP_02"
-#define TEST_DESC  "P2P transactions should not deadlock  "
+#define TEST_DESC  "P2P transactions must not deadlock  "
 
 uint32_t
 get_target_exer_bdf(uint32_t req_rp_bdf, uint32_t *tgt_e_bdf,
@@ -101,7 +101,7 @@ uint32_t
 check_p2p_transaction(uint32_t req_instance, uint32_t req_rp_bdf,
                                                uint64_t bar_base)
 {
-  /* P2P transaction should fail */
+  /* P2P transaction must fail */
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)bar_base, 1, req_instance);
   val_exerciser_ops(START_DMA, EDMA_TO_DEVICE, req_instance);
 

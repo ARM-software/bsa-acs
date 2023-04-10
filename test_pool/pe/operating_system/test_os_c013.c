@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,7 +31,7 @@ payload()
 
   data = val_pe_reg_read(ID_AA64ISAR0_EL1);
 
-  if ((data >> 16) & 0xF) //bits 19:16 are CRC32 and should not be zero
+  if ((data >> 16) & 0xF) //bits 19:16 are CRC32 and must not be zero
         val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   else
         val_set_status(index, RESULT_FAIL(TEST_NUM, 1));

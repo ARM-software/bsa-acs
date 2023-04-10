@@ -175,7 +175,7 @@ check_transaction_blocking (uint32_t req_instance, uint32_t req_rp_bdf, uint64_t
   val_pcie_clear_sig_target_abort(req_rp_bdf);
 
   /* Transaction with Address Type other than default(0x0)
-   * Should result into Transaction blocking.
+   * must result into Transaction blocking.
    */
   val_exerciser_set_param(CFG_TXN_ATTRIBUTES, TXN_ADDR_TYPE, AT_RESERVED, req_instance);
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)bar_base, 1, req_instance);
