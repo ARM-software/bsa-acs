@@ -254,8 +254,8 @@ val_get_gicr_base(uint32_t *rdbase_len, uint32_t gicr_rd_index)
   while (gic_entry->type != 0xFF) {
       if (gic_entry->type == ENTRY_TYPE_GICR_GICRD) {
           if (index == gicr_rd_index) {
-                  *rdbase_len = gic_entry->length;
-                  return gic_entry->base;
+              *rdbase_len = gic_entry->length;
+              return gic_entry->base;
           }
           index++;
       }
@@ -310,12 +310,15 @@ val_gic_get_pe_rdbase(uint64_t mpidr)
   /* Use GICR RD base structure */
   while (gicr_rdindex < g_gic_info_table->header.num_gicr_rd) {
       gicrd_base = val_get_gicr_base(&gicrd_baselen, gicr_rdindex);
-      val_print(ACS_PRINT_DEBUG, "       gicr_rdindex %d", gicr_rdindex);
-      val_print(ACS_PRINT_DEBUG, "       gicrd_base 0x%lx\n", gicrd_base);
+      val_print(ACS_PRINT_INFO, "       gicr_rdindex %d", gicr_rdindex);
+      val_print(ACS_PRINT_INFO, "       gicrd_base 0x%lx\n", gicrd_base);
 
       pe_gicrd_base = gicrd_base;
       while (pe_gicrd_base < (gicrd_base + gicrd_baselen))
       {
+          val_print(ACS_PRINT_INFO, "       GICR_TYPER 0x%lx\n",
+                    val_mmio_read64(pe_gicrd_base + GICR_TYPER));
+
           affinity = (val_mmio_read64(pe_gicrd_base + GICR_TYPER) & GICR_TYPER_AFF) >> 32;
           if (affinity == pe_affinity)
               return pe_gicrd_base;

@@ -51,6 +51,7 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
   GIC_INFO_ENTRY                *GicEntry = NULL;
   UINT32                         Length= 0;
   UINT32                         TableLength;
+  UINT32                         is_gicr_present = 0;
 
   if (GicTable == NULL) {
     bsa_print(ACS_PRINT_ERR, L" Input GIC Table Pointer is NULL. Cannot create GIC INFO \n");
@@ -79,6 +80,21 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
   Entry = (EFI_ACPI_6_1_GIC_STRUCTURE *) (gMadtHdr + 1);
   Length = sizeof (EFI_ACPI_6_1_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER);
 
+  /* Check if GICR Structure is present */
+  do {
+
+    if (Entry->Type == EFI_ACPI_6_1_GICR) {
+        is_gicr_present = 1;
+        break;
+    }
+
+    Length += Entry->Length;
+    Entry = (EFI_ACPI_6_1_GIC_STRUCTURE *) ((UINT8 *)Entry + (Entry->Length));
+
+  } while(Length < TableLength);
+
+  Entry = (EFI_ACPI_6_1_GIC_STRUCTURE *) (gMadtHdr + 1);
+  Length = sizeof (EFI_ACPI_6_1_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER);
 
   do {
 
@@ -86,17 +102,23 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
       if (Entry->PhysicalBaseAddress != 0) {
         GicEntry->type = ENTRY_TYPE_CPUIF;
         GicEntry->base = Entry->PhysicalBaseAddress;
-        bsa_print(ACS_PRINT_INFO, L"  GIC CPUIF base %x \n", GicEntry->base);
+        bsa_print(ACS_PRINT_INFO, L"  GIC CPUIF base %lx \n", GicEntry->base);
         GicEntry++;
       }
 
       if (Entry->GICRBaseAddress != 0) {
-        GicEntry->type = ENTRY_TYPE_GICC_GICRD;
-        GicEntry->base = Entry->GICRBaseAddress;
-        GicEntry->length = 0;
-        bsa_print(ACS_PRINT_INFO, L"  GICC RD base %x \n", GicEntry->base);
-        GicTable->header.num_gicc_rd++;
-        GicEntry++;
+        /* Add this entry if GICR is not present */
+        if (is_gicr_present == 0) {
+          GicEntry->type = ENTRY_TYPE_GICC_GICRD;
+          GicEntry->base = Entry->GICRBaseAddress;
+          GicEntry->length = 0;
+          bsa_print(ACS_PRINT_INFO, L"  GICC RD base %lx \n", GicEntry->base);
+          GicTable->header.num_gicc_rd++;
+          GicEntry++;
+        } else {
+          bsa_print(ACS_PRINT_INFO,
+                    L"  Warning : GICR Structure Present, GICC RD Base Non-Zero \n", 0);
+        }
       }
 
       if (Entry->GICH != 0) {
@@ -122,6 +144,7 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
         GicEntry->base = ((EFI_ACPI_6_1_GICR_STRUCTURE *)Entry)->DiscoveryRangeBaseAddress;
         GicEntry->length = ((EFI_ACPI_6_1_GICR_STRUCTURE *)Entry)->DiscoveryRangeLength;
         bsa_print(ACS_PRINT_INFO, L"  GICR RD base %lx \n", GicEntry->base);
+        bsa_print(ACS_PRINT_INFO, L"  GICR RD Length %lx \n", GicEntry->length);
         GicTable->header.num_gicr_rd++;
         GicEntry++;
     }
