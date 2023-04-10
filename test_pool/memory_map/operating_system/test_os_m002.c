@@ -71,7 +71,7 @@ payload()
           goto normal_mem_test;
       }
 
-      /* Access should not cause a deadlock */
+      /* Access must not cause a deadlock */
       original_value = *((volatile addr_t*)addr);
       *((volatile addr_t*)addr) = original_value;
       while (timeout--)
@@ -97,7 +97,7 @@ normal_mem_test:
           return;
       }
 
-      /* Access should not cause a deadlock */
+      /* Access must not cause a deadlock */
       original_value = *((volatile addr_t*)addr);
       *((volatile addr_t*)addr) = original_value;
       while (timeout--)

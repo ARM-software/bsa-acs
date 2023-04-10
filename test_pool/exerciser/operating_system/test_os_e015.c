@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021-2022, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021-2022, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -106,7 +106,7 @@ payload(void)
 
       /*
        * Generate a config request from PE to the Secondary bus
-       * of the exerciser's root port. Exerciser should see this
+       * of the exerciser's root port. Exerciser must see this
        * request as a Type 0 Request.
        */
       for (dev_num = 0; dev_num < PCIE_MAX_DEV; dev_num++)
@@ -145,7 +145,7 @@ payload(void)
 
       /*
        * Generate a config request from PE to the Secondary bus
-       * of the exerciser's root port. Exerciser should see this
+       * of the exerciser's root port. Exerciser must see this
        * request as a Type 1 Request.
        */
       for (dev_num = 0; dev_num < PCIE_MAX_DEV; dev_num++)

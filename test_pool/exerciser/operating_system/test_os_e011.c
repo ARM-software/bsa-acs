@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -160,7 +160,7 @@ payload (void)
       while ((--timeout > 0) && irq_pending)
           {};
 
-      /* Interrupt should not be generated */
+      /* Interrupt must not be generated */
       if (timeout == 0) {
           val_print(ACS_PRINT_ERR,
               "\n       Interrupt trigger failed int_id : 0x%x", base_lpi_id + instance);

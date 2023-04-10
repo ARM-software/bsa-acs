@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019-2020, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2020, 2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -152,7 +152,7 @@ payload(void)
 
       /*
        * Generate a config request from PE to the Subordinate bus
-       * of the exerciser. Exerciser should see this request as a
+       * of the exerciser. Exerciser must see this request as a
        * Type 1 Request.
        */
       status = val_exerciser_ops(START_TXN_MONITOR, CFG_READ, instance);

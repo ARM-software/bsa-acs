@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -86,7 +86,7 @@ payload(void)
       val_print(ACS_PRINT_INFO, "\n       Maximum bus value is 0x%x", bus_index);
       bus_index += 1;
 
-      /* Bus value should not exceed 255 */
+      /* Bus value must not exceed 255 */
       if (bus_index > end_bus) {
           val_print(ACS_PRINT_DEBUG, "\n       Bus index exceeded END_BUS Number", 0);
           val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));

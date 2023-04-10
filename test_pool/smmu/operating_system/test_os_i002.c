@@ -67,7 +67,7 @@ payload()
        * then TGran4 == 0x1 or TGran4_2 == 0x3*/
       if ((VAL_EXTRACT_BITS(data_pe_mmfr0, 28, 31) == 0x1) ||
           (VAL_EXTRACT_BITS(data_pe_mmfr0, 40, 43) == 0x3)) {
-          /*PE FEAT_LPA2 is implemeted, SMMU should support 4KB granule size and 52-bit
+          /*PE FEAT_LPA2 is implemeted, SMMU must support 4KB granule size and 52-bit
            * addressing. i.e data_oas == 0x6*/
           if ((is_smmu_4k != 1) && (data_oas != 0x6)) {
               val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
@@ -82,7 +82,7 @@ payload()
        * then TGran16 == 0x2 or TGran16_2 == 0x3 */
       if ((VAL_EXTRACT_BITS(data_pe_mmfr0, 20, 23) == 0x2) ||
           (VAL_EXTRACT_BITS(data_pe_mmfr0, 32, 35) == 0x3)) {
-          /*PE FEAT_LPA2 is implemeted, SMMU should support 16KB granule size and 52-bit
+          /*PE FEAT_LPA2 is implemeted, SMMU must support 16KB granule size and 52-bit
            * addressing. i.e data_oas == 0x6*/
           if ((is_smmu_16k != 1) && (data_oas != 0x6)) {
               val_set_status(index, RESULT_FAIL(TEST_NUM, 2));

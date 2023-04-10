@@ -18,14 +18,14 @@
  * outer shareable by the PE page tables. CPU Write to this region with
  * new data and ensure that the new data is cached in the CPU caches.
  * Read the same data locations from the Exerciser with NS=0. The
- * exerciser should get the latest data (hardware enforced cache coherency
+ * exerciser must get the latest data (hardware enforced cache coherency
  * expected).
  *
  * Second test sequence - Initialize a main memory region marked as WB,
  * outer shareable by the PE page tables. CPU reads these locations and
  * ensures that the data is cached in its caches. Exerciser Writes to
  * this region with new data and with NS=0. CPU reads the same data
- * locations. The CPU should get the latest data (hardware enforced
+ * locations. The CPU must get the latest data (hardware enforced
  * cache coherency expected).
  *
  * The above cases verify exerciser dma data check (both read and write)
