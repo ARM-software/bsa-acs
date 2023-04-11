@@ -84,24 +84,10 @@ os_i003_entry(uint32_t num_pe);
 uint32_t
 os_i004_entry(uint32_t num_pe);
 uint32_t
-os_i005_entry(uint32_t num_pe);
-uint32_t
-os_i006_entry(uint32_t num_pe);
-uint32_t
-os_i007_entry(uint32_t num_pe);
-uint32_t
-os_i008_entry(uint32_t num_pe);
-uint32_t
-os_i009_entry(uint32_t num_pe);
-uint32_t
-hyp_i001_entry(uint32_t num_pe);
-uint32_t
 hyp_i002_entry(uint32_t num_pe);
 uint32_t
 hyp_i003_entry(uint32_t num_pe);
 uint32_t
 hyp_i004_entry(uint32_t num_pe);
-uint32_t
-hyp_i005_entry(uint32_t num_pe);
 
 #endif

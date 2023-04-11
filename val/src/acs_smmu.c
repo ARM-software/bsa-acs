@@ -90,13 +90,12 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
        val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
        status |= os_i001_entry(num_pe);
        status |= os_i002_entry(num_pe);
-       status |= os_i005_entry(num_pe);
-       status |= os_i006_entry(num_pe);
+       status |= os_i003_entry(num_pe);
+       status |= os_i004_entry(num_pe);
   }
 
   if (g_sw_view[G_SW_HYP]) {
        val_print(ACS_PRINT_ERR, "\nHypervisor View:\n", 0);
-       status |= hyp_i001_entry(num_pe);
        status |= hyp_i002_entry(num_pe);
        if (ver_smmu == 2)
            status |= hyp_i003_entry(num_pe);
