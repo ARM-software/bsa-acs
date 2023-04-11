@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021-2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@
 
 #define TEST_NUM   (ACS_SMMU_TEST_NUM_BASE + 4)
 #define TEST_RULE  "B_SMMU_08"
-#define TEST_DESC  "SMMU revision and S-EL2 support       "
+#define TEST_DESC  "S-EL2 not implemented & SMMU stage1 support"
 
 static
 void

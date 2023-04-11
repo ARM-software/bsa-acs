@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021-2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2023 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,8 +23,8 @@
 #include "val/include/bsa_acs_pcie.h"
 
 #define TEST_NUM   (ACS_SMMU_HYP_TEST_NUM_BASE + 2)
-#define TEST_RULE  "B_SMMU_18"
-#define TEST_DESC  "SMMU Revision,S-EL2 support Hyp       "
+#define TEST_RULE  "B_SMMU_16, B_SMMU_17, B_SMMU_18"
+#define TEST_DESC  "S-EL2 not implemented & SMMU stage2 support"
 
 static
 void
