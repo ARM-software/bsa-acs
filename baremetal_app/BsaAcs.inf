@@ -105,13 +105,13 @@
   ../test_pool/pcie/operating_system/test_os_p037.c
   ../test_pool/pcie/operating_system/test_os_p038.c
   ../test_pool/pcie/operating_system/test_os_p039.c
+  ../test_pool/pcie/operating_system/test_os_p040.c
+  ../test_pool/pcie/operating_system/test_os_p041.c
+  ../test_pool/pcie/operating_system/test_os_p042.c
   ../test_pool/pcie/operating_system/test_os_p061.c
   ../test_pool/pcie/operating_system/test_os_p062.c
+  ../test_pool/pcie/operating_system/test_os_p063.c
   ../test_pool/pcie/operating_system/test_os_p064.c
-  ../test_pool/pcie/operating_system/test_os_p065.c
-  ../test_pool/pcie/operating_system/test_os_p066.c
-  ../test_pool/pcie/operating_system/test_os_p067.c
-  ../test_pool/pcie/operating_system/test_os_p068.c
   ../test_pool/smmu/operating_system/test_os_i001.c
   ../test_pool/smmu/operating_system/test_os_i002.c
   ../test_pool/smmu/operating_system/test_os_i003.c

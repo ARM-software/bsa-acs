@@ -513,7 +513,6 @@ void     pal_smmu_create_info_table(SMMU_INFO_TABLE *smmu_info_table);
 uint32_t pal_smmu_check_device_iova(void *port, uint64_t dma_addr);
 void     pal_smmu_device_start_monitor_iova(void *port);
 void     pal_smmu_device_stop_monitor_iova(void *port);
-uint32_t pal_smmu_max_pasids(uint64_t smmu_base);
 uint32_t pal_smmu_create_pasid_entry(uint64_t smmu_base, uint32_t pasid);
 uint32_t pal_smmu_disable(uint64_t smmu_base);
 uint64_t pal_smmu_pa2iova(uint64_t smmu_base, uint64_t pa);
@@ -610,14 +609,11 @@ typedef struct {
 uint32_t pal_pcie_get_legacy_irq_map(uint32_t seg, uint32_t bus, uint32_t dev, uint32_t fn, PERIPHERAL_IRQ_MAP *irq_map);
 uint32_t pal_pcie_is_device_behind_smmu(uint32_t seg, uint32_t bus, uint32_t dev, uint32_t fn);
 uint32_t pal_pcie_get_root_port_bdf(uint32_t *seg, uint32_t *bus, uint32_t *dev, uint32_t *func);
-uint32_t pal_pcie_get_device_type(uint32_t seg, uint32_t bus, uint32_t dev, uint32_t fn);
 uint32_t pal_pcie_get_snoop_bit(uint32_t seg, uint32_t bus, uint32_t dev, uint32_t fn);
 uint32_t pal_pcie_get_dma_support(uint32_t seg, uint32_t bus, uint32_t dev, uint32_t fn);
 uint32_t pal_pcie_get_dma_coherent(uint32_t seg, uint32_t bus, uint32_t dev, uint32_t fn);
 uint32_t pal_pcie_is_devicedma_64bit(uint32_t seg, uint32_t bus, uint32_t dev, uint32_t fn);
 uint32_t pal_pcie_device_driver_present(uint32_t seg, uint32_t bus, uint32_t dev, uint32_t fn);
-uint32_t pal_pcie_scan_bridge_devices_and_check_memtype(uint32_t seg, uint32_t bus,
-                                                            uint32_t dev, uint32_t fn);
 uint32_t pal_pcie_get_rp_transaction_frwd_support(uint32_t seg, uint32_t bus,
                                                             uint32_t dev, uint32_t fn);
 

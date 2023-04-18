@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021-2023  Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2023,  Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,7 @@
 #include "val/include/bsa_acs_memory.h"
 #include "val/include/bsa_acs_pcie.h"
 
-#define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 65)
+#define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 63)
 #define TEST_RULE  "PCI_LI_02"
 #define TEST_DESC  "PCI legacy intr SPI ID unique         "
 
@@ -151,7 +151,7 @@ payload (void)
 }
 
 uint32_t
-os_p065_entry (uint32_t num_pe)
+os_p063_entry(uint32_t num_pe)
 {
   uint32_t status = ACS_STATUS_FAIL;
 

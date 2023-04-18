@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2019, 2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2019, 2022-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,9 +21,9 @@
 #include "val/include/bsa_acs_smmu.h"
 #include "val/include/bsa_acs_pcie.h"
 
-#define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 68)
+#define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 42)
 #define TEST_RULE  "PCI_PAS_1"
-#define TEST_DESC  "PASID support atleast 16 bits     "
+#define TEST_DESC  "PASID support atleast 16 bits         "
 
 #define MIN_PASID_SUPPORT 16
 
@@ -40,6 +40,8 @@ static void payload(void)
   for (num_per--; num_per >= 0; num_per--)
   {
      max_pasids = val_peripheral_get_info(MAX_PASIDS, num_per);
+     val_print(ACS_PRINT_DEBUG, "\n       Peripheral check - Max PASID bits - 0x%x", max_pasids);
+
      if (max_pasids > 0)
      {
         skip = 0;
@@ -63,6 +65,8 @@ static void payload(void)
          if (val_iovirt_get_smmu_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) == 3)
          {
            max_pasids = val_smmu_max_pasids(num_smmu);
+           val_print(ACS_PRINT_DEBUG, "\n       SMMU check- Max PASID bits- 0x%x", max_pasids);
+
            if (max_pasids > 0)
              {
                  skip = 0;
@@ -86,7 +90,7 @@ static void payload(void)
 }
 
 uint32_t
-os_p068_entry(uint32_t num_pe)
+os_p042_entry(uint32_t num_pe)
 {
 
   uint32_t status = ACS_STATUS_FAIL;

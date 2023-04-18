@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -318,11 +318,8 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 #if defined(TARGET_LINUX) || defined(ENABLE_OOB) || defined(TARGET_EMULATION)
       status |= os_p061_entry(num_pe);
       status |= os_p062_entry(num_pe);
+      status |= os_p063_entry(num_pe);
       status |= os_p064_entry(num_pe);
-      status |= os_p065_entry(num_pe);
-      status |= os_p066_entry(num_pe);
-      status |= os_p067_entry(num_pe);
-      status |= os_p068_entry(num_pe);
 #endif
 #ifndef TARGET_LINUX
       status |= os_p002_entry(num_pe);
@@ -352,6 +349,9 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       status |= os_p037_entry(num_pe);
       status |= os_p038_entry(num_pe);
       status |= os_p039_entry(num_pe);
+      status |= os_p040_entry(num_pe);
+      status |= os_p041_entry(num_pe);
+      status |= os_p042_entry(num_pe);
 
 #endif
 
@@ -896,23 +896,6 @@ val_pcie_device_driver_present(uint32_t bdf)
 }
 
 /**
-  @brief   This API scans bridge devices and checks memory type
-           1. Caller       -  Test Suite
-  @param   bdf      - PCIe BUS/Device/Function
-
-  @return  0 -> 32-bit mem type, 1 -> 64-bit mem type
-**/
-uint32_t val_pcie_scan_bridge_devices_and_check_memtype(uint32_t bdf)
-{
-    uint32_t seg  = PCIE_EXTRACT_BDF_SEG (bdf);
-    uint32_t bus  = PCIE_EXTRACT_BDF_BUS (bdf);
-    uint32_t dev  = PCIE_EXTRACT_BDF_DEV (bdf);
-    uint32_t func = PCIE_EXTRACT_BDF_FUNC (bdf);
-
-    return pal_pcie_scan_bridge_devices_and_check_memtype(seg, bus, dev, func);
-}
-
-/**
   @brief   This API returns the bdf of root port
   @param   bdf             - PCIe BUS/Device/Function
 
@@ -938,16 +921,27 @@ val_pcie_get_root_port_bdf(uint32_t *bdf)
   @brief   This API returns the PCIe device type
            1. Caller       -  Test Suite
   @param   bdf      - PCIe BUS/Device/Function
-  @return  0: Normal PCIe device, 1: PCIe bridge device,
-           2: PCIe Host bridge, else: INVALID
+  @return  status code:
+            1: Normal PCIe device, 2: PCIe Host bridge,
+            3: PCIe bridge device
 **/
 uint32_t
 val_pcie_get_device_type(uint32_t bdf)
 {
-  return pal_pcie_get_device_type(PCIE_EXTRACT_BDF_SEG (bdf),
-                                  PCIE_EXTRACT_BDF_BUS (bdf),
-                                  PCIE_EXTRACT_BDF_DEV (bdf),
-                                  PCIE_EXTRACT_BDF_FUNC (bdf));
+  uint32_t header_type, class_code;
+
+  val_pcie_read_cfg(bdf, TYPE01_CLSR, &header_type);
+  if (PCIE_HEADER_TYPE(header_type) != TYPE0_HEADER)
+  {
+      val_pcie_read_cfg(bdf, TYPE01_RIDR, &class_code);
+      if ((((class_code >> CC_BASE_SHIFT) & CC_BASE_MASK) == HB_BASE_CLASS) &&
+           (((class_code >> CC_SUB_SHIFT) & CC_SUB_MASK)) == HB_SUB_CLASS)
+          return 2;
+      else
+          return 3;
+  }
+  else
+      return 1;
 }
 
 /**
@@ -2420,4 +2414,49 @@ val_is_transaction_pending_set(uint32_t bdf)
 uint32_t val_pcie_mem_get_offset(uint32_t type)
 {
   return pal_pcie_mem_get_offset(type);
+}
+
+/**
+  @brief   This API scans bridge devices and checks memory type of TYPE1 devices.
+  @param   bdf      - PCIe BUS/Device/Function of TYPE1 device
+
+  @return  0 -> 32-bit mem type, 1 -> 64-bit mem type
+**/
+uint32_t val_pcie_scan_bridge_devices_and_check_memtype(uint32_t bdf)
+{
+
+  uint32_t Bus, Dev, Func;
+  uint32_t sec_bus, sub_bus;
+  uint32_t status = 0;
+  uint32_t reg_value;
+  uint32_t data;
+  uint8_t  mem_type;
+
+  val_pcie_read_cfg(bdf, TYPE1_PBN, &reg_value);
+  sec_bus = ((reg_value >> SECBN_SHIFT) & SECBN_MASK);
+  sub_bus = ((reg_value >> SUBBN_SHIFT) & SUBBN_MASK);
+
+  for (Bus = sec_bus; Bus <= sub_bus; Bus++)
+  {
+      for (Dev = 0; Dev < PCIE_MAX_DEV; Dev++)
+      {
+          for (Func = 0; Func < PCIE_MAX_FUNC; Func++)
+          {
+              if (val_pcie_function_header_type(bdf) == TYPE0_HEADER)
+              {
+                  val_pcie_read_cfg(bdf, TYPE01_BAR, &data);
+                  if (data)
+                  {
+                      mem_type = ((data >> BAR_MDT_SHIFT) & BAR_MDT_MASK);
+                      if (mem_type != 0) {
+                          status = 1;
+                          break;
+                      }
+                  }
+              }
+          }
+      }
+  }
+
+  return status;
 }

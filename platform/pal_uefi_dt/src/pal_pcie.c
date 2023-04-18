@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020, 2021-2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -404,25 +404,6 @@ UINT32
 pal_pcie_check_device_list(void)
 {
   return 0;
-}
-
-/**
-    @brief   Get the PCIe device type
-
-    @param   seg        PCI segment number
-    @param   bus        PCI bus address
-    @param   dev        PCI device address
-    @param   fn         PCI function number
-
-    @retval 0 if Error: could not determine device structures
-    @retval 1 if normal PCIe device
-    @retval 2 if PCIe host bridge
-    @retval 3 if PCIe bridge
-    **/
-UINT32
-pal_pcie_get_device_type(UINT32 seg, UINT32 bus, UINT32 dev, UINT32 fn)
-{
-    return 4;
 }
 
 /**

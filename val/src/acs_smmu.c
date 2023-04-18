@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021-2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -230,9 +230,12 @@ uint32_t
 val_smmu_max_pasids(uint32_t smmu_index)
 {
   uint64_t smmu_base;
+  uint32_t reg, pasid_bits;
 
   smmu_base = val_iovirt_get_smmu_info(SMMU_CTRL_BASE, smmu_index);
-  return pal_smmu_max_pasids(smmu_base);
+  reg = val_mmio_read(smmu_base + SMMU_V3_IDR1);
+  pasid_bits = (reg >> SMMU_V3_IDR1_PASID_SHIFT) & SMMU_V3_IDR1_PASID_MASK;
+  return pasid_bits;
 }
 
 /**
