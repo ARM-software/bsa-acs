@@ -30,15 +30,16 @@
   #define G_SW_HYP           1
   #define G_SW_PS            2
 
-  #define PE_INFO_TBL_SZ         8192 /*Supports maximum 400 PEs*/
+  #define PE_INFO_TBL_SZ         8192   /*Supports maximum 400 PEs*/
   #define GIC_INFO_TBL_SZ        239616 /*Supports maximum 832 GIC info (GICH,
                                           CPUIF, RD, ITS, MSI, D)*/
-  #define TIMER_INFO_TBL_SZ      1024 /*Supports maximum 2 system timers*/
-  #define WD_INFO_TBL_SZ         512  /*Supports maximum 20 Watchdogs*/
-  #define MEM_INFO_TBL_SZ        32768/*Supports maximum 800 memory regions*/
-  #define IOVIRT_INFO_TBL_SZ     32768/*Supports maximum 240 nodes of a typical iort table*/
-  #define PERIPHERAL_INFO_TBL_SZ 1024 /*Supports maximum 20 PCIe EPs (USB and SATA controllers only) */
-  #define PCIE_INFO_TBL_SZ       512  /*Supports maximum 20 RC's*/
+  #define TIMER_INFO_TBL_SZ      1024   /*Supports maximum 2 system timers*/
+  #define WD_INFO_TBL_SZ         512    /*Supports maximum 20 Watchdogs*/
+  #define MEM_INFO_TBL_SZ        32768  /*Supports maximum 800 memory regions*/
+  #define IOVIRT_INFO_TBL_SZ     163840 /*Supports maximum 600 nodes of a typical iort table*/
+  #define PERIPHERAL_INFO_TBL_SZ 1024   /*Supports maximum 20 PCIe EPs
+                                          (USB and SATA controllers only) */
+  #define PCIE_INFO_TBL_SZ       512    /*Supports maximum 20 RC's*/
 
   #ifdef _AARCH64_BUILD_
   unsigned long __stack_chk_guard = 0xBAAAAAAD;
