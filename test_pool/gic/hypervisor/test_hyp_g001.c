@@ -37,7 +37,7 @@ isr_vir()
     uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
     /* We received our interrupt, so disable timer from generating further interrupts */
     val_timer_set_vir_el2(0);
-    val_print(ACS_PRINT_INFO, "\n       Received interrupt    ", 0);
+    val_print(ACS_PRINT_INFO, "\n       Received vir el2 interrupt    ", 0);
     val_set_status(index, RESULT_PASS(TEST_NUM, 1));
     val_gic_end_of_interrupt(intid);
 }
