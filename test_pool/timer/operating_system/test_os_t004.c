@@ -34,7 +34,7 @@ isr()
 {
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
-  val_print(ACS_PRINT_INFO, "\n       Received interrupt   ", 0);
+  val_print(ACS_PRINT_INFO, "\n       Received sys timer interrupt   ", 0);
   val_timer_disable_system_timer((addr_t)cnt_base_n);
   val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   val_gic_end_of_interrupt(intid);

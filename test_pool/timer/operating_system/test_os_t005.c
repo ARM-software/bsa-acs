@@ -28,7 +28,7 @@
 static uint32_t intid;
 static uint64_t cnt_base_n;
 static int irq_received;
-
+static uint32_t intid_phy;
 static
 void
 isr_sys_timer()
@@ -41,11 +41,20 @@ isr_sys_timer()
 
 static
 void
+isr_phy_el1()
+{
+  val_timer_set_phy_el1(0);
+  val_print(ACS_PRINT_INFO, "\n       Received el1_phy interrupt   ", 0);
+  val_gic_end_of_interrupt(intid_phy);
+}
+
+static
+void
 payload()
 {
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
-  uint64_t sys_timer_ticks = TIMEOUT_MEDIUM;
-  uint64_t pe_timer_ticks = TIMEOUT_LARGE;
+  uint64_t sys_timer_ticks = val_get_counter_frequency() * 1;
+  uint64_t pe_timer_ticks = val_get_counter_frequency() * 2;
   uint32_t ns_timer = 0;
   uint64_t timer_num, timer_cnt;
   int32_t status;
@@ -71,13 +80,16 @@ payload()
 
   intid = val_timer_get_info(TIMER_INFO_SYS_INTID, timer_num);
   val_gic_install_isr(intid, isr_sys_timer);
+
+  intid_phy = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
+  val_gic_install_isr(intid_phy, isr_phy_el1);
+
+  /* Start Sys timer*/
   cnt_base_n = val_timer_get_info(TIMER_INFO_SYS_CNT_BASE_N, timer_num);
+  val_timer_set_system_timer((addr_t)cnt_base_n, sys_timer_ticks);
 
   /* Start EL1 PHY timer */
   val_timer_set_phy_el1(pe_timer_ticks);
-
-  /* Start Sys timer*/
-  val_timer_set_system_timer((addr_t)cnt_base_n, sys_timer_ticks);
 
   /* Put current PE in to low power mode*/
   status = val_suspend_pe(0, 0);

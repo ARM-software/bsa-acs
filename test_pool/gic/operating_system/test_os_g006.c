@@ -32,7 +32,7 @@ void
 isr_phy()
 {
   val_timer_set_phy_el1(0);
-  val_print(ACS_PRINT_INFO, "\n       Received interrupt   ", 0);
+  val_print(ACS_PRINT_INFO, "\n       Received phy el1 interrupt   ", 0);
   val_set_status(0, RESULT_PASS(TEST_NUM, 1));
   val_gic_end_of_interrupt(intid);
 }
@@ -42,7 +42,7 @@ void
 isr_vir()
 {
   val_timer_set_vir_el1(0);
-  val_print(ACS_PRINT_INFO, "\n       Received interrupt   ", 0);
+  val_print(ACS_PRINT_INFO, "\n       Received vir el1 interrupt   ", 0);
   val_set_status(0, RESULT_PASS(TEST_NUM, 1));
   val_gic_end_of_interrupt(intid);
 }
