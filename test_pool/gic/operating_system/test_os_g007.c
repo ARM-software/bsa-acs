@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021, 2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,19 +21,18 @@
 #include "val/include/bsa_acs_gic.h"
 #include "val/include/bsa_acs_pe.h"
 
-#define TEST_NUM   (ACS_GIC_TEST_NUM_BASE + 6)
+#define TEST_NUM   (ACS_GIC_TEST_NUM_BASE + 7)
 #define TEST_RULE  "B_PPI_01"
-#define TEST_DESC  "Check EL1-Phy timer PPI assignment    "
-
+#define TEST_DESC  "Check EL1-Virt timer PPI assignment   "
 
 static uint32_t intid;
 
 static
 void
-isr_phy()
+isr_vir()
 {
-  val_timer_set_phy_el1(0);
-  val_print(ACS_PRINT_INFO, "\n       Received phy el1 interrupt   ", 0);
+  val_timer_set_vir_el1(0);
+  val_print(ACS_PRINT_INFO, "\n       Received virt el1 interrupt   ", 0);
   val_set_status(0, RESULT_PASS(TEST_NUM, 1));
   val_gic_end_of_interrupt(intid);
 }
@@ -42,17 +41,22 @@ static
 void
 payload()
 {
-  /* Check non-secure physical timer Private Peripheral Interrupt (PPI) assignment */
+  /* Check CTIIRQ interrupt received    (x)    -- not feasible */
+  /* Check PMU interrupt received - Checked in PE test         */
+  /* Check COMMIRQ interrupt received   (x)    -- not feasible */
+  /* Check PMBIRQ interrupt received    (x)    -- requires access to secure monitor */
+
   uint32_t timeout = TIMEOUT_LARGE;
   uint32_t timer_expire_val = 100;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
-
-  intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
+  /* Check non-secure virtual timer Private Peripheral Interrupt (PPI) assignment */
+  val_set_status(0, RESULT_PENDING(TEST_NUM));
+  intid = val_timer_get_info(TIMER_INFO_VIR_EL1_INTID, 0);
   if (g_build_sbsa) {
-      if (intid != 30) {
+      if (intid != 27) {
           val_print(ACS_PRINT_ERR,
-              "\n       EL0-Phy timer not mapped to PPI ID 30, INTID: %d   ", intid);
+              "\n       EL0-Virtual timer not mapped to PPI ID 27, INTID: %d   ", intid);
           val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
           return;
       }
@@ -60,10 +64,10 @@ payload()
 
   if ((intid < 16 || intid > 31) && (!val_gic_is_valid_eppi(intid)))
       val_print(ACS_PRINT_WARN,
-          "\n       EL0-Phy timer not mapped to PPI recommended range, INTID: %d   ", intid);
+          "\n       EL0-Virtual timer not mapped to PPI recommended range, INTID: %d   ", intid);
 
-  val_gic_install_isr(intid, isr_phy);
-  val_timer_set_phy_el1(timer_expire_val);
+  val_gic_install_isr(intid, isr_vir);
+  val_timer_set_vir_el1(timer_expire_val);
 
   while ((--timeout > 0) && (IS_RESULT_PENDING(val_get_status(index)))) {
         ;
@@ -71,7 +75,7 @@ payload()
 
   if (timeout == 0) {
     val_print(ACS_PRINT_ERR,
-        "\n       EL0-Phy timer interrupt not received on INTID: %d   ", intid);
+        "\n       EL0-Virtual timer interrupt not received on INTID: %d   ", intid);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
     return;
   }
@@ -79,7 +83,7 @@ payload()
 }
 
 uint32_t
-os_g006_entry(uint32_t num_pe)
+os_g007_entry(uint32_t num_pe)
 {
 
   uint32_t status = ACS_STATUS_FAIL;

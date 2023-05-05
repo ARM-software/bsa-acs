@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021-2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,6 +77,7 @@ val_gic_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
       status |= os_g005_entry(num_pe);
       status |= os_g006_entry(num_pe);
+      status |= os_g007_entry(num_pe);
   }
 
   if (g_sw_view[G_SW_HYP]) {
