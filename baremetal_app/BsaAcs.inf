@@ -60,6 +60,7 @@
   ../test_pool/gic/operating_system/test_os_g004.c
   ../test_pool/gic/operating_system/test_os_g005.c
   ../test_pool/gic/operating_system/test_os_g006.c
+  ../test_pool/gic/operating_system/test_os_g007.c
   ../test_pool/gic/operating_system/test_os_v2m001.c
   ../test_pool/gic/operating_system/test_os_v2m002.c
   ../test_pool/gic/operating_system/test_os_v2m003.c
