@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021-2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,6 +33,10 @@
 #define SMMUv3_AIDR         0x1C
 
 #define SMMUv3_MPAMIDR      0x130
+
+#define SMMU_V3_IDR1               0x4
+#define SMMU_V3_IDR1_PASID_SHIFT   0x6
+#define SMMU_V3_IDR1_PASID_MASK    0x1f
 
 uint64_t
 val_smmu_ssid_bits(uint32_t smmu_index);

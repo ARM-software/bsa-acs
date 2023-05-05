@@ -1,5 +1,5 @@
 ## @file
- # Copyright (c) 2016-2021, Arm Limited or its affiliates. All rights reserved.
+ # Copyright (c) 2016-2021, 2023, Arm Limited or its affiliates. All rights reserved.
  # SPDX-License-Identifier : Apache-2.0
  #
  # Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,11 +27,8 @@ obj-m += bsa_acs_test.o
 bsa_acs_test-objs += $(TEST_POOL)/pcie/operating_system/test_os_p001.o \
                      $(TEST_POOL)/pcie/operating_system/test_os_p061.o \
                      $(TEST_POOL)/pcie/operating_system/test_os_p062.o \
+                     $(TEST_POOL)/pcie/operating_system/test_os_p063.o \
                      $(TEST_POOL)/pcie/operating_system/test_os_p064.o \
-                     $(TEST_POOL)/pcie/operating_system/test_os_p065.o \
-                     $(TEST_POOL)/pcie/operating_system/test_os_p066.o \
-                     $(TEST_POOL)/pcie/operating_system/test_os_p067.o \
-                     $(TEST_POOL)/pcie/operating_system/test_os_p068.o \
                      $(TEST_POOL)/peripherals/operating_system/test_os_d004.o \
                      $(TEST_POOL)/memory_map/operating_system/test_os_m004.o \
 
