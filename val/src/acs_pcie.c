@@ -383,6 +383,8 @@ val_pcie_print_device_info(void)
   uint32_t num_rciep = 0, num_rcec = 0;
   uint32_t num_iep = 0, num_irp = 0;
   uint32_t num_ep = 0, num_rp = 0;
+  uint32_t num_dp = 0, num_up = 0;
+  uint32_t num_pcie_pci = 0, num_pci_pcie = 0;
   uint32_t bdf_counter;
 
   bdf_tbl_ptr = val_pcie_bdf_table_ptr();
@@ -402,12 +404,36 @@ val_pcie_print_device_info(void)
 
       switch (dp_type)
       {
-        case RCiEP  : num_rciep++; break;
-        case RCEC   : num_rcec++; break;
-        case EP     : num_ep++; break;
-        case RP     : num_rp++; break;
-        case iEP_EP : num_iep++; break;
-        case iEP_RP : num_irp++; break;
+        case RCiEP:
+            num_rciep++;
+            break;
+        case RCEC:
+            num_rcec++;
+            break;
+        case EP:
+            num_ep++;
+            break;
+        case RP:
+            num_rp++;
+            break;
+        case iEP_EP:
+            num_iep++;
+            break;
+        case iEP_RP:
+            num_irp++;
+            break;
+        case UP:
+            num_up++;
+            break;
+        case DP:
+            num_dp++;
+            break;
+        case PCI_PCIE:
+            num_pci_pcie++;
+            break;
+        case PCIE_PCI:
+            num_pcie_pci++;
+            break;
       }
   }
 
@@ -417,6 +443,10 @@ val_pcie_print_device_info(void)
   val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of RP              : %4d \n", num_rp);
   val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of iEP_EP          : %4d \n", num_iep);
   val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of iEP_RP          : %4d \n", num_irp);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of UP of switch    : %4d \n", num_up);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of DP of switch    : %4d \n", num_dp);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of PCI/PCIe Bridge : %4d \n", num_pci_pcie);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of PCIe/PCI Bridge : %4d \n", num_pcie_pci);
 
   while (ecam_index < (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0))
   {

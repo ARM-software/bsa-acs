@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019-2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -374,6 +374,8 @@
 #define DP       (1 << 0b0110)
 #define iEP_EP   (1 << 0b1100)
 #define iEP_RP   (1 << 0b1011)
+#define PCI_PCIE (1 << 0b1000)
+#define PCIE_PCI (1 << 0b0111)
 #define PCIe_ALL (iEP_RP | iEP_EP | RP | EP | RCEC | RCiEP)
 
 /* MSI-X Capabilities */
