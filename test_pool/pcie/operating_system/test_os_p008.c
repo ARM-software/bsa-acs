@@ -47,7 +47,35 @@ static uint32_t get_max_bdf(uint32_t segment, uint32_t end_bus)
           max_bdf = bdf;
   }
 
+  val_print(ACS_PRINT_DEBUG, "\n max bdf 0x%x", max_bdf);
   return max_bdf;
+}
+
+/* Returns the maximum subordinate bus value for that segment from the RP's in the BDF table */
+static uint32_t get_max_bus(uint32_t segment, uint32_t bdf, uint32_t end_bus)
+{
+  pcie_device_bdf_table *bdf_tbl_ptr;
+  uint32_t seg_num;
+  uint32_t rp_bdf, sub_bus, bus_num;
+  uint32_t reg_value;
+  uint32_t tbl_index = 0;
+  uint32_t max_sub_bus = 0;
+
+  bdf_tbl_ptr = val_pcie_bdf_table_ptr();
+  for (tbl_index = 0; tbl_index < bdf_tbl_ptr->num_entries; tbl_index++)
+  {
+      rp_bdf = bdf_tbl_ptr->device[tbl_index].rp_bdf;
+      seg_num = PCIE_EXTRACT_BDF_SEG(rp_bdf);
+      bus_num = PCIE_EXTRACT_BDF_BUS(rp_bdf);
+
+      val_pcie_read_cfg(rp_bdf, TYPE1_PBN, &reg_value);
+      sub_bus = ((reg_value >> SUBBN_SHIFT) & SUBBN_MASK);
+      if ((segment == seg_num) && (bus_num <= end_bus) && (max_sub_bus < sub_bus))
+          max_sub_bus = sub_bus;
+  }
+
+  val_print(ACS_PRINT_DEBUG, "\n Maximum sub bus %x", max_sub_bus);
+  return max_sub_bus;
 }
 
 static
@@ -60,6 +88,7 @@ payload(void)
   uint32_t ecam_index;
   uint32_t num_ecam;
   uint32_t end_bus;
+  uint32_t sub_bus;
   uint32_t cfg_addr;
   uint32_t bus_index;
   uint32_t dev_index;
@@ -81,10 +110,13 @@ payload(void)
       /* Get the highest BDF value for that segment */
       bdf = get_max_bdf(segment, end_bus);
 
+      /* Get the maximum subordinate bus for that segment */
+      sub_bus = get_max_bus(segment, bdf, end_bus);
+
       /* Get the least highest of max bus number */
-      bus_index = (PCIE_EXTRACT_BDF_BUS(bdf) < end_bus) ? PCIE_EXTRACT_BDF_BUS(bdf):end_bus;
-      val_print(ACS_PRINT_INFO, "\n       Maximum bus value is 0x%x", bus_index);
+      bus_index = (PCIE_EXTRACT_BDF_BUS(bdf) < end_bus) ? sub_bus:end_bus;
       bus_index += 1;
+      val_print(ACS_PRINT_INFO, "\n       Maximum bus value is 0x%x", bus_index);
 
       /* Bus value must not exceed 255 */
       if (bus_index > end_bus) {
