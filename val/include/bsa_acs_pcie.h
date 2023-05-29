@@ -56,6 +56,8 @@
 #define PCIE_DLL_LINK_STATUS_ACTIVE           0x1
 #define PCIE_DLL_LINK_ACTIVE_NOT_SUPPORTED    0x2
 
+#define PCIE_RP_NOT_FOUND 0xFF
+
 #define REG_MASK(end, start) (((~(uint32_t)0 << (start)) & \
                              (((uint32_t)1 << ((end)+1)) - 1)) >> (start))
 #define REG_SHIFT(alignment_byte_cnt, start) (((alignment_byte_cnt)*BITS_IN_BYTE) + start)
