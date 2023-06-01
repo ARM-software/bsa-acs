@@ -693,7 +693,13 @@ val_pcie_create_device_bdf_table()
                       if (val_pcie_is_host_bridge(bdf))
                           continue;
 
-                      /* Skip if the device is a PCI legacy device */
+                      /* Enable memory access and bus master enable for all BDF's
+                       * For BM systems, these bits are enabled during enumeration in PAL
+                      */
+                      val_pcie_enable_bme(bdf);
+                      val_pcie_enable_msa(bdf);
+
+		      /* Skip if the device is a PCI legacy device */
                       p_cap = val_pcie_find_capability(
                         bdf,
                         PCIE_CAP,
