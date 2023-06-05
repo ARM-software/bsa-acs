@@ -36,8 +36,6 @@ val_wd_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 {
   uint32_t status, i;
 
-  status = ACS_STATUS_PASS;
-
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_WD_TEST_NUM_BASE) {
           val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all Watchdog tests \n", 0);
@@ -45,13 +43,11 @@ val_wd_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       }
   }
 
-  if (g_single_module != SINGLE_MODULE_SENTINEL && g_single_module != ACS_WD_TEST_NUM_BASE &&
-       (g_single_test == SINGLE_MODULE_SENTINEL ||
-         (g_single_test - ACS_WD_TEST_NUM_BASE > 100 ||
-          g_single_test - ACS_WD_TEST_NUM_BASE < 0))) {
-    val_print(ACS_PRINT_TEST, "\n      USER Override - Skipping all Watchdog tests ", 0);
-    val_print(ACS_PRINT_TEST, "\n      (Running only a single module)\n", 0);
-    return ACS_STATUS_SKIP;
+  /* Check if there are any tests to be executed in current module with user override options*/
+  status = val_check_skip_module(ACS_WD_TEST_NUM_BASE);
+  if (status) {
+      val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all Watchdog tests \n", 0);
+      return ACS_STATUS_SKIP;
   }
 
 if (!g_build_sbsa) { /* For SBSA compliance WD is mandatory */
@@ -63,6 +59,8 @@ if (!g_build_sbsa) { /* For SBSA compliance WD is mandatory */
 }
 
   val_print_test_start("Watchdog");
+  status = ACS_STATUS_PASS;
+
   g_curr_module = 1 << WD_MODULE;
 
   if (g_sw_view[G_SW_OS]) {

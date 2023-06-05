@@ -296,27 +296,24 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   uint32_t status, i;
   uint32_t num_ecam = 0;
 
-  status = ACS_STATUS_PASS;
-
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_PCIE_TEST_NUM_BASE) {
           val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all PCIe tests \n", 0);
           return ACS_STATUS_SKIP;
       }
   }
-   if (pcie_bdf_table_list_flag == 1) {
-    val_print(ACS_PRINT_WARN, "\n     *** Created device list with valid bdf doesn't match \
-                    with the platform pcie device hierarchy, Skipping PCIE tests *** \n", 0);
-    return ACS_STATUS_SKIP;
+
+  /* Check if there are any tests to be executed in current module with user override options*/
+  status = val_check_skip_module(ACS_PCIE_TEST_NUM_BASE);
+  if (status) {
+      val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all PCIe tests \n", 0);
+      return ACS_STATUS_SKIP;
   }
 
-  if (g_single_module != SINGLE_MODULE_SENTINEL && g_single_module != ACS_PCIE_TEST_NUM_BASE &&
-       (g_single_test == SINGLE_MODULE_SENTINEL ||
-         (g_single_test - ACS_PCIE_TEST_NUM_BASE > 100 ||
-          g_single_test - ACS_PCIE_TEST_NUM_BASE < 0))) {
-    val_print(ACS_PRINT_TEST, "\n      USER Override - Skipping all PCIE tests ", 0);
-    val_print(ACS_PRINT_TEST, "\n      (Running only a single module)\n", 0);
-    return ACS_STATUS_SKIP;
+  if (pcie_bdf_table_list_flag == 1) {
+      val_print(ACS_PRINT_WARN, "\n     *** Created device list with valid bdf doesn't match \
+                    with the platform pcie device hierarchy, Skipping PCIE tests *** \n", 0);
+      return ACS_STATUS_SKIP;
   }
 
   num_ecam = (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
@@ -326,6 +323,8 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   }
 
   val_print_test_start("PCIe");
+  status = ACS_STATUS_PASS;
+
   g_curr_module = 1 << PCIE_MODULE;
 
   if (g_sw_view[G_SW_OS]) {

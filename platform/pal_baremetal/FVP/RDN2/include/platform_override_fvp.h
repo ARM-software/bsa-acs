@@ -24,6 +24,10 @@
 
 extern uint32_t g_skip_array[];
 extern uint32_t g_num_skip;
+extern uint32_t g_test_array[];
+extern uint32_t g_num_tests;
+extern uint32_t g_module_array[];
+extern uint32_t g_num_modules;
 
 /* Settings */
 #define PLATFORM_OVERRIDE_PRINT_LEVEL  0x3     //The permissible levels are 1,2,3,4 and 5

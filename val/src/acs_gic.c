@@ -45,12 +45,10 @@ val_gic_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       }
   }
 
-  if (g_single_module != SINGLE_MODULE_SENTINEL && g_single_module != ACS_GIC_TEST_NUM_BASE &&
-       (g_single_test == SINGLE_MODULE_SENTINEL ||
-         (g_single_test - ACS_GIC_TEST_NUM_BASE > 100 ||
-          g_single_test - ACS_GIC_TEST_NUM_BASE < 0))) {
-      val_print(ACS_PRINT_TEST, "\n      USER Override - Skipping all GIC tests ", 0);
-      val_print(ACS_PRINT_TEST, "\n      (Running only a single module) \n", 0);
+  /* Check if there are any tests to be executed in current module with user override options*/
+  status = val_check_skip_module(ACS_GIC_TEST_NUM_BASE);
+  if (status) {
+      val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all GIC tests \n", 0);
       return ACS_STATUS_SKIP;
   }
 

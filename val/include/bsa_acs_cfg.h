@@ -28,8 +28,10 @@ extern uint32_t g_bsa_tests_fail;
 extern uint64_t g_stack_pointer;
 extern uint64_t g_exception_ret_addr;
 extern uint64_t g_ret_addr;
-extern uint32_t g_single_test;
-extern uint32_t g_single_module;
+extern uint32_t *g_execute_tests;
+extern uint32_t g_num_tests;
+extern uint32_t *g_execute_modules;
+extern uint32_t g_num_modules;
 extern uint32_t g_build_sbsa;
 extern uint32_t g_curr_module;
 

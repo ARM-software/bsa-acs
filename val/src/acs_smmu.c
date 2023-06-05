@@ -59,8 +59,6 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   uint32_t num_smmu;
   uint32_t ver_smmu;
 
-  status = ACS_STATUS_PASS;
-
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_SMMU_TEST_NUM_BASE) {
           val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all SMMU tests \n", 0);
@@ -68,13 +66,11 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       }
   }
 
-  if (g_single_module != SINGLE_MODULE_SENTINEL && g_single_module != ACS_SMMU_TEST_NUM_BASE &&
-       (g_single_test == SINGLE_MODULE_SENTINEL ||
-         (g_single_test - ACS_SMMU_TEST_NUM_BASE > 100 ||
-          g_single_test - ACS_SMMU_TEST_NUM_BASE < 0))) {
-    val_print(ACS_PRINT_TEST, "\n      USER Override - Skipping all SMMU tests ", 0);
-    val_print(ACS_PRINT_TEST, "\n      (Running only a single module)\n", 0);
-    return ACS_STATUS_SKIP;
+  /* Check if there are any tests to be executed in current module with user override options*/
+  status = val_check_skip_module(ACS_SMMU_TEST_NUM_BASE);
+  if (status) {
+      val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all SMMU tests \n", 0);
+      return ACS_STATUS_SKIP;
   }
 
   num_smmu = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
@@ -84,6 +80,8 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   }
 
   val_print_test_start("SMMU");
+  status = ACS_STATUS_PASS;
+
   g_curr_module = 1 << SMMU_MODULE;
 
   ver_smmu = val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, 0);

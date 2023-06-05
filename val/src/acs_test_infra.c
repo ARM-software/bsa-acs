@@ -252,6 +252,44 @@ val_mmio_write64(addr_t addr, uint64_t data)
 }
 
 /**
+  @brief  This API checks if all the tests in the current module needs to be skipped.
+          Skip if no tests are to be executed with user override options.
+          1. Caller       - Test suite
+          2. Prerequisite - None.
+
+  @param module_base Base number of the module
+
+  @return         ACS_STATUS_SKIP - if the user override has no tests to run in the current module
+                  ACS_STATUS_PASS - if tests are to be run in the current module
+ **/
+uint32_t
+val_check_skip_module(uint32_t module_base)
+{
+  uint32_t i, skip_module = 0;
+
+  /* Case 1 - Don't skip the module if the module number is mentioned in -m option parameters */
+  for (i = 0; i < g_num_modules; i++) {
+      if (g_execute_modules[i] == module_base) {
+          skip_module++;
+      }
+  }
+
+  /* Case 2 - Don't skip the module if any of module's tests are in -t option parameters  */
+  for (i = 0; i < g_num_tests; i++) {
+      if ((g_execute_tests[i] - module_base) < 100) {
+          skip_module++;
+      }
+  }
+
+  /* Skip the module if neither of above 2 cases are true */
+  if ((!skip_module) && (g_num_tests || g_num_modules)) {
+      return ACS_STATUS_SKIP;
+  }
+
+  return ACS_STATUS_PASS;
+}
+
+/**
   @brief  This API prints the test number, description and
           sets the test status to pending for the input number of PEs.
           1. Caller       - Application layer
@@ -268,6 +306,7 @@ val_initialize_test(uint32_t test_num, char8_t *desc, uint32_t num_pe)
 {
 
   uint32_t i;
+  uint32_t override_skip = 0;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
   val_print(ACS_PRINT_ERR, "%4d : ", test_num); //Always print this
@@ -288,13 +327,26 @@ val_initialize_test(uint32_t test_num, char8_t *desc, uint32_t num_pe)
       }
   }
 
-  if ((g_single_test != SINGLE_TEST_SENTINEL && test_num != g_single_test) &&
-        (g_single_module == SINGLE_MODULE_SENTINEL ||
-          (test_num - g_single_module >= 100 ||
-           test_num - g_single_module < 0))) {
-    val_print(ACS_PRINT_TEST, "\n       USER OVERRIDE VIA SINGLE TEST - Skip Test        ", 0);
-    val_set_status(index, RESULT_SKIP(test_num, 0));
-    return ACS_STATUS_SKIP;
+  /* Don't skip if test_num is one of the -t option parameters */
+  for (i = 0; i < g_num_tests; i++) {
+      if (test_num == g_execute_tests[i]) {
+          override_skip++;
+      }
+  }
+
+  /* Don't skip if the test belongs to one of the modules in -m option parameters */
+  for (i = 0; i < g_num_modules; i++) {
+      if ((test_num - g_execute_modules[i]) > 0 &&
+          (test_num - g_execute_modules[i]) < 100)
+      {
+          override_skip++;
+      }
+  }
+
+  if ((!override_skip) && (g_num_tests || g_num_modules)) {
+      val_print(ACS_PRINT_TEST, "\n       USER OVERRIDE VIA SPECIFIC TESTS - Skip Test      ", 0);
+      val_set_status(index, RESULT_SKIP(test_num, 0));
+      return ACS_STATUS_SKIP;
   }
 
   return ACS_STATUS_PASS;
