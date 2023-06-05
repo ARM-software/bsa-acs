@@ -220,34 +220,34 @@ ShellAppMainbsa(
   val_pe_context_save(AA64ReadSp(), (uint64_t)branch_label);
   val_pe_initialize_default_exception_handler(val_pe_default_esr);
 
-  val_print(ACS_PRINT_TEST, "\n      ***  Starting PE tests ***  ", 0);
+  /***  Starting PE tests             ***/
   Status = val_pe_execute_tests(val_pe_get_num(), g_sw_view);
 
-  val_print(ACS_PRINT_TEST, "\n      ***  Starting Memory Map tests ***  ", 0);
-  val_memory_execute_tests(val_pe_get_num(), g_sw_view);
+  /***  Starting Memory Map tests     ***/
+  Status |= val_memory_execute_tests(val_pe_get_num(), g_sw_view);
 
-  val_print(ACS_PRINT_TEST, "\n      ***  Starting GIC tests ***  ", 0);
+  /***  Starting GIC tests            ***/
   Status |= val_gic_execute_tests(val_pe_get_num(), g_sw_view);
 
-  val_print(ACS_PRINT_TEST, "\n      *** Starting System MMU tests ***  ", 0);
+  /***  Starting System MMU tests     ***/
   Status |= val_smmu_execute_tests(val_pe_get_num(), g_sw_view);
 
-  val_print(ACS_PRINT_TEST, "\n      *** Starting Timer tests ***  ", 0);
+  /***  Starting Timer tests          ***/
   Status |= val_timer_execute_tests(val_pe_get_num(), g_sw_view);
 
-  val_print(ACS_PRINT_TEST, "\n      *** Starting Wakeup semantic tests ***  ", 0);
+  /***  Starting Wakeup semantic tests ***/
   Status |= val_wakeup_execute_tests(val_pe_get_num(), g_sw_view);
 
-  val_print(ACS_PRINT_TEST, "\n      *** Starting Peripheral tests ***  ", 0);
+  /***  Starting Peripheral tests     ***/
   Status |= val_peripheral_execute_tests(val_pe_get_num(), g_sw_view);
 
-  val_print(ACS_PRINT_TEST, "\n      *** Starting Watchdog tests ***  ", 0);
+  /***  Starting Watchdog tests       ***/
   Status |= val_wd_execute_tests(val_pe_get_num(), g_sw_view);
 
-  val_print(ACS_PRINT_TEST, "\n      *** Starting PCIe tests ***  ", 0);
+  /***  Starting PCIe tests           ***/
   Status |= val_pcie_execute_tests(val_pe_get_num(), g_sw_view);
 
-  val_print(ACS_PRINT_TEST, "\n      *** Starting PCIe Exerciser tests ***  ", 0);
+  /***  Starting PCIe Exerciser tests ***/
   Status |= val_exerciser_execute_tests(g_sw_view);
 
 print_test_status:

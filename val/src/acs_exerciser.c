@@ -481,6 +481,7 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
   val_print(ACS_PRINT_INFO, "  Initializing ITS\n", 0);
   val_gic_its_configure();
 
+  val_print_test_start("Exerciser");
   g_curr_module = 1 << EXERCISER_MODULE;
 
   if (g_sw_view[G_SW_OS]) {

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,6 +61,8 @@ if (!g_build_sbsa) { /* For SBSA compliance WD is mandatory */
     return ACS_STATUS_SKIP;
   }
 }
+
+  val_print_test_start("Watchdog");
   g_curr_module = 1 << WD_MODULE;
 
   if (g_sw_view[G_SW_OS]) {
