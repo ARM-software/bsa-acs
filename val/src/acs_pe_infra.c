@@ -174,6 +174,9 @@ val_pe_get_index_mpid(uint64_t mpid)
   entry = g_pe_info_table->pe_info;
 
   while (i > 0) {
+    val_data_cache_ops_by_va((addr_t)&entry->mpidr, INVALIDATE);
+    val_data_cache_ops_by_va((addr_t)&entry->pe_num, INVALIDATE);
+
     if (entry->mpidr == mpid) {
       return entry->pe_num;
     }
