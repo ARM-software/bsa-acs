@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -502,6 +502,9 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
 
      status |= os_e014_entry();
      status |= os_e015_entry();
+     status |= os_e016_entry();
+     status |= os_e017_entry();
+     status |= os_e018_entry();
   }
 
   val_smmu_stop();
