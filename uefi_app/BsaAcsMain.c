@@ -117,17 +117,6 @@ createGicInfoTable (
 }
 
 EFI_STATUS
-configureGicIts (
-)
-{
-  EFI_STATUS Status;
-
-  Status = val_gic_its_configure();
-
-  return Status;
-}
-
-EFI_STATUS
 createTimerInfoTable(
 )
 {
@@ -537,12 +526,6 @@ ShellAppMain (
 
   val_print(ACS_PRINT_TEST, "\n      ***  Starting Memory Map tests ***  ", 0);
   val_memory_execute_tests(val_pe_get_num(), g_sw_view);
-
-  /*
-   * Configure Gic Redistributor and ITS to support
-   * Generation of LPIs.
-  */
-  configureGicIts();
 
   val_print(ACS_PRINT_TEST, "\n      ***  Starting GIC tests ***  ", 0);
   Status |= val_gic_execute_tests(val_pe_get_num(), g_sw_view);

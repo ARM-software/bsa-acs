@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -477,6 +477,9 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
   /* Disable All SMMU's */
   for (instance = 0; instance < num_smmu; ++instance)
       val_smmu_disable(instance);
+
+  val_print(ACS_PRINT_INFO, "  Initializing ITS\n", 0);
+  val_gic_its_configure();
 
   g_curr_module = 1 << EXERCISER_MODULE;
 
