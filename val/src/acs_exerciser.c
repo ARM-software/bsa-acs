@@ -505,6 +505,9 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
 
      status |= os_e014_entry();
      status |= os_e015_entry();
+     status |= os_e016_entry();
+     status |= os_e017_entry();
+     status |= os_e018_entry();
   }
 
   val_smmu_stop();

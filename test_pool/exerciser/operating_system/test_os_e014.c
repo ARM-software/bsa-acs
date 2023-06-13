@@ -24,7 +24,7 @@
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 14)
 #define TEST_RULE  "PCI_PP_02"
-#define TEST_DESC  "P2P transactions must not deadlock  "
+#define TEST_DESC  "P2P transactions must not deadlock    "
 
 uint32_t
 get_target_exer_bdf(uint32_t req_rp_bdf, uint32_t *tgt_e_bdf,
