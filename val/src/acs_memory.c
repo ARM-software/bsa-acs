@@ -56,6 +56,7 @@ val_memory_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   status = ACS_STATUS_PASS;
 
+  val_print_test_start("Memory Map");
   g_curr_module = 1 << MEM_MODULE;
 
   if (g_sw_view[G_SW_OS]) {

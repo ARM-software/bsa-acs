@@ -56,6 +56,7 @@ val_gic_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   status      = ACS_STATUS_PASS;
 
+  val_print_test_start("GIC");
   g_curr_module = 1 << GIC_MODULE;
 
   gic_version = val_gic_get_info(GIC_INFO_VERSION);
@@ -100,7 +101,7 @@ val_gic_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       goto its_test;
   }
 
-  val_print(ACS_PRINT_ERR, "\n      *** Starting GICv2m tests ***\n", 0);
+  val_print_test_start("GICv2m");
   if (g_sw_view[G_SW_OS]) {
       val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
       status |= os_v2m001_entry(num_pe);
@@ -114,7 +115,8 @@ its_test:
       val_print(ACS_PRINT_DEBUG, "\n       No ITS, Skipping all DeviceID & ITS tests \n", 0);
       goto test_done;
   }
-  val_print(ACS_PRINT_ERR, "\n      *** Starting DeviceID generation and ITS tests ***\n", 0);
+
+  val_print_test_start("DeviceID generation and ITS");
   if (g_sw_view[G_SW_OS]) {
       val_print(ACS_PRINT_ERR, "\nOperating System View:\n", 0);
       status |= os_its001_entry(num_pe);
