@@ -41,6 +41,10 @@ uint32_t  *g_skip_test_num;
 uint32_t  *g_execute_tests;
 uint32_t  *g_execute_modules;
 uint32_t  g_build_sbsa = 0;
+/* VE systems run acs at EL1 and in some systems crash is observed during acess
+   of EL1 phy and virt timer, Below command line option is added only for debug
+   purpose to complete BSA run on these systems */
+uint32_t  g_el1physkip;
 
 uint32_t
 createPeInfoTable(
