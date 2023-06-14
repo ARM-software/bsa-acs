@@ -38,6 +38,8 @@ uint32_t  g_wakeup_timeout;
 
 uint32_t  g_sw_view[3] = {1, 1, 1}; //Operating System, Hypervisor, Platform Security
 uint32_t  *g_skip_test_num;
+uint32_t  *g_execute_tests;
+uint32_t  *g_execute_modules;
 uint32_t  g_build_sbsa = 0;
 
 uint32_t
@@ -167,7 +169,19 @@ ShellAppMainbsa(
   void                 *branch_label;
 
   g_skip_test_num = &g_skip_array[0];
+
+  /* Check if there is a user override to run specific tests*/
+  if (g_num_tests) {
+      g_execute_tests   = &g_test_array[0];
+  }
+
+  /* Check if there is a user override to run specific modules*/
+  if (g_num_modules) {
+      g_execute_modules = &g_module_array[0];
+  }
+
   g_print_level = PLATFORM_OVERRIDE_PRINT_LEVEL;
+
   if (g_print_level < ACS_PRINT_INFO)
   {
       val_print(ACS_PRINT_ERR, "Print Level %d is not supported.\n", g_print_level);
