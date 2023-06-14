@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021,2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021,2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,15 @@
 #define TEST_RULE  "PCI_IN_04"
 #define TEST_DESC  "All EP/Sw under RP in same ECAM Region"
 
+/**
+  @brief   This function checks if the PCIe endpoint and the rootport share the same
+           ECAM region.
+  @param   dsf_bdf    - BDF of Endpoint
 
+  @return  0 - if EP and RP share the same ECAM region.
+           1 - if EP and RP do not share the same ECAM region.
+           PCIE_RP_NOT_FOUND - If the EP is not a downstream device to an RP.
+**/
 static uint8_t func_ecam_is_rp_ecam(uint32_t dsf_bdf)
 {
 
@@ -65,7 +73,7 @@ static uint8_t func_ecam_is_rp_ecam(uint32_t dsf_bdf)
       }
   }
 
-  return 1;
+  return PCIE_RP_NOT_FOUND;
 }
 
 static
@@ -74,6 +82,7 @@ payload(void)
 {
 
   uint32_t bdf;
+  uint32_t status;
   uint32_t dp_type;
   uint32_t pe_index;
   uint32_t tbl_index;
@@ -100,10 +109,15 @@ payload(void)
           /* If test runs for atleast an endpoint */
           test_skip = 0;
 
-          if (func_ecam_is_rp_ecam(bdf)) {
-              val_print(ACS_PRINT_ERR, "\n       bdf: 0x%x ", bdf);
-              val_print(ACS_PRINT_ERR, "dp_type: 0x%x ", dp_type);
-              val_print(ACS_PRINT_ERR, "\n       RP and EP does not share same ECAM region", 0);
+          status = func_ecam_is_rp_ecam(bdf);
+          if (status) {
+              val_print(ACS_PRINT_ERR, "  dp_type: 0x%x ", dp_type);
+
+              if (status == PCIE_RP_NOT_FOUND)
+                  val_print(ACS_PRINT_ERR, "  No RP found to the EP", 0);
+              else
+                  val_print(ACS_PRINT_ERR, "  RP and EP does not share same ECAM region", 0);
+
               fail_cnt++;
           }
       }
