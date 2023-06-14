@@ -75,7 +75,9 @@ val_gic_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       }
 
       status |= os_g005_entry(num_pe);
-      status |= os_g006_entry(num_pe);
+      if (!g_el1physkip)
+          status |= os_g006_entry(num_pe);
+
       status |= os_g007_entry(num_pe);
   }
 

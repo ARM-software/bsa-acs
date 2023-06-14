@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2019, 2021-2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2019, 2021-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -346,19 +346,21 @@ os_u001_entry(uint32_t num_pe)
 
   num_pe = 1;  //This Timer test is run on single processor
 
-    /* EL1 PHY */
-  status_test = val_initialize_test(TEST_NUM1, TEST_DESC1, num_pe);
-  if (status_test != ACS_STATUS_SKIP)
-      val_run_test_payload(TEST_NUM1, num_pe, payload1, 0);
-  status |= val_check_for_error(TEST_NUM1, num_pe, TEST_RULE1);
-  val_report_status(0, BSA_ACS_END(TEST_NUM1), NULL);
+  if (!g_el1physkip) {
+      /* EL1 PHY */
+      status_test = val_initialize_test(TEST_NUM1, TEST_DESC1, num_pe);
+      if (status_test != ACS_STATUS_SKIP)
+          val_run_test_payload(TEST_NUM1, num_pe, payload1, 0);
+      status |= val_check_for_error(TEST_NUM1, num_pe, TEST_RULE1);
+      val_report_status(0, BSA_ACS_END(TEST_NUM1), NULL);
 
-  /* EL1 VIR */
-  status_test = val_initialize_test(TEST_NUM2, TEST_DESC2, num_pe);
-  if (status_test != ACS_STATUS_SKIP)
-      val_run_test_payload(TEST_NUM2, num_pe, payload2, 0);
-  status |= val_check_for_error(TEST_NUM2, num_pe, TEST_RULE2);
-  val_report_status(0, BSA_ACS_END(TEST_NUM2), NULL);
+      /* EL1 VIR */
+      status_test = val_initialize_test(TEST_NUM2, TEST_DESC2, num_pe);
+      if (status_test != ACS_STATUS_SKIP)
+          val_run_test_payload(TEST_NUM2, num_pe, payload2, 0);
+      status |= val_check_for_error(TEST_NUM2, num_pe, TEST_RULE2);
+      val_report_status(0, BSA_ACS_END(TEST_NUM2), NULL);
+  }
 
   /* EL2 PHY */
   /* Run this test if current exception level is EL2 */

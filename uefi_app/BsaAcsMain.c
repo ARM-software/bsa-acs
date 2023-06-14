@@ -51,6 +51,10 @@ UINT32  *g_execute_tests;
 UINT32  g_num_tests = 0;
 UINT32  *g_execute_modules;
 UINT32  g_num_modules = 0;
+/* VE systems run acs at EL1 and in some systems crash is observed during acess
+   of EL1 phy and virt timer, Below command line option is added only for debug
+   purpose to complete BSA run on these systems */
+UINT32  g_el1physkip = FALSE;
 
 SHELL_FILE_HANDLE g_bsa_log_file_handle;
 SHELL_FILE_HANDLE g_dtb_log_file_handle;
@@ -278,6 +282,7 @@ HelpMsg (
          "-rciep  Enable running pcie tests for RCiEP\n"
          "-iep    Enable running pcie tests for iEP\n"
          "-sbsa   Enable sbsa requirements for bsa binary\n"
+         "-el1physkip Skips EL1 register checks\n"
   );
 }
 
@@ -298,6 +303,7 @@ STATIC CONST SHELL_PARAM_ITEM ParamList[] = {
   {L"-dtb", TypeValue},  // -dtb  # Binary Flag to enable dtb dump
   {L"-sbsa", TypeFlag},  // -sbsa # Enable sbsa requirements for bsa binary\n"
   {L"-mmio", TypeFlag}, // -mmio # Enable pal_mmio prints
+  {L"-el1physkip", TypeFlag}, // -el1physkip # Skips EL1 register checks
   {NULL, TypeMax}
   };
 
@@ -547,6 +553,9 @@ ShellAppMain (
     g_pcie_cache_present = FALSE;
   }
 
+  if (ShellCommandLineGetFlag (ParamPackage, L"-el1physkip")) {
+    g_el1physkip = TRUE;
+  }
   //
   // Initialize global counters
   //
