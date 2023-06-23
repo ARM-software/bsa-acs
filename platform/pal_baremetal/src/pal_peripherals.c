@@ -128,6 +128,14 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
     per_info->width = 1;
     per_info->irq   = platform_uart_cfg.GlobalSystemInterrupt;
     per_info->type  = PERIPHERAL_TYPE_UART;
+    per_info->bdf = 0;
+
+    if(platform_uart_cfg.PciVendorId != 0xFFFF)
+    {
+       DeviceBdf = PCIE_CREATE_BDF(platform_uart_cfg.PciSegment, platform_uart_cfg.PciBusNumber,
+                                         platform_uart_cfg.PciDeviceNumber, platform_uart_cfg.PciFunctionNumber);
+       per_info->bdf = DeviceBdf;
+    }
 
     if (platform_uart_cfg.BaudRate < 8)
         per_info->baud_rate = spcr_baudrate_id[platform_uart_cfg.BaudRate];
