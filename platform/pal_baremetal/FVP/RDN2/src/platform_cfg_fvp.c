@@ -45,6 +45,10 @@ uint32_t  g_num_skip         = sizeof(g_skip_array)/sizeof(g_skip_array[0]);
 uint32_t  g_num_tests        = sizeof(g_test_array)/sizeof(g_test_array[0]);
 uint32_t  g_num_modules      = sizeof(g_module_array)/sizeof(g_module_array[0]);
 
+/* VE systems run acs at EL1 and in some systems crash is observed during acess
+   of EL1 phy and virt timer, Below command line option is added only for debug
+   purpose to complete BSA run on these systems */
+uint32_t  g_el1physkip       = FALSE;
 
 PE_INFO_TABLE platform_pe_cfg = {
 
@@ -790,5 +794,15 @@ EXERCISER_READ_TABLE platform_exerciser_device_hierarchy = {
     .device[3].dev           = PLATFORM_EXERCISER_DEV3_DEV_NUM,
     .device[3].func          = PLATFORM_EXERCISER_DEV3_FUNC_NUM,
     .device[3].seg           = PLATFORM_EXERCISER_DEV3_SEG_NUM,
+
+    .device[4].bus           = PLATFORM_EXERCISER_DEV4_BUS_NUM,
+    .device[4].dev           = PLATFORM_EXERCISER_DEV4_DEV_NUM,
+    .device[4].func          = PLATFORM_EXERCISER_DEV4_FUNC_NUM,
+    .device[4].seg           = PLATFORM_EXERCISER_DEV4_SEG_NUM,
+
+    .device[5].bus           = PLATFORM_EXERCISER_DEV5_BUS_NUM,
+    .device[5].dev           = PLATFORM_EXERCISER_DEV5_DEV_NUM,
+    .device[5].func          = PLATFORM_EXERCISER_DEV5_FUNC_NUM,
+    .device[5].seg           = PLATFORM_EXERCISER_DEV5_SEG_NUM,
 };
 
