@@ -138,7 +138,6 @@
   ../test_pool/exerciser/operating_system/test_os_e015.c
   ../test_pool/exerciser/operating_system/test_os_e016.c
   ../test_pool/exerciser/operating_system/test_os_e017.c
-  ../test_pool/exerciser/operating_system/test_os_e018.c
 
 [Packages]
   StdLib/StdLib.dec

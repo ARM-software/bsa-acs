@@ -140,6 +140,5 @@ uint32_t os_e014_entry(void);
 uint32_t os_e015_entry(void);
 uint32_t os_e016_entry(void);
 uint32_t os_e017_entry(void);
-uint32_t os_e018_entry(void);
 
 #endif

@@ -18,406 +18,184 @@
 #include "val/include/bsa_acs_val.h"
 #include "val/include/val_interface.h"
 
-#include "val/include/bsa_acs_pe.h"
-#include "val/include/bsa_acs_smmu.h"
-#include "val/include/bsa_acs_pgt.h"
-#include "val/include/bsa_acs_iovirt.h"
 #include "val/include/bsa_acs_pcie_enumeration.h"
 #include "val/include/bsa_acs_pcie.h"
+#include "val/include/bsa_acs_pe.h"
+#include "val/include/bsa_acs_smmu.h"
 #include "val/include/bsa_acs_memory.h"
 #include "val/include/bsa_acs_exerciser.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 17)
-#define TEST_DESC  "Generate PASID PCIe transactions      "
-#define TEST_RULE  "PCI_PAS_1, RE_SMU_4"
+#define TEST_DESC  "Check BME functionality of RP         "
+#define TEST_RULE  "IE_REG_3, PCI_IN_05"
 
-#define TEST_DATA_NUM_PAGES  2
-#define TEST_DATA 0xDE
+#define TEST_DATA_NUM_PAGES  1
 
-#define MIN_PASID_BITS 16
-#define MAX_PASID_BITS 20
-#define TEST_PASID1 (0x1ul << (MIN_PASID_BITS - 1)) + (0x1ull << 8)
-#define TEST_PASID2 (0x1ul << (MIN_PASID_BITS - 1)) + (0x2ull << 8)
-
-static
-void
-write_test_data(void *buf, uint32_t size)
-{
-
-  uint32_t index;
-
-  for (index = 0; index < size; index++) {
-    *((char8_t *)buf + index) = TEST_DATA;
-  }
-
-  val_data_cache_ops_by_va((addr_t)buf, CLEAN_AND_INVALIDATE);
-}
-
-static
-void
-clear_dram_buf(void *buf, uint32_t size)
-{
-
-  uint32_t index;
-
-  for (index = 0; index < size; index++) {
-    *((char8_t *)buf + index) = 0;
-  }
-
-  val_data_cache_ops_by_va((addr_t)buf, CLEAN_AND_INVALIDATE);
-}
+static void *branch_to_test;
 
 /*
- * For each exerciser behind an SMMU,
- * Create a mapping of 1 IOVA region to 2 PA regions, via SMMU
- * Each of the 2 mappings is identified by a distinct PASID
- * Confiugure exerciser DMA engine to access IOVA region base.
- * Configure exerciser to execute DMA with TEST_PASID1 in transactions, Accesses must PA region 1.
- * Configure exerciser to execute DMA with TEST_PASID2 in transactions, Accesses must PA region 2.
+ * Execption is not expected in this test scenario.
+ * The handler is present just as a fail-safe mechanism.
  */
-static void
+static
+void
+esr(uint64_t interrupt_type, void *context)
+{
+
+  /* Update the ELR to return to test specified address */
+  val_pe_update_elr(context, (uint64_t)branch_to_test);
+
+  val_print(ACS_PRINT_INFO, "\n       Received exception of type: %d", interrupt_type);
+}
+
+
+
+static
+void
 payload(void)
 {
+
   uint32_t pe_index;
+  uint32_t e_bdf;
+  uint32_t erp_bdf;
   uint32_t instance;
-  uint64_t e_bdf;
-  uint32_t e_valid_cnt;
+  uint64_t bar_base;
+  uint32_t fail_cnt;
+  uint32_t smmu_index;
   uint32_t dma_len;
-  uint32_t smmu_ssid_bits;
-  void *dram_buf_base_virt;
-  void *dram_buf_pasid1_in_virt;
-  void *dram_buf_pasid2_in_virt;
-  void *dram_buf_pasid1_out_virt;
-  void *dram_buf_pasid2_out_virt;
-  uint64_t dram_buf_pasid1_base_phys;
-  uint64_t dram_buf_pasid2_base_phys;
-  uint64_t dram_buf_in_iova = 0;
-  uint64_t dram_buf_out_iova = 0;
-  uint32_t device_id, its_id;
+  uint32_t status;
+  uint32_t reg_value;
+  void *dram_buf_virt;
+  void *dram_buf_phys;
+  void *dram_buf_iova;
   uint32_t page_size = val_memory_page_size();
-  uint32_t test_data_blk_size = page_size * TEST_DATA_NUM_PAGES;
-  memory_region_descriptor_t mem_desc_array[2], *mem_desc;
-  smmu_master_attributes_t master = {0, 0, 0, 0, 0};
-  pgt_descriptor_t pgt_desc;
-  uint64_t ttbr;
-  uint32_t exerciser_ssid_bits, status;
-  uint64_t pgt_base_pasid1 = 0;
-  uint64_t pgt_base_pasid2 = 0;
 
-  /* Initialize DMA master and memory descriptors */
-  val_memory_set(&master, sizeof(master), 0);
-  val_memory_set(mem_desc_array, sizeof(mem_desc_array), 0);
-  mem_desc = &mem_desc_array[0];
-  e_valid_cnt = 0;
-  pe_index = val_pe_get_index_mpid (val_pe_get_mpid());
+  fail_cnt = 0;
+  pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
+  instance = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
 
-  /* Allocate 2 test buffers, one for each pasid */
-  dram_buf_base_virt = val_memory_alloc_pages(TEST_DATA_NUM_PAGES * 2);
-  if (!dram_buf_base_virt) {
-      val_print(ACS_PRINT_ERR, "\n       Cacheable mem alloc failure %x", 02);
+  /* Install sync and async handlers to handle exceptions.*/
+  status = val_pe_install_esr(EXCEPT_AARCH64_SYNCHRONOUS_EXCEPTIONS, esr);
+  status |= val_pe_install_esr(EXCEPT_AARCH64_SERROR, esr);
+  if (status)
+  {
+      val_print(ACS_PRINT_ERR, "\n       Failed in installing the exception handler", 0);
+      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 01));
+      return;
+  }
+
+  branch_to_test = &&exception_return;
+
+  /* Create a buffer of size TEST_DMA_SIZE in DRAM */
+  dram_buf_virt = val_memory_alloc_pages(TEST_DATA_NUM_PAGES);
+
+  if (!dram_buf_virt)
+  {
+      val_print(ACS_PRINT_ERR,
+            "\n       Unable to allocate memory for buffer of %x pages", TEST_DATA_NUM_PAGES);
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
       return;
   }
 
-  /* Setup virtual and physical addresses for test buffers for each pasid */
-  dram_buf_pasid1_in_virt = dram_buf_base_virt;
-  dram_buf_pasid2_in_virt = dram_buf_base_virt + test_data_blk_size;
-  dram_buf_pasid1_out_virt = dram_buf_pasid1_in_virt + test_data_blk_size/2;
-  dram_buf_pasid2_out_virt = dram_buf_pasid2_in_virt + test_data_blk_size/2;
+  dram_buf_phys = val_memory_virt_to_phys(dram_buf_virt);
+  dma_len = page_size * TEST_DATA_NUM_PAGES;;
 
-  dram_buf_pasid1_base_phys = (uint64_t)val_memory_virt_to_phys(dram_buf_pasid1_in_virt);
-  dram_buf_pasid2_base_phys = (uint64_t)val_memory_virt_to_phys(dram_buf_pasid2_in_virt);
-
-  dma_len = test_data_blk_size/2;
-
-  /* Get translation attributes via TCR and translation table base via TTBR */
-  if (val_pe_reg_read_tcr(0 /*for TTBR0*/, &pgt_desc.tcr))
-  {
-    val_print(ACS_PRINT_ERR, "\n       TCR read failure %x", 03);
-    val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 03));
-    return;
-  }
-
-  if (val_pe_reg_read_ttbr(0 /*TTBR0*/, &ttbr))
-  {
-    val_print(ACS_PRINT_ERR, "\n       TTBR0 read failure %x", 04);
-    val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 04));
-    return;
-  }
-
-  pgt_desc.pgt_base = (ttbr & AARCH64_TTBR_ADDR_MASK);
-  pgt_desc.mair = val_pe_reg_read(MAIR_ELx);
-  pgt_desc.stage = PGT_STAGE1;
-
-  /* Get memory attributes of the test buffer, we'll use the same attibutes to create
-   * our own page table later.
-   */
-  if (val_pgt_get_attributes(pgt_desc, (uint64_t)dram_buf_base_virt, &mem_desc->attributes)) {
-    val_print(ACS_PRINT_ERR, "\n       Unable to get memory attributes of the test buffer", 0);
-    goto test_fail;
-  }
-
-  instance = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
   while (instance-- != 0) {
-    clear_dram_buf(dram_buf_base_virt, test_data_blk_size * 2);
 
-    /* if init fail moves to next exerciser */
-    if (val_exerciser_init(instance))
+      /* if init fail moves to next exerciser */
+      if (val_exerciser_init(instance))
+          continue;
+
+     e_bdf = val_exerciser_get_bdf(instance);
+     val_print(ACS_PRINT_DEBUG, "\n       Exerciser BDF - 0x%x", e_bdf);
+
+      /* Skip this exerciser if it doesn't have mmio BAR */
+      val_pcie_get_mmio_bar(e_bdf, &bar_base);
+      if (!bar_base) {
+        val_print(ACS_PRINT_DEBUG,
+                 "\n       Exerciser 0x%x does not have MMIO BAR. Skipping exerciser.", e_bdf);
         continue;
+      }
 
-    /* Get exerciser bdf */
-    e_bdf = val_exerciser_get_bdf(instance);
-    val_print(ACS_PRINT_DEBUG, "\n       Exerciser BDF - 0x%x", e_bdf);
+      /*
+       * Disable Bus Master Enable bit in Exierciser upstream Root
+       * Port Command Register. This bit controls forwarding of
+       * Memory Requests by a Root Port in the Upstream direction.
+       * When this bit is 0b, Memory Requests received at a Root Port
+       * must be handled as Unsupported Requests (UR).
+       */
+      if (!val_pcie_get_rootport(e_bdf, &erp_bdf))
+          val_pcie_disable_bme(erp_bdf);
+      else
+          continue;
 
-    /* Find SMMU node index for this pcie endpoint */
-    master.smmu_index = val_iovirt_get_rc_smmu_index(PCIE_EXTRACT_BDF_SEG(e_bdf),
-                                                     PCIE_CREATE_BDF_PACKED(e_bdf));
-    if (master.smmu_index == ACS_INVALID_INDEX) {
-        continue;
-    }
+      /* Disable error reporting of Exerciser upstream Root Port */
+      val_pcie_disable_eru(erp_bdf);
 
-    /* Check if SMMU supports substreamid (ssid), and number of ssid bits supported*/
-    smmu_ssid_bits = val_smmu_get_info(SMMU_SSID_BITS, master.smmu_index);
+      /*
+       * Clear unsupported request detected bit in Exerciser upstream
+       * Rootport's Device Status Register to clear any pending urd status.
+       */
+      val_pcie_clear_urd(erp_bdf);
 
-    if (smmu_ssid_bits < MIN_PASID_BITS || smmu_ssid_bits > MAX_PASID_BITS)
-    {
-        val_print(ACS_PRINT_ERR, "\n       SMMU substreamid support error %d", smmu_ssid_bits);
-        goto test_fail;
-    }
+      /*
+       * Get SMMU node index for this exerciser instance to convert
+       * the dram physical addresses to IOVA addresses for DMA purposes.
+       */
+      smmu_index = val_iovirt_get_rc_smmu_index(PCIE_EXTRACT_BDF_SEG(e_bdf),
+                                                PCIE_CREATE_BDF_PACKED(e_bdf));
+      if (smmu_index == ACS_INVALID_INDEX)
+          dram_buf_iova = dram_buf_phys;
+      else
+          dram_buf_iova = (void *) val_smmu_pa2iova(smmu_index, (uint64_t)dram_buf_phys);
 
-    /* We just want to test minimum pasid size (16-bits) functionality.
-     * Make sure exerciser supports at least that
-     */
-    status = val_pcie_get_max_pasid_width(e_bdf, &exerciser_ssid_bits);
-    if (status == PCIE_CAP_NOT_FOUND)
-    {
-        val_print(ACS_PRINT_ERR,
-                 "\n       PASID extended capability not found for BDF: %x", e_bdf);
-        goto test_fail;
-    }
+      /*
+       * Issue a Memory Read request from exerciser to cause unsupported
+       * request detected bit set in exercise's Device Status Register.
+       * Based on platform configuration, this may even cause a
+       * sync/async exception.
+       */
+      val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf_iova, dma_len, instance);
+      val_exerciser_ops(START_DMA, EDMA_TO_DEVICE, instance);
 
-    else if (status)
-    {
-        val_print(ACS_PRINT_ERR,
-                 "\n       Error in obtaining the PASID max width for BDF: %x", e_bdf);
-        goto test_fail;
-    }
+exception_return:
+      /* Check if UR detected bit isn't set in the Root Port */
+      if (val_pcie_is_urd(erp_bdf))
+      {
+          /* Clear urd bit in Device Status Register */
+          val_pcie_clear_urd(erp_bdf);
+      } else
+      {
+          val_print(ACS_PRINT_ERR,
+                   "\n       Root Port BDF 0x%x BME functionality failure", erp_bdf);
+          fail_cnt++;
+      }
 
-    if (exerciser_ssid_bits < MIN_PASID_BITS)
-    {
-        val_print(ACS_PRINT_ERR,
-                 "\n       exerciser substreamid support error %d", exerciser_ssid_bits);
-        goto test_fail;
-    }
+      /* Restore Rootport Bus Master Enable */
+      val_pcie_enable_bme(erp_bdf);
 
-    master.ssid_bits = MIN_PASID_BITS;
 
-    val_smmu_enable(master.smmu_index);
+      /* Check if Received Master Abort bit is set in the Exerciser */
+      val_pcie_read_cfg(e_bdf, COMMAND_REG_OFFSET, &reg_value);
+      if (!((reg_value & MASTER_ABORT_MASK) >> MASTER_ABORT_SHIFT))
+      {
+          val_print(ACS_PRINT_ERR, "\n       Exerciser BDF 0x%x BME functionality failure", e_bdf);
+          fail_cnt++;
+      }
 
-    /* Increment the exerciser count with pasid support */
-    e_valid_cnt++;
 
-    if (master.smmu_index != ACS_INVALID_INDEX &&
-        val_iovirt_get_smmu_info(SMMU_CTRL_ARCH_MAJOR_REV, master.smmu_index) == 3) {
-
-        if (val_iovirt_get_device_info(PCIE_CREATE_BDF_PACKED(e_bdf),
-                                       PCIE_EXTRACT_BDF_SEG(e_bdf),
-                                       &device_id, &master.streamid,
-                                       &its_id))
-            continue;
-
-        /* Intent is to do DMA with PASID1 and PASID2 sequentially, with same IOVA.
-         * SMMU does virtual to physical address translation using
-         * tables configured for each pasid.
-         * Here we setup memory descriptor for creating page tables for pasid1.
-         */
-        mem_desc->virtual_address = (uint64_t)dram_buf_base_virt;
-        mem_desc->physical_address = dram_buf_pasid1_base_phys;
-        mem_desc->length = test_data_blk_size;
-        mem_desc->attributes |= PGT_STAGE1_AP_RW;
-
-        /* Need to know input and output address sizes before creating page table */
-        pgt_desc.ias = val_smmu_get_info(SMMU_IN_ADDR_SIZE, master.smmu_index);
-        if ((pgt_desc.ias) == 0) {
-            val_print(ACS_PRINT_ERR,
-                      "\n       Input address size of SMMU %d is 0", master.smmu_index);
-            goto test_fail;
-        }
-
-        pgt_desc.oas = val_smmu_get_info(SMMU_OUT_ADDR_SIZE, master.smmu_index);
-        if ((pgt_desc.oas) == 0) {
-            val_print(ACS_PRINT_ERR,
-                       "\n       Output address size of SMMU %d is 0", master.smmu_index);
-            goto test_fail;
-        }
-
-        /* set pgt_desc.pgt_base to NULL to create new translation table, val_pgt_create
-           will update pgt_desc.pgt_base to point to created translation table */
-        pgt_desc.pgt_base = (uint64_t) NULL;
-        if (val_pgt_create(mem_desc, &pgt_desc)) {
-            val_print(ACS_PRINT_ERR,
-                     "\n       Unable to create page table with given attributes", 0);
-            goto test_fail;
-        }
-
-        pgt_base_pasid1 = pgt_desc.pgt_base;
-
-        master.substreamid = TEST_PASID1;
-        if (val_smmu_map(master, pgt_desc))
-        {
-            val_print(ACS_PRINT_ERR, "\n       SMMU mapping failed (%d)     ", master.substreamid);
-            goto test_fail;
-        }
-
-        dram_buf_in_iova = mem_desc->virtual_address;
-        dram_buf_out_iova = dram_buf_in_iova + (test_data_blk_size / 2);
-    }
-
-    write_test_data(dram_buf_pasid1_in_virt, dma_len);
-
-    /* Program exerciser to start sending TLPs
-     * with PASID TLP Prefixes. This includes setting PASID Enable bit
-     * in exerciser PASID Control register and the implementation specific
-     * PASID Enable bit of the Root Port.
-     */
-    if (val_exerciser_ops(PASID_TLP_START, (uint64_t)master.substreamid, instance)) {
-        val_print(ACS_PRINT_ERR, "\n       Exerciser %x PASID TLP Prefix enable error", instance);
-        goto test_fail;
-    }
-
-    if (val_exerciser_set_param(DMA_ATTRIBUTES, dram_buf_in_iova, dma_len, instance)) {
-        val_print(ACS_PRINT_ERR, "\n       DMA attributes setting failure %4x", instance);
-        goto test_fail;
-    }
-
-    /* Trigger DMA from input buffer to exerciser memory */
-    if (val_exerciser_ops(START_DMA, EDMA_TO_DEVICE, instance)) {
-        val_print(ACS_PRINT_ERR, "\n       DMA write failure to exerciser %4x", instance);
-        goto test_fail;
-    }
-
-    if (val_exerciser_set_param(DMA_ATTRIBUTES, dram_buf_out_iova, dma_len, instance)) {
-        val_print(ACS_PRINT_ERR, "\n       DMA attributes setting failure %4x", instance);
-        goto test_fail;
-    }
-
-    /* Trigger DMA from exerciser memory to output buffer*/
-    if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, instance)) {
-        val_print(ACS_PRINT_ERR, "\n       DMA read failure from exerciser %4x", instance);
-        goto test_fail;
-    }
-
-    if (val_memory_compare(dram_buf_pasid1_in_virt, dram_buf_pasid1_out_virt, dma_len)) {
-        val_print(ACS_PRINT_ERR, "\n       Data Comparision failure for Exerciser %4x", instance);
-        goto test_fail;
-    }
-
-    if (val_exerciser_set_param(DMA_ATTRIBUTES, dram_buf_in_iova, dma_len, instance)) {
-        val_print(ACS_PRINT_ERR, "\n       DMA attributes setting failure %4x", instance);
-        goto test_fail;
-    }
-
-    /*
-     * Disable exerciser to stop sending TLPs
-     * with PASID TLP Prefixes. This includes re-setting PASID Enable bit
-     * in exerciser PASID Control register.
-     */
-    if (val_exerciser_ops(PASID_TLP_STOP, (uint64_t)master.substreamid, instance)) {
-        val_print(ACS_PRINT_ERR, "\n       Exerciser %x PASID TLP Prefix disable error", instance);
-        goto test_fail;
-    }
-
-    /* Now setup memory descriptor for creating page tables for pasid2. */
-    mem_desc->virtual_address = (uint64_t)dram_buf_base_virt;
-    mem_desc->physical_address = dram_buf_pasid2_base_phys;
-    mem_desc->length = test_data_blk_size;
-    mem_desc->attributes |= PGT_STAGE1_AP_RW;
-
-    /* set pgt_desc.pgt_base to NULL to create new translation table, val_pgt_create
-       will update pgt_desc.pgt_base to point to created translation table */
-    pgt_desc.pgt_base = (uint64_t) NULL;
-    if (val_pgt_create(mem_desc, &pgt_desc)) {
-        val_print(ACS_PRINT_ERR, "\n       Unable to create page table with given attributes", 0);
-        goto test_fail;
-    }
-
-    pgt_base_pasid2 = pgt_desc.pgt_base;
-
-    master.substreamid = TEST_PASID2;
-    if (val_smmu_map(master, pgt_desc))
-    {
-        val_print(ACS_PRINT_ERR, "\n       SMMU mapping failed (%d)     ", master.substreamid);
-        goto test_fail;
-    }
-
-    dram_buf_in_iova = mem_desc->virtual_address;
-    dram_buf_out_iova = dram_buf_in_iova + (test_data_blk_size / 2);
-
-    write_test_data(dram_buf_pasid2_in_virt, dma_len);
-
-    /* Program exerciser and it's root port to start sending TLPs
-     * with PASID TLP Prefixes. This includes setting PASID Enable bit
-     * in exerciser PASID Control register and the implementation specific
-     * PASID Enable bit of the Root Port.
-     */
-    if (val_exerciser_ops(PASID_TLP_START, (uint64_t)master.substreamid, instance)) {
-        val_print(ACS_PRINT_ERR, "\n       Exerciser %x PASID TLP Prefix enable error", instance);
-        goto test_fail;
-    }
-
-    if (val_exerciser_set_param(DMA_ATTRIBUTES, dram_buf_in_iova, dma_len, instance)) {
-        val_print(ACS_PRINT_ERR, "\n       DMA attributes setting failure %4x", instance);
-        goto test_fail;
-    }
-
-    /* Trigger DMA from input buffer to exerciser memory */
-    if (val_exerciser_ops(START_DMA, EDMA_TO_DEVICE, instance)) {
-        val_print(ACS_PRINT_ERR, "\n       DMA write failure to exerciser %4x", instance);
-        goto test_fail;
-    }
-
-    if (val_exerciser_set_param(DMA_ATTRIBUTES, dram_buf_out_iova, dma_len, instance)) {
-        val_print(ACS_PRINT_ERR, "\n       DMA attributes setting failure %4x", instance);
-        goto test_fail;
-    }
-
-    /* Trigger DMA from exerciser memory to output buffer */
-    if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, instance)) {
-        val_print(ACS_PRINT_ERR, "\n       DMA read failure from exerciser %4x", instance);
-        goto test_fail;
-    }
-
-    if (val_exerciser_ops(PASID_TLP_STOP, (uint64_t)master.substreamid, instance)) {
-        val_print(ACS_PRINT_ERR, "\n       Exerciser %x PASID TLP Prefix disable error", instance);
-        goto test_fail;
-    }
-
-    if (val_memory_compare(dram_buf_pasid2_in_virt, dram_buf_pasid2_out_virt, dma_len)) {
-        val_print(ACS_PRINT_ERR, "\n       Data Comparasion failure for Exerciser %4x", instance);
-        goto test_fail;
-    }
-
-    val_smmu_unmap(master);
-    val_smmu_disable(master.smmu_index);
   }
 
-  if (e_valid_cnt) {
-    val_set_status (pe_index, RESULT_PASS (TEST_NUM, 01));
-  } else {
-    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 00));
-  }
+  /* Return the buffer to the heap manager */
+  val_memory_free_pages(dram_buf_virt, TEST_DATA_NUM_PAGES);
 
-  goto test_clean;
+  if (fail_cnt)
+      val_set_status(pe_index, RESULT_FAIL(TEST_NUM, fail_cnt));
+  else
+      val_set_status(pe_index, RESULT_PASS(TEST_NUM, 01));
 
-test_fail:
-  val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));;
+  return;
 
-test_clean:
-  val_memory_free_pages(dram_buf_base_virt, TEST_DATA_NUM_PAGES * 2);
-  if ((pgt_base_pasid1 != 0) || (pgt_base_pasid2 != 0))
-  {
-    val_pgt_destroy(pgt_desc);
-  }
 }
 
 uint32_t
