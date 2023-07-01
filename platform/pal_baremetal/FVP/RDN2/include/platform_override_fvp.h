@@ -242,6 +242,8 @@ extern uint32_t g_num_modules;
 // This value is arbitrary and may have to be adjusted
 #define PLATFORM_BM_OVERRIDE_MAX_IRQ_CNT       0xFFFF
 
+#define PLATFORM_OVERRIDE_MAX_SID              20
+
 #define PLATFORM_OVERRIDE_TIMEOUT              0
 /* Define the Timeout values to be used */
 #define PLATFORM_BM_OVERRIDE_TIMEOUT_LARGE         0x10000
