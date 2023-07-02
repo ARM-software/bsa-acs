@@ -34,6 +34,8 @@
 #define PCIE_MAX_FUNC    8
 #define MAX_IRQ_CNT    0xFFFF    // This value is arbitrary and may have to be adjusted
 
+#define MAX_SID        32
+
 #elif TARGET_EMULATION
 #include <stdlib.h>
 #include <stdint.h>
@@ -51,7 +53,7 @@
 #define PCIE_MAX_DEV     PLATFORM_BM_OVERRIDE_PCIE_MAX_DEV
 #define PCIE_MAX_FUNC    PLATFORM_BM_OVERRIDE_PCIE_MAX_FUNC
 
-
+#define MAX_SID          PLATFORM_OVERRIDE_MAX_SID
 #define MAX_IRQ_CNT      PLATFORM_BM_OVERRIDE_MAX_IRQ_CNT
 
 #elif ENABLE_OOB
@@ -76,6 +78,7 @@
 #define PCIE_MAX_FUNC   PLATFORM_BM_OVERRIDE_PCIE_MAX_FUNC
 
 #define MAX_IRQ_CNT     PLATFORM_BM_OVERRIDE_MAX_IRQ_CNT
+#define MAX_SID         PLATFORM_OVERRIDE_MAX_SID
 
 #else
 #include "../platform/include/platform_override.h"
@@ -89,6 +92,9 @@
   typedef UINT64 uint64_t;
   typedef UINT64 addr_t;
   typedef UINT64 dma_addr_t;
+
+/* Max SID Size in SMMU is 32 */
+#define MAX_SID  32
 
 #if PLATFORM_OVERRIDE_TIMEOUT
     #define TIMEOUT_LARGE    PLATFORM_OVERRIDE_TIMEOUT_LARGE
