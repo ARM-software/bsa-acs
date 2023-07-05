@@ -65,7 +65,8 @@ val_memory_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 #ifndef TARGET_LINUX
       status |= os_m002_entry(num_pe);
       status |= os_m003_entry(num_pe);
-#else
+#endif
+#if defined(TARGET_LINUX) || defined(ENABLE_OOB) || defined(TARGET_EMULATION)
       status |= os_m004_entry(num_pe);
 #endif
 

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,6 +47,10 @@ payload (void)
   while (count) {
       count--;
       dev_bdf = (uint32_t)val_peripheral_get_info (ANY_BDF, count);
+
+      if (dev_bdf == 0)
+          continue;
+
       dev_type = val_pcie_get_device_type(dev_bdf);
       // 1: Normal PCIe device, 2: PCIe Host bridge, 3: PCIe bridge device, else: INVALID
 
@@ -66,13 +70,13 @@ payload (void)
       data = val_pcie_is_devicedma_64bit(dev_bdf);
       if (data == 0) {
           if (!val_pcie_is_device_behind_smmu(dev_bdf)) {
-              val_print(ACS_PRINT_ERR, "\n       WARNING:The device with bdf=0x%x", dev_bdf);
-              val_print(ACS_PRINT_ERR, "\n       doesn't support 64 bit addressing and is not", 0);
-              val_print(ACS_PRINT_ERR, "\n       behind smmu. device is of type = %d", dev_type);
+              val_print(ACS_PRINT_ERR, "\n   WARNING:The device with bdf=0x%x", dev_bdf);
+              val_print(ACS_PRINT_ERR, "\n   doesn't support 64 bit addressing and is not", 0);
+              val_print(ACS_PRINT_ERR, "\n   behind smmu. device is of type = %d", dev_type);
               val_set_status(index, RESULT_FAIL (TEST_NUM, 1));
               return;
           }
-      }
+       }
   }
 
   if (test_run)
