@@ -702,7 +702,7 @@ val_pcie_create_device_bdf_table()
                       val_pcie_enable_msa(bdf);
 #endif
 
-		      /* Skip if the device is a PCI legacy device */
+                      /* Skip if the device is a PCI legacy device */
                       p_cap = val_pcie_find_capability(
                         bdf,
                         PCIE_CAP,
