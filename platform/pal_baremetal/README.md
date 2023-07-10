@@ -20,6 +20,8 @@ Reference Makefile is present at [Makefile](../../Makefile). To compile BSA, per
 
 The output library files will be generated at <bsa_path>/build/lib/
 
+For more details on how to port the reference code to a specific platform and for further customisation please refer to the [User Guide](../../docs/Arm_BSA_ACS_Bare-metal_User_Guide.pdf)
+
 -----------------
 
 *Copyright (c) 2023, Arm Limited and Contributors. All rights reserved.*

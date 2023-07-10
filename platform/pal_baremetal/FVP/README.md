@@ -14,8 +14,8 @@ This suite includes a set of examples of the invariant behaviors that are provid
 The tests are executed in a baremetal environment. The initialization of the baremetal environment is specific to the environment and is out of scope of this document.
 
 ## Release details
- - Code Quality: REL v1.0.4
- - The tests are written for version 1.0 of the BSA specification.
+ - Code Quality: REL v1.0.5
+ - The tests are written for version 1.0 (c) of the BSA specification.
  - The compliance suite is not a substitute for design verification.
  - To review the BSA ACS logs, Arm licensees can contact Arm directly through their partner managers.
 
@@ -27,7 +27,7 @@ Contact your EDA vendor and ask if they include these tests as part of their ver
   - To get the latest version of the code with bug fixes and new features, use the main branch.
 
 ## Additional reading
-  - For details on the BSA ACS test execution, see the [Arm BSA ACS User Guide](../docs/Arm_BSA_ACS_Bare-metal_User_Guide.pdf).
+  - For details on the BSA ACS test execution, see the [Arm BSA ACS User Guide](../../../docs/Arm_BSA_ACS_Bare-metal_User_Guide.pdf).
   - For details on the Design of the BSA ACS, see the [Arm BSA Validation Methodology Document](../../../docs/Arm_Base_System_Architecture_Compliance_Validation_Methodology.pdf).
 Note: The Baremetal PCIe enumeration code provided as part of the BSA ACS should be used and should not be replaced. This code is vital in analyzing of the test result.
 
@@ -56,7 +56,7 @@ To start the ACS build, perform the following steps:
 2.  cd edk2
 3.  git clone https://github.com/tianocore/edk2-libc
 4.  git submodule update --init --recursive
-5.  git clone ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bsa ShellPkg/Application/bsa-acs
+5.  git clone https://github.com/ARM-software/bsa-acs.git ShellPkg/Application/bsa-acs
 6.  Add the following to the [LibraryClasses.common] section in ShellPkg/ShellPkg.dsc
    - UefiRuntimeLib|MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
    - BsaValBaremetalLib|ShellPkg/Application/bsa-acs/val/BsaValBaremetalLib.inf
