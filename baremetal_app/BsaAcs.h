@@ -23,7 +23,7 @@
 
   #define BSA_ACS_MAJOR_VER      1
   #define BSA_ACS_MINOR_VER      0
-  #define BSA_ACS_SUBMINOR_VER   4
+  #define BSA_ACS_SUBMINOR_VER   5
 
   #ifdef _AARCH64_BUILD_
   unsigned long __stack_chk_guard = 0xBAAAAAAD;
