@@ -50,3 +50,12 @@ v23.03_1.0.4
 * Better messaging and info details
 * Support to run specific tests and modules
 * Documentation
+
+v23.07_1.0.5
+* Ported some PCIe linux tests to UEFI
+* SMMU test reordering and enhancements
+* Test enhancements and bug fixes
+* Moved few exerciser tests from SBSA to BSA
+* Updated info table sizes
+* Enhancements in -t -m options to not limit tests and modules selected
+* Documentation changes
