@@ -24,7 +24,7 @@
 
 #define TEST_NUM   (ACS_SMMU_TEST_NUM_BASE + 4)
 #define TEST_RULE  "B_SMMU_08"
-#define TEST_DESC  "S-EL2 not implemented & SMMU stage1 support"
+#define TEST_DESC  "Check SMMU S-EL2 & stage1 support     "
 
 static
 void
