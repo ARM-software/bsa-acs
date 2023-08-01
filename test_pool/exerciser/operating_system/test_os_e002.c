@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2020,2021, 2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020,2021,2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -93,15 +93,17 @@ static
 uint32_t
 create_va_pa_mapping (uint64_t txn_va, uint64_t txn_pa,
                       smmu_master_attributes_t *smmu_master,
-                      pgt_descriptor_t *pgt_desc,
-                      uint32_t e_bdf, uint32_t pgt_ap)
+                      pgt_descriptor_t *pgt_desc, uint32_t req_instance,
+                      uint32_t req_rp_bdf, uint32_t pgt_ap)
 {
   smmu_master_attributes_t master;
   memory_region_descriptor_t mem_desc_array[2], *mem_desc;
+  uint32_t e_bdf = val_exerciser_get_bdf(req_instance);
   uint64_t ttbr;
   uint32_t num_smmus;
   uint32_t instance;
   uint32_t device_id, its_id;
+  uint32_t status, dma_status;
 
   master = *smmu_master;
 
@@ -123,7 +125,7 @@ create_va_pa_mapping (uint64_t txn_va, uint64_t txn_pa,
    * our own page table later.
    */
   if (val_pgt_get_attributes(*pgt_desc, (uint64_t)txn_va, &mem_desc->attributes))
-    return ACS_STATUS_FAIL;
+    goto test_fail;
 
   num_smmus = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
 
@@ -141,7 +143,7 @@ create_va_pa_mapping (uint64_t txn_va, uint64_t txn_pa,
                                      PCIE_EXTRACT_BDF_SEG(e_bdf),
                                      &device_id, &master.streamid,
                                      &its_id))
-          return ACS_STATUS_FAIL;
+          goto test_fail;
 
       /* Each exerciser instance accesses a unique IOVA, which, because of SMMU translations,
        * will point to the same physical address. We create the requisite page tables and
@@ -156,28 +158,59 @@ create_va_pa_mapping (uint64_t txn_va, uint64_t txn_pa,
       /* Need to know input and output address sizes before creating page table */
       pgt_desc->ias = val_smmu_get_info(SMMU_IN_ADDR_SIZE, master.smmu_index);
       if (!pgt_desc->ias)
-        return ACS_STATUS_FAIL;
+        goto test_fail;
 
       pgt_desc->oas = val_smmu_get_info(SMMU_OUT_ADDR_SIZE, master.smmu_index);
       if (!pgt_desc->oas)
-        return ACS_STATUS_FAIL;
+        goto test_fail;
 
       /* set pgt_desc.pgt_base to NULL to create new translation table, val_pgt_create
        will update pgt_desc.pgt_base to point to created translation table */
       pgt_desc->pgt_base = (uint64_t) NULL;
       if (val_pgt_create(mem_desc, pgt_desc))
-        return ACS_STATUS_FAIL;
+        goto test_fail;
 
       /* Configure SMMU tables for this exerciser to use this page table for VA to PA translations*/
       if (val_smmu_map(master, *pgt_desc))
       {
           val_print(ACS_PRINT_DEBUG, "\n       SMMU mapping failed (%x)     ", e_bdf);
-          return ACS_STATUS_FAIL;
+          goto test_fail;
       }
-      return ACS_STATUS_PASS;
+
+      /* Trigger DMA from req_e_bdf */
+      val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)txn_va, 1, req_instance);
+
+      /* Clear Error Status Bits */
+      val_pcie_clear_device_status_error(req_rp_bdf);
+      val_pcie_clear_sig_target_abort(req_rp_bdf);
+
+      dma_status = val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance);
+      /* DMA must fail because Write permission not given */
+      if ((pgt_ap == PGT_STAGE1_AP_RO) && (dma_status == 0)) {
+          val_print(ACS_PRINT_DEBUG,
+                    "\n       Seq1:DMA Write must not happen For : %4x", req_instance);
+          goto test_fail;
+      }
+
+      /* DMA must fail not because Write permission given */
+      if ((pgt_ap == PGT_STAGE1_AP_RW) && (dma_status != 0)) {
+          val_print(ACS_PRINT_DEBUG, "\n       Seq2:DMA Write must happen For : %4x", req_instance);
+          goto test_fail;
+      }
+      status = ACS_STATUS_PASS;
+      goto test_clean;
   }
-  return ACS_STATUS_FAIL;
+
+test_fail:
+      status = ACS_STATUS_FAIL;
+
+test_clean:
+      val_pgt_destroy(*pgt_desc);
+      val_smmu_unmap(master);
+
+  return status;
 }
+
 
 static
 uint32_t
@@ -185,7 +218,6 @@ check_redirected_req_validation (uint32_t req_instance, uint32_t req_rp_bdf, uin
 {
   uint64_t txn_va;
   uint32_t instance;
-  uint32_t e_bdf;
   uint32_t num_smmus;
   uint32_t status;
   smmu_master_attributes_t master;
@@ -201,31 +233,14 @@ check_redirected_req_validation (uint32_t req_instance, uint32_t req_rp_bdf, uin
   /* Set the virtual and physical addresses for test buffers */
   txn_va = (uint64_t)val_memory_phys_to_virt(bar_base);
 
-  /* Get exerciser bdf */
-  e_bdf = val_exerciser_get_bdf(req_instance);
-
   num_smmus = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
 
   status = create_va_pa_mapping(txn_va, bar_base, &master,
-                                &pgt_desc, e_bdf,
-                                PGT_STAGE1_AP_RO);
+                                &pgt_desc, req_instance,
+                                req_rp_bdf, PGT_STAGE1_AP_RO);
   if (status) {
       val_print(ACS_PRINT_DEBUG,
                       "\n       Seq1:SMMU Mapping Failed For : %4x", req_instance);
-      goto test_fail;
-  }
-
-  /* Trigger DMA from req_e_bdf */
-  val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)txn_va, 1, req_instance);
-
-  /* Clear Error Status Bits */
-  val_pcie_clear_device_status_error(req_rp_bdf);
-  val_pcie_clear_sig_target_abort(req_rp_bdf);
-
-  /* DMA must fail because Write permission not given */
-  if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance) == 0) {
-      val_print(ACS_PRINT_DEBUG,
-                "\n       Seq1:DMA Write must not happen For : %4x", req_instance);
       goto test_fail;
   }
 
@@ -238,10 +253,6 @@ check_redirected_req_validation (uint32_t req_instance, uint32_t req_rp_bdf, uin
       goto test_fail;
   }
 
-  /* Unmap SMMU & Pgt */
-  val_smmu_unmap(master);
-  val_pgt_destroy(pgt_desc);
-
   /* Disable all SMMUs */
   for (instance = 0; instance < num_smmus; ++instance)
      val_smmu_disable(instance);
@@ -252,23 +263,10 @@ check_redirected_req_validation (uint32_t req_instance, uint32_t req_rp_bdf, uin
 
   /* Create VA-PA Mapping in SMMU with PGT permissions as Read Write */
   status = create_va_pa_mapping(txn_va, bar_base, &master,
-                                &pgt_desc, e_bdf,
-                                PGT_STAGE1_AP_RW);
+                                &pgt_desc, req_instance,
+                                req_rp_bdf, PGT_STAGE1_AP_RW);
   if (status) {
       val_print(ACS_PRINT_DEBUG, "\n       Seq2:SMMU Mapping Failed For : %4x", req_instance);
-      goto test_fail;
-  }
-
-  /* Trigger DMA from req_e_bdf */
-  val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)txn_va, 1, req_instance);
-
-  /* Clear Error Status Bits */
-  val_pcie_clear_device_status_error(req_rp_bdf);
-  val_pcie_clear_sig_target_abort(req_rp_bdf);
-
-  /* DMA must fail not because Write permission given */
-  if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance) != 0) {
-      val_print(ACS_PRINT_DEBUG, "\n       Seq2:DMA Write must happen For : %4x", req_instance);
       goto test_fail;
   }
 
@@ -288,8 +286,6 @@ test_fail:
   status = ACS_STATUS_FAIL;
 
 test_clean:
-  val_smmu_unmap(master);
-  val_pgt_destroy(pgt_desc);
 
   /* Clear Error Status Bits */
   val_pcie_clear_device_status_error(req_rp_bdf);
