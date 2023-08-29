@@ -20,6 +20,8 @@
 #include "include/bsa_acs_common.h"
 #include "sys_arch_src/gic/bsa_exception.h"
 
+uint32_t g_override_skip;
+
 /**
   @brief  This API calls PAL layer to print a formatted string
           to the output console.
@@ -306,22 +308,16 @@ val_initialize_test(uint32_t test_num, char8_t *desc, uint32_t num_pe)
 {
 
   uint32_t i;
-  uint32_t override_skip = 0;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
-  val_print(ACS_PRINT_ERR, "%4d : ", test_num); //Always print this
-  val_print(ACS_PRINT_TEST, desc, 0);
-  val_report_status(0, BSA_ACS_START(test_num), NULL);
-  val_pe_initialize_default_exception_handler(val_pe_default_esr);
-
-  g_bsa_tests_total++;
+  g_override_skip = 0;
 
   for (i = 0; i < num_pe; i++)
       val_set_status(i, RESULT_PENDING(test_num));
 
+  /* Skip the test if it one of the -skip option parameters */
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == test_num) {
-          val_print(ACS_PRINT_TEST, "\n       USER OVERRIDE  - Skip Test        ", 0);
           val_set_status(index, RESULT_SKIP(test_num, 0));
           return ACS_STATUS_SKIP;
       }
@@ -330,7 +326,7 @@ val_initialize_test(uint32_t test_num, char8_t *desc, uint32_t num_pe)
   /* Don't skip if test_num is one of the -t option parameters */
   for (i = 0; i < g_num_tests; i++) {
       if (test_num == g_execute_tests[i]) {
-          override_skip++;
+          g_override_skip++;
       }
   }
 
@@ -339,15 +335,23 @@ val_initialize_test(uint32_t test_num, char8_t *desc, uint32_t num_pe)
       if ((test_num - g_execute_modules[i]) > 0 &&
           (test_num - g_execute_modules[i]) < 100)
       {
-          override_skip++;
+          g_override_skip++;
       }
   }
 
-  if ((!override_skip) && (g_num_tests || g_num_modules)) {
-      val_print(ACS_PRINT_TEST, "\n       USER OVERRIDE VIA SPECIFIC TESTS - Skip Test      ", 0);
+  if ((!g_override_skip) && (g_num_tests || g_num_modules)) {
       val_set_status(index, RESULT_SKIP(test_num, 0));
       return ACS_STATUS_SKIP;
   }
+
+  g_override_skip = 1;
+
+  val_print(ACS_PRINT_ERR, "%4d : ", test_num); //Always print this
+  val_print(ACS_PRINT_TEST, desc, 0);
+  val_report_status(0, BSA_ACS_START(test_num), NULL);
+  val_pe_initialize_default_exception_handler(val_pe_default_esr);
+
+  g_bsa_tests_total++;
 
   return ACS_STATUS_PASS;
 }
