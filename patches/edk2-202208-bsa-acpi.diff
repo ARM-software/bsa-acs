@@ -1,0 +1,21 @@
+diff --git a/ShellPkg/ShellPkg.dsc b/ShellPkg/ShellPkg.dsc
+index 38fde3dc71..c329cb0030 100644
+--- a/ShellPkg/ShellPkg.dsc
++++ b/ShellPkg/ShellPkg.dsc
+@@ -22,6 +22,8 @@
+ !include MdePkg/MdeLibs.dsc.inc
+ 
+ [LibraryClasses.common]
++  BsaValLib|ShellPkg/Application/bsa-acs/val/BsaValLib.inf
++  BsaPalLib|ShellPkg/Application/bsa-acs/platform/pal_uefi_acpi/BsaPalLib.inf
+   UefiApplicationEntryPoint|MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
+   UefiDriverEntryPoint|MdePkg/Library/UefiDriverEntryPoint/UefiDriverEntryPoint.inf
+   UefiBootServicesTableLib|MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
+@@ -87,6 +89,7 @@
+   # Build all the libraries when building this package.
+   # This helps developers test changes and how they affect the package.
+   #
++  ShellPkg/Application/bsa-acs/uefi_app/BsaAcs.inf
+   ShellPkg/Library/UefiShellLib/UefiShellLib.inf
+   ShellPkg/Library/UefiShellAcpiViewCommandLib/UefiShellAcpiViewCommandLib.inf
+   ShellPkg/Library/UefiShellCommandLib/UefiShellCommandLib.inf
