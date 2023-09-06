@@ -1,0 +1,37 @@
+diff --git a/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c b/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
+index f0a8b9fe62..e41e0de3e0 100644
+--- a/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
++++ b/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
+@@ -90,8 +90,8 @@ UefiHiiServicesLibConstructor (
+   //
+   // Retrieve the pointer to the UEFI HII Config Routing Protocol
+   //
+-  Status = gBS->LocateProtocol (&gEfiHiiConfigRoutingProtocolGuid, NULL, (VOID **)&gHiiConfigRouting);
+-  ASSERT_EFI_ERROR (Status);
++  //Status = gBS->LocateProtocol (&gEfiHiiConfigRoutingProtocolGuid, NULL, (VOID **)&gHiiConfigRouting);
++  //ASSERT_EFI_ERROR (Status);
+ 
+   //
+   // Retrieve the pointer to the optional UEFI HII Font Protocol
+diff --git a/ShellPkg/ShellPkg.dsc b/ShellPkg/ShellPkg.dsc
+index 38fde3dc71..559c2217d3 100644
+--- a/ShellPkg/ShellPkg.dsc
++++ b/ShellPkg/ShellPkg.dsc
+@@ -22,6 +22,9 @@
+ !include MdePkg/MdeLibs.dsc.inc
+ 
+ [LibraryClasses.common]
++  FdtLib|EmbeddedPkg/Library/FdtLib/FdtLib.inf
++  BsaValLib|ShellPkg/Application/bsa-acs/val/BsaValLib.inf
++  BsaPalLib|ShellPkg/Application/bsa-acs/platform/pal_uefi_dt/BsaPalLib.inf
+   UefiApplicationEntryPoint|MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
+   UefiDriverEntryPoint|MdePkg/Library/UefiDriverEntryPoint/UefiDriverEntryPoint.inf
+   UefiBootServicesTableLib|MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
+@@ -87,6 +90,7 @@
+   # Build all the libraries when building this package.
+   # This helps developers test changes and how they affect the package.
+   #
++  ShellPkg/Application/bsa-acs/uefi_app/BsaAcs.inf
+   ShellPkg/Library/UefiShellLib/UefiShellLib.inf
+   ShellPkg/Library/UefiShellAcpiViewCommandLib/UefiShellAcpiViewCommandLib.inf
+   ShellPkg/Library/UefiShellCommandLib/UefiShellCommandLib.inf

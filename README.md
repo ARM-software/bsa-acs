@@ -1,5 +1,6 @@
 # Base System Architecture - Architecture Compliance Suite
 
+[![BSA-ACS UEFI Build](https://github.com/ARM-software/bsa-acs/actions/workflows/build-bsa-uefi.yml/badge.svg?event=schedule)](https://github.com/ARM-software/bsa-acs/actions/workflows/build-bsa-uefi.yml)
 
 ## Base System Architecture
 **Base System Architecture** (BSA) specification describes a hardware system architecture based on the Arm 64-bit architecture. System software such as operating systems, hypervisors, and firmware rely on this. It addresses PE features and key aspects of system architecture.
