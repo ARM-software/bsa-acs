@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2022, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@
 #include "include/bsa_acs_val.h"
 #include "include/bsa_acs_common.h"
 
+extern uint32_t g_override_skip;
 
 /**
   @brief  Parse the input status and print the appropriate information to console
@@ -32,6 +33,10 @@
 void
 val_report_status(uint32_t index, uint32_t status, char8_t *ruleid)
 {
+
+  /* Test stays quiet if it is overridden by any of the user options */
+  if (!g_override_skip)
+    return;
 
   if (IS_TEST_FAIL(status)) {
       val_print(ACS_PRINT_ERR, "\n       Failed on PE - %4d", index);

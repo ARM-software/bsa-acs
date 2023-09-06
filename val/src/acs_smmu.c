@@ -61,7 +61,7 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_SMMU_TEST_NUM_BASE) {
-          val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all SMMU tests \n", 0);
+          val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all SMMU tests \n", 0);
           return ACS_STATUS_SKIP;
       }
   }
@@ -69,7 +69,7 @@ val_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   /* Check if there are any tests to be executed in current module with user override options*/
   status = val_check_skip_module(ACS_SMMU_TEST_NUM_BASE);
   if (status) {
-      val_print(ACS_PRINT_TEST, "\n       USER Override - Skipping all SMMU tests \n", 0);
+      val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all SMMU tests \n", 0);
       return ACS_STATUS_SKIP;
   }
 
