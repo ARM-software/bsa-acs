@@ -3,10 +3,10 @@ name: BSA-ACS UEFI application build
 on:
   push:
     branches:                # trigger on push to master
-      - master
+      - main
   pull_request:              # trigger on pull requests to master
     branches:
-      - master
+      - main
   schedule:
       - cron: '0 4 * * *'    # runs at 10 AM IST (4 AM UTC) every day
   workflow_dispatch:         # to dispatch from Github Actions
