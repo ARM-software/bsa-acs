@@ -20,8 +20,8 @@ jobs:
     steps:
       - name: Install dependencies
         run: 
-          /usr/bin/git config --global --add safe.directory /home/runner/workspace
-          sudo apt-get update && sudo apt-get install -y git build-essential nasm
+          /usr/bin/git config --global --add safe.directory /home/runner/workspace;
+          sudo apt-get update && sudo apt-get install -y git build-essential nasm;
 
       - name: Download edk2 and its submodules
         run: |
