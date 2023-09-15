@@ -74,7 +74,7 @@ payload()
   uint32_t ier_scratch3;
   uint32_t mcr_reg;
   uint32_t msr_status;
-  uint32_t uart_base;
+  uint64_t uart_base;
   uint32_t lcr_reg;
   uint32_t lcr_scratch2;
   uint32_t lcr_scratch3;
@@ -143,7 +143,7 @@ payload()
               }
           }
 
-          val_print(ACS_PRINT_ERR, "\nDEBUG: uart_base %X", uart_base);
+          val_print(ACS_PRINT_ERR, "\nDEBUG: uart_base %llx", uart_base);
           val_print(ACS_PRINT_ERR, "\nDEBUG: access_width %d", access_width);
 
 
