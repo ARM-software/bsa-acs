@@ -32,6 +32,8 @@ PE_INFO_TABLE *g_pe_info_table;
 **/
 ARM_SMC_ARGS g_smc_args;
 
+/* global variable to store primary PE index */
+uint32_t g_primary_pe_index = 0;
 
 /**
   @brief   This API will call PAL layer to fill in the PE information
@@ -76,6 +78,13 @@ val_pe_create_info_table(uint64_t *pe_info_table)
       val_print(ACS_PRINT_ERR, "\n *** CRITICAL ERROR: Num PE is 0x0 ***\n", 0);
       return ACS_STATUS_ERR;
   }
+
+  /* store primary PE index for debug message printing purposes on
+     multi PE tests */
+  g_primary_pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
+  val_print(ACS_PRINT_DEBUG, " PE_INFO: Primary PE index       : %4d \n",
+            g_primary_pe_index);
+
   return ACS_STATUS_PASS;
 }
 
@@ -382,4 +391,18 @@ val_pe_cache_clean_range(uint64_t start_addr, uint64_t length)
       aligned_addr += line_length;
   }
 #endif
+}
+
+
+/**
+  @brief   This API returns the index of primary PE on which system is booted.
+           1. Caller       -  Test Suite, VAL
+           2. Prerequisite -  val_create_peinfo_table
+  @param   None
+  @return  Primary PE index.
+**/
+uint32_t
+val_pe_get_primary_index(void)
+{
+  return g_primary_pe_index;
 }

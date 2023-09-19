@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018,2021,2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,14 +28,21 @@ payload()
 {
   uint64_t data = 0;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
+  uint32_t primary_pe_idx = val_pe_get_primary_index();
 
-  data = val_pe_reg_read(ID_AA64DFR0_EL1);
+  data = val_pe_reg_read(ID_AA64DFR0_EL1);  /* bits 23:20 for number of synchronous
+                                               watchpoints - 1 */
+  data = (((data >> 20) & 0xF) > 2) + 1;    /* number of synchronous watchpoints */
 
-  if (((data >> 20) & 0xF) > 2) //bits 23:20 for Number of watchpoints - 1
-        val_set_status(index, RESULT_PASS(TEST_NUM, 1));
-  else
-        val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
-
+  if (data > 3)
+      val_set_status(index, RESULT_PASS(TEST_NUM, 1));
+  else {
+      if (index == primary_pe_idx) {
+          val_print(ACS_PRINT_ERR,
+          "\n       Number of synchronous watchpoints reported: %d, expected > 3", data);
+      }
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+  }
   return;
 
 }

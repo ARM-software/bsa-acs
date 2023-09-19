@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021,2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,13 +28,20 @@ payload()
 {
   uint64_t data = 0;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
+  uint32_t primary_pe_idx = val_pe_get_primary_index();
 
   data = val_pe_reg_read(PMCR_EL0);
-  if (((data & 0x0F800) >> 11) > 1) //bits 15:11 for Number of counters.
-      val_set_status(index, RESULT_PASS(TEST_NUM, 1));
-  else
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+  data = (data & 0x0F800) >> 11; /* bits 15:11 for number of PMU counters */
 
+  if (data > 1)
+      val_set_status(index, RESULT_PASS(TEST_NUM, 1));
+  else {
+      if (index == primary_pe_idx) {
+          val_print(ACS_PRINT_ERR,
+          "\n       Number of PMU counters reported: %d, expected > 1", data);
+      }
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+  }
   return;
 }
 

@@ -76,6 +76,7 @@ uint32_t val_pe_get_gmain_gsiv(uint32_t index);
 uint64_t val_pe_get_mpid(void);
 uint32_t val_pe_get_index_mpid(uint64_t mpid);
 uint32_t val_pe_install_esr(uint32_t exception_type, void (*esr)(uint64_t, void *));
+uint32_t val_pe_get_primary_index(void);
 
 void     val_execute_on_pe(uint32_t index, void (*payload)(void), uint64_t args);
 int      val_suspend_pe(uint64_t entry, uint32_t context_id);
