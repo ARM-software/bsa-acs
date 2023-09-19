@@ -21,7 +21,7 @@
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 9)
 #define TEST_RULE  "PCI_IN_20"
-#define TEST_DESC  "Vendor specfic data are PCIe compliant"
+#define TEST_DESC  "Vendor specific data is PCIe compliant"
 
 // Valid PCIe CapID ranges (PCIe 6.0 - v1.0)
 #define PCIE_CAP_ID_END     0x15
