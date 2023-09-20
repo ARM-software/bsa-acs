@@ -279,8 +279,6 @@ HelpMsg (
          "-hyp    Enable the execution of hypervisor tests\n"
          "-ps     Enable the execution of platform security tests\n"
          "-dtb    Enable the execution of dtb dump\n"
-         "-rciep  Enable running pcie tests for RCiEP\n"
-         "-iep    Enable running pcie tests for iEP\n"
          "-sbsa   Enable sbsa requirements for bsa binary\n"
          "-el1physkip Skips EL1 register checks\n"
   );
