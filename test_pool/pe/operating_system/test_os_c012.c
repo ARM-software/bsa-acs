@@ -32,7 +32,7 @@ payload()
 
   data = val_pe_reg_read(ID_AA64DFR0_EL1);  /* bits 23:20 for number of synchronous
                                                watchpoints - 1 */
-  data = (((data >> 20) & 0xF) > 2) + 1;    /* number of synchronous watchpoints */
+  data = ((data >> 20) & 0xF) + 1;          /* number of synchronous watchpoints */
 
   if (data > 3)
       val_set_status(index, RESULT_PASS(TEST_NUM, 1));
