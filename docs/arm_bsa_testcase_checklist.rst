@@ -249,4 +249,4 @@ The below table provides the following details
 |917    |Check BME functionality of RP               |IE_REG_3, PCI_IN_05                                         |No   |No   |No   |Yes  |Yes       |No   |Yes                |
 +-------+--------------------------------------------+------------------------------------------------------------+-----+-----+-----+-----+----------+-----+-------------------+
 
-*For running tests on a bare-metal environment, integration of ACS with platform boot code is required. See `Bare-metal User Guide <Arm_BSA_ACS_Bare-metal_User_Guide.pdf>`_
+*For running tests on a bare-metal environment, integration of ACS with platform boot code is required. See ` arm BSA Bare-metal User Guide <docs/arm_bsa_architecture_compliance_bare-metal_user_guide.pdf>`_

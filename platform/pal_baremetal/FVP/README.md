@@ -14,7 +14,7 @@ This suite includes a set of examples of the invariant behaviors that are provid
 The tests are executed in a baremetal environment. The initialization of the baremetal environment is specific to the environment and is out of scope of this document.
 
 ## Release details
- - Code Quality: REL v1.0.5
+ - Code Quality: REL v1.0.6
  - The tests are written for version 1.0 (c) of the BSA specification.
  - The compliance suite is not a substitute for design verification.
  - To review the BSA ACS logs, Arm licensees can contact Arm directly through their partner managers.
@@ -27,8 +27,8 @@ Contact your EDA vendor and ask if they include these tests as part of their ver
   - To get the latest version of the code with bug fixes and new features, use the main branch.
 
 ## Additional reading
-  - For details on the BSA ACS test execution, see the [Arm BSA ACS User Guide](../../../docs/Arm_BSA_ACS_Bare-metal_User_Guide.pdf).
-  - For details on the Design of the BSA ACS, see the [Arm BSA Validation Methodology Document](../../../docs/Arm_Base_System_Architecture_Compliance_Validation_Methodology.pdf).
+  - For details on the BSA ACS test execution, see the [Arm BSA ACS User Guide](../../../docs/arm_bsa_architecture_compliance_bare-metal_user_guide.pdf).
+  - For details on the Design of the BSA ACS, see the [Arm BSA Validation Methodology Document](../../../docs/arm_bsa_architecture_compliance_validation_methodology.pdf).
 Note: The Baremetal PCIe enumeration code provided as part of the BSA ACS should be used and should not be replaced. This code is vital in analyzing of the test result.
 
 ## Target platforms
@@ -111,7 +111,7 @@ The EFI executable file is generated at <edk2_path>/Build/Shell/DEBUG_GCC49/AARC
 
 The execution of the compliance suite varies depending on the test environment. These steps assume that the test suite is invoked through the ACS UEFI shell application.
 
-For details about the BSA ACS UEFI Shell application, see the [BSA ACS USER Guide](../../../docs/Arm_Base_System_Architecture_Compliance_User_Guide.pdf)
+For details about the BSA ACS UEFI Shell application, see the [BSA ACS USER Guide](../../../docs/arm_bsa_architecture_compliance_user_guide.pdf)
 
 ### On-Silicon
 
@@ -125,7 +125,7 @@ On a system where a USB port is available and functional, perform the following 
 4. To determine the file system number of the plugged in USB drive, execute 'map -r' command.
 5. Type 'fsx' where 'x' is replaced by the number determined in step 4.
 6. To start the compliance tests, run the executable Bsa.efi with the appropriate parameters.
-   For details on the parameters, refer to [BSA ACS User Guide](../../../docs/Arm_Base_System_Architecture_Compliance_User_Guide.pdf)
+   For details on the parameters, refer to [BSA ACS User Guide](../../../docs/arm_bsa_architecture_compliance_user_guide.pdf)
 
 ## Limitations
 Validating the compliance of certain PCIe rules defined in the BSA specification requires the PCIe end-point to generate specific stimulus during the runtime of the test. Examples of such stimulus are  P2P, PASID, ATC, etc. The tests that requires these stimuli are grouped together in the exerciser module. The exerciser layer is an abstraction layer that enables the integration of hardware capable of generating such stimuli to the test framework.
