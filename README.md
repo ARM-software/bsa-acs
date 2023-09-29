@@ -23,19 +23,19 @@ The tests can also be executed in a Bare-metal environment. The initialization o
  - For complete coverage of the BSA rules, availability of an Exerciser is required for Exerciser tests to be run during verficiation at Pre-Silicon level.
  - The compliance suite is not a substitute for design verification.
  - To review the BSA ACS logs, Arm licensees can contact Arm directly through their partner managers.
- - To know about the BSA rules not implemented in this release, see the [Test Scenario Document](docs/Arm_BSA_Architecture_Compliance_Test_Scenario.pdf).
+ - To know about the BSA rules not implemented in this release, see the [Test Scenario Document](docs/arm_bsa_architecture_compliance_test_scenario.pdf).
 
 ## GitHub branch
   - To pick up the release version of the code, checkout the corresponding tag from the main branch.
   - To get the latest version of the code with bug fixes and new features, use the main branch.
 
 ## Additional reading
-  - For information about the implementable BSA rules test algorithm and for unimplemented BSA rules, see the [Scenario Document](docs/Arm_BSA_Architecture_Compliance_Test_Scenario.pdf).
-  - For information on test category(UEFI, Linux, Bare-metal) and applicable systems(IR,ES,SR,Pre-Silicon), see the [Test Checklist](docs/Arm_BSA_testcase-checklist.rst).
-  - For details on the design of the BSA ACS, see the [Arm BSA Validation Methodology Document](docs/Arm_Base_System_Architecture_Compliance_Validation_Methodology.pdf).
-  - For details on the BSA ACS UEFI Shell Application and Linux Application see the [Arm BSA ACS User Guide](docs/Arm_Base_System_Architecture_Compliance_User_Guide.pdf).
+  - For information about the implementable BSA rules test algorithm and for unimplemented BSA rules, see the [arm BSA Test Scenario Document](docs/arm_bsa_architecture_compliance_test_scenario.pdf).
+  - For information on test category(UEFI, Linux, Bare-metal) and applicable systems(IR,ES,SR,Pre-Silicon), see the [arm BSA Test Checklist](docs/arm_bsa_testcase_checklist.rst).
+  - For details on the design of the BSA ACS, see the [arm BSA Validation Methodology Document](docs/arm_bsa_architecture_compliance_validation_methodology.pdf).
+  - For details on the BSA ACS UEFI Shell Application and Linux Application see the [arm BSA ACS User Guide](docs/arm_bsa_architecture_compliance_user_guide.pdf).
   - For details on the BSA ACS Bare-metal support, see the
-    - [Arm BSA ACS Bare-metal User Guide](docs/Arm_BSA_ACS_Bare-metal_User_Guide.pdf).
+    - [arm BSA ACS Bare-metal User Guide](docs/arm_bsa_architecture_compliance_bare-metal_user_guide.pdf).
     - [Bare-metal Code](platform/pal_baremetal/). <br />
 Note: The Bare-metal PCIe enumeration code provided as part of the BSA ACS should be used and should not be replaced. This code is vital in analyzing of the test result.
 
@@ -159,7 +159,7 @@ On an emulation environment with secondary storage, perform the following steps:
 6. To start the compliance tests, run the executable Bsa.efi with the appropriate parameters.
 7. Copy the UART console output to a log file for analysis and certification.
 
-  - For information on the BSA uefi shell application parameters, see the [User Guide](docs/Arm_Base_System_Architecture_Compliance_User_Guide.pdf).
+  - For information on the BSA uefi shell application parameters, see the [User Guide](docs/arm_bsa_architecture_compliance_user_guide.pdf).
 
 
 #### 2.3 Emulation environment without secondary storage
@@ -169,7 +169,7 @@ On an emulation platform where secondary storage is not available, perform the f
 1. Add the path to 'Bsa.efi' file in the UEFI FD file.
 2. Build UEFI image including the UEFI Shell.
 3. Boot the system to UEFI shell.
-4. Run the executable 'Bsa.efi' to start the compliance tests. For details about the parameters,see the [User Guide](docs/Arm_Base_System_Architecture_Compliance_User_Guide.pdf).
+4. Run the executable 'Bsa.efi' to start the compliance tests. For details about the parameters,see the [User Guide](docs/arm_bsa_architecture_compliance_user_guide.pdf).
 5. Copy the UART console output to a log file for analysis and certification.
 
 
@@ -226,7 +226,7 @@ shell> insmod bsa_acs.ko
 ```sh
 shell> ./bsa
 ```
-  - For information on the BSA Linux application parameters, see the [User Guide](docs/Arm_Base_System_Architecture_Compliance_User_Guide.pdf).
+  - For information on the BSA Linux application parameters, see the [User Guide](docs/arm_bsa_architecture_compliance_user_guide.pdf).
 
 ## ACS build steps - Bare-metal abstraction
 
