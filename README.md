@@ -14,11 +14,13 @@ BSA **Architecture Compliance Suite** (ACS) is a collection of self-checking, po
 This suite includes a set of examples of the invariant behaviors that are provided by the [BSA](https://developer.arm.com/documentation/den0094/c/?lang=en) specification, so that you can verify if these behaviour have been interpreted correctly.
 Most of the tests are executed from UEFI (Unified Extensible Firmware Interface) Shell by executing the BSA UEFI shell application.
 A few tests are executed by running the BSA ACS Linux application which in turn depends on the BSA ACS Linux kernel module.
-
+The tests can also be executed in a Bare-metal environment. The initialization of the Bare-metal environment is specific to the environment and is out of scope of this document.
 
 ## Release details
  - Code quality: v1.0.5
  - The tests are written for version 1.0 (c) of the BSA specification.
+ - The tests can be run at both the Pre-Silicon and Silicon level.
+ - For complete coverage of the BSA rules, availability of an Exerciser is required for Exerciser tests to be run during verficiation at Pre-Silicon level.
  - The compliance suite is not a substitute for design verification.
  - To review the BSA ACS logs, Arm licensees can contact Arm directly through their partner managers.
  - To know about the BSA rules not implemented in this release, see the [Test Scenario Document](docs/Arm_BSA_Architecture_Compliance_Test_Scenario.pdf).
@@ -29,13 +31,19 @@ A few tests are executed by running the BSA ACS Linux application which in turn 
 
 ## Additional reading
   - For information about the implementable BSA rules test algorithm and for unimplemented BSA rules, see the [Scenario Document](docs/Arm_BSA_Architecture_Compliance_Test_Scenario.pdf).
-  - For information on test category(UEFI, Linux, BM) and applicable systems(IR,ES,SR,PreSilicon), see the [Test Checklist](docs/Arm_BSA_testcase-checklist.rst).
+  - For information on test category(UEFI, Linux, Bare-metal) and applicable systems(IR,ES,SR,Pre-Silicon), see the [Test Checklist](docs/Arm_BSA_testcase-checklist.rst).
   - For details on the design of the BSA ACS, see the [Arm BSA Validation Methodology Document](docs/Arm_Base_System_Architecture_Compliance_Validation_Methodology.pdf).
   - For details on the BSA ACS UEFI Shell Application and Linux Application see the [Arm BSA ACS User Guide](docs/Arm_Base_System_Architecture_Compliance_User_Guide.pdf).
-  - For details on the BSA ACS Baremetal support, see the
+  - For details on the BSA ACS Bare-metal support, see the
     - [Arm BSA ACS Bare-metal User Guide](docs/Arm_BSA_ACS_Bare-metal_User_Guide.pdf).
     - [Bare-metal Code](platform/pal_baremetal/). <br />
-Note: The Baremetal PCIe enumeration code provided as part of the BSA ACS should be used and should not be replaced. This code is vital in analyzing of the test result.
+Note: The Bare-metal PCIe enumeration code provided as part of the BSA ACS should be used and should not be replaced. This code is vital in analyzing of the test result.
+
+### Running Exerciser tests for complete coverage
+
+Exerciser is a client device wrapped up by PCIe Endpoint. This device is created to meet BSA requirements for various PCIe capability validation tests. Running the Exerciser tests provides additional test coverage on the platform.
+
+Note: To run the exerciser tests on a UEFI Based platform with Exerciser, the Exerciser PAL API's need to be implemented. For details on the reference Exerciser implementation and support, see the [Exerciser.md](docs/PCIe_Exerciser/Exerciser.md) and [Exerciser_API_porting_guide.md](docs/PCIe_Exerciser/Exerciser_API_porting_guide.md)
 
 ## ACS build steps - UEFI Shell application
 
@@ -219,6 +227,14 @@ shell> insmod bsa_acs.ko
 shell> ./bsa
 ```
   - For information on the BSA Linux application parameters, see the [User Guide](docs/Arm_Base_System_Architecture_Compliance_User_Guide.pdf).
+
+## ACS build steps - Bare-metal abstraction
+
+The Bare-metal build environment is platform specific.
+
+To provide a baseline, the build steps to integrate and run the Bare-metal tests from UEFI shell are provided in [README.md](platform/pal_baremetal/FVP/README.md).
+
+For details on generating the binaries to run on Bare-metal environment, refer [README.md](platform/pal_baremetal/README.md)
 
 ## Security implication
 The Arm SystemReady ACS test suite may run at a higher privilege level. An attacker may utilize these tests to elevate the privilege which can potentially reveal the platform security assets. To prevent the leakage of Secure information, Arm strongly recommends that you run the ACS test suite only on development platforms. If it is run on production systems, the system should be scrubbed after running the test suite.
