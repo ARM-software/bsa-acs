@@ -59,3 +59,9 @@ v23.07_1.0.5
 * Updated info table sizes
 * Enhancements in -t -m options to not limit tests and modules selected
 * Documentation changes
+
+v23.09_1.0.6
+* Test enhancements and bug fixes
+* Linux version moved to v6.4
+* Reference documents for PCIe exerciser functionality
+* Documentation changes
