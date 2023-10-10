@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2020,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020,2021,2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,7 +44,9 @@ payload(void)
 
   /* Check If PCIe Hierarchy supports P2P */
   if (val_pcie_p2p_support() == NOT_IMPLEMENTED) {
-    val_print(ACS_PRINT_DEBUG, "\n       pal_pcie_p2p_support API is unimplemented ", 0);
+    val_print(ACS_PRINT_DEBUG, "\n       The test is applicable only if the system supports", 0);
+    val_print(ACS_PRINT_DEBUG, "\n       P2P traffic. If the system supports P2P, pass the", 0);
+    val_print(ACS_PRINT_DEBUG, "\n       command line option '-p2p' while running the binary", 0);
     val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
     return;
   }
