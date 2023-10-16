@@ -551,6 +551,7 @@ pal_pe_create_info_table_dt(PE_INFO_TABLE *PeTable)
   UINT64 MpidrAff0Max = 0, MpidrAff1Max = 0, MpidrAff2Max = 0, MpidrAff3Max = 0;
   int prop_len, addr_cell, size_cell;
   int offset, parent_offset;
+  CHAR8 * Pstatus;
 
   /* initialise number of PEs to zero */
   PeTable->header.num_of_pe = 0;
@@ -596,6 +597,20 @@ pal_pe_create_info_table_dt(PE_INFO_TABLE *PeTable)
       if ((prop_len < 0) || (prop_val == NULL)) {
         bsa_print(ACS_PRINT_ERR, L"  PROPERTY reg offset %x, Error %d\n", offset, prop_len);
         return;
+      }
+
+      /* In DT v0.4 specification "fail" value of status field is added, to indicate PE is
+         not operational or exist
+      */
+      Pstatus = (CHAR8 *)fdt_getprop_namelen((void *)dt_ptr, offset, "status", 6, &prop_len);
+      if ((prop_len > 0) && (Pstatus != NULL)) {
+          bsa_print(ACS_PRINT_DEBUG, L"  Status field length %d\n", prop_len);
+          if (pal_strncmp(Pstatus, "fail", 5) == 0) {
+              bsa_print(ACS_PRINT_DEBUG, L"  CPU is not operational..SKIP \n");
+              offset = fdt_node_offset_by_prop_value((const void *) dt_ptr, offset,
+                                                      "device_type", "cpu", 4);
+              continue;
+          }
       }
 
       reg_val[0] = fdt32_to_cpu(prop_val[0]);
