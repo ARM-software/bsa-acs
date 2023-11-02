@@ -240,6 +240,8 @@ The Arm SystemReady ACS test suite may run at a higher privilege level. An attac
 
 ## Limitations
 
+ - For systems that present firmware compliant to SBBR, BSA depends on SPCR acpi table to get UART information.
+   UEFI console setting must be set to "serial" on these systems.
  - ITS test are available only for systems that present firmware compliant to SBBR.
  - Some PCIe and Exerciser test are dependent on PCIe features supported by the test system.
    Please fill the required API's with test system information.

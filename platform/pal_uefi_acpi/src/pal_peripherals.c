@@ -141,6 +141,10 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
     per_info->interface_type = spcr->InterfaceType;
     per_info++;
   }
+  else {
+    bsa_print(ACS_PRINT_DEBUG, L"  WARNING:SPCR acpi table not found\n", 0);
+    bsa_print(ACS_PRINT_DEBUG, L"  UEFI console setting must be set to serial\n", 0);
+ }
 
   if (PLATFORM_GENERIC_UART_BASE) {
     peripheralInfoTable->header.num_uart++;
