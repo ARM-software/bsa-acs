@@ -193,6 +193,16 @@ ShellAppMainbsa(
       g_print_level = ACS_PRINT_ERR;
   }
 
+#ifdef TARGET_BM_BOOT
+  /* Write page tables */
+  if (val_setup_mmu())
+      return ACS_STATUS_FAIL;
+
+  /* Enable Stage-1 MMU */
+  if (val_enable_mmu())
+      return ACS_STATUS_FAIL;
+#endif
+
   g_print_mmio = FALSE;
   g_wakeup_timeout = 1;
 
