@@ -52,7 +52,7 @@ static uint32_t get_max_bdf(uint32_t segment, uint32_t end_bus)
 }
 
 /* Returns the maximum subordinate bus value for that segment from the RP's in the BDF table */
-static uint32_t get_max_bus(uint32_t segment, uint32_t bdf, uint32_t end_bus)
+static uint32_t get_max_bus(uint32_t segment, uint32_t end_bus)
 {
   pcie_device_bdf_table *bdf_tbl_ptr;
   uint32_t seg_num;
@@ -111,7 +111,7 @@ payload(void)
       bdf = get_max_bdf(segment, end_bus);
 
       /* Get the maximum subordinate bus for that segment */
-      sub_bus = get_max_bus(segment, bdf, end_bus);
+      sub_bus = get_max_bus(segment, end_bus);
 
       /* Get the least highest of max bus number */
       bus_index = (PCIE_EXTRACT_BDF_BUS(bdf) < end_bus) ? sub_bus:end_bus;

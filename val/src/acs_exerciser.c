@@ -198,10 +198,9 @@ uint32_t val_get_exerciser_err_info(EXERCISER_ERROR_CODE type)
 /**
   @brief   This API returns the requested information about the PCIe stimulus hardware
   @param   type         - Information type required from the stimulus hadrware
-  @param   instance     - Stimulus hadrware instance number
   @return  value        - Information value for input type
 **/
-uint32_t val_exerciser_get_info(EXERCISER_INFO_TYPE type, uint32_t instance)
+uint32_t val_exerciser_get_info(EXERCISER_INFO_TYPE type)
 {
     switch (type) {
     case EXERCISER_NUM_CARDS:
@@ -457,7 +456,7 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
       return ACS_STATUS_SKIP;
   }
 
-  num_instances = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
+  num_instances = val_exerciser_get_info(EXERCISER_NUM_CARDS);
 
   if (num_instances == 0) {
       val_print(ACS_PRINT_WARN, "\n       No Exerciser Devices Found, "

@@ -558,8 +558,7 @@ val_pcie_create_info_table(uint64_t *pcie_info_table)
   pal_pcie_create_info_table(g_pcie_info_table);
 
   num_ecam = (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
-
-  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of ECAM regions    :    %ld \n", num_ecam);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of ECAM regions    : %ld \n", num_ecam);
   if (num_ecam == 0)
       return;
 
@@ -736,7 +735,7 @@ val_pcie_create_device_bdf_table()
   val_pcie_populate_device_rootport();
 
   val_print(ACS_PRINT_TEST,
-    " PCIE_INFO: Number of BDFs found      :    %d\n", g_pcie_bdf_table->num_entries);
+    " PCIE_INFO: Number of BDFs found      : %d\n", g_pcie_bdf_table->num_entries);
 
   return 0;
 }
@@ -1146,7 +1145,7 @@ val_pcie_increment_bdf(uint32_t bdf)
   uint32_t bus;
   uint32_t dev;
   uint32_t func;
-  uint32_t ecam_cnt;
+  int32_t ecam_cnt;
   uint32_t ecam_index = 0;
 
   seg = PCIE_EXTRACT_BDF_SEG(bdf);
@@ -1253,21 +1252,6 @@ uint32_t
 val_pcie_is_onchip_peripheral(uint32_t bdf)
 {
   return pal_pcie_is_onchip_peripheral(bdf);
-}
-
-/**
-  @brief  Returns whether a PCIe Function is atomicop requester capable
-
-  @param  bdf        - Segment/Bus/Dev/Func in the format of PCIE_CREATE_BDF
-  @return Returns 0 (if Function doesn't supports atomicop requester capable
-                     else non-zero value)
-**/
-uint32_t
-val_pcie_get_atomicop_requester_capable(uint32_t bdf)
-{
-  /* TO DO */
-  //return pal_pcie_get_atomicop_requester_capable(bdf);
-  return 0;
 }
 
 /**

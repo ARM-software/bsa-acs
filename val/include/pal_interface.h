@@ -68,7 +68,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
-#include "../platform/pal_baremetal/FVP/RDN2/include/platform_override_fvp.h"
+#include "platform_override_fvp.h"
   typedef uint64_t addr_t;
   typedef char     char8_t;
   typedef uint64_t dma_addr_t;
@@ -95,7 +95,7 @@
   typedef UINT64 uint64_t;
   typedef UINT64 addr_t;
   typedef UINT64 dma_addr_t;
-#include "../../platform/pal_baremetal/FVP/RDN2/include/platform_override_fvp.h"
+#include "platform_override_fvp.h"
 
 #define TIMEOUT_LARGE    PLATFORM_BM_OVERRIDE_TIMEOUT_LARGE
 #define TIMEOUT_MEDIUM   PLATFORM_BM_OVERRIDE_TIMEOUT_MEDIUM
@@ -111,7 +111,7 @@
 #define MMU_PGT_OAS      48
 
 #else
-#include "../platform/include/platform_override.h"
+#include "../../platform/include/platform_override.h"
   typedef INT8   int8_t;
   typedef INT32  int32_t;
   typedef CHAR8  char8_t;
@@ -747,6 +747,7 @@ void     pal_mem_allocate_shared(uint32_t num_pe, uint32_t sizeofentry);
 void     pal_mem_free_shared(void);
 uint64_t pal_mem_get_shared_addr(void);
 
+uint32_t pal_mmio_read(uint64_t addr);
 uint8_t  pal_mmio_read8(uint64_t addr);
 uint16_t pal_mmio_read16(uint64_t addr);
 

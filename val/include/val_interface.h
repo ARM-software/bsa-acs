@@ -50,6 +50,7 @@
 
 #define VAL_EXTRACT_BITS(data, start, end) ((data >> start) & ((1ul << (end-start+1))-1))
 
+typedef char char8_t;
 /* GENERIC VAL APIs */
 void val_allocate_shared_mem(void);
 void val_free_shared_mem(void);

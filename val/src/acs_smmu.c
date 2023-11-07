@@ -195,9 +195,8 @@ val_smmu_check_device_iova(uint32_t ctrl_index, addr_t dma_addr)
   @return 0 for success
 **/
 uint64_t
-val_smmu_ops(SMMU_OPS_e ops, uint32_t smmu_index, void *param1, void *param2)
+val_smmu_ops(SMMU_OPS_e ops, void *param1, void *param2)
 {
-
   switch(ops)
   {
       case SMMU_START_MONITOR_DEV:

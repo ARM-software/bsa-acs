@@ -1,6 +1,6 @@
 
 /** @file
- * Copyright (c) 2016-2018, 2021, 2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,7 +44,7 @@ esr(uint64_t interrupt_type, void *context)
   /* Update the ELR to point to next instrcution */
   val_pe_update_elr(context, (uint64_t)branch_to_test);
 
-  val_print(ACS_PRINT_ERR, "\n       Error : Received Sync Exception ", 0);
+  val_print(ACS_PRINT_ERR, "\n       Error : Received Exception of type %d", interrupt_type);
   val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
 }
 

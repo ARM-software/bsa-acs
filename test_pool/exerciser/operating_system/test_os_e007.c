@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018-2021,2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2018-2021,2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,7 +163,7 @@ payload (void)
   pe_index = val_pe_get_index_mpid (val_pe_get_mpid());
 
   /* Read the number of excerciser cards */
-  instance = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
+  instance = val_exerciser_get_info(EXERCISER_NUM_CARDS);
 
   while (instance-- != 0) {
 

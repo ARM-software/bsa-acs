@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, 2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,7 +44,7 @@ esr(uint64_t interrupt_type, void *context)
   /* Update the ELR to point to next instrcution */
   val_pe_update_elr(context, branch_to_test);
 
-  val_print(ACS_PRINT_DEBUG, "\n       Received DAbort Exception ", 0);
+  val_print(ACS_PRINT_DEBUG, "\n       Received Exception of type %d", interrupt_type);
 }
 
 static
@@ -64,7 +64,7 @@ payload()
   while (loop_var) {
       timeout = TIMEOUT_SMALL;
       /* Get the address of device memory region */
-      addr = val_memory_get_addr(MEMORY_TYPE_DEVICE, instance, &attr);
+      addr = val_memory_get_addr(MEM_TYPE_DEVICE, instance, &attr);
       if (!addr) {
           val_print(ACS_PRINT_DEBUG, "\n       Error in getting dev mem for"
                                    " index %d  ", instance);
@@ -90,7 +90,7 @@ normal_mem_test:
   while (loop_var) {
       timeout = TIMEOUT_SMALL;
       /* Get the address of normal memory region */
-      addr = val_memory_get_addr(MEMORY_TYPE_NORMAL, instance, &attr);
+      addr = val_memory_get_addr((MEMORY_INFO_e)MEMORY_TYPE_NORMAL, instance, &attr);
       if (!addr) {
           val_print(ACS_PRINT_DEBUG, "\n       Error in obtaining normal memory for"
                                    " instance %d", instance);

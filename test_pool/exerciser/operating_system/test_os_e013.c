@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021, 2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,7 +55,7 @@ get_exerciser_in_its_group(uint32_t its_id, uint32_t *req_instance)
   uint32_t device_id = 0;
 
   /* Read the number of excerciser cards */
-  num_cards = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
+  num_cards = val_exerciser_get_info(EXERCISER_NUM_CARDS);
 
   for (index = 0; index < num_cards; index++)
   {
@@ -116,7 +116,7 @@ payload (void)
   }
 
   /* Read the number of excerciser cards */
-  num_cards = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
+  num_cards = val_exerciser_get_info(EXERCISER_NUM_CARDS);
 
   /* Disable all SMMUs */
   num_smmus = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);

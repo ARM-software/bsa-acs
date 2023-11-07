@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ payload()
   uint32_t status;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
   uint32_t num_group, num_blocks, its_id, blk_index;
-  int i, j, k;
+  uint32_t i, j, k;
 
   status = val_iovirt_get_its_info(ITS_NUM_GROUPS, 0, 0, &num_group);
   if (status) {
