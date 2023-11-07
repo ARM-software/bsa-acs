@@ -18,6 +18,8 @@
 #ifndef __BSA_AVS_LEVEL_H__
 #define __BSA_AVS_LEVEL_H__
 
+#include "platform_image_def.h"
+#include "platform_override_fvp.h"
 
 #define SIZE_4K 0x100
 

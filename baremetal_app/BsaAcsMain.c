@@ -20,7 +20,6 @@
 #include "val/include/bsa_acs_val.h"
 
 #include "val/include/bsa_acs_memory.h"
-#include "platform/pal_baremetal/FVP/RDN2/include/platform_override_fvp.h"
 #include "BsaAcs.h"
 
 uint32_t  g_print_level;
@@ -41,6 +40,13 @@ uint32_t  *g_skip_test_num;
 uint32_t  *g_execute_tests;
 uint32_t  *g_execute_modules;
 uint32_t  g_build_sbsa = 0;
+
+extern uint32_t g_skip_array[];
+extern uint32_t g_num_skip;
+extern uint32_t g_test_array[];
+extern uint32_t g_num_tests;
+extern uint32_t g_module_array[];
+extern uint32_t g_num_modules;
 
 uint32_t
 createPeInfoTable(
@@ -168,18 +174,6 @@ ShellAppMainbsa(
   uint32_t             Status;
   void                 *branch_label;
 
-  g_skip_test_num = &g_skip_array[0];
-
-  /* Check if there is a user override to run specific tests*/
-  if (g_num_tests) {
-      g_execute_tests   = &g_test_array[0];
-  }
-
-  /* Check if there is a user override to run specific modules*/
-  if (g_num_modules) {
-      g_execute_modules = &g_module_array[0];
-  }
-
   g_print_level = PLATFORM_OVERRIDE_PRINT_LEVEL;
 
   if (g_print_level < ACS_PRINT_INFO)
@@ -220,6 +214,17 @@ ShellAppMainbsa(
 
   val_print(ACS_PRINT_TEST, " Starting tests with print level : %2d\n\n", ACS_PRINT_TEST);
 
+  g_skip_test_num = &g_skip_array[0];
+
+  /* Check if there is a user override to run specific tests*/
+  if (g_num_tests) {
+      g_execute_tests   = &g_test_array[0];
+  }
+
+  /* Check if there is a user override to run specific modules*/
+  if (g_num_modules) {
+      g_execute_modules = &g_module_array[0];
+  }
 
   val_print(ACS_PRINT_TEST, " Creating Platform Information Tables \n", 0);
   Status = createPeInfoTable();
@@ -286,6 +291,6 @@ print_test_status:
   val_print(ACS_PRINT_TEST, "\n      *** BSA tests complete. Reset the system. *** \n\n", 0);
 
   val_pe_context_restore(AA64WriteSp(g_stack_pointer));
-
+  while (1);
   return 0;
 }
