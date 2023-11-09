@@ -61,11 +61,11 @@ To start the ACS build, perform the following steps:
    - UefiRuntimeLib|MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
    - BsaValBaremetalLib|ShellPkg/Application/bsa-acs/val/BsaValBaremetalLib.inf
    - BsaPalBaremetalLib|ShellPkg/Application/bsa-acs/platform/pal_baremetal/BsaPalBaremetalLib.inf
-   - BsaPalFVPLib|ShellPkg/Application/bsa-acs/platform/pal_baremetal/FVP/RDN2/BsaPalFVPLib.inf
+   - BsaPalFVPLib|ShellPkg/Application/bsa-acs/platform/pal_baremetal/RDN2/BsaPalFVPLib.inf
 7.  Add ShellPkg/Application/bsa-acs/baremetal_app/BsaAcs.inf in the [components] section of ShellPkg/ShellPkg.dsc
 8.  Modify CC Flags in the [BuildOptions] section of ShellPkg/ShellPkg.dsc
 ```
-      *_*_*_CC_FLAGS = -DENABLE_OOB
+      *_*_*_CC_FLAGS = -DENABLE_OOB -I${WORKSPACE}/ShellPkg/Application/bsa-acs/platform/pal_baremetal/common/include -I${WORKSPACE}/ShellPkg/Application/bsa-acs/platform/pal_baremetal/RDN2/include/
 
       !include StdLib/StdLib.inc
 ```

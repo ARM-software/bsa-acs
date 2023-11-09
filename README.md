@@ -231,7 +231,7 @@ shell> ./bsa
 
 The Bare-metal build environment is platform specific.
 
-To provide a baseline, the build steps to integrate and run the Bare-metal tests from UEFI shell are provided in [README.md](platform/pal_baremetal/FVP/README.md).
+To provide a baseline, the build steps to integrate and run the Bare-metal tests from UEFI shell are provided in [README.md](platform/pal_baremetal/RDN2/README.md).
 
 For details on generating the binaries to run on Bare-metal environment, refer [README.md](platform/pal_baremetal/README.md)
 
