@@ -56,16 +56,16 @@ To start the ACS build, perform the following steps:
 2.  cd edk2
 3.  git clone https://github.com/tianocore/edk2-libc
 4.  git submodule update --init --recursive
-5.  git clone ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bsa ShellPkg/Application/bsa-acs
+5.  git clone https://github.com/ARM-software/bsa-acs.git ShellPkg/Application/bsa-acs
 6.  Add the following to the [LibraryClasses.common] section in ShellPkg/ShellPkg.dsc
    - UefiRuntimeLib|MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
    - BsaValBaremetalLib|ShellPkg/Application/bsa-acs/val/BsaValBaremetalLib.inf
    - BsaPalBaremetalLib|ShellPkg/Application/bsa-acs/platform/pal_baremetal/BsaPalBaremetalLib.inf
-   - BsaPalFVPLib|ShellPkg/Application/bsa-acs/platform/pal_baremetal/FVP/RDN2/BsaPalFVPLib.inf
+   - BsaPalFVPLib|ShellPkg/Application/bsa-acs/platform/pal_baremetal/RDN2/BsaPalFVPLib.inf
 7.  Add ShellPkg/Application/bsa-acs/baremetal_app/BsaAcs.inf in the [components] section of ShellPkg/ShellPkg.dsc
 8.  Modify CC Flags in the [BuildOptions] section of ShellPkg/ShellPkg.dsc
 ```
-      *_*_*_CC_FLAGS = -DENABLE_OOB
+      *_*_*_CC_FLAGS = -DENABLE_OOB -I${WORKSPACE}/ShellPkg/Application/bsa-acs/platform/pal_baremetal/common/include -I${WORKSPACE}/ShellPkg/Application/bsa-acs/platform/pal_baremetal/RDN2/include/
 
       !include StdLib/StdLib.inc
 ```
