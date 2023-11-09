@@ -259,6 +259,7 @@ The Arm SystemReady ACS test suite may run at a higher privilege level. An attac
 --------------------------------------------------------------------------------------------
 |    BSA Spec Version   |   BSA ACS Version   |      BSA Tag ID     |    Pre-Si Support    |
 |-----------------------|:-------------------:|:-------------------:|:--------------------:|
+|       BSA v1.0(c)     |        v1.0.6       |v23.11_BootFramework |       Yes            |
 |       BSA v1.0(c)     |        v1.0.6       |   v23.09_REL1.0.6   |       Yes            |
 |       BSA v1.0(c)     |        v1.0.5       |   v23.07_REL1.0.5   |       Yes            |
 |       BSA v1.0(c)     |        v1.0.4       |   v23.03_REL1.0.4   |       Yes            |
