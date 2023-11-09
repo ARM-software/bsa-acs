@@ -65,3 +65,10 @@ v23.09_1.0.6
 * Linux version moved to v6.4
 * Reference documents for PCIe exerciser functionality
 * Documentation changes
+
+v23.11_BootFramework
+* Deprecating Baremetal support for RDN1
+* Introducing Bootwrapper support
+* Replacing pal_print calls with val_print in val
+* Addition of cmake files instead of Makefiles
+* Code improvements needed when additional compiler flags are added
