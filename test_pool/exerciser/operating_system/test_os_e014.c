@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021,2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +38,7 @@ get_target_exer_bdf(uint32_t req_rp_bdf, uint32_t *tgt_e_bdf,
   uint32_t erp_ecam_index;
   uint32_t status;
 
-  instance = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
+  instance = val_exerciser_get_info(EXERCISER_NUM_CARDS);
 
   while (instance-- != 0)
   {
@@ -98,8 +98,7 @@ test_fail:
 }
 
 uint32_t
-check_p2p_transaction(uint32_t req_instance, uint32_t req_rp_bdf,
-                                               uint64_t bar_base)
+check_p2p_transaction(uint32_t req_instance, uint64_t bar_base)
 {
   /* P2P transaction must fail */
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)bar_base, 1, req_instance);
@@ -125,7 +124,7 @@ payload(void)
 
   test_skip = 1;
   index = val_pe_get_index_mpid(val_pe_get_mpid());
-  instance = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
+  instance = val_exerciser_get_info(EXERCISER_NUM_CARDS);
 
   /* Check If PCIe Hierarchy supports P2P. */
   if (!val_pcie_p2p_support())
@@ -158,7 +157,7 @@ payload(void)
       test_skip = 0;
 
       /* Check if P2P transaction causes any deadlock */
-      status = check_p2p_transaction(instance, req_rp_bdf, bar_base);
+      status = check_p2p_transaction(instance, bar_base);
       if (status)
       {
           val_set_status(index, RESULT_FAIL(TEST_NUM, 1));

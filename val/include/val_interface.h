@@ -20,7 +20,7 @@
 
 #include "pal_interface.h"
 
-#ifdef TARGET_EMULATION
+#if defined(TARGET_EMULATION) || defined(TARGET_BM_BOOT)
 #define TRUE 1
 #define FALSE 0
 #define BIT0 (1)
@@ -50,6 +50,7 @@
 
 #define VAL_EXTRACT_BITS(data, start, end) ((data >> start) & ((1ul << (end-start+1))-1))
 
+typedef char char8_t;
 /* GENERIC VAL APIs */
 void val_allocate_shared_mem(void);
 void val_free_shared_mem(void);
@@ -77,6 +78,7 @@ uint64_t val_pe_get_mpid(void);
 uint32_t val_pe_get_index_mpid(uint64_t mpid);
 uint32_t val_pe_install_esr(uint32_t exception_type, void (*esr)(uint64_t, void *));
 uint32_t val_pe_get_primary_index(void);
+uint64_t val_get_primary_mpidr(void);
 
 void     val_execute_on_pe(uint32_t index, void (*payload)(void), uint64_t args);
 int      val_suspend_pe(uint64_t entry, uint32_t context_id);
@@ -375,6 +377,13 @@ typedef enum {
 #define MEM_ALIGN_16K      0x4000
 #define MEM_ALIGN_32K      0x8000
 #define MEM_ALIGN_64K      0x10000
+
+/* Mem Map APIs */
+void val_mmu_add_mmap(void);
+void val_mmap_add_region(uint64_t va_base, uint64_t pa_base,
+                uint64_t length, uint64_t attributes);
+uint32_t val_setup_mmu(void);
+uint32_t val_enable_mmu(void);
 
 /* Identify memory type using MAIR attribute, refer to ARM ARM VMSA for details */
 

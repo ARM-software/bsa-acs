@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020,2022-2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2020,2022-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -63,6 +63,25 @@
 #define BSA_TCR_IPS_MASK   (0x7ull << BSA_TCR_IPS_SHIFT)
 #define BSA_TCR_PS_SHIFT   16
 #define BSA_TCR_PS_MASK    (0x7ull << BSA_TCR_PS_SHIFT)
+
+/* MPIDR macros */
+#define PAL_MPIDR_AFFLVL_MASK    0xffull
+#define PAL_MPIDR_AFFINITY_BITS  8
+#define PAL_MPIDR_AFF0_SHIFT     0
+#define PAL_MPIDR_AFF1_SHIFT     8u
+#define PAL_MPIDR_AFF2_SHIFT     16u
+#define PAL_MPIDR_AFF3_SHIFT     32u
+#define PAL_MPIDR_AFFLVL0        0x0ull
+#define PAL_MPIDR_AFFLVL1        0x1ull
+#define PAL_MPIDR_AFFLVL2        0x2ull
+#define PAL_MPIDR_AFFLVL3        0x3ull
+
+#define PAL_MPIDR_AFFINITY_MASK ((PAL_MPIDR_AFFLVL_MASK << PAL_MPIDR_AFF3_SHIFT) | \
+                 (PAL_MPIDR_AFFLVL_MASK << PAL_MPIDR_AFF2_SHIFT) | \
+                 (PAL_MPIDR_AFFLVL_MASK << PAL_MPIDR_AFF1_SHIFT) | \
+                 (PAL_MPIDR_AFFLVL_MASK << PAL_MPIDR_AFF0_SHIFT))
+
+#define PAL_INVALID_MPID        0xFFFFFFFFu
 
 typedef enum {
   MPIDR_EL1 = 1,

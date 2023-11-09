@@ -156,7 +156,7 @@ payload(void)
   if (val_pgt_get_attributes(pgt_desc, (uint64_t)dram_buf_base_virt, &mem_desc->attributes))
     goto test_fail;
 
-  instance = val_exerciser_get_info(EXERCISER_NUM_CARDS, 0);
+  instance = val_exerciser_get_info(EXERCISER_NUM_CARDS);
 
   while (instance-- != 0) {
     clear_dram_buf(dram_buf_base_virt, test_data_blk_size * 2);

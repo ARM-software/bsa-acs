@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019-2020,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +34,7 @@ payload(void)
   uint32_t pe_index;
   uint32_t tbl_index;
   uint32_t reg_value;
-  uint32_t max_payload_value;
+  int32_t max_payload_value;
   uint32_t test_fails;
   uint32_t test_skip = 1;
   uint32_t cap_base;

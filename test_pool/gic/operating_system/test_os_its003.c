@@ -38,7 +38,8 @@ payload()
   uint32_t cap_base;
   uint32_t test_skip = 1;
   pcie_device_bdf_table *bdf_tbl_ptr;
-  int32_t prev_its_id = -1, i, j;
+  int32_t prev_its_id = -1;
+  uint32_t i, j;
   uint32_t *streamID = NULL;
   uint32_t *smmu_index = NULL;
   uint32_t *dev_bdf = NULL;
@@ -135,7 +136,7 @@ payload()
     }
 
     /* Check uniqueness of streamID if ITS group changed or for the last group*/
-    if ((prev_its_id != its_id) || (tbl_index == (bdf_tbl_ptr->num_entries - 1))) {
+    if ((prev_its_id != (int)its_id) || (tbl_index == (bdf_tbl_ptr->num_entries - 1))) {
       for (i = 0; i < (dev_index - 1); i++) {
           for (j = (i + 1); j < dev_index; j++) {
             if ((streamID[i] == streamID[j]) && (smmu_index[i] == smmu_index[j])) {

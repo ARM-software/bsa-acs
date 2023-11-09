@@ -202,9 +202,6 @@ uint32_t
 val_pcie_get_rp_transaction_frwd_support(uint32_t bdf);
 
 uint32_t
-val_pcie_get_atomicop_requester_capable(uint32_t bdf);
-
-uint32_t
 val_pcie_is_cache_present(uint32_t bdf);
 
 uint32_t

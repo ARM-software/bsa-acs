@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, 2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -220,7 +220,6 @@ static void
 WriteCmdQMAPC(
    uint32_t     its_index,
    uint64_t     *CMDQ_BASE,
-   uint32_t     device_id,
    uint32_t     Clctn_ID,
    uint32_t     RDBase,
    uint64_t     Valid
@@ -431,7 +430,7 @@ void val_its_create_lpi_map(uint32_t its_index, uint32_t device_id,
                 g_gic_its_info->GicIts[its_index].ITTBase,
                 g_gic_its_info->GicIts[its_index].IDBits, 0x1 /*Valid*/);
   /* Map Collection using MAPC */
-  WriteCmdQMAPC(its_index, (uint64_t *)(ItsCommandBase), device_id,
+  WriteCmdQMAPC(its_index, (uint64_t *)(ItsCommandBase),
                 0x1 /*Clctn_ID*/, RDBase, 0x1 /*Valid*/);
   /* Map Interrupt using MAPI */
   WriteCmdQMAPI(its_index, (uint64_t *)(ItsCommandBase), device_id, int_id, 0x1 /*Clctn_ID*/);
@@ -537,8 +536,7 @@ uint32_t val_its_init(void)
   }
 
   /* Configure Redistributor For LPIs */
-  Status = ArmGicRedistributorConfigurationForLPI(g_gic_its_info->GicDBase,
-                                                  g_gic_its_info->GicRdBase);
+  Status = ArmGicRedistributorConfigurationForLPI(g_gic_its_info->GicRdBase);
   if (Status)
     return Status;
 

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2019,2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2019, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -225,14 +225,6 @@ uint32_t val_pgt_create(memory_region_descriptor_t *mem_desc, pgt_descriptor_t *
                       "truncating to %d-bits     ",
                       pgt_desc->ias);
             mem_desc->virtual_address &= ((0x1ull << pgt_desc->ias) - 1);
-        }
-
-        if ((pgt_desc->tcr.tg_size_log2) != page_size_log2)
-        {
-            val_print(ACS_PRINT_ERR,
-                      "\n       val_pgt_create: input page_size 0x%x unsupported    ",
-                      ((uint64_t)0x1 << pgt_desc->tcr.tg_size_log2));
-            return ACS_STATUS_ERR;
         }
 
         tt_desc.input_base = mem_desc->virtual_address & ((0x1ull << pgt_desc->ias) - 1);

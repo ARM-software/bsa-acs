@@ -20,6 +20,8 @@
 #include "include/bsa_acs_common.h"
 #include "sys_arch_src/gic/bsa_exception.h"
 
+#include "include/val_interface.h"
+
 uint32_t g_override_skip;
 
 /**
@@ -37,9 +39,14 @@ uint32_t g_override_skip;
 void
 val_print(uint32_t level, char8_t *string, uint64_t data)
 {
-
+#ifndef TARGET_BM_BOOT
   if (level >= g_print_level)
       pal_print(string, data);
+#else
+  if (level >= g_print_level) {
+      pal_uart_print(level, string, data);
+  }
+#endif
 
 }
 
@@ -55,9 +62,9 @@ val_print(uint32_t level, char8_t *string, uint64_t data)
 void
 val_print_test_start(char8_t *string)
 {
-  pal_print("\n      *** Starting ", 0);
-  pal_print(string, 0);
-  pal_print(" tests ***  \n", 0);
+  val_print(ACS_PRINT_TEST, "\n      *** Starting ", 0);
+  val_print(ACS_PRINT_TEST, string, 0);
+  val_print(ACS_PRINT_TEST, " tests ***  \n", 0);
 }
 
 /**
@@ -74,20 +81,20 @@ val_print_test_start(char8_t *string)
 void
 val_print_test_end(uint32_t status, char8_t *string)
 {
-  pal_print("\n      ", 0);
+  val_print(ACS_PRINT_TEST, "\n      ", 0);
 
   if (status != ACS_STATUS_PASS) {
-      pal_print("One or more ", 0);
-      pal_print(string, 0);
-      pal_print(" tests failed or were skipped.", 0);
+      val_print(ACS_PRINT_TEST, "One or more ", 0);
+      val_print(ACS_PRINT_TEST, string, 0);
+      val_print(ACS_PRINT_TEST, " tests failed or were skipped.", 0);
   }
   else {
-      pal_print("All ", 0);
-      pal_print(string, 0);
-      pal_print(" tests passed.", 0);
+      val_print(ACS_PRINT_TEST, "All ", 0);
+      val_print(ACS_PRINT_TEST, string, 0);
+      val_print(ACS_PRINT_TEST, " tests passed.", 0);
   }
 
-  pal_print("\n", 0);
+  val_print(ACS_PRINT_TEST, "\n", 0);
 
 }
 
@@ -547,6 +554,7 @@ val_check_for_error(uint32_t test_num, uint32_t num_pe, char8_t *ruleid)
   uint32_t status = 0;
   uint32_t error_flag = 0;
   uint32_t my_index = val_pe_get_index_mpid(val_pe_get_mpid());
+  (void) test_num;
 
   /* this special case is needed when the Main PE is not the first entry
      of pe_info_table but num_pe is 1 for SOC tests */
