@@ -51,8 +51,7 @@ payload()
       }
   }
   if ((smmuv2_flag) && (smmuv3_flag)) {
-      val_print(ACS_PRINT_ERR, "\n       ALL SMMUs are not of the same "
-                                "Architecture version\n", 0);
+      val_print(ACS_PRINT_ERR, "\n       ALL SMMUs are not of the same Architecture version\n", 0);
       val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
       return;
   }

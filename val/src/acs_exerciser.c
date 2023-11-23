@@ -46,8 +46,7 @@ uint32_t val_exerciser_create_device_bdf_table(void)
   num_ecam = val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
   if (num_ecam == 0)
   {
-      val_print(ACS_PRINT_ERR,
-        "       No ECAMs discovered             \n ", 0);
+      val_print(ACS_PRINT_ERR, "       No ECAMs discovered\n ", 0);
       return 1;
   }
 

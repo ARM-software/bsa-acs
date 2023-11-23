@@ -117,17 +117,17 @@ main (int argc, char **argv)
     g_sw_view[G_SW_HYP] = 0x0;
     g_sw_view[G_SW_PS]  = 0x0;
 
-    printf ("\n ************ BSA Architecture Compliance Suite *********\n");
-    printf ("                        Version %d.%d.%d\n",
+    printf("\n ************ BSA Architecture Compliance Suite *********\n");
+    printf("                        Version %d.%d.%d\n",
             BSA_APP_VERSION_MAJOR, BSA_APP_VERSION_MINOR, BSA_APP_VERSION_SUBMINOR);
 
 
-    printf ("\n Starting tests (Print level is %2d)\n\n", g_print_level);
+    printf("\n Starting tests (Print level is %2d)\n\n", g_print_level);
 
-    printf (" Gathering system information....\n");
+    printf(" Gathering system information....\n");
     status = initialize_test_environment(g_print_level);
     if (status) {
-        printf ("Cannot initialize test environment. Exiting....\n");
+        printf("Cannot initialize test environment. Exiting....\n");
         return 0;
     }
 

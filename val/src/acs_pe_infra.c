@@ -260,14 +260,14 @@ val_execute_on_pe(uint32_t index, void (*payload)(void), uint64_t test_input)
   } while (g_smc_args.Arg0 == (uint64_t)ARM_SMC_PSCI_RET_ALREADY_ON && timeout--);
 
   if (g_smc_args.Arg0 == (uint64_t)ARM_SMC_PSCI_RET_ALREADY_ON)
-      val_print(ACS_PRINT_ERR, "       PSCI_CPU_ON: cpu already on  \n", 0);
+      val_print(ACS_PRINT_ERR, "\n       PSCI_CPU_ON: cpu already on", 0);
   else {
       if(g_smc_args.Arg0 == 0) {
-          val_print(ACS_PRINT_INFO, "       PSCI_CPU_ON: success  \n", 0);
+          val_print(ACS_PRINT_INFO, "\n       PSCI_CPU_ON: success", 0);
           return;
       }
       else
-          val_print(ACS_PRINT_ERR, "       PSCI_CPU_ON: failure[%d]  \n", g_smc_args.Arg0);
+          val_print(ACS_PRINT_ERR, "\n       PSCI_CPU_ON: failure[%d]", g_smc_args.Arg0);
 
   }
   val_set_status(index, RESULT_FAIL(0, 0x120 - (int)g_smc_args.Arg0));

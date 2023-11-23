@@ -70,10 +70,10 @@ val_report_status(uint32_t index, uint32_t status, char8_t *ruleid)
       }
       else
         if (IS_TEST_START(status))
-          val_print(ACS_PRINT_INFO, "         START\n", status);
+          val_print(ACS_PRINT_INFO, "\n       START", status);
         else
           if (IS_TEST_END(status))
-            val_print(ACS_PRINT_INFO, "         END\n\n", status);
+            val_print(ACS_PRINT_INFO, "       END\n\n", status);
           else
             val_print(ACS_PRINT_ERR, ": Result:  %8x\n", status);
 

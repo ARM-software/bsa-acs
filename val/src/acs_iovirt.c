@@ -143,7 +143,8 @@ val_iovirt_get_pcie_rc_info(PCIE_RC_INFO_e type, uint32_t index)
   }
   if (index > j-1)
   {
-      val_print(ACS_PRINT_ERR, "GET_PCIe_RC_INFO: Index (%d) is greater than num of PCIe-RC\n", index);
+      val_print(ACS_PRINT_ERR, "GET_PCIe_RC_INFO: Index (%d) is greater than num of PCIe-RC\n",
+                                                                                            index);
       return 0;
   }
   return j;
@@ -393,7 +394,7 @@ val_iovirt_create_info_table(uint64_t *iovirt_info_table)
 
   g_num_smmus = (uint32_t)val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
   val_print(ACS_PRINT_TEST,
-            " SMMU_INFO: Number of SMMU CTRL       : %d\n", g_num_smmus);
+            " SMMU_INFO: Number of SMMU CTRL       :    %d\n", g_num_smmus);
   for (i = 0; i < g_num_smmus; i++) {
     smmu_ver = val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, i);
     val_print(ACS_PRINT_TEST,
