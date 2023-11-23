@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2020, 2021, 2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2020, 2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,11 +49,11 @@ pal_target_is_dt()
   // Find the interrupt controller protocol.
   Status = gBS->LocateProtocol (&gHardwareInterruptProtocolGuid, NULL, (VOID **)&Interrupt);
   if (EFI_ERROR(Status)) {
-      bsa_print(ACS_PRINT_INFO, L"  Using ACS interrupt API's \n");
+      bsa_print(ACS_PRINT_INFO, L"  Using ACS interrupt API's\n");
       return 1; /* Not able to locate HW Interrupt Protocol, use ACS interrupt handlers API */
   }
   else {
-      bsa_print(ACS_PRINT_INFO, L"  Using F/W interrupt API's \n");
+      bsa_print(ACS_PRINT_INFO, L"  Using F/W interrupt API's\n");
       return 0; /* Use F/W interrupt handlers */
   }
 }
@@ -74,18 +74,18 @@ pal_get_dt_ptr()
   for (Index = 0; Index < gST->NumberOfTableEntries; Index++) {
     if (CompareGuid (&gFdtTableGuid, &(gST->ConfigurationTable[Index].VendorGuid))) {
       DTB = gST->ConfigurationTable[Index].VendorTable;
-      bsa_print(ACS_PRINT_DEBUG, L"  Platform DTB PTR %x \n", DTB);
+      bsa_print(ACS_PRINT_DEBUG, L"  Platform DTB PTR %x\n", DTB);
       break;
     }
   }
 
   if (!DTB) {
-    bsa_print(ACS_PRINT_ERR, L" DTB not present in platform \n");
+    bsa_print(ACS_PRINT_ERR, L" DTB not present in platform\n");
     return 0; //No fdt blob addr found
   }
 
   if (fdt_check_header(DTB)) {
-    bsa_print(ACS_PRINT_ERR, L" fdt hdr check failed \n");
+    bsa_print(ACS_PRINT_ERR, L" fdt hdr check failed\n");
     return 0;
   }
 
@@ -144,7 +144,7 @@ int fdt_interrupt_cells(const void *fdt, int nodeoffset)
   } while (nodeoffset >= 0);
 
   if (nodeoffset < 0) {
-      bsa_print(ACS_PRINT_DEBUG, L"  No interrupt cell found \n");
+      bsa_print(ACS_PRINT_DEBUG, L"  No interrupt cell found\n");
       return 3; /* default value 3*/
   }
 

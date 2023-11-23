@@ -39,7 +39,7 @@ val_timer_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_TIMER_TEST_NUM_BASE) {
-          val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all Timer tests \n", 0);
+          val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all Timer tests\n", 0);
           return ACS_STATUS_SKIP;
       }
   }
@@ -47,7 +47,7 @@ val_timer_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   /* Check if there are any tests to be executed in current module with user override options*/
   status = val_check_skip_module(ACS_TIMER_TEST_NUM_BASE);
   if (status) {
-      val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all Timer tests \n", 0);
+      val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all Timer tests\n", 0);
       return ACS_STATUS_SKIP;
   }
 
@@ -335,7 +335,7 @@ val_timer_create_info_table(uint64_t *timer_info_table)
 {
 
   if (timer_info_table == NULL) {
-      val_print(ACS_PRINT_ERR, "Input for Create Info table cannot be NULL \n", 0);
+      val_print(ACS_PRINT_ERR, "Input for Create Info table cannot be NULL\n", 0);
       return;
   }
   val_print(ACS_PRINT_INFO, " Creating TIMER INFO table\n", 0);
@@ -351,7 +351,7 @@ val_timer_create_info_table(uint64_t *timer_info_table)
      val_timer_set_phy_el1(0);
      val_timer_set_vir_el1(0);
   }
-  val_print(ACS_PRINT_TEST, " TIMER_INFO: Number of system timers  : %4d \n", g_timer_info_table->header.num_platform_timer);
+  val_print(ACS_PRINT_TEST, " TIMER_INFO: Number of system timers  : %4d\n", g_timer_info_table->header.num_platform_timer);
 
 }
 

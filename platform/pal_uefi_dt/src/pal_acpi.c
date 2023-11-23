@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2020 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2020, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -90,7 +90,7 @@ pal_get_madt_ptr()
 
   Xsdt = (EFI_ACPI_DESCRIPTION_HEADER *) pal_get_xsdt_ptr();
   if (Xsdt == NULL) {
-      bsa_print(ACS_PRINT_INFO, L" XSDT not found \n");
+      bsa_print(ACS_PRINT_INFO, L" XSDT not found\n");
       return 0;
   }
 
@@ -124,7 +124,7 @@ pal_get_gtdt_ptr()
 
   Xsdt = (EFI_ACPI_DESCRIPTION_HEADER *) pal_get_xsdt_ptr();
   if (Xsdt == NULL) {
-      bsa_print(ACS_PRINT_INFO, L" XSDT not found \n");
+      bsa_print(ACS_PRINT_INFO, L" XSDT not found\n");
       return 0;
   }
 
@@ -157,7 +157,7 @@ pal_get_mcfg_ptr()
 
   Xsdt = (EFI_ACPI_DESCRIPTION_HEADER *) pal_get_xsdt_ptr();
   if (Xsdt == NULL) {
-      bsa_print(ACS_PRINT_INFO, L" XSDT not found \n");
+      bsa_print(ACS_PRINT_INFO, L" XSDT not found\n");
       return 0;
   }
 
@@ -222,7 +222,7 @@ pal_get_iort_ptr()
 
   Xsdt = (EFI_ACPI_DESCRIPTION_HEADER *) pal_get_xsdt_ptr();
   if (Xsdt == NULL) {
-      bsa_print(ACS_PRINT_INFO, L" XSDT not found \n");
+      bsa_print(ACS_PRINT_INFO, L" XSDT not found\n");
       return 0;
   }
 

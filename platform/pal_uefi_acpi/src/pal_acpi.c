@@ -38,7 +38,7 @@ VOID
 pal_dump_dtb()
 {
   bsa_print(ACS_PRINT_ERR, L" DTB dump not available for platform initialized"
-                                " with ACPI table \n");
+                                " with ACPI table\n");
 }
 /**
   @brief   Checks if System information is passed using Device Tree (DT)
@@ -118,7 +118,7 @@ pal_get_madt_ptr()
 
   Xsdt = (EFI_ACPI_DESCRIPTION_HEADER *) pal_get_xsdt_ptr();
   if (Xsdt == NULL) {
-      bsa_print(ACS_PRINT_ERR, L" XSDT not found \n");
+      bsa_print(ACS_PRINT_ERR, L" XSDT not found\n");
       return 0;
   }
 
@@ -152,7 +152,7 @@ pal_get_gtdt_ptr()
 
   Xsdt = (EFI_ACPI_DESCRIPTION_HEADER *) pal_get_xsdt_ptr();
   if (Xsdt == NULL) {
-      bsa_print(ACS_PRINT_ERR, L" XSDT not found \n");
+      bsa_print(ACS_PRINT_ERR, L" XSDT not found\n");
       return 0;
   }
 
@@ -185,7 +185,7 @@ pal_get_mcfg_ptr()
 
   Xsdt = (EFI_ACPI_DESCRIPTION_HEADER *) pal_get_xsdt_ptr();
   if (Xsdt == NULL) {
-      bsa_print(ACS_PRINT_ERR, L" XSDT not found \n");
+      bsa_print(ACS_PRINT_ERR, L" XSDT not found\n");
       return 0;
   }
 
@@ -218,7 +218,7 @@ pal_get_spcr_ptr()
 
   Xsdt = (EFI_ACPI_DESCRIPTION_HEADER *) pal_get_xsdt_ptr();
   if (Xsdt == NULL) {
-      bsa_print(ACS_PRINT_ERR, L" XSDT not found \n");
+      bsa_print(ACS_PRINT_ERR, L" XSDT not found\n");
       return 0;
   }
 
@@ -251,7 +251,7 @@ pal_get_iort_ptr()
 
   Xsdt = (EFI_ACPI_DESCRIPTION_HEADER *) pal_get_xsdt_ptr();
   if (Xsdt == NULL) {
-      bsa_print(ACS_PRINT_ERR, L" XSDT not found \n");
+      bsa_print(ACS_PRINT_ERR, L" XSDT not found\n");
       return 0;
   }
 
@@ -289,7 +289,7 @@ pal_get_fadt_ptr (
 
   Xsdt = (EFI_ACPI_DESCRIPTION_HEADER *) pal_get_xsdt_ptr();
   if (Xsdt == NULL) {
-      bsa_print(ACS_PRINT_ERR, L" XSDT not found \n");
+      bsa_print(ACS_PRINT_ERR, L" XSDT not found\n");
       return 0;
   }
 

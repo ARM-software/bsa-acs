@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021, 2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -96,7 +96,7 @@ pal_psci_get_conduit (
 
   dt_ptr = pal_get_dt_ptr();
   if (dt_ptr == 0) {
-      bsa_print(ACS_PRINT_ERR, L" dt_ptr is NULL \n");
+      bsa_print(ACS_PRINT_ERR, L" dt_ptr is NULL\n");
       return CONDUIT_NONE;
   }
 
@@ -107,7 +107,7 @@ pal_psci_get_conduit (
         break;
   }
   if (offset < 0) {
-      bsa_print(ACS_PRINT_ERR, L"  psci node offset not found \n");
+      bsa_print(ACS_PRINT_ERR, L"  psci node offset not found\n");
       return CONDUIT_UNKNOWN;
   }
 
@@ -115,11 +115,11 @@ pal_psci_get_conduit (
   if ((prop_len > 0) && (Pmethod != NULL)) {
       bsa_print(ACS_PRINT_DEBUG, L"  method field length %d\n", prop_len);
       if (pal_strncmp(Pmethod, "hvc", 4) == 0) {
-          bsa_print(ACS_PRINT_DEBUG, L"  psci method hvc \n");
+          bsa_print(ACS_PRINT_DEBUG, L"  psci method hvc\n");
           return CONDUIT_HVC;
       }
       if (pal_strncmp(Pmethod, "smc", 4) == 0) {
-          bsa_print(ACS_PRINT_DEBUG, L"  psci method smc \n");
+          bsa_print(ACS_PRINT_DEBUG, L"  psci method smc\n");
           return CONDUIT_SMC;
       }
   }
@@ -189,7 +189,7 @@ PalAllocateSecondaryStack(UINT64 mpidr)
                     (NumPe * SIZE_STACK_SECONDARY_PE),
                     (VOID **) &gSecondaryPeStack);
       if (EFI_ERROR(Status)) {
-          bsa_print(ACS_PRINT_ERR, L"\n FATAL - Allocation for Seconday stack failed %x \n", Status);
+          bsa_print(ACS_PRINT_ERR, L"\n FATAL - Allocation for Seconday stack failed %x\n", Status);
       }
       pal_pe_data_cache_ops_by_va((UINT64)&gSecondaryPeStack, CLEAN_AND_INVALIDATE);
   }
@@ -215,7 +215,7 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
 
 
   if (PeTable == NULL) {
-    bsa_print(ACS_PRINT_ERR, L" Input PE Table Pointer is NULL. Cannot create PE INFO \n");
+    bsa_print(ACS_PRINT_ERR, L" Input PE Table Pointer is NULL. Cannot create PE INFO\n");
     return;
   }
   pal_pe_create_info_table_dt(PeTable);
@@ -225,7 +225,7 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
 
   if (gMadtHdr != NULL) {
     TableLength =  gMadtHdr->Header.Length;
-    bsa_print(ACS_PRINT_INFO, L"  MADT is at %x and length is %x \n", gMadtHdr, TableLength);
+    bsa_print(ACS_PRINT_INFO, L"  MADT is at %x and length is %x\n", gMadtHdr, TableLength);
   }
 
   PeTable->header.num_of_pe = 0;
@@ -241,7 +241,7 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
       Ptr->mpidr    = Entry->MPIDR;
       Ptr->pe_num   = PeTable->header.num_of_pe;
       Ptr->pmu_gsiv = Entry->PerformanceInterruptGsiv;
-      bsa_print(ACS_PRINT_DEBUG, L"  MPIDR %x PE num %d \n", Ptr->mpidr, Ptr->pe_num);
+      bsa_print(ACS_PRINT_DEBUG, L"  MPIDR %x PE num %d\n", Ptr->mpidr, Ptr->pe_num);
       pal_pe_data_cache_ops_by_va((UINT64)Ptr, CLEAN_AND_INVALIDATE);
       Ptr++;
       PeTable->header.num_of_pe++;
@@ -438,7 +438,7 @@ pal_pe_info_table_pmu_gsiv_dt(PE_INFO_TABLE *PeTable)
 
   dt_ptr = pal_get_dt_ptr();
   if (dt_ptr == 0) {
-      bsa_print(ACS_PRINT_ERR, L" dt_ptr is NULL \n");
+      bsa_print(ACS_PRINT_ERR, L" dt_ptr is NULL\n");
       return;
   }
 
@@ -466,12 +466,12 @@ pal_pe_info_table_pmu_gsiv_dt(PE_INFO_TABLE *PeTable)
           interrupt_cell = fdt_interrupt_cells((const void *)dt_ptr, offset);
           bsa_print(ACS_PRINT_DEBUG, L"  interrupt_cell  %d\n", interrupt_cell);
           if (interrupt_cell < INTERRUPT_CELLS_MIN || interrupt_cell > INTERRUPT_CELLS_MAX) {
-              bsa_print(ACS_PRINT_ERR, L"  Invalid interrupt cell : %d \n", interrupt_cell);
+              bsa_print(ACS_PRINT_ERR, L"  Invalid interrupt cell : %d\n", interrupt_cell);
               return;
           }
 
           interrupt_frame_count = ((prop_len/sizeof(int))/interrupt_cell);
-          bsa_print(ACS_PRINT_DEBUG, L"  interrupt frame count : %d \n", interrupt_frame_count);
+          bsa_print(ACS_PRINT_DEBUG, L"  interrupt frame count : %d\n", interrupt_frame_count);
 
           if (interrupt_frame_count == 0) {
               bsa_print(ACS_PRINT_ERR, L"  interrupt_frame_count is invalid\n");
@@ -499,8 +499,8 @@ pal_pe_info_table_pmu_gsiv_dt(PE_INFO_TABLE *PeTable)
                 return;
               }
 
-              bsa_print(ACS_PRINT_DEBUG, L"  intr_type    : %d \n", intr_type);
-              bsa_print(ACS_PRINT_DEBUG, L"  pmu_intr_num : %d \n", curr_pmu_intr_num);
+              bsa_print(ACS_PRINT_DEBUG, L"  intr_type    : %d\n", intr_type);
+              bsa_print(ACS_PRINT_DEBUG, L"  pmu_intr_num : %d\n", curr_pmu_intr_num);
 
               if (intr_type == INTERRUPT_TYPE_PPI) {
                 curr_pmu_intr_num += PPI_OFFSET;
@@ -583,7 +583,7 @@ pal_pe_create_info_table_dt(PE_INFO_TABLE *PeTable)
         return;
       }
   } else {
-        bsa_print(ACS_PRINT_ERR, L"  No CPU node found \n");
+        bsa_print(ACS_PRINT_ERR, L"  No CPU node found\n");
         return;
   }
 
@@ -606,7 +606,7 @@ pal_pe_create_info_table_dt(PE_INFO_TABLE *PeTable)
       if ((prop_len > 0) && (Pstatus != NULL)) {
           bsa_print(ACS_PRINT_DEBUG, L"  Status field length %d\n", prop_len);
           if (pal_strncmp(Pstatus, "fail", 5) == 0) {
-              bsa_print(ACS_PRINT_DEBUG, L"  CPU is not operational..SKIP \n");
+              bsa_print(ACS_PRINT_DEBUG, L"  CPU is not operational..SKIP\n");
               offset = fdt_node_offset_by_prop_value((const void *) dt_ptr, offset,
                                                       "device_type", "cpu", 4);
               continue;

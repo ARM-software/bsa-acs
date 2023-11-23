@@ -143,7 +143,7 @@ PalAllocateSecondaryStack(UINT64 mpidr)
                     (NumPe * SIZE_STACK_SECONDARY_PE),
                     (VOID **) &gSecondaryPeStack);
       if (EFI_ERROR(Status)) {
-          bsa_print(ACS_PRINT_ERR, L"\n FATAL - Allocation for Seconday stack failed %x \n", Status);
+          bsa_print(ACS_PRINT_ERR, L"\n FATAL - Allocation for Seconday stack failed %x\n", Status);
       }
       pal_pe_data_cache_ops_by_va((UINT64)&gSecondaryPeStack, CLEAN_AND_INVALIDATE);
   }
@@ -169,7 +169,7 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
   UINT32                        Flags;
 
   if (PeTable == NULL) {
-    bsa_print(ACS_PRINT_ERR, L" Input PE Table Pointer is NULL. Cannot create PE INFO \n");
+    bsa_print(ACS_PRINT_ERR, L" Input PE Table Pointer is NULL. Cannot create PE INFO\n");
     return;
   }
 
@@ -180,9 +180,9 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
 
   if (gMadtHdr != NULL) {
     TableLength =  gMadtHdr->Header.Length;
-    bsa_print(ACS_PRINT_INFO, L"  MADT is at %x and length is %x \n", gMadtHdr, TableLength);
+    bsa_print(ACS_PRINT_INFO, L"  MADT is at %x and length is %x\n", gMadtHdr, TableLength);
   } else {
-    bsa_print(ACS_PRINT_ERR, L" MADT not found \n");
+    bsa_print(ACS_PRINT_ERR, L" MADT not found\n");
     return;
   }
 
@@ -195,7 +195,7 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
     if (Entry->Type == EFI_ACPI_6_1_GIC) {
       //Fill in the cpu num and the mpidr in pe info table
       Flags           = Entry->Flags;
-      bsa_print(ACS_PRINT_INFO, L"  Flags %x \n", Flags);
+      bsa_print(ACS_PRINT_INFO, L"  Flags %x\n", Flags);
       bsa_print(ACS_PRINT_DEBUG, L"  PE Enabled %d, Online Capable %d\n", ENABLED_BIT(Flags), ONLINE_CAP_BIT(Flags));
 
       /* As per MADT (GICC CPU Interface Flags) Processor is usable when
@@ -209,7 +209,7 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
           Ptr->pe_num     = PeTable->header.num_of_pe;
           Ptr->pmu_gsiv   = Entry->PerformanceInterruptGsiv;
           Ptr->gmain_gsiv = Entry->VGICMaintenanceInterrupt;
-          bsa_print(ACS_PRINT_DEBUG, L"  MPIDR %llx PE num %x \n", Ptr->mpidr, Ptr->pe_num);
+          bsa_print(ACS_PRINT_DEBUG, L"  MPIDR %llx PE num %x\n", Ptr->mpidr, Ptr->pe_num);
           pal_pe_data_cache_ops_by_va((UINT64)Ptr, CLEAN_AND_INVALIDATE);
           Ptr++;
           PeTable->header.num_of_pe++;

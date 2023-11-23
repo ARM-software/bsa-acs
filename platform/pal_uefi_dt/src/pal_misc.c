@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,7 +40,7 @@ VOID
 pal_mmio_write8(UINT64 addr, UINT8 data)
 {
   if (g_print_mmio || (g_curr_module & g_enable_module))
-      bsa_print(ACS_PRINT_INFO, L" pal_mmio_write8 Address = %llx  Data = %lx \n", addr, data);
+      bsa_print(ACS_PRINT_INFO, L" pal_mmio_write8 Address = %llx  Data = %lx\n", addr, data);
 
   *(volatile UINT8 *)addr = data;
 }
@@ -58,7 +58,7 @@ VOID
 pal_mmio_write16(UINT64 addr, UINT16 data)
 {
   if (g_print_mmio || (g_curr_module & g_enable_module))
-      bsa_print(ACS_PRINT_INFO, L" pal_mmio_write16 Address = %llx  Data = %lx \n", addr, data);
+      bsa_print(ACS_PRINT_INFO, L" pal_mmio_write16 Address = %llx  Data = %lx\n", addr, data);
 
   *(volatile UINT16 *)addr = data;
 }
@@ -76,7 +76,7 @@ VOID
 pal_mmio_write64(UINT64 addr, UINT64 data)
 {
   if (g_print_mmio || (g_curr_module & g_enable_module))
-      bsa_print(ACS_PRINT_INFO, L" pal_mmio_write64 Address = %llx  Data = %llx \n", addr, data);
+      bsa_print(ACS_PRINT_INFO, L" pal_mmio_write64 Address = %llx  Data = %llx\n", addr, data);
 
   *(volatile UINT64 *)addr = data;
 }
@@ -97,7 +97,7 @@ pal_mmio_read8(UINT64 addr)
   data = (*(volatile UINT8 *)addr);
 
   if (g_print_mmio || (g_curr_module & g_enable_module))
-      bsa_print(ACS_PRINT_INFO, L" pal_mmio_read8 Address = %lx  Data = %lx \n", addr, data);
+      bsa_print(ACS_PRINT_INFO, L" pal_mmio_read8 Address = %lx  Data = %lx\n", addr, data);
 
   return data;
 }
@@ -118,7 +118,7 @@ pal_mmio_read16(UINT64 addr)
   data = (*(volatile UINT16 *)addr);
 
   if (g_print_mmio || (g_curr_module & g_enable_module))
-      bsa_print(ACS_PRINT_INFO, L" pal_mmio_read16 Address = %lx  Data = %lx \n", addr, data);
+      bsa_print(ACS_PRINT_INFO, L" pal_mmio_read16 Address = %lx  Data = %lx\n", addr, data);
 
   return data;
 }
@@ -139,7 +139,7 @@ pal_mmio_read64(UINT64 addr)
   data = (*(volatile UINT64 *)addr);
 
   if (g_print_mmio || (g_curr_module & g_enable_module))
-      bsa_print(ACS_PRINT_INFO, L" pal_mmio_read64 Address = %lx  Data = %lx \n", addr, data);
+      bsa_print(ACS_PRINT_INFO, L" pal_mmio_read64 Address = %lx  Data = %lx\n", addr, data);
 
   return data;
 }
@@ -158,13 +158,13 @@ pal_mmio_read(UINT64 addr)
   UINT32 data;
 
   if (addr & 0x3) {
-      bsa_print(ACS_PRINT_WARN, L"\n  Error-Input address is not aligned. Masking the last 2 bits \n");
+      bsa_print(ACS_PRINT_WARN, L"\n  Error-Input address is not aligned. Masking the last 2 bits\n");
       addr = addr & ~(0x3);  //make sure addr is aligned to 4 bytes
   }
   data = (*(volatile UINT32 *)addr);
 
   if (g_print_mmio || (g_curr_module & g_enable_module))
-      bsa_print(ACS_PRINT_INFO, L" pal_mmio_read Address = %lx  Data = %x \n", addr, data);
+      bsa_print(ACS_PRINT_INFO, L" pal_mmio_read Address = %lx  Data = %x\n", addr, data);
 
   return data;
 }
@@ -182,7 +182,7 @@ VOID
 pal_mmio_write(UINT64 addr, UINT32 data)
 {
   if (g_print_mmio || (g_curr_module & g_enable_module))
-      bsa_print(ACS_PRINT_INFO, L" pal_mmio_write Address = %llx  Data = %x \n", addr, data);
+      bsa_print(ACS_PRINT_INFO, L" pal_mmio_write Address = %llx  Data = %x\n", addr, data);
 
   *(volatile UINT32 *)addr = data;
 }
@@ -326,10 +326,10 @@ pal_mem_allocate_shared(UINT32 num_pe, UINT32 sizeofentry)
                                (num_pe * sizeofentry),
                                (VOID **) &gSharedMemory );
 
-  bsa_print(ACS_PRINT_INFO, L" Shared memory is %llx \n", gSharedMemory);
+  bsa_print(ACS_PRINT_INFO, L" Shared memory is %llx\n", gSharedMemory);
 
   if (EFI_ERROR(Status)) {
-    bsa_print(ACS_PRINT_ERR, L" Allocate Pool shared memory failed %x \n", Status);
+    bsa_print(ACS_PRINT_ERR, L" Allocate Pool shared memory failed %x\n", Status);
   }
   pal_pe_data_cache_ops_by_va((UINT64)&gSharedMemory, CLEAN_AND_INVALIDATE);
 
@@ -388,7 +388,7 @@ pal_mem_alloc (
                               (VOID **) &Buffer);
   if (EFI_ERROR(Status))
   {
-    bsa_print(ACS_PRINT_ERR, L" Allocate Pool failed %x \n", Status);
+    bsa_print(ACS_PRINT_ERR, L" Allocate Pool failed %x\n", Status);
     return NULL;
   }
 
@@ -419,7 +419,7 @@ pal_mem_calloc (
                               (VOID **) &Buffer);
   if (EFI_ERROR(Status))
   {
-    bsa_print(ACS_PRINT_ERR, L" Allocate Pool failed %x \n", Status);
+    bsa_print(ACS_PRINT_ERR, L" Allocate Pool failed %x\n", Status);
     return NULL;
   }
 
@@ -453,7 +453,7 @@ pal_mem_alloc_cacheable (
                                EFI_SIZE_TO_PAGES(Size),
                                &Address);
   if (EFI_ERROR(Status)) {
-    bsa_print(ACS_PRINT_ERR, L" Allocate Pool failed %x \n", Status);
+    bsa_print(ACS_PRINT_ERR, L" Allocate Pool failed %x\n", Status);
     return NULL;
   }
 
@@ -602,7 +602,7 @@ pal_mem_alloc_pages (
                                &PageBase);
   if (EFI_ERROR(Status))
   {
-    bsa_print(ACS_PRINT_ERR, L" Allocate Pages failed %x \n", Status);
+    bsa_print(ACS_PRINT_ERR, L" Allocate Pages failed %x\n", Status);
     return NULL;
   }
 

@@ -52,7 +52,7 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
   PERIPHERAL_INFO_BLOCK *per_info = NULL;
 
   if (peripheralInfoTable == NULL) {
-    print(ACS_PRINT_ERR, "Input Peripheral Table Pointer is NULL. Cannot create Peripheral INFO \n");
+    print(ACS_PRINT_ERR, "Input Peripheral Table Pointer is NULL. Cannot create Peripheral INFO\n");
     return;
   }
 
@@ -67,7 +67,7 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
   /* check for any USB Controllers */
   do {
 
-       print(ACS_PRINT_INFO, "Entered USB loop \n");
+       print(ACS_PRINT_INFO, "Entered USB loop\n");
        DeviceBdf = pal_pcie_get_bdf(USB_CLASSCODE, StartBdf);
        if (DeviceBdf != 0) {
           per_info->type  = PERIPHERAL_TYPE_USB;
@@ -80,7 +80,7 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
           per_info->bdf   = DeviceBdf;
           per_info->platform_type = 0;
 
-          print(ACS_PRINT_INFO, "Found a USB controller %4x \n", per_info->base0);
+          print(ACS_PRINT_INFO, "Found a USB controller %4x\n", per_info->base0);
           peripheralInfoTable->header.num_usb++;
           peripheralInfoTable->header.num_all++;
           per_info++;
@@ -94,7 +94,7 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
   /* check for any SATA Controllers */
   do {
 
-       print(ACS_PRINT_INFO, "Entered SATA loop \n");
+       print(ACS_PRINT_INFO, "Entered SATA loop\n");
        DeviceBdf = pal_pcie_get_bdf(SATA_CLASSCODE, StartBdf);
        if (DeviceBdf != 0) {
           per_info->type  = PERIPHERAL_TYPE_SATA;
@@ -107,7 +107,7 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
           per_info->platform_type = 0;
           per_info->bdf   = DeviceBdf;
 
-          print(ACS_PRINT_INFO, "Found a SATA controller %4x \n", per_info->base0);
+          print(ACS_PRINT_INFO, "Found a SATA controller %4x\n", per_info->base0);
           peripheralInfoTable->header.num_sata++;
           peripheralInfoTable->header.num_all++;
           per_info++;

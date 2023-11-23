@@ -38,7 +38,7 @@ val_wd_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_WD_TEST_NUM_BASE) {
-          val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all Watchdog tests \n", 0);
+          val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all Watchdog tests\n", 0);
           return ACS_STATUS_SKIP;
       }
   }
@@ -46,7 +46,7 @@ val_wd_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   /* Check if there are any tests to be executed in current module with user override options*/
   status = val_check_skip_module(ACS_WD_TEST_NUM_BASE);
   if (status) {
-      val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all Watchdog tests \n", 0);
+      val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all Watchdog tests\n", 0);
       return ACS_STATUS_SKIP;
   }
 
@@ -121,7 +121,7 @@ val_wd_create_info_table(uint64_t *wd_info_table)
 {
 
   if (wd_info_table == NULL) {
-      val_print(ACS_PRINT_ERR, "Input for Create Info table cannot be NULL \n", 0);
+      val_print(ACS_PRINT_ERR, "Input for Create Info table cannot be NULL\n", 0);
       return;
   }
   val_print(ACS_PRINT_INFO, " Creating WATCHDOG INFO table\n", 0);
@@ -130,7 +130,7 @@ val_wd_create_info_table(uint64_t *wd_info_table)
 
   pal_wd_create_info_table(g_wd_info_table);
 
-  val_print(ACS_PRINT_TEST, " WATCHDOG_INFO: Number of Watchdogs   : %4d \n", val_wd_get_info(0, WD_INFO_COUNT));
+  val_print(ACS_PRINT_TEST, " WATCHDOG_INFO: Number of Watchdogs   : %4d\n", val_wd_get_info(0, WD_INFO_COUNT));
 }
 
 /**

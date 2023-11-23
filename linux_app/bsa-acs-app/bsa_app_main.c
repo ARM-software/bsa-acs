@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2020-2021, 2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2020-2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -117,35 +117,35 @@ main (int argc, char **argv)
     g_sw_view[G_SW_HYP] = 0x0;
     g_sw_view[G_SW_PS]  = 0x0;
 
-    printf ("\n ************ BSA Architecture Compliance Suite ********* \n");
-    printf ("                        Version %d.%d.%d  \n",
+    printf ("\n ************ BSA Architecture Compliance Suite *********\n");
+    printf ("                        Version %d.%d.%d\n",
             BSA_APP_VERSION_MAJOR, BSA_APP_VERSION_MINOR, BSA_APP_VERSION_SUBMINOR);
 
 
     printf ("\n Starting tests (Print level is %2d)\n\n", g_print_level);
 
-    printf (" Gathering system information.... \n");
+    printf (" Gathering system information....\n");
     status = initialize_test_environment(g_print_level);
     if (status) {
-        printf ("Cannot initialize test environment. Exiting.... \n");
+        printf ("Cannot initialize test environment. Exiting....\n");
         return 0;
     }
 
-    printf("\n      *** Starting Memory Map tests ***  \n");
+    printf("\n      *** Starting Memory Map tests ***\n");
     execute_tests_memory(1, g_print_level);
 
-    printf("\n      *** Starting Peripherals tests ***  \n");
+    printf("\n      *** Starting Peripherals tests ***\n");
     execute_tests_peripheral(1, g_print_level);
 
     if (run_exerciser) {
-        printf("\n      *** PCIe Exerciser tests only runs on UEFI ***  \n");
+        printf("\n      *** PCIe Exerciser tests only runs on UEFI ***\n");
         //execute_tests_exerciser(1, g_print_level);
     } else {
-        printf("\n      *** Starting PCIe tests ***  \n");
+        printf("\n      *** Starting PCIe tests ***\n");
         execute_tests_pcie(1, g_print_level);
     }
 
-    printf("\n                    *** BSA tests complete *** \n\n");
+    printf("\n                    *** BSA tests complete ***\n\n");
 
     cleanup_test_environment();
 

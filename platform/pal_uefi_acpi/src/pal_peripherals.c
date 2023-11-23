@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2020-2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2020-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,7 +60,7 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
 
   if (peripheralInfoTable == NULL) {
     bsa_print(ACS_PRINT_ERR,
-              L" Input Peripheral Table Pointer is NULL. Cannot create Peripheral INFO \n");
+              L" Input Peripheral Table Pointer is NULL. Cannot create Peripheral INFO\n");
     return;
   }
 
@@ -257,7 +257,7 @@ pal_memory_create_info_table(MEMORY_INFO_TABLE *memoryInfoTable)
   UINT32                Index, i = 0;
 
   if (memoryInfoTable == NULL) {
-    bsa_print(ACS_PRINT_ERR, L" Input Memory Table Pointer is NULL. Cannot create Memory INFO \n");
+    bsa_print(ACS_PRINT_ERR, L" Input Memory Table Pointer is NULL. Cannot create Memory INFO\n");
     return;
   }
 

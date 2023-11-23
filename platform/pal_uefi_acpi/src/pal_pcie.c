@@ -54,7 +54,7 @@ pal_pcie_get_mcfg_ecam()
   gMcfgHdr = (EFI_ACPI_MEMORY_MAPPED_CONFIGURATION_BASE_ADDRESS_TABLE_HEADER *) pal_get_mcfg_ptr();
 
   if (gMcfgHdr == NULL) {
-      bsa_print(ACS_PRINT_WARN, L" ACPI - MCFG Table not found. Setting ECAM Base to 0. \n");
+      bsa_print(ACS_PRINT_WARN, L" ACPI - MCFG Table not found. Setting ECAM Base to 0.\n");
       return 0x0;
   }
 
@@ -80,7 +80,7 @@ pal_pcie_create_info_table(PCIE_INFO_TABLE *PcieTable)
   UINT32 i = 0;
 
   if (PcieTable == NULL) {
-    bsa_print(ACS_PRINT_ERR, L" Input PCIe Table Pointer is NULL. Cannot create PCIe INFO \n");
+    bsa_print(ACS_PRINT_ERR, L" Input PCIe Table Pointer is NULL. Cannot create PCIe INFO\n");
     return;
   }
 
@@ -89,7 +89,7 @@ pal_pcie_create_info_table(PCIE_INFO_TABLE *PcieTable)
   gMcfgHdr = (EFI_ACPI_MEMORY_MAPPED_CONFIGURATION_BASE_ADDRESS_TABLE_HEADER *) pal_get_mcfg_ptr();
 
   if (gMcfgHdr == NULL) {
-      bsa_print(ACS_PRINT_DEBUG, L" ACPI - MCFG Table not found. \n");
+      bsa_print(ACS_PRINT_DEBUG, L" ACPI - MCFG Table not found.\n");
       return;
   }
 

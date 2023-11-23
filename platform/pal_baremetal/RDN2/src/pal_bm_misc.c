@@ -99,14 +99,14 @@ pal_mem_alloc_cacheable(uint32_t Bdf, uint32_t Size, void **Pa)
                                EFI_SIZE_TO_PAGES(Size),
                                &Address);
   if (EFI_ERROR(Status)) {
-    print(ACS_PRINT_ERR, "Allocate Pool failed %x \n", Status);
+    print(ACS_PRINT_ERR, "Allocate Pool failed %x\n", Status);
     return NULL;
   }
 
   /* Check Whether Cpu architectural protocol is installed */
   Status = gBS->LocateProtocol ( &gEfiCpuArchProtocolGuid, NULL, (VOID **)&Cpu);
   if (EFI_ERROR(Status)) {
-    print(ACS_PRINT_ERR, "Could not get Cpu Arch Protocol %x \n", Status);
+    print(ACS_PRINT_ERR, "Could not get Cpu Arch Protocol %x\n", Status);
     return NULL;
   }
 
@@ -116,7 +116,7 @@ pal_mem_alloc_cacheable(uint32_t Bdf, uint32_t Size, void **Pa)
                                      Size,
                                      EFI_MEMORY_WB);
   if (EFI_ERROR (Status)) {
-    print(ACS_PRINT_ERR, "Could not Set Memory Attribute %x \n", Status);
+    print(ACS_PRINT_ERR, "Could not Set Memory Attribute %x\n", Status);
     return NULL;
   }
 
@@ -259,7 +259,7 @@ pal_mem_alloc_pages (uint32_t NumPages)
                                &PageBase);
   if (EFI_ERROR(Status))
   {
-    print(ACS_PRINT_ERR, "Allocate Pages failed %x \n", Status);
+    print(ACS_PRINT_ERR, "Allocate Pages failed %x\n", Status);
     return NULL;
   }
 

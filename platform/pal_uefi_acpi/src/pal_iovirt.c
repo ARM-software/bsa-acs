@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2019, 2021-2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2019, 2021-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -189,13 +189,13 @@ check_mapping_overlap(IOVIRT_INFO_TABLE *iovirt)
             if(tmp->type == IOVIRT_NODE_ITS_GROUP) {
                key_block->flags |= (1 << IOVIRT_FLAG_DEVID_OVERLAP_SHIFT);
                block->flags |= (1 << IOVIRT_FLAG_DEVID_OVERLAP_SHIFT);
-               bsa_print(ACS_PRINT_INFO, L"\n Overlapping device ids %x-%x and %x-%x \n",
+               bsa_print(ACS_PRINT_INFO, L"\n Overlapping device ids %x-%x and %x-%x\n",
                           key_start, key_end, start, end);
             }
             else {
                key_block->flags |= (1 << IOVIRT_FLAG_STRID_OVERLAP_SHIFT);
                block->flags |= (1 << IOVIRT_FLAG_STRID_OVERLAP_SHIFT);
-               bsa_print(ACS_PRINT_INFO, L"\n Overlapping stream ids %x-%x and %x-%x \n",
+               bsa_print(ACS_PRINT_INFO, L"\n Overlapping stream ids %x-%x and %x-%x\n",
                           key_start, key_end, start, end);
             }
           }
@@ -424,7 +424,7 @@ pal_iovirt_create_info_table(IOVIRT_INFO_TABLE *IoVirtTable)
   /* Create iovirt block for each IORT node*/
   for (i = 0; i < iort->node_count; i++) {
     if (iort_node >= iort_end) {
-      bsa_print(ACS_PRINT_ERR, L" Bad IORT table \n");
+      bsa_print(ACS_PRINT_ERR, L" Bad IORT table\n");
       return;
     }
     iort_add_block(iort, iort_node, IoVirtTable, &next_block);

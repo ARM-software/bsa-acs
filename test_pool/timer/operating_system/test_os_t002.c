@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,7 +44,7 @@ payload()
         (val_timer_get_info(TIMER_INFO_VIR_EL1_FLAGS, 0) & BSA_TIMER_FLAG_ALWAYS_ON)) {
           val_set_status(index, RESULT_PASS(TEST_NUM, 1));
       } else {
-          val_print(ACS_PRINT_ERR, "\n       PE Timers are not always-on \n"
+          val_print(ACS_PRINT_ERR, "\n       PE Timers are not always-on\n"
                                    "       And no system wake up timer", 0);
           val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
       }

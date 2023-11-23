@@ -131,7 +131,7 @@ uint32_t val_exerciser_create_info_table(void)
 
   }
 
-  val_print(ACS_PRINT_ERR, " \nPCIE_INFO: Number of exerciser cards : %4d \n",
+  val_print(ACS_PRINT_ERR, "\nPCIE_INFO: Number of exerciser cards : %4d\n",
                                                              g_exerciser_info_table.num_exerciser);
   return 0;
 }
@@ -438,7 +438,7 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
 
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_EXERCISER_TEST_NUM_BASE) {
-          val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all Exerciser tests \n", 0);
+          val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all Exerciser tests\n", 0);
           return ACS_STATUS_SKIP;
       }
   }
@@ -446,7 +446,7 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
   /* Check if there are any tests to be executed in current module with user override options*/
   status = val_check_skip_module(ACS_EXERCISER_TEST_NUM_BASE);
   if (status) {
-    val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all Exerciser tests \n", 0);
+    val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all Exerciser tests\n", 0);
     return ACS_STATUS_SKIP;
   }
 

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2019, 2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2019, 2022, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -197,13 +197,13 @@ check_mapping_overlap(IOVIRT_INFO_TABLE *iovirt)
             if(tmp->type == IOVIRT_NODE_ITS_GROUP) {
                key_block->flags |= (1 << IOVIRT_FLAG_DEVID_OVERLAP_SHIFT);
                block->flags |= (1 << IOVIRT_FLAG_DEVID_OVERLAP_SHIFT);
-               bsa_print(ACS_PRINT_INFO, L"\n Overlapping device ids %x-%x and %x-%x \n",
+               bsa_print(ACS_PRINT_INFO, L"\n Overlapping device ids %x-%x and %x-%x\n",
                           key_start, key_end, start, end);
             }
             else {
                key_block->flags |= (1 << IOVIRT_FLAG_STRID_OVERLAP_SHIFT);
                block->flags |= (1 << IOVIRT_FLAG_STRID_OVERLAP_SHIFT);
-               bsa_print(ACS_PRINT_INFO, L"\n Overlapping stream ids %x-%x and %x-%x \n",
+               bsa_print(ACS_PRINT_INFO, L"\n Overlapping stream ids %x-%x and %x-%x\n",
                           key_start, key_end, start, end);
             }
           }
@@ -431,7 +431,7 @@ pal_iovirt_create_info_table(IOVIRT_INFO_TABLE *IoVirtTable)
   /* Create iovirt block for each IORT node*/
   for (i = 0; i < iort->node_count; i++) {
     if (iort_node >= iort_end) {
-      bsa_print(ACS_PRINT_ERR, L" Bad IORT table \n");
+      bsa_print(ACS_PRINT_ERR, L" Bad IORT table\n");
       return;
     }
     iort_add_block(iort, iort_node, IoVirtTable, &next_block);
@@ -616,12 +616,12 @@ pal_iovirt_create_info_table_dt(IOVIRT_INFO_TABLE *IoVirtTable)
       addr_cell = fdt_address_cells((const void *) dt_ptr, parent_offset);
       bsa_print(ACS_PRINT_DEBUG, L"  addr cell %d\n", addr_cell);
       if (addr_cell < 1) {
-          bsa_print(ACS_PRINT_ERR, L"  Invalid address cell : %d \n", addr_cell);
+          bsa_print(ACS_PRINT_ERR, L"  Invalid address cell : %d\n", addr_cell);
           return;
       }
 
       while (offset != -FDT_ERR_NOTFOUND) {
-          bsa_print(ACS_PRINT_DEBUG, L"  SMMUv3 node:%d offset:%d \n", IoVirtTable->num_smmus,
+          bsa_print(ACS_PRINT_DEBUG, L"  SMMUv3 node:%d offset:%d\n", IoVirtTable->num_smmus,
                     offset);
 
           Preg_val = (UINT32 *)fdt_getprop_namelen((void *)dt_ptr, offset, "reg", 3, &prop_len);
@@ -671,12 +671,12 @@ pal_iovirt_create_info_table_dt(IOVIRT_INFO_TABLE *IoVirtTable)
       addr_cell = fdt_address_cells((const void *) dt_ptr, parent_offset);
       bsa_print(ACS_PRINT_DEBUG, L"  addr cell %d\n", addr_cell);
       if (addr_cell < 1) {
-          bsa_print(ACS_PRINT_ERR, L"  Invalid address cell : %d \n", addr_cell);
+          bsa_print(ACS_PRINT_ERR, L"  Invalid address cell : %d\n", addr_cell);
           return;
       }
 
       while (offset != -FDT_ERR_NOTFOUND) {
-          bsa_print(ACS_PRINT_DEBUG, L"  SMMUv2 node:%d offset:%d \n", IoVirtTable->num_smmus,
+          bsa_print(ACS_PRINT_DEBUG, L"  SMMUv2 node:%d offset:%d\n", IoVirtTable->num_smmus,
                     offset);
 
           Preg_val = (UINT32 *)fdt_getprop_namelen((void *)dt_ptr, offset, "reg", 3, &prop_len);
@@ -719,14 +719,14 @@ pal_iovirt_create_info_table_dt(IOVIRT_INFO_TABLE *IoVirtTable)
   size_cell = fdt_size_cells((const void *) dt_ptr, parent_offset);
   bsa_print(ACS_PRINT_DEBUG, L"  NODE pcie size cell %d\n", size_cell);
   if (size_cell < 0) {
-    bsa_print(ACS_PRINT_ERR, L"  Invalid size cell \n");
+    bsa_print(ACS_PRINT_ERR, L"  Invalid size cell\n");
     return;
   }
 
   addr_cell = fdt_address_cells((const void *) dt_ptr, parent_offset);
   bsa_print(ACS_PRINT_DEBUG, L"  NODE pcie addr cell %d\n", addr_cell);
   if (addr_cell <= 0 || addr_cell > 2) {
-    bsa_print(ACS_PRINT_ERR, L"  Invalid address cell \n");
+    bsa_print(ACS_PRINT_ERR, L"  Invalid address cell\n");
     return;
   }
 

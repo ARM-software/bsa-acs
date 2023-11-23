@@ -81,7 +81,7 @@ pal_pcie_create_info_table(PCIE_INFO_TABLE *PcieTable)
   UINT32 i = 0;
 
   if (PcieTable == NULL) {
-    bsa_print(ACS_PRINT_ERR, L" Input PCIe Table Pointer is NULL. Cannot create PCIe INFO \n");
+    bsa_print(ACS_PRINT_ERR, L" Input PCIe Table Pointer is NULL. Cannot create PCIe INFO\n");
     return;
   }
 
@@ -537,7 +537,7 @@ pal_pcie_create_info_table_dt(PCIE_INFO_TABLE *PcieTable)
   for (i = 0; i < sizeof(pci_dt_arr)/PCI_COMPATIBLE_STR_LEN ; i++) {
       offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, pci_dt_arr[i]);
       if (offset < 0) {
-          bsa_print(ACS_PRINT_DEBUG, L"  PCI node offset not found %d \n", offset);
+          bsa_print(ACS_PRINT_DEBUG, L"  PCI node offset not found %d\n", offset);
           continue; /* Search for next compatible node*/
       }
 
@@ -547,14 +547,14 @@ pal_pcie_create_info_table_dt(PCIE_INFO_TABLE *PcieTable)
       size_cell = fdt_size_cells((const void *) dt_ptr, parent_offset);
       bsa_print(ACS_PRINT_DEBUG, L"  NODE pcie size cell %d\n", size_cell);
       if (size_cell < 0) {
-          bsa_print(ACS_PRINT_ERR, L"  Invalid size cell \n");
+          bsa_print(ACS_PRINT_ERR, L"  Invalid size cell\n");
           return;
       }
 
       addr_cell = fdt_address_cells((const void *) dt_ptr, parent_offset);
       bsa_print(ACS_PRINT_DEBUG, L"  NODE pcie addr cell %d\n", addr_cell);
       if (addr_cell <= 0 || addr_cell > 2) {
-          bsa_print(ACS_PRINT_ERR, L"  Invalid address cell \n");
+          bsa_print(ACS_PRINT_ERR, L"  Invalid address cell\n");
           return;
       }
 

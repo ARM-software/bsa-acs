@@ -555,7 +555,7 @@ uint32_t val_its_init(void)
 
   g_its_setup_done = 1;
 
-  val_print(ACS_PRINT_INFO, "  ITS : Info Block \n", 0);
+  val_print(ACS_PRINT_INFO, "  ITS : Info Block\n", 0);
   for (index = 0; index < g_gic_its_info->GicNumIts; index++)
   {
       val_print(ACS_PRINT_INFO, "  GIC ITS Index: %x", index);

@@ -61,7 +61,7 @@ static void intr_handler(void)
     /* Clear the interrupt pending state */
     e_intr_pending = 0;
 
-    val_print(ACS_PRINT_INFO, " \n       Received legacy interrupt %d", e_intr_line);
+    val_print(ACS_PRINT_INFO, "\n       Received legacy interrupt %d", e_intr_line);
 
 }
 
