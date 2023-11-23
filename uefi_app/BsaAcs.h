@@ -46,7 +46,7 @@
                                         /*[24 B Each + 4 B Header] */
   #define MEM_INFO_TBL_SZ        32768  /*Supports max 800 memory regions*/
                                         /*[40 B Each + 16 B Header]      */
-  #define IOVIRT_INFO_TBL_SZ     262144 /*Supports max 600 nodes of a typical iort table*/
+  #define IOVIRT_INFO_TBL_SZ     1048576/*Supports max 2400 nodes of a typical iort table*/
                                         /*[(268+32*5) B Each + 24 B Header]*/
   #define PERIPHERAL_INFO_TBL_SZ 2048   /*Supports max 20 PCIe EPs (USB and SATA controllers)*/
                                         /*[72 B Each + 16 B Header]*/
