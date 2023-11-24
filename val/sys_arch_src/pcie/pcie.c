@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,6 +77,6 @@ uint32_t pcie_enumerate_device(uint32_t bus, uint32_t sec_bus)
 **/
 void val_bsa_pcie_enumerate(void)
 {
-  val_print(ACS_PRINT_INFO, " \n Starting Enumeration \n", 0);
+  val_print(ACS_PRINT_INFO, "\n Starting Enumeration\n", 0);
   pcie_enumerate_device(PRI_BUS, SEC_BUS);
 }

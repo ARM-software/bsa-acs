@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,8 +51,7 @@ payload()
       }
   }
   if ((smmuv2_flag) && (smmuv3_flag)) {
-      val_print(ACS_PRINT_ERR, "\n       ALL SMMUs are not of the same "
-                                "Architecture version \n", 0);
+      val_print(ACS_PRINT_ERR, "\n       ALL SMMUs are not of the same Architecture version\n", 0);
       val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
       return;
   }

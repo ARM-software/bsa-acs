@@ -298,7 +298,7 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_PCIE_TEST_NUM_BASE) {
-          val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all PCIe tests \n", 0);
+          val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all PCIe tests\n", 0);
           return ACS_STATUS_SKIP;
       }
   }
@@ -306,19 +306,19 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   /* Check if there are any tests to be executed in current module with user override options*/
   status = val_check_skip_module(ACS_PCIE_TEST_NUM_BASE);
   if (status) {
-      val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all PCIe tests \n", 0);
+      val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all PCIe tests\n", 0);
       return ACS_STATUS_SKIP;
   }
 
   if (pcie_bdf_table_list_flag == 1) {
       val_print(ACS_PRINT_WARN, "\n     *** Created device list with valid bdf doesn't match \
-                    with the platform pcie device hierarchy, Skipping PCIE tests *** \n", 0);
+                    with the platform pcie device hierarchy, Skipping PCIE tests ***\n", 0);
       return ACS_STATUS_SKIP;
   }
 
   num_ecam = (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
   if (!num_ecam) {
-      val_print(ACS_PRINT_WARN, "\n      *** No ECAM region found, Skipping PCIE tests *** \n", 0);
+      val_print(ACS_PRINT_WARN, "\n      *** No ECAM region found, Skipping PCIE tests ***\n", 0);
       return ACS_STATUS_SKIP;
   }
 
@@ -332,7 +332,7 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
       status |= os_p001_entry(num_pe);
       if (status == ACS_STATUS_FAIL) {
-        val_print(ACS_PRINT_WARN, "\n      *** Skipping remaining PCIE tests *** \n", 0);
+        val_print(ACS_PRINT_WARN, "\n      *** Skipping remaining PCIE tests ***\n", 0);
         return status;
       }
   }
@@ -466,16 +466,16 @@ val_pcie_print_device_info(void)
       }
   }
 
-  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of RCiEP           : %4d \n", num_rciep);
-  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of RCEC            : %4d \n", num_rcec);
-  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of EP              : %4d \n", num_ep);
-  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of RP              : %4d \n", num_rp);
-  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of iEP_EP          : %4d \n", num_iep);
-  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of iEP_RP          : %4d \n", num_irp);
-  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of UP of switch    : %4d \n", num_up);
-  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of DP of switch    : %4d \n", num_dp);
-  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of PCI/PCIe Bridge : %4d \n", num_pci_pcie);
-  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of PCIe/PCI Bridge : %4d \n", num_pcie_pci);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of RCiEP           : %4d\n", num_rciep);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of RCEC            : %4d\n", num_rcec);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of EP              : %4d\n", num_ep);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of RP              : %4d\n", num_rp);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of iEP_EP          : %4d\n", num_iep);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of iEP_RP          : %4d\n", num_irp);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of UP of switch    : %4d\n", num_up);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of DP of switch    : %4d\n", num_dp);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of PCI/PCIe Bridge : %4d\n", num_pci_pcie);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of PCIe/PCI Bridge : %4d\n", num_pcie_pci);
 
   while (ecam_index < (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0))
   {
@@ -548,7 +548,7 @@ val_pcie_create_info_table(uint64_t *pcie_info_table)
   uint32_t num_ecam;
 
   if (pcie_info_table == NULL) {
-      val_print(ACS_PRINT_ERR, "Input for Create Info table cannot be NULL \n", 0);
+      val_print(ACS_PRINT_ERR, "Input for Create Info table cannot be NULL\n", 0);
       return;
   }
   val_print(ACS_PRINT_INFO, " Creating PCIe INFO table\n", 0);
@@ -558,7 +558,7 @@ val_pcie_create_info_table(uint64_t *pcie_info_table)
   pal_pcie_create_info_table(g_pcie_info_table);
 
   num_ecam = (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
-  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of ECAM regions    : %ld \n", num_ecam);
+  val_print(ACS_PRINT_TEST, " PCIE_INFO: Number of ECAM regions    :    %ld\n", num_ecam);
   if (num_ecam == 0)
       return;
 
@@ -645,7 +645,7 @@ val_pcie_create_device_bdf_table()
   if (!g_pcie_bdf_table)
   {
       val_print(ACS_PRINT_ERR,
-        "       PCIe BDF table memory allocation failed         \n", 0);
+        "       PCIe BDF table memory allocation failed\n", 0);
       return 1;
   }
 
@@ -654,8 +654,7 @@ val_pcie_create_device_bdf_table()
   num_ecam = (uint32_t)val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
   if (num_ecam == 0)
   {
-      val_print(ACS_PRINT_ERR,
-        "       No ECAMs discovered             \n ", 0);
+      val_print(ACS_PRINT_ERR, "       No ECAMs discovered\n ", 0);
       return 1;
   }
 
@@ -735,7 +734,7 @@ val_pcie_create_device_bdf_table()
   val_pcie_populate_device_rootport();
 
   val_print(ACS_PRINT_TEST,
-    " PCIE_INFO: Number of BDFs found      : %d\n", g_pcie_bdf_table->num_entries);
+    " PCIE_INFO: Number of BDFs found      :    %d\n", g_pcie_bdf_table->num_entries);
 
   return 0;
 }
@@ -834,13 +833,13 @@ val_pcie_get_info(PCIE_INFO_e type, uint32_t index)
 {
 
   if (g_pcie_info_table == NULL) {
-      val_print(ACS_PRINT_ERR, "GET_PCIe_INFO: PCIE info table is not created \n", 0);
+      val_print(ACS_PRINT_ERR, "GET_PCIe_INFO: PCIE info table is not created\n", 0);
       return 0;
   }
 
   if (index >= g_pcie_info_table->num_entries) {
       if (g_pcie_info_table->num_entries != 0)
-          val_print(ACS_PRINT_ERR, "Invalid index %d > num of entries \n", index);
+          val_print(ACS_PRINT_ERR, "Invalid index %d > num of entries\n", index);
       return 0;
   }
 
@@ -858,7 +857,7 @@ val_pcie_get_info(PCIE_INFO_e type, uint32_t index)
       case PCIE_INFO_SEGMENT:
           return g_pcie_info_table->block[index].segment_num;
       default:
-          val_print(ACS_PRINT_ERR, "This PCIE info option not supported %d \n", type);
+          val_print(ACS_PRINT_ERR, "This PCIE info option not supported %d\n", type);
           break;
   }
 

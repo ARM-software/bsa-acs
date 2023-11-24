@@ -82,7 +82,7 @@ ArmArchTimerReadReg (
       break;
 
     default:
-      val_print(ACS_PRINT_TEST, "Unknown ARM Generic Timer register %x. \n ", Reg);
+      val_print(ACS_PRINT_TEST, "Unknown ARM Generic Timer register %x.\n ", Reg);
     }
 
     return 0xFFFFFFFF;
@@ -106,7 +106,7 @@ ArmArchTimerWriteReg (
     switch(Reg) {
 
     case CntPct:
-      val_print(ACS_PRINT_TEST, "Can't write to Read Only Register: CNTPCT \n", 0);
+      val_print(ACS_PRINT_TEST, "Can't write to Read Only Register: CNTPCT\n", 0);
       break;
 
     case CntkCtl:
@@ -130,7 +130,7 @@ ArmArchTimerWriteReg (
       break;
 
     case CntvCt:
-       val_print(ACS_PRINT_TEST, "Can't write to Read Only Register: CNTVCT \n", 0);
+       val_print(ACS_PRINT_TEST, "Can't write to Read Only Register: CNTVCT\n", 0);
       break;
 
     case CntpCval:
@@ -160,10 +160,10 @@ ArmArchTimerWriteReg (
     case CnthCtl:
     case CnthpCval:
       val_print(ACS_PRINT_TEST, "The register is related to Hypervisor Mode. \
-      Can't perform requested operation \n", 0);
+      Can't perform requested operation\n", 0);
       break;
 
     default:
-      val_print(ACS_PRINT_TEST, "Unknown ARM Generic Timer register %x. \n ", Reg);
+      val_print(ACS_PRINT_TEST, "Unknown ARM Generic Timer register %x.\n ", Reg);
     }
 }

@@ -207,7 +207,7 @@ ShellAppMainbsa(
   g_bsa_tests_pass  = 0;
   g_bsa_tests_fail  = 0;
 
-  val_print(ACS_PRINT_TEST, "\n\n BSA Architecture Compliance Suite \n", 0);
+  val_print(ACS_PRINT_TEST, "\n\n BSA Architecture Compliance Suite\n", 0);
   val_print(ACS_PRINT_TEST, "\n          Version %d.", BSA_ACS_MAJOR_VER);
   val_print(ACS_PRINT_TEST, "%d.", BSA_ACS_MINOR_VER);
   val_print(ACS_PRINT_TEST, "%d\n", BSA_ACS_SUBMINOR_VER);
@@ -226,7 +226,7 @@ ShellAppMainbsa(
       g_execute_modules = &g_module_array[0];
   }
 
-  val_print(ACS_PRINT_TEST, " Creating Platform Information Tables \n", 0);
+  val_print(ACS_PRINT_TEST, " Creating Platform Information Tables\n", 0);
   Status = createPeInfoTable();
   if (Status)
     return Status;
@@ -280,15 +280,15 @@ ShellAppMainbsa(
   Status |= val_exerciser_execute_tests(g_sw_view);
 
 print_test_status:
-  val_print(ACS_PRINT_TEST, "\n     ------------------------------------------------------- \n", 0);
+  val_print(ACS_PRINT_TEST, "\n     -------------------------------------------------------\n", 0);
   val_print(ACS_PRINT_TEST, "     Total Tests run  = %4d", g_bsa_tests_total);
   val_print(ACS_PRINT_TEST, "  Tests Passed  = %4d", g_bsa_tests_pass);
   val_print(ACS_PRINT_TEST, "  Tests Failed = %4d\n", g_bsa_tests_fail);
-  val_print(ACS_PRINT_TEST, "     ------------------------------------------------------- \n", 0);
+  val_print(ACS_PRINT_TEST, "     -------------------------------------------------------\n", 0);
 
   freeBsaAcsMem();
 
-  val_print(ACS_PRINT_TEST, "\n      *** BSA tests complete. Reset the system. *** \n\n", 0);
+  val_print(ACS_PRINT_TEST, "\n      *** BSA tests complete. Reset the system. ***\n\n", 0);
 
   val_pe_context_restore(AA64WriteSp(g_stack_pointer));
   while (1);

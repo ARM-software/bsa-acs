@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, 2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +38,7 @@ uint32_t val_gic_v2m_parse_info(void)
   uint32_t i;
 
   if (g_gic_info_table == NULL) {
-      val_print(ACS_PRINT_DEBUG, "GIC INFO table not available \n", 0);
+      val_print(ACS_PRINT_DEBUG, "GIC INFO table not available\n", 0);
       return ACS_STATUS_SKIP;
   }
 

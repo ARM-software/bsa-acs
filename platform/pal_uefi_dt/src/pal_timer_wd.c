@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018-2019,2021-2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2018-2019, 2021-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -94,7 +94,7 @@ pal_timer_create_info_table(TIMER_INFO_TABLE *TimerTable)
   UINT32                      num_of_entries;
 
   if (TimerTable == NULL) {
-    bsa_print(ACS_PRINT_ERR, L" Input Timer Table Pointer is NULL. Cannot create Timer INFO \n");
+    bsa_print(ACS_PRINT_ERR, L" Input Timer Table Pointer is NULL. Cannot create Timer INFO\n");
     return;
   }
 
@@ -106,7 +106,7 @@ pal_timer_create_info_table(TIMER_INFO_TABLE *TimerTable)
 
   gGtdtHdr = (EFI_ACPI_6_1_GENERIC_TIMER_DESCRIPTION_TABLE *) pal_get_gtdt_ptr();
 
-  bsa_print(ACS_PRINT_INFO, L" GTDT is at %x and length is %x \n", gGtdtHdr, gGtdtHdr->Header.Length);
+  bsa_print(ACS_PRINT_INFO, L" GTDT is at %x and length is %x\n", gGtdtHdr, gGtdtHdr->Header.Length);
 
   //Fill in our internal table
   TimerTable->header.s_el1_timer_flag  = gGtdtHdr->SecurePL1TimerFlags;
@@ -126,14 +126,14 @@ pal_timer_create_info_table(TIMER_INFO_TABLE *TimerTable)
   while(num_of_entries) {
 
     if (Entry->Type == EFI_ACPI_6_1_GTDT_GT_BLOCK) {
-      bsa_print(ACS_PRINT_INFO, L"  Found block entry \n");
+      bsa_print(ACS_PRINT_INFO, L"  Found block entry\n");
       GtEntry->type = TIMER_TYPE_SYS_TIMER;
       GtEntry->block_cntl_base = Entry->CntCtlBase;
       GtEntry->timer_count     = Entry->GTBlockTimerCount;
-      bsa_print(ACS_PRINT_DEBUG, L"  CNTCTLBase = %llx \n", GtEntry->block_cntl_base);
+      bsa_print(ACS_PRINT_DEBUG, L"  CNTCTLBase = %llx\n", GtEntry->block_cntl_base);
       GtBlockTimer = (EFI_ACPI_6_1_GTDT_GT_BLOCK_TIMER_STRUCTURE *)(((UINT8 *)Entry) + Entry->GTBlockTimerOffset);
       for (i = 0; i < GtEntry->timer_count; i++) {
-        bsa_print(ACS_PRINT_INFO, L"  Found timer entry \n");
+        bsa_print(ACS_PRINT_INFO, L"  Found timer entry\n");
         GtEntry->frame_num[i]    = GtBlockTimer->GTFrameNumber;
         GtEntry->GtCntBase[i]    = GtBlockTimer->CntBaseX;
         GtEntry->GtCntEl0Base[i] = GtBlockTimer->CntEL0BaseX;
@@ -217,7 +217,7 @@ pal_wd_create_info_table(WD_INFO_TABLE *WdTable)
 
   if (WdTable == NULL) {
     bsa_print(ACS_PRINT_ERR,
-              L" Input Watchdog Table Pointer is NULL. Cannot create Watchdog INFO \n");
+              L" Input Watchdog Table Pointer is NULL. Cannot create Watchdog INFO\n");
     return;
   }
 
@@ -248,7 +248,7 @@ pal_wd_create_info_table(WD_INFO_TABLE *WdTable)
       WdEntry->wd_flags        = Entry->WatchdogTimerFlags;
       WdTable->header.num_wd++;
       bsa_print(ACS_PRINT_DEBUG,
-                L"  Watchdog base = 0x%llx INTID = 0x%x \n",
+                L"  Watchdog base = 0x%llx INTID = 0x%x\n",
                 WdEntry->wd_ctrl_base,
                 WdEntry->wd_gsiv);
       WdEntry++;
@@ -290,14 +290,14 @@ pal_wd_create_info_table_dt(WD_INFO_TABLE *WdTable)
 
   dt_ptr = pal_get_dt_ptr();
   if (dt_ptr == 0) {
-    bsa_print(ACS_PRINT_ERR, L" dt_ptr is NULL \n");
+    bsa_print(ACS_PRINT_ERR, L" dt_ptr is NULL\n");
     return;
   }
 
   for (i = 0; i < sizeof(wd_dt_arr)/WD_COMPATIBLE_STR_LEN ; i++) {
       offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, wd_dt_arr[i]);
       if (offset < 0) {
-          bsa_print(ACS_PRINT_DEBUG, L"  WD node offset not found %d \n", offset);
+          bsa_print(ACS_PRINT_DEBUG, L"  WD node offset not found %d\n", offset);
           continue; /* Search for next compatible wd*/
       }
 
@@ -314,12 +314,12 @@ pal_wd_create_info_table_dt(WD_INFO_TABLE *WdTable)
       addr_cell = fdt_address_cells((const void *) dt_ptr, parent_offset);
       bsa_print(ACS_PRINT_DEBUG, L"  addr cell %d\n", addr_cell);
       if (addr_cell < 1 || addr_cell > 2) {
-          bsa_print(ACS_PRINT_ERR, L"  Invalid address cell : %d \n", addr_cell);
+          bsa_print(ACS_PRINT_ERR, L"  Invalid address cell : %d\n", addr_cell);
           return;
       }
 
       while (offset != -FDT_ERR_NOTFOUND) {
-          bsa_print(ACS_PRINT_DEBUG, L"  WD node:%d offset:%d \n", WdTable->header.num_wd, offset);
+          bsa_print(ACS_PRINT_DEBUG, L"  WD node:%d offset:%d\n", WdTable->header.num_wd, offset);
 
           Preg_val = (UINT32 *)fdt_getprop_namelen((void *)dt_ptr, offset, "reg", 3, &prop_len);
           if ((prop_len < 0) || (Preg_val == NULL)) {
@@ -338,7 +338,7 @@ pal_wd_create_info_table_dt(WD_INFO_TABLE *WdTable)
           interrupt_cell = fdt_interrupt_cells((const void *)dt_ptr, offset);
           bsa_print(ACS_PRINT_DEBUG, L"  interrupt_cell  %d\n", interrupt_cell);
           if (interrupt_cell < INTERRUPT_CELLS_MIN || interrupt_cell > INTERRUPT_CELLS_MAX) {
-              bsa_print(ACS_PRINT_ERR, L"  Invalid interrupt cell : %d \n", interrupt_cell);
+              bsa_print(ACS_PRINT_ERR, L"  Invalid interrupt cell : %d\n", interrupt_cell);
               return;
           }
 
@@ -396,7 +396,7 @@ pal_wd_create_info_table_dt(WD_INFO_TABLE *WdTable)
               wd_polarity = INTERRUPT_IS_ACTIVE_LOW;
               break;
             default:
-              bsa_print(ACS_PRINT_ERR, L"  interrupt type invalid :%X \n",
+              bsa_print(ACS_PRINT_ERR, L"  interrupt type invalid :%X\n",
                         fdt32_to_cpu(Pintr_val[2]));
               return;
           }
@@ -435,7 +435,7 @@ pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable)
 
   dt_ptr = pal_get_dt_ptr();
   if (dt_ptr == 0) {
-      bsa_print(ACS_PRINT_ERR, L" dt_ptr is NULL \n");
+      bsa_print(ACS_PRINT_ERR, L" dt_ptr is NULL\n");
       return;
   }
 
@@ -463,13 +463,13 @@ pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable)
   }
   /* Return if Timer node not found*/
   if (offset < 0) {
-      bsa_print(ACS_PRINT_ERR, L"  timer node offset not found \n");
+      bsa_print(ACS_PRINT_ERR, L"  timer node offset not found\n");
       return;
   }
   interrupt_cell = fdt_interrupt_cells((const void *)dt_ptr, offset);
   bsa_print(ACS_PRINT_DEBUG, L"  interrupt_cell  %d\n", interrupt_cell);
   if (interrupt_cell < INTERRUPT_CELLS_MIN || interrupt_cell > INTERRUPT_CELLS_MAX) {
-      bsa_print(ACS_PRINT_ERR, L"  Invalid interrupt cell : %d \n", interrupt_cell);
+      bsa_print(ACS_PRINT_ERR, L"  Invalid interrupt cell : %d\n", interrupt_cell);
       return;
   }
 
@@ -529,7 +529,7 @@ pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable)
         break;
   }
   if (offset < 0) {
-      bsa_print(ACS_PRINT_ERR, L"  MEM timer node offset not found \n");
+      bsa_print(ACS_PRINT_ERR, L"  MEM timer node offset not found\n");
       return;
   }
 
@@ -547,7 +547,7 @@ pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable)
   addr_cell = fdt_address_cells((const void *) dt_ptr, parent_offset);
   bsa_print(ACS_PRINT_DEBUG, L"  addr cell %d\n", addr_cell);
   if (addr_cell < 1 || addr_cell > 2) {
-      bsa_print(ACS_PRINT_ERR, L"  Invalid address cell : %d \n", addr_cell);
+      bsa_print(ACS_PRINT_ERR, L"  Invalid address cell : %d\n", addr_cell);
       return;
   }
 
@@ -576,21 +576,21 @@ pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable)
   addr_cell = fdt_address_cells((const void *) dt_ptr, offset);
   bsa_print(ACS_PRINT_DEBUG, L"  addr cell %d\n", addr_cell);
   if (addr_cell < 1 || addr_cell > 2) {
-      bsa_print(ACS_PRINT_ERR, L"  Invalid address cell for timer node: %d \n", addr_cell);
+      bsa_print(ACS_PRINT_ERR, L"  Invalid address cell for timer node: %d\n", addr_cell);
       return;
   }
 
   /* Get frame sub node*/
   subnode_offset = fdt_subnode_offset((const void *)dt_ptr, offset, "frame");
   if (subnode_offset < 0) {
-      bsa_print(ACS_PRINT_DEBUG, L"  frame node offset not found %d \n", subnode_offset);
+      bsa_print(ACS_PRINT_DEBUG, L"  frame node offset not found %d\n", subnode_offset);
       return;
   }
 
   while (subnode_offset != -FDT_ERR_NOTFOUND) {
       /* Get frame number*/
       frame_number = fdt_frame_number((const void *)dt_ptr, subnode_offset);
-      bsa_print(ACS_PRINT_DEBUG, L"  Frame number is  %d \n", frame_number);
+      bsa_print(ACS_PRINT_DEBUG, L"  Frame number is  %d\n", frame_number);
 
       /* Get reg property from frame to update GtCntBase */
       Preg = (UINT32 *)fdt_getprop_namelen((void *)dt_ptr, subnode_offset, "reg", 3, &prop_len);
@@ -611,7 +611,7 @@ pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable)
       interrupt_cell = fdt_interrupt_cells((const void *)dt_ptr, subnode_offset);
       bsa_print(ACS_PRINT_DEBUG, L"  interrupt_cell for subnode  %d\n", interrupt_cell);
       if (interrupt_cell < INTERRUPT_CELLS_MIN || interrupt_cell > INTERRUPT_CELLS_MAX) {
-          bsa_print(ACS_PRINT_ERR, L"  Invalid interrupt cell subnode: %d \n", interrupt_cell);
+          bsa_print(ACS_PRINT_ERR, L"  Invalid interrupt cell subnode: %d\n", interrupt_cell);
           return;
       }
 
@@ -661,9 +661,9 @@ pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable)
       GtEntry->timer_count++;
 
       subnode_offset = fdt_next_subnode((const void *)dt_ptr, subnode_offset);
-      bsa_print(ACS_PRINT_DEBUG, L"  timer-mem-fram next node offset %d \n", subnode_offset);
+      bsa_print(ACS_PRINT_DEBUG, L"  timer-mem-fram next node offset %d\n", subnode_offset);
   }
-  bsa_print(ACS_PRINT_DEBUG, L"  GT block timer count %d \n", GtEntry->timer_count);
+  bsa_print(ACS_PRINT_DEBUG, L"  GT block timer count %d\n", GtEntry->timer_count);
   TimerTable->header.num_platform_timer = GtEntry->timer_count;
 
   dt_dump_timer_table(TimerTable);

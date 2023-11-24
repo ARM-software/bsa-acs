@@ -39,7 +39,7 @@ val_peripheral_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_PER_TEST_NUM_BASE) {
-          val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all Peripheral tests \n", 0);
+          val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all Peripheral tests\n", 0);
           return ACS_STATUS_SKIP;
       }
   }
@@ -47,7 +47,7 @@ val_peripheral_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
   /* Check if there are any tests to be executed in current module with user override options*/
   status = val_check_skip_module(ACS_PER_TEST_NUM_BASE);
   if (status) {
-      val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all Peripheral tests \n", 0);
+      val_print(ACS_PRINT_INFO, "\n       USER Override - Skipping all Peripheral tests\n", 0);
       return ACS_STATUS_SKIP;
   }
 
@@ -302,9 +302,9 @@ val_peripheral_dump_info(void)
   }
 
 
-  val_print(ACS_PRINT_DEBUG, " Peripheral: Num of Network ctrl      :    %d \n", ntwk);
-  val_print(ACS_PRINT_DEBUG, " Peripheral: Num of Storage ctrl      :    %d \n", strg);
-  val_print(ACS_PRINT_DEBUG, " Peripheral: Num of Display ctrl      :    %d \n", dply);
+  val_print(ACS_PRINT_DEBUG, " Peripheral: Num of Network ctrl      :    %d\n", ntwk);
+  val_print(ACS_PRINT_DEBUG, " Peripheral: Num of Storage ctrl      :    %d\n", strg);
+  val_print(ACS_PRINT_DEBUG, " Peripheral: Num of Display ctrl      :    %d\n", dply);
 
 }
 
@@ -334,11 +334,11 @@ val_peripheral_create_info_table(uint64_t *peripheral_info_table)
 
   pal_peripheral_create_info_table(g_peripheral_info_table);
 
-  val_print(ACS_PRINT_TEST, " Peripheral: Num of USB controllers   :    %d \n",
+  val_print(ACS_PRINT_TEST, " Peripheral: Num of USB controllers   :    %d\n",
     val_peripheral_get_info(NUM_USB, 0));
-  val_print(ACS_PRINT_TEST, " Peripheral: Num of SATA controllers  :    %d \n",
+  val_print(ACS_PRINT_TEST, " Peripheral: Num of SATA controllers  :    %d\n",
     val_peripheral_get_info(NUM_SATA, 0));
-  val_print(ACS_PRINT_TEST, " Peripheral: Num of UART controllers  :    %d \n",
+  val_print(ACS_PRINT_TEST, " Peripheral: Num of UART controllers  :    %d\n",
     val_peripheral_get_info(NUM_UART, 0));
   val_peripheral_dump_info();
 

@@ -47,7 +47,7 @@ val_iovirt_get_smmu_info(SMMU_INFO_e type, uint32_t index)
 
   if (g_iovirt_info_table == NULL)
   {
-      val_print(ACS_PRINT_ERR, "GET_SMMU_INFO: iovirt info table is not created \n", 0);
+      val_print(ACS_PRINT_ERR, "GET_SMMU_INFO: iovirt info table is not created\n", 0);
       return 0;
   }
 
@@ -73,7 +73,7 @@ val_iovirt_get_smmu_info(SMMU_INFO_e type, uint32_t index)
                   case SMMU_IOVIRT_BLOCK:
                       return (uint64_t)block;
                   default:
-                      val_print(ACS_PRINT_ERR, "This SMMU info option not supported %d \n", type);
+                      val_print(ACS_PRINT_ERR, "This SMMU info option not supported %d\n", type);
                       return 0;
               }
           }
@@ -83,7 +83,7 @@ val_iovirt_get_smmu_info(SMMU_INFO_e type, uint32_t index)
 
   if (index > j-1)
   {
-      val_print(ACS_PRINT_ERR, "GET_SMMU_INFO: Index (%d) is greater than num of SMMU \n", index);
+      val_print(ACS_PRINT_ERR, "GET_SMMU_INFO: Index (%d) is greater than num of SMMU\n", index);
       return 0;
   }
   return j;
@@ -106,7 +106,7 @@ val_iovirt_get_pcie_rc_info(PCIE_RC_INFO_e type, uint32_t index)
 
   if (g_iovirt_info_table == NULL)
   {
-      val_print(ACS_PRINT_ERR, "GET_PCIe_RC_INFO: iovirt info table is not created \n", 0);
+      val_print(ACS_PRINT_ERR, "GET_PCIe_RC_INFO: iovirt info table is not created\n", 0);
       return 0;
   }
 
@@ -134,7 +134,7 @@ val_iovirt_get_pcie_rc_info(PCIE_RC_INFO_e type, uint32_t index)
                   case RC_IOVIRT_BLOCK:
                       return (uint64_t)block;
                   default:
-                      val_print(ACS_PRINT_ERR, "This PCIe RC info option not supported %d \n", type);
+                      val_print(ACS_PRINT_ERR, "This PCIe RC info option not supported %d\n", type);
                       return 0;
               }
           }
@@ -143,7 +143,8 @@ val_iovirt_get_pcie_rc_info(PCIE_RC_INFO_e type, uint32_t index)
   }
   if (index > j-1)
   {
-      val_print(ACS_PRINT_ERR, "GET_PCIe_RC_INFO: Index (%d) is greater than num of PCIe-RC \n", index);
+      val_print(ACS_PRINT_ERR, "GET_PCIe_RC_INFO: Index (%d) is greater than num of PCIe-RC\n",
+                                                                                            index);
       return 0;
   }
   return j;
@@ -171,11 +172,11 @@ val_iovirt_get_its_info(
 
 
   if (g_iovirt_info_table == NULL) {
-    val_print(ACS_PRINT_ERR, "GET_ITS_INFO: iovirt info table is not created \n", 0);
+    val_print(ACS_PRINT_ERR, "GET_ITS_INFO: iovirt info table is not created\n", 0);
     return ACS_STATUS_ERR;
   }
   if (!return_value) {
-      val_print(ACS_PRINT_ERR, "GET_ITS_INFO: Return pointer is NULL \n", 0);
+      val_print(ACS_PRINT_ERR, "GET_ITS_INFO: Return pointer is NULL\n", 0);
       return ACS_STATUS_ERR;
   }
 
@@ -230,7 +231,7 @@ val_iovirt_get_its_info(
                   /* ITS_ID not found in current group, return error */
                   return ACS_INVALID_INDEX;
                 default:
-                  val_print(ACS_PRINT_ERR, "This ITS info option not supported %d \n", type);
+                  val_print(ACS_PRINT_ERR, "This ITS info option not supported %d\n", type);
                   return ACS_STATUS_ERR;
               }
               break;
@@ -382,7 +383,7 @@ val_iovirt_create_info_table(uint64_t *iovirt_info_table)
 
   if (iovirt_info_table == NULL)
   {
-      val_print(ACS_PRINT_ERR, "\n   Input for Create Info table cannot be NULL \n", 0);
+      val_print(ACS_PRINT_ERR, "\n   Input for Create Info table cannot be NULL\n", 0);
       return;
   }
   val_print(ACS_PRINT_INFO, " Creating SMMU INFO table\n", 0);
@@ -393,7 +394,7 @@ val_iovirt_create_info_table(uint64_t *iovirt_info_table)
 
   g_num_smmus = (uint32_t)val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
   val_print(ACS_PRINT_TEST,
-            " SMMU_INFO: Number of SMMU CTRL       : %d \n", g_num_smmus);
+            " SMMU_INFO: Number of SMMU CTRL       :    %d\n", g_num_smmus);
   for (i = 0; i < g_num_smmus; i++) {
     smmu_ver = val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, i);
     val_print(ACS_PRINT_TEST,
@@ -404,7 +405,7 @@ val_iovirt_create_info_table(uint64_t *iovirt_info_table)
       smmu_minor = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_AIDR, i), 0, 3);
       val_print(ACS_PRINT_TEST, ".%d", smmu_minor);
     }
-    val_print(ACS_PRINT_TEST, " \n", smmu_ver);
+    val_print(ACS_PRINT_TEST, "\n", smmu_ver);
   }
 }
 

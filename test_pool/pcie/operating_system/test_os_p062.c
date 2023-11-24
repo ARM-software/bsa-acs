@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,7 +59,7 @@ payload(void)
           status = val_smmu_ops(SMMU_CHECK_DEVICE_IOVA, &target_dev_index, &dma_addr);
           if (status) {
               val_print(ACS_PRINT_ERR, "\n       The DMA address %lx used by device ", dma_addr);
-              val_print(ACS_PRINT_ERR, "\n       is not present in the SMMU IOVA table \n", 0);
+              val_print(ACS_PRINT_ERR, "\n       is not present in the SMMU IOVA table\n", 0);
               val_set_status(index, RESULT_FAIL(TEST_NUM, target_dev_index));
               return;
           }
@@ -80,7 +80,7 @@ payload(void)
           if (status) {
               val_print(ACS_PRINT_ERR, "\n       The DMA addr allocated to device %d ",
                         target_dev_index);
-              val_print(ACS_PRINT_ERR, "\n       is not present in the SMMU IOVA table \n", 0);
+              val_print(ACS_PRINT_ERR, "\n       is not present in the SMMU IOVA table\n", 0);
               val_set_status(index, RESULT_FAIL(TEST_NUM, target_dev_index));
               return;
           }

@@ -89,7 +89,7 @@ createPeInfoTable (
 
   if (EFI_ERROR(Status))
   {
-    Print(L"Allocate Pool failed %x \n", Status);
+    Print(L"Allocate Pool failed %x\n", Status);
     return Status;
   }
 
@@ -112,7 +112,7 @@ createGicInfoTable (
 
   if (EFI_ERROR(Status))
   {
-    Print(L"Allocate Pool failed %x \n", Status);
+    Print(L"Allocate Pool failed %x\n", Status);
     return Status;
   }
 
@@ -135,7 +135,7 @@ createTimerInfoTable(
 
   if (EFI_ERROR(Status))
   {
-    Print(L"Allocate Pool failed %x \n", Status);
+    Print(L"Allocate Pool failed %x\n", Status);
     return Status;
   }
   val_timer_create_info_table(TimerInfoTable);
@@ -156,7 +156,7 @@ createWatchdogInfoTable(
 
   if (EFI_ERROR(Status))
   {
-    Print(L"Allocate Pool failed %x \n", Status);
+    Print(L"Allocate Pool failed %x\n", Status);
     return Status;
   }
   val_wd_create_info_table(WdInfoTable);
@@ -181,7 +181,7 @@ createPcieVirtInfoTable(
 
   if (EFI_ERROR(Status))
   {
-    Print(L"Allocate Pool failed %x \n", Status);
+    Print(L"Allocate Pool failed %x\n", Status);
     return Status;
   }
   val_pcie_create_info_table(PcieInfoTable);
@@ -192,7 +192,7 @@ createPcieVirtInfoTable(
 
   if (EFI_ERROR(Status))
   {
-    Print(L"Allocate Pool failed %x \n", Status);
+    Print(L"Allocate Pool failed %x\n", Status);
     return Status;
   }
   val_iovirt_create_info_table(IoVirtInfoTable);
@@ -215,7 +215,7 @@ createPeripheralInfoTable(
 
   if (EFI_ERROR(Status))
   {
-    Print(L"Allocate Pool failed %x \n", Status);
+    Print(L"Allocate Pool failed %x\n", Status);
     return Status;
   }
   val_peripheral_create_info_table(PeripheralInfoTable);
@@ -226,7 +226,7 @@ createPeripheralInfoTable(
 
   if (EFI_ERROR(Status))
   {
-    Print(L"Allocate Pool failed %x \n", Status);
+    Print(L"Allocate Pool failed %x\n", Status);
     return Status;
   }
 
@@ -262,7 +262,7 @@ HelpMsg (
          "              module numbers along with global verbosity level 1\n"
          "              Module numbers are PE 0, MEM 1, GIC 2, SMMU 3, TIMER 4, WAKEUP 5   ...\n"
          "              PERIPHERAL 6, Watchdog 7, PCIe 8, Exerciser 9   ...\n"
-         "              E.g., To enable mmio prints for PE and TIMER pass -v 104 \n"
+         "              E.g., To enable mmio prints for PE and TIMER pass -v 104\n"
          "-mmio   Pass this flag to enable pal_mmio_read/write prints, use with -v 1\n"
          "-f      Name of the log file to record the test results in\n"
          "-skip   Test(s) to be skipped\n"
@@ -357,7 +357,7 @@ ShellAppMain (
                                  (VOID **) &g_skip_test_num);
       if (EFI_ERROR(Status))
       {
-        Print(L"Allocate memory for -skip failed \n", 0);
+        Print(L"Allocate memory for -skip failed\n", 0);
         return 0;
       }
 
@@ -477,7 +477,7 @@ ShellAppMain (
                                      (VOID **) &g_execute_tests);
           if (EFI_ERROR(Status))
           {
-              Print(L"Allocate memory for -t failed \n", 0);
+              Print(L"Allocate memory for -t failed\n", 0);
               return 0;
           }
 
@@ -516,7 +516,7 @@ ShellAppMain (
                                      (VOID **) &g_execute_modules);
           if (EFI_ERROR(Status))
           {
-              Print(L"Allocate memory for -m failed \n", 0);
+              Print(L"Allocate memory for -m failed\n", 0);
               return 0;
           }
 
@@ -627,11 +627,11 @@ ShellAppMain (
   Status |= val_exerciser_execute_tests(g_sw_view);
 
 print_test_status:
-  val_print(ACS_PRINT_TEST, "\n     ------------------------------------------------------- \n", 0);
+  val_print(ACS_PRINT_TEST, "\n     -------------------------------------------------------\n", 0);
   val_print(ACS_PRINT_TEST, "     Total Tests run  = %4d", g_bsa_tests_total);
   val_print(ACS_PRINT_TEST, "  Tests Passed  = %4d", g_bsa_tests_pass);
   val_print(ACS_PRINT_TEST, "  Tests Failed = %4d\n", g_bsa_tests_fail);
-  val_print(ACS_PRINT_TEST, "     ------------------------------------------------------- \n", 0);
+  val_print(ACS_PRINT_TEST, "     -------------------------------------------------------\n", 0);
 
   freeBsaAcsMem();
 
@@ -639,7 +639,7 @@ print_test_status:
     ShellCloseFile(&g_dtb_log_file_handle);
   }
 
-  val_print(ACS_PRINT_TEST, "\n      *** BSA tests complete. Reset the system. *** \n\n", 0);
+  val_print(ACS_PRINT_TEST, "\n      *** BSA tests complete. Reset the system. ***\n\n", 0);
 
   if (g_bsa_log_file_handle) {
     ShellCloseFile(&g_bsa_log_file_handle);

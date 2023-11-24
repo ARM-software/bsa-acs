@@ -852,8 +852,8 @@ static uint32_t smmu_probe(smmu_dev_t *smmu)
     smmu->oas = smmu_oas[BITFIELD_GET(IDR5_OAS, data)];
     smmu->ias = get_max(smmu->ias, smmu->oas);
 
-    val_print(ACS_PRINT_INFO, "  ias %d-bit ", smmu->ias);
-    val_print(ACS_PRINT_INFO, "oas %d-bit \n", smmu->oas);
+    val_print(ACS_PRINT_INFO, "  ias %d-bit", smmu->ias);
+    val_print(ACS_PRINT_INFO, "  oas %d-bit\n", smmu->oas);
 
     return 1;
 }
