@@ -33,24 +33,18 @@ payload()
   /* Check SMMU Revision & S-EL2 Support for Hypervisor */
   uint32_t num_smmu;
   uint32_t index;
-  uint32_t s_el2;
+  uint32_t pe_s_el2;
   uint32_t smmu_rev;
   uint32_t minor;
   uint32_t s2ts, s2p;
 
   index = val_pe_get_index_mpid(val_pe_get_mpid());
-  s_el2 = VAL_EXTRACT_BITS(val_pe_reg_read(ID_AA64PFR0_EL1), 36, 39);
+  pe_s_el2 = VAL_EXTRACT_BITS(val_pe_reg_read(ID_AA64PFR0_EL1), 36, 39);
 
   num_smmu = val_smmu_get_info(SMMU_NUM_CTRL, 0);
   if (num_smmu == 0) {
       val_print(ACS_PRINT_ERR, "\n       No SMMU Controllers are discovered ", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
-      return;
-  }
-
-  if (s_el2) {
-      val_print(ACS_PRINT_DEBUG, "\n       S-EL2 implemented...Skipping", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
       return;
   }
 
@@ -69,13 +63,22 @@ payload()
       }
       else if (smmu_rev == 3) {
           minor = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_AIDR, num_smmu), 0, 3);
-          s2p = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_IDR0, num_smmu), 0, 0);
-          // Stage 2 translation functionality cannot be provided by SMMU v3.0/3.1 revisions
-          if (!s2p) {
-              val_print(ACS_PRINT_ERR,
-                        "\n       SMMUv3.%d not providing Stage2 functionality", minor);
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
-              return;
+          /* If minor < 2 : SMMU not implementing S_EL2 */
+          if (!(pe_s_el2 && (minor > 1))) {
+              /* Either PE or SMMU does not support S_EL2 */
+              s2p = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_IDR0, num_smmu), 0, 0);
+              // Stage 2 translation functionality cannot be provided by SMMU v3.0/3.1 revisions
+              if (!s2p) {
+                  val_print(ACS_PRINT_ERR,
+                            "\n       SMMUv3.%d not providing Stage2 functionality", minor);
+                  val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+                  return;
+              }
+          } else {
+            /* If both PE & SMMU Implement S_EL2, Skip this test */
+            val_print(ACS_PRINT_DEBUG, "\n       S-EL2 implemented...Skipping", 0);
+            val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
+            return;
           }
       }
       if (smmu_rev < 2) {
