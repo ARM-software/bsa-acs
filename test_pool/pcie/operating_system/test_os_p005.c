@@ -141,7 +141,7 @@ payload(void)
       bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
       dp_type = val_pcie_device_port_type(bdf);
 
-      if ((dp_type == RP) || (dp_type == iEP_RP))
+      if (dp_type == RP)
       {
         /* Part 1:
          * Check When Address is within the Range of Prefetchable
@@ -175,21 +175,15 @@ payload(void)
 
         /* If Memory Limit is programmed with value less the Base, then Skip.*/
         if (mem_lim < mem_base) {
-            val_print(ACS_PRINT_DEBUG, "\n       Mem limit < Mem Base. Skipping Bdf - 0x%x", bdf);
+            val_print(ACS_PRINT_DEBUG, "\n       No P memory on secondary side of the Bridge", 0);
+            val_print(ACS_PRINT_DEBUG, "\n       Skipping Bdf - 0x%x", bdf);
             continue;
         }
 
         /* If test runs for atleast an endpoint */
         test_skip = 0;
 
-        /* Check_1: Accessing address in range of P memory
-         * must not cause any exception or data abort
-         *
-         * Write known value to an address which is in range
-         * Base + offset must always be in the range.
-         * Read the same
-        */
-        mem_offset = val_pcie_mem_get_offset(MEM_OFFSET_MEDIUM);
+        mem_offset = val_pcie_mem_get_offset(bdf, PREFETCH_MEMORY);
 
         if ((mem_base + mem_offset) > mem_lim)
         {
@@ -199,6 +193,14 @@ payload(void)
             val_set_status(pe_index, RESULT_FAIL(TEST_NUM, 02));
             return;
         }
+
+        /* Check_1: Accessing address in range of P memory
+         * must not cause any exception or data abort
+         *
+         * Write known value to an address which is in range
+         * Base + offset must always be in the range.
+         * Read the same
+        */
 
         val_pcie_bar_mem_read(bdf, mem_base + mem_offset, &old_value);
         val_pcie_bar_mem_write(bdf, mem_base + mem_offset, KNOWN_DATA);
@@ -294,7 +296,7 @@ exception_return:
 
   if (test_skip == 1) {
       val_print(ACS_PRINT_DEBUG,
-        "\n       No RP/ iEP_RP type device found with valid Memory Base/Limit Reg.", 0);
+        "\n       No RP type device found with valid Memory Base/Limit Reg.", 0);
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
   }
   else

@@ -354,8 +354,10 @@ val_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 #ifndef TARGET_LINUX
       status |= os_p002_entry(num_pe);
       status |= os_p003_entry(num_pe);
+#if defined(ENABLE_OOB) || defined(TARGET_EMULATION)
       status |= os_p004_entry(num_pe);
       status |= os_p005_entry(num_pe);
+#endif
       status |= os_p006_entry(num_pe);
       status |= os_p008_entry(num_pe);
       status |= os_p009_entry(num_pe);
@@ -2456,13 +2458,14 @@ val_is_transaction_pending_set(uint32_t bdf)
           accessed from the BAR base and is within
           BAR limit value
 
-  @param  type
+  @param  bdf      - PCIe BUS/Device/Function
+  @param  mem_type - If the memory is Pre-fetchable or Non-prefetchable memory
   @return memory offset
 
 **/
-uint32_t val_pcie_mem_get_offset(uint32_t type)
+uint32_t val_pcie_mem_get_offset(uint32_t bdf, PCIE_MEM_TYPE_INFO_e mem_type)
 {
-  return pal_pcie_mem_get_offset(type);
+  return pal_pcie_mem_get_offset(bdf, mem_type);
 }
 
 /**

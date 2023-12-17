@@ -81,8 +81,6 @@
   ../test_pool/pcie/operating_system/test_os_p001.c
   ../test_pool/pcie/operating_system/test_os_p002.c
   ../test_pool/pcie/operating_system/test_os_p003.c
-  ../test_pool/pcie/operating_system/test_os_p004.c
-  ../test_pool/pcie/operating_system/test_os_p005.c
   ../test_pool/pcie/operating_system/test_os_p006.c
   ../test_pool/pcie/operating_system/test_os_p008.c
   ../test_pool/pcie/operating_system/test_os_p009.c
