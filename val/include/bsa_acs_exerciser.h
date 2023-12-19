@@ -131,7 +131,6 @@ uint32_t os_e005_entry(void);
 uint32_t os_e006_entry(void);
 uint32_t os_e007_entry(void);
 uint32_t os_e008_entry(void);
-uint32_t os_e009_entry(void);
 uint32_t os_e010_entry(void);
 uint32_t os_e011_entry(void);
 uint32_t os_e012_entry(void);

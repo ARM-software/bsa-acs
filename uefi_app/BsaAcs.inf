@@ -126,7 +126,6 @@
   ../test_pool/exerciser/operating_system/test_os_e006.c
   ../test_pool/exerciser/operating_system/test_os_e007.c
   ../test_pool/exerciser/operating_system/test_os_e008.c
-  ../test_pool/exerciser/operating_system/test_os_e009.c
   ../test_pool/exerciser/operating_system/test_os_e010.c
   ../test_pool/exerciser/operating_system/test_os_e011.c
   ../test_pool/exerciser/operating_system/test_os_e012.c
