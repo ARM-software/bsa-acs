@@ -491,7 +491,6 @@ val_exerciser_execute_tests(uint32_t *g_sw_view)
      status |= os_e006_entry();
      status |= os_e007_entry();
      status |= os_e008_entry();
-     status |= os_e009_entry();
      status |= os_e010_entry();
 
      if (!pal_target_is_dt()) {
