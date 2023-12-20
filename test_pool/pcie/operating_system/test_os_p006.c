@@ -32,6 +32,7 @@ payload(void)
 {
   uint32_t status;
   uint32_t bdf;
+  uint32_t dp_type;
   uint32_t pe_index;
   uint32_t tbl_index;
   uint32_t reg_value;
@@ -57,6 +58,13 @@ payload(void)
   while (tbl_index < bdf_tbl_ptr->num_entries)
   {
       bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
+      dp_type = val_pcie_device_port_type(bdf);
+
+      /* Check entry is RP/EP/DP/UP. Else move to next BDF. */
+      if ((dp_type == iEP_EP) || (dp_type == iEP_RP)
+          || (dp_type == RCEC) || (dp_type == RCiEP))
+          continue;
+
       val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", bdf);
 
       /* Read Interrupt Line Register */
@@ -78,8 +86,9 @@ payload(void)
         }
         else {
             val_print (ACS_PRINT_DEBUG,
-                        "\n       PCIe Legacy IRQs unmapped. Skipping test", 0);
+                        "\n       PCIe Legacy IRQs unmapped. Skipping BDF %llx", bdf);
             val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 3));
+            continue;
         }
 
         return;

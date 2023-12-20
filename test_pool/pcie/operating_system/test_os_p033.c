@@ -31,6 +31,7 @@ payload(void)
 {
 
   uint32_t bdf;
+  uint32_t dp_type;
   uint32_t pe_index;
   uint32_t tbl_index;
   uint32_t reg_value;
@@ -50,6 +51,12 @@ payload(void)
   {
       bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
       val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", bdf);
+      dp_type = val_pcie_device_port_type(bdf);
+
+      /* Check entry is RP/EP/DP/UP. Else move to next BDF. */
+      if ((dp_type == iEP_EP) || (dp_type == iEP_RP)
+          || (dp_type == RCEC) || (dp_type == RCiEP))
+          continue;
 
       /* Retrieve the addr of PCI express capability (10h) */
       if (val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &cap_base) != PCIE_SUCCESS) {

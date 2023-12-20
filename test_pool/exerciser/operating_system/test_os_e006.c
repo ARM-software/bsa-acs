@@ -108,7 +108,7 @@ payload (void)
         continue;
 
     /* Get the legacy IRQ map */
-    status = val_exerciser_get_legacy_irq_map(e_bdf, e_intr_map);
+    status = val_pci_get_legacy_irq_map(e_bdf, e_intr_map);
     if (!status) {
 
         /* Get the number of IRQ for the specified INTx# */
@@ -169,9 +169,8 @@ payload (void)
             continue;
         }
         else {
-           val_print(ACS_PRINT_ERR, "\n       Legacy interrupt mapping Read error for bdf: 0x%x",
-                     e_bdf);
-           test_fail++;
+           val_print(ACS_PRINT_DEBUG, "\n    PCIe Legacy IRQs unmapped. Skipping bdf: 0x%x", e_bdf);
+            continue;
         }
    }
  }

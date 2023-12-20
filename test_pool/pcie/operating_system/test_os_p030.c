@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019-2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,6 +48,7 @@ payload(void)
 {
 
   uint32_t bdf;
+  uint32_t dp_type;
   uint32_t dsf_bdf;
   uint32_t pe_index;
   uint32_t tbl_index;
@@ -84,6 +85,12 @@ payload(void)
       bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
       val_print(ACS_PRINT_DEBUG, "\n      tbl_index %x", tbl_index - 1);
       val_print(ACS_PRINT_DEBUG, "      BDF %x", bdf);
+      dp_type = val_pcie_device_port_type(bdf);
+
+      /* Check entry is RP/EP/DP/UP. Else move to next BDF. */
+      if ((dp_type == iEP_EP) || (dp_type == iEP_RP)
+          || (dp_type == RCEC) || (dp_type == RCiEP))
+          continue;
 
       /*
        * For a Function with type 0 config space header, obtain

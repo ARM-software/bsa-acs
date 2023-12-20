@@ -61,7 +61,7 @@ get_target_exer_bdf(uint32_t req_rp_bdf, uint32_t *tgt_e_bdf,
           continue;
 
       /* Get RP of the exerciser */
-      if (val_exerciser_get_rootport(e_bdf, &erp_bdf))
+      if (val_pcie_get_rootport(e_bdf, &erp_bdf))
           continue;
 
       /* It ACS Not Supported, continue */
@@ -251,7 +251,7 @@ payload(void)
       val_print(ACS_PRINT_DEBUG, "\n       Requester exerciser BDF - 0x%x", req_e_bdf);
 
       /* Get RP of the exerciser */
-      if (val_exerciser_get_rootport(req_e_bdf, &req_rp_bdf))
+      if (val_pcie_get_rootport(req_e_bdf, &req_rp_bdf))
           continue;
 
       /* It ACS Not Supported, Fail.*/
