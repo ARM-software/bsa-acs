@@ -22,7 +22,7 @@
 
   #define BSA_ACS_MAJOR_VER      1
   #define BSA_ACS_MINOR_VER      0
-  #define BSA_ACS_SUBMINOR_VER   6
+  #define BSA_ACS_SUBMINOR_VER   7
 
   #define G_PRINT_LEVEL ACS_PRINT_TEST
 
