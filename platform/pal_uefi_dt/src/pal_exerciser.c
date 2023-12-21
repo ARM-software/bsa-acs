@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018-2020,2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2018-2020,2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -546,20 +546,4 @@ pal_exerciser_get_data (
     }
 }
 
-/**
-    @brief   Get legacy IRQ routing for a PCI device
-
-    @param   bus        PCI bus address
-    @param   dev        PCI device address
-    @param   fn         PCI function number
-    @param   irq_map    pointer to IRQ map structure
-
-    @return  irq_map    IRQ routing map
-    @return  status code
-**/
-UINT32
-pal_exerciser_get_legacy_irq_map(UINT32 Seg, UINT32 Bus, UINT32 Dev, UINT32 Fn, PERIPHERAL_IRQ_MAP *IrqMap)
-{
- return NOT_IMPLEMENTED;
-}
 

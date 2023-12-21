@@ -915,8 +915,6 @@ uint32_t pal_exerciser_get_state(EXERCISER_STATE *state, uint32_t bdf);
 uint32_t pal_exerciser_ops(EXERCISER_OPS ops, uint64_t param, uint32_t instance);
 uint32_t pal_exerciser_get_data(EXERCISER_DATA_TYPE type, exerciser_data_t *data, uint32_t bdf,
                                                                                   uint64_t ecam);
-uint32_t pal_exerciser_get_legacy_irq_map(uint32_t seg, uint32_t bus, uint32_t dev, uint32_t fn,
-                                                                    PERIPHERAL_IRQ_MAP *irq_map);
 
 #endif
 

@@ -647,19 +647,6 @@ typedef enum {
     INJECT_ERROR         = 0xe
 } EXERCISER_OPS;
 
-typedef struct {
-  uint32_t   bus;
-  uint32_t   dev;
-  uint32_t   func;
-  uint32_t   seg;
-  PERIPHERAL_IRQ_MAP irq_map;
-} EXERCISER_READ_BLOCK;
-
-typedef struct {
-  uint32_t num_entries;
-  PCIE_READ_BLOCK device[];
-} EXERCISER_READ_TABLE;
-
 /* LibC functions declaration */
 
 int32_t pal_mem_compare(void *Src, void *Dest, uint32_t Len);

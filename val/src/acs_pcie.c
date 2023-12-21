@@ -634,7 +634,6 @@ val_pcie_create_device_bdf_table()
   uint32_t reg_value;
   uint32_t cid_offset;
   uint32_t p_cap;
-  uint32_t dp_type;
   uint32_t status;
 
   /* if table is already present, return success */
@@ -709,16 +708,6 @@ val_pcie_create_device_bdf_table()
                         &cid_offset);
 
                       if (p_cap != PCIE_SUCCESS)
-                          continue;
-
-                      dp_type = val_pcie_device_port_type(bdf);
-
-                      /* RCiEP rules are for SBSA L6 */
-                      if ((dp_type == RCiEP) || (dp_type == RCEC))
-                          continue;
-
-                      /* iEP rules are for SBSA L6 */
-                      if ((dp_type == iEP_EP) || (dp_type == iEP_RP))
                           continue;
 
                       status = pal_pcie_check_device_valid(bdf);

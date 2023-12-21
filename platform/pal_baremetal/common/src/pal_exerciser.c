@@ -19,7 +19,6 @@
 #include "pal_pcie_enum.h"
 
 extern PCIE_INFO_TABLE *g_pcie_info_table;
-extern EXERCISER_READ_TABLE platform_exerciser_device_hierarchy;
 
 uint64_t
 pal_exerciser_get_pcie_config_offset(uint32_t Bdf)
@@ -109,38 +108,4 @@ uint32_t pal_exerciser_find_pcie_capability (uint32_t ID, uint32_t Bdf, uint32_t
 
   print(ACS_PRINT_ERR, "\n No capabilities found",0);
   return 1;
-}
-
-/**
-    @brief   Get legacy IRQ routing for a PCI device
-
-    @param   bus        PCI bus address
-    @param   dev        PCI device address
-    @param   fn         PCI function number
-    @param   irq_map    pointer to IRQ map structure
-
-    @return  irq_map    IRQ routing map
-    @return  status code
-**/
-uint32_t
-pal_exerciser_get_legacy_irq_map(uint32_t Seg, uint32_t Bus, uint32_t Dev, uint32_t Fn, PERIPHERAL_IRQ_MAP *IrqMap)
-{
-
-  uint32_t i;
-
-  for(i = 0; i < platform_exerciser_device_hierarchy.num_entries; i++)
-  {
-     if(Seg  == platform_exerciser_device_hierarchy.device[i].seg &&
-        Bus  == platform_exerciser_device_hierarchy.device[i].bus &&
-        Dev  == platform_exerciser_device_hierarchy.device[i].dev &&
-        Fn == platform_exerciser_device_hierarchy.device[i].func)
-        {
-            pal_memcpy(IrqMap, &platform_exerciser_device_hierarchy.device[i].irq_map,
-                       sizeof(platform_exerciser_device_hierarchy.device[i].irq_map));
-            return 0;
-        }
-  }
-
-  print(ACS_PRINT_ERR, "No PCI devices found in the system\n");
-  return PCIE_NO_MAPPING;
 }

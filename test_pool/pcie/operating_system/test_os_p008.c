@@ -56,6 +56,7 @@ static uint32_t get_max_bus(uint32_t segment, uint32_t end_bus)
 {
   pcie_device_bdf_table *bdf_tbl_ptr;
   uint32_t seg_num;
+  uint32_t bdf, dp_type;
   uint32_t rp_bdf, sub_bus, bus_num;
   uint32_t reg_value;
   uint32_t tbl_index = 0;
@@ -64,6 +65,13 @@ static uint32_t get_max_bus(uint32_t segment, uint32_t end_bus)
   bdf_tbl_ptr = val_pcie_bdf_table_ptr();
   for (tbl_index = 0; tbl_index < bdf_tbl_ptr->num_entries; tbl_index++)
   {
+      bdf = bdf_tbl_ptr->device[tbl_index].bdf;
+      dp_type = val_pcie_device_port_type(bdf);
+
+      /* Since RCEC or RCiEP has no RP. Skip for them. */
+      if ((dp_type == RCEC) || (dp_type == RCiEP))
+          continue;
+
       rp_bdf = bdf_tbl_ptr->device[tbl_index].rp_bdf;
       seg_num = PCIE_EXTRACT_BDF_SEG(rp_bdf);
       bus_num = PCIE_EXTRACT_BDF_BUS(rp_bdf);
