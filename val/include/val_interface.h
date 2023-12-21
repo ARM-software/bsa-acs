@@ -379,7 +379,6 @@ typedef enum {
 #define MEM_ALIGN_64K      0x10000
 
 /* Mem Map APIs */
-void val_mmu_add_mmap(void);
 void val_mmap_add_region(uint64_t va_base, uint64_t pa_base,
                 uint64_t length, uint64_t attributes);
 uint32_t val_setup_mmu(void);

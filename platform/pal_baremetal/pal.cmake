@@ -24,6 +24,7 @@
  ${ROOT_DIR}/platform/pal_baremetal/${TARGET}/src/pal_bm_pe.c
  ${ROOT_DIR}/platform/pal_baremetal/${TARGET}/src/pal_bm_peripherals.c
  ${ROOT_DIR}/platform/pal_baremetal/${TARGET}/src/pal_bm_smmu.c
+ ${ROOT_DIR}/platform/pal_baremetal/${TARGET}/src/pal_bm_memory.c
  ${ROOT_DIR}/platform/pal_baremetal/${TARGET}/src/platform_cfg_fvp.c
  ${ROOT_DIR}/platform/pal_baremetal/common/src/pal_dma.c
  ${ROOT_DIR}/platform/pal_baremetal/common/src/pal_exerciser.c

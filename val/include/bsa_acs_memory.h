@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021, 2023 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021, 2023, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,9 @@
 
 addr_t val_memory_ioremap(void *addr, uint32_t size, uint32_t attr);
 
+void val_mmu_add_mmap(void);
+void *val_mmu_get_mmap_list(void);
+uint32_t val_mmu_get_mapping_count(void);
 void val_memory_unmap(void *ptr);
 void *val_memory_alloc(uint32_t size);
 void *val_memory_calloc(uint32_t num, uint32_t size);

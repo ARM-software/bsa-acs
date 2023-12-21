@@ -17,11 +17,7 @@
 
 #include "pal_pcie_enum.h"
 #include "pal_common_support.h"
-#ifdef ENABLE_OOB
 #include "platform_override_struct.h"
-#else
-#include "platform_override_struct.h"
-#endif
 
 /**
   @brief   This API checks the PCIe hierarchy fo P2P support
