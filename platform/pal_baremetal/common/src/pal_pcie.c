@@ -476,7 +476,7 @@ pal_pcie_is_cache_present(uint32_t seg, uint32_t bus, uint32_t dev, uint32_t fn)
 uint32_t
 pal_pcie_get_legacy_irq_map(uint32_t Seg, uint32_t Bus, uint32_t Dev, uint32_t Fn, PERIPHERAL_IRQ_MAP *IrqMap)
 {
-  uint32_t i;
+  uint32_t i, e_intr_pin;
 
   for(i = 0; i < platform_pcie_device_hierarchy.num_entries; i++)
   {
@@ -485,9 +485,17 @@ pal_pcie_get_legacy_irq_map(uint32_t Seg, uint32_t Bus, uint32_t Dev, uint32_t F
         Dev  == platform_pcie_device_hierarchy.device[i].dev &&
         Fn == platform_pcie_device_hierarchy.device[i].func)
         {
-            pal_memcpy(IrqMap, &platform_pcie_device_hierarchy.device[i].irq_map,
+            pal_pcie_read_cfg(Seg, Bus, Dev, Fn, PCIE_INTERRUPT_LINE, &e_intr_pin);
+            e_intr_pin = (e_intr_pin >> PCIE_INTERRUPT_PIN_SHIFT) & PCIE_INTERRUPT_PIN_MASK;
+            if (platform_pcie_device_hierarchy.device[i].
+                                                irq_map.legacy_irq_map[e_intr_pin - 1].irq_count)
+            {
+                pal_memcpy(IrqMap, &platform_pcie_device_hierarchy.device[i].irq_map,
                        sizeof(platform_pcie_device_hierarchy.device[i].irq_map));
-            return 0;
+                return 0;
+            }
+            else
+                return 1;
         }
   }
 

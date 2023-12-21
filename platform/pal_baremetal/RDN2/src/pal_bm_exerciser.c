@@ -17,11 +17,7 @@
 
 #include "pal_common_support.h"
 #include "pal_pcie_enum.h"
-#if defined (ENABLE_OOB) || defined (TARGET_BM_BOOT)
 #include "platform_override_struct.h"
-#else
-#include "platform_override_struct.h"
-#endif
 
 uint64_t
 pal_exerciser_get_ecam(uint32_t Bdf);
