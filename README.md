@@ -18,7 +18,7 @@ A few tests are executed by running the BSA ACS Linux application which in turn 
 The tests can also be executed in a Bare-metal environment. The initialization of the Bare-metal environment is specific to the environment and is out of scope of this document.
 
 ## Release details
- - Code quality: v1.0.6
+ - Code quality: v1.0.7
  - The tests are written for version 1.0 (c) of the BSA specification.
  - The tests can be run at both the Pre-Silicon and Silicon level.
  - For complete coverage of the BSA rules, availability of an Exerciser is required for Exerciser tests to be run during verficiation at Pre-Silicon level.
@@ -259,6 +259,7 @@ The Arm SystemReady ACS test suite may run at a higher privilege level. An attac
 --------------------------------------------------------------------------------------------
 |    BSA Spec Version   |   BSA ACS Version   |      BSA Tag ID     |    Pre-Si Support    |
 |-----------------------|:-------------------:|:-------------------:|:--------------------:|
+|       BSA v1.0(c)     |        v1.0.7       |   v23.12_REL1.0.7   |       Yes            |
 |       BSA v1.0(c)     |        v1.0.6       |v23.11_BootFramework |       Yes            |
 |       BSA v1.0(c)     |        v1.0.6       |   v23.09_REL1.0.6   |       Yes            |
 |       BSA v1.0(c)     |        v1.0.5       |   v23.07_REL1.0.5   |       Yes            |

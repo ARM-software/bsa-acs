@@ -14,7 +14,7 @@ This suite includes a set of examples of the invariant behaviors that are provid
 The tests are executed in a baremetal environment. The initialization of the baremetal environment is specific to the environment and is out of scope of this document.
 
 ## Release details
- - Code Quality: REL v1.0.6
+ - Code Quality: REL v1.0.7
  - The tests are written for version 1.0 (c) of the BSA specification.
  - The compliance suite is not a substitute for design verification.
  - To review the BSA ACS logs, Arm licensees can contact Arm directly through their partner managers.
