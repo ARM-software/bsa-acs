@@ -40,6 +40,55 @@ typedef struct
     uint32_t nbits;
 } tt_descriptor_t;
 
+static
+uint32_t get_entries_per_level(uint32_t page_size)
+{
+    switch (page_size)
+    {
+        case(PAGE_SIZE_4K):   //4kb granule
+            return MAX_ENTRIES_4K;
+        case(PAGE_SIZE_16K):  //16kb granule
+            return MAX_ENTRIES_16K;
+        case(PAGE_SIZE_64K):  //64kb granule
+            return MAX_ENTRIES_64K;
+        default:
+            val_print(ACS_PRINT_ERR, "\n       %llx granularity not supported.", page_size);
+            return 0;
+    }
+}
+
+static
+uint64_t get_block_size(uint32_t level)
+{
+    uint32_t entries = get_entries_per_level(page_size);
+    switch (level)
+    {
+        case(PGT_LEVEL_0):  // For L0 table translation
+            if (page_size == PAGE_SIZE_4K)
+                return (uint64_t)(page_size * entries * entries * entries);
+            else if (page_size == PAGE_SIZE_16K)
+                return (uint64_t)(page_size * entries * entries * 2); // only 2 lookup tables in L0
+            else {
+                val_print(ACS_PRINT_ERR, "\n       L0 tables not supported for page size %llx",
+                                                                                        page_size);
+                return 0;
+            }
+
+        case(PGT_LEVEL_1):  // For L1 table translation
+            if (page_size == PAGE_SIZE_4K || page_size == PAGE_SIZE_16K)
+                return (uint64_t)(page_size * entries * entries);
+            else
+                return (uint64_t)(page_size * entries * 64); // 64 Lookup tables in L1 (64KB Gran)
+
+        case(PGT_LEVEL_2):  // For L2 table translation
+            return (uint64_t)(page_size * entries);
+        case(PGT_LEVEL_3):  // For L3 table translation
+            return (uint64_t)(page_size);
+        default:
+            return 0;
+    }
+}
+
 /**
   @brief  This API fills the translation table
 
@@ -52,7 +101,8 @@ static
 uint32_t fill_translation_table(tt_descriptor_t tt_desc, memory_region_descriptor_t *mem_desc)
 {
     uint64_t block_size = 0x1ull << tt_desc.size_log2;
-    uint64_t input_address, output_address, table_index, *tt_base_next_level, *table_desc;
+    uint64_t input_address, output_address, table_index, max_allowed_mem, offset=0;
+    uint64_t *tt_base_next_level, *table_desc;
     tt_descriptor_t tt_desc_next_level;
 
     val_print(PGT_DEBUG_LEVEL, "\n       tt_desc.level: %d     ", tt_desc.level);
@@ -64,7 +114,7 @@ uint32_t fill_translation_table(tt_descriptor_t tt_desc, memory_region_descripto
 
     for (input_address = tt_desc.input_base, output_address = tt_desc.output_base;
          input_address < tt_desc.input_top;
-         input_address += block_size, output_address += block_size)
+         input_address += (block_size - offset), output_address += (block_size - offset))
     {
         table_index = input_address >> tt_desc.size_log2 & ((0x1ull << tt_desc.nbits) - 1);
         table_desc = &tt_desc.tt_base[table_index];
@@ -78,6 +128,7 @@ uint32_t fill_translation_table(tt_descriptor_t tt_desc, memory_region_descripto
             *table_desc |= (output_address & ~(uint64_t)(page_size - 1));
             *table_desc |= mem_desc->attributes;
             val_print(PGT_DEBUG_LEVEL, "\n       page_descriptor = 0x%llx     ", *table_desc);
+            offset = 0;
             continue;
         }
 
@@ -90,6 +141,7 @@ uint32_t fill_translation_table(tt_descriptor_t tt_desc, memory_region_descripto
             *table_desc |= (output_address & ~(block_size - 1));
             *table_desc |= mem_desc->attributes;
             val_print(PGT_DEBUG_LEVEL, "\n       block_descriptor = 0x%llx     ", *table_desc);
+            offset = 0;
             continue;
         }
         /*
@@ -119,6 +171,13 @@ uint32_t fill_translation_table(tt_descriptor_t tt_desc, memory_region_descripto
         tt_desc_next_level.level = tt_desc.level + 1;
         tt_desc_next_level.size_log2 = tt_desc.size_log2 - bits_per_level;
         tt_desc_next_level.nbits = bits_per_level;
+
+        // Calculate the maximum allowed mem addr that can be mapped for the L0/L1/L2 table.
+        // This prevents overwriting page tables.  Offset will adjust input_address accordingly
+        table_index                  = input_address >> tt_desc_next_level.size_log2 & ((0x1ull << tt_desc_next_level.nbits) - 1);
+        offset                       = table_index * get_block_size(tt_desc_next_level.level);
+        max_allowed_mem              = input_address + block_size - offset - 1;
+        tt_desc_next_level.input_top = get_min(tt_desc.input_top, max_allowed_mem);
 
         if (fill_translation_table(tt_desc_next_level, mem_desc))
         {
