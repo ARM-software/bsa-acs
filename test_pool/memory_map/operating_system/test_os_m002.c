@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, 2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,6 +71,7 @@ payload()
           goto normal_mem_test;
       }
 
+      val_print(ACS_PRINT_DEBUG, "\n       Device Mem Address : 0x%llx", addr);
       /* Access must not cause a deadlock */
       original_value = *((volatile addr_t*)addr);
       *((volatile addr_t*)addr) = original_value;
@@ -96,7 +97,7 @@ normal_mem_test:
                                    " instance %d", instance);
           return;
       }
-
+      val_print(ACS_PRINT_DEBUG, "\n       Normal Mem Address : 0x%llx", addr);
       /* Access must not cause a deadlock */
       original_value = *((volatile addr_t*)addr);
       *((volatile addr_t*)addr) = original_value;
