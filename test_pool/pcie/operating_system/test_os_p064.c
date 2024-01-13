@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021-2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,8 +64,8 @@ check_list_duplicates (PERIPHERAL_VECTOR_LIST *list_one, PERIPHERAL_VECTOR_LIST 
 
   uint32_t fcount = 0;
   uint32_t scount = 0;
-  uint32_t irq_start1, irq_end1;
-  uint32_t irq_start2, irq_end2;
+  uint64_t irq_start1, irq_end1;
+  uint64_t irq_start2, irq_end2;
 
   flist_node = list_one;
   slist_node = list_two;
