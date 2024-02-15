@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2020,2021,2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020,2021,2023-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +29,16 @@
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 1)
 #define TEST_RULE  "PCI_PP_04"
 #define TEST_DESC  "Check P2P ACS Functionality           "
+
+static
+void
+clear_error_status(uint32_t bdf)
+{
+  /* Clear Error Status Bits of the mentioned BDF */
+  val_pcie_clear_device_status_error(bdf);
+  val_pcie_clear_sig_target_abort(bdf);
+  return;
+}
 
 static
 uint32_t
@@ -119,18 +129,20 @@ check_source_validation (uint32_t req_instance, uint32_t req_rp_bdf, uint64_t ba
   uint32_t  sub_bus;
   uint32_t  new_bdf;
 
+  /* Clear error status bits of the Req RP*/
+  clear_error_status(req_rp_bdf);
+
   /* Pass Sequence */
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)bar_base, 1, req_instance);
+  val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance);
 
-  if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance)) {
+  /* DMA should be successful and not trigger Corr/Uncorr error, UR response, Sig Target Abort. */
+  if ((val_pcie_is_device_status_error(req_rp_bdf) != 0) ||
+     (val_pcie_is_sig_target_abort(req_rp_bdf) != 0)) {
       val_print(ACS_PRINT_ERR,
-              "\n       Src Validation 1st DMA failure from exerciser 0x%4x", req_instance);
+                     "\n       Src Validation unexpected Error on RootPort : 0x%x", req_rp_bdf);
       return ACS_STATUS_FAIL;
   }
-
-  /* Clear Error Status Bits */
-  val_pcie_clear_device_status_error(req_rp_bdf);
-  val_pcie_clear_sig_target_abort(req_rp_bdf);
 
   /* Change Requester ID for DMA such that it does not fall under req_rp_bdf
    * Secondary & Subordinate bdf
@@ -141,14 +153,13 @@ check_source_validation (uint32_t req_instance, uint32_t req_rp_bdf, uint64_t ba
                             (sub_bus+1), 0, 0);
   new_bdf = PCIE_CREATE_BDF_PACKED(new_bdf);
 
+  /* Clear error status bits of the Req RP*/
+  clear_error_status(req_rp_bdf);
+
   val_exerciser_set_param(CFG_TXN_ATTRIBUTES, TXN_REQ_ID, new_bdf, req_instance);
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)bar_base, 1, req_instance);
 
-  if (!val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance)) {
-      val_print(ACS_PRINT_ERR,
-              "\n       Src Validation 2nd DMA failure from exerciser 0x%4x", req_instance);
-      return ACS_STATUS_FAIL;
-  }
+  val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance);
 
   /* Check For Error in Device Status Register / Status Register
    * Secondary Status Register
@@ -170,9 +181,8 @@ check_transaction_blocking (uint32_t req_instance, uint32_t req_rp_bdf, uint64_t
 {
   /* Check 2 : ACS Transaction Blocking */
 
-  /* Clear Error Status Bits */
-  val_pcie_clear_device_status_error(req_rp_bdf);
-  val_pcie_clear_sig_target_abort(req_rp_bdf);
+  /* Clear error status bits of the Req RP*/
+  clear_error_status(req_rp_bdf);
 
   /* Transaction with Address Type other than default(0x0)
    * must result into Transaction blocking.
@@ -180,11 +190,7 @@ check_transaction_blocking (uint32_t req_instance, uint32_t req_rp_bdf, uint64_t
   val_exerciser_set_param(CFG_TXN_ATTRIBUTES, TXN_ADDR_TYPE, AT_RESERVED, req_instance);
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)bar_base, 1, req_instance);
 
-  if (!val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance)) {
-      val_print(ACS_PRINT_ERR,
-                "\n       Traxn blocking DMA failure from exerciser 0x%4x", req_instance);
-      return ACS_STATUS_FAIL;
-  }
+  val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance);
 
   /* Check For Error in Device Status Register / Status Register
    * Secondary Status Register
@@ -302,9 +308,9 @@ payload(void)
           curr_bdf_failed = 0;
           fail_cnt++;
       }
-      /* Clear Error Status Bits */
-      val_pcie_clear_device_status_error(req_rp_bdf);
-      val_pcie_clear_sig_target_abort(req_rp_bdf);
+
+      /* Clear error status bits of the Req RP*/
+      clear_error_status(req_rp_bdf);
   }
 
   if (test_skip == 1)

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018-2021,2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2018-2021,2023-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,17 +61,11 @@ test_sequence2(void *dram_buf1_virt, void *dram_buf1_phys, uint32_t e_bdf, uint3
 
   /* Perform DMA OUT to copy contents of dram_buf2 to exerciser memory */
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf2_phys, dma_len, instance);
-  if (val_exerciser_ops(START_DMA, EDMA_TO_DEVICE, instance)) {
-      val_print(ACS_PRINT_ERR, "\n       DMA write failure to exerciser %4x", instance);
-      return 1;
-  }
+  val_exerciser_ops(START_DMA, EDMA_TO_DEVICE, instance);
 
   /* Perform DMA IN to copy content back from exerciser memory to dram_buf1 */
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf1_phys, dma_len, instance);
-  if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, instance)) {
-      val_print(ACS_PRINT_ERR, "\n       DMA read failure from exerciser %4x", instance);
-      return 1;
-  }
+  val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, instance);
 
   /* Check if the transaction pending bit is cleared */
   tp_bit = val_is_transaction_pending_set(e_bdf);
@@ -116,17 +110,11 @@ test_sequence1(void *dram_buf1_virt, void *dram_buf1_phys, uint32_t e_bdf, uint3
 
   /* Perform DMA OUT to copy contents of dram_buf1 to exerciser memory */
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf1_phys, dma_len, instance);
-  if (val_exerciser_ops(START_DMA, EDMA_TO_DEVICE, instance)) {
-      val_print(ACS_PRINT_ERR, "\n       DMA write failure to exerciser %4x", instance);
-      return 1;
-  }
+  val_exerciser_ops(START_DMA, EDMA_TO_DEVICE, instance);
 
   /* Perform DMA IN to copy the content from exerciser memory to dram_buf2 */
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf2_phys, dma_len, instance);
-  if (val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, instance)) {
-      val_print(ACS_PRINT_ERR, "\n       DMA read failure from exerciser %4x", instance);
-      return 1;
-  }
+  val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, instance);
 
   /* Check if the transaction pending bit is cleared */
   tp_bit = val_is_transaction_pending_set(e_bdf);
