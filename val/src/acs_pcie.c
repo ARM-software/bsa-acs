@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -688,8 +688,11 @@ val_pcie_create_device_bdf_table()
                   if (reg_value != PCIE_UNKNOWN_RESPONSE)
                   {
                       /* Skip if the device is a host bridge */
-                      if (val_pcie_is_host_bridge(bdf))
+                      if (val_pcie_is_host_bridge(bdf)) {
+                          val_print(ACS_PRINT_ERR,
+                                     "       BDF 0x%x is a Host Bridge...Skipping\n", bdf);
                           continue;
+                      }
 
 #ifndef TARGET_LINUX
                       /* Enable memory access and bus master enable for all BDF's
@@ -707,12 +710,18 @@ val_pcie_create_device_bdf_table()
                         CID_PCIECS,
                         &cid_offset);
 
-                      if (p_cap != PCIE_SUCCESS)
+                      if (p_cap != PCIE_SUCCESS) {
+                          val_print(ACS_PRINT_ERR,
+                          "       BDF 0x%x PCI Express capability not present...Skipping\n", bdf);
                           continue;
+                      }
 
                       status = pal_pcie_check_device_valid(bdf);
-                      if (status)
+                      if (status) {
+                          val_print(ACS_PRINT_ERR,
+                           "       BDF 0x%x Marked as invalid in Platform API...Skipping\n", bdf);
                           continue;
+                      }
 
                       g_pcie_bdf_table->device[g_pcie_bdf_table->num_entries++].bdf = bdf;
                   }
