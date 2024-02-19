@@ -689,7 +689,7 @@ val_pcie_create_device_bdf_table()
                   {
                       /* Skip if the device is a host bridge */
                       if (val_pcie_is_host_bridge(bdf)) {
-                          val_print(ACS_PRINT_ERR,
+                          val_print(ACS_PRINT_DEBUG,
                                      "       BDF 0x%x is a Host Bridge...Skipping\n", bdf);
                           continue;
                       }
@@ -711,14 +711,14 @@ val_pcie_create_device_bdf_table()
                         &cid_offset);
 
                       if (p_cap != PCIE_SUCCESS) {
-                          val_print(ACS_PRINT_ERR,
+                          val_print(ACS_PRINT_DEBUG,
                           "       BDF 0x%x PCI Express capability not present...Skipping\n", bdf);
                           continue;
                       }
 
                       status = pal_pcie_check_device_valid(bdf);
                       if (status) {
-                          val_print(ACS_PRINT_ERR,
+                          val_print(ACS_PRINT_DEBUG,
                            "       BDF 0x%x Marked as invalid in Platform API...Skipping\n", bdf);
                           continue;
                       }
