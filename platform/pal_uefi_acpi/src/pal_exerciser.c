@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018-2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -145,7 +145,6 @@ pal_exerciser_start_dma_direction (
   )
 {
   UINT32 Mask;
-  UINT32 Status;
 
   if (Direction == EDMA_TO_DEVICE) {
       Mask = DMA_TO_DEVICE_MASK;//  DMA direction:to Device
@@ -160,15 +159,13 @@ pal_exerciser_start_dma_direction (
   // Triggering the DMA
   pal_mmio_write(Base + DMACTL1, (pal_mmio_read(Base + DMACTL1) | MASK_BIT));
 
-  // Reading the Status of the DMA
-  Status = (pal_mmio_read(Base + DMASTATUS) & ((MASK_BIT << 1) | MASK_BIT));
-  return Status;
+  return 0;
 }
 
 /**
   @brief This function finds the PCI capability and return 0 if it finds.
 
-  @param ID    PCI capability IF 
+  @param ID    PCI capability IF
   @param Bdf   BDF value for the device
   @param Value 1 PCIE capability 0 PCI capability
   @param Offset capability offset

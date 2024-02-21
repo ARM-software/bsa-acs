@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2020,2021,2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020,2021,2023-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -104,6 +104,8 @@ create_va_pa_mapping (uint64_t txn_va, uint64_t txn_pa,
   uint32_t instance;
   uint32_t device_id, its_id;
   uint32_t status, dma_status;
+  uint64_t bar_value;
+  uint32_t old_val, new_val;
 
   master = *smmu_master;
 
@@ -184,16 +186,39 @@ create_va_pa_mapping (uint64_t txn_va, uint64_t txn_pa,
       val_pcie_clear_device_status_error(req_rp_bdf);
       val_pcie_clear_sig_target_abort(req_rp_bdf);
 
-      dma_status = val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance);
+      /* Store the value of BAR reg. To be rewritten back later. */
+      bar_value = val_mmio_read64((uint64_t)txn_va);
+
+      /* Corrupt the BAR and read the value before making a DMA transaction. */
+      val_mmio_write(txn_va, 0xABCDABCD);
+      old_val = val_mmio_read((uint64_t)txn_va);
+      val_print(ACS_PRINT_DEBUG, "\n       Bar value before DMA is %llx", old_val);
+
+      /* Trigger DMA from Exerciser to the target device. */
+      val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, req_instance);
+
+      /* Read the memory location to check if DMA is successful or not. */
+      new_val = val_mmio_read((uint64_t)txn_va);
+      val_print(ACS_PRINT_DEBUG, "\n       Bar value after DMA is %llx", new_val);
+
+      /* If the values of targeted reads are same, the DMA is failure. */
+      if (old_val == new_val)
+            dma_status = 0;  // DMA Fail
+      else
+            dma_status = 1;  // DMA Success
+
+      /* Write back the original BAR value to the address. */
+      val_mmio_write64(txn_va, bar_value);
+
       /* DMA must fail because Write permission not given */
-      if ((pgt_ap == PGT_STAGE1_AP_RO) && (dma_status == 0)) {
+      if ((pgt_ap == PGT_STAGE1_AP_RO) && (dma_status != 0)) {
           val_print(ACS_PRINT_DEBUG,
                     "\n       Seq1:DMA Write must not happen For : %4x", req_instance);
           goto test_fail;
       }
 
-      /* DMA must fail not because Write permission given */
-      if ((pgt_ap == PGT_STAGE1_AP_RW) && (dma_status != 0)) {
+      /* DMA must not fail because Write permission given */
+      if ((pgt_ap == PGT_STAGE1_AP_RW) && (dma_status == 0)) {
           val_print(ACS_PRINT_DEBUG, "\n       Seq2:DMA Write must happen For : %4x", req_instance);
           goto test_fail;
       }
