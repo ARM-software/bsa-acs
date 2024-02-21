@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020,2022-2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2020,2022-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -165,7 +165,8 @@ typedef enum {
   DBGBCR12_EL1,
   DBGBCR13_EL1,
   DBGBCR14_EL1,
-  DBGBCR15_EL1
+  DBGBCR15_EL1,
+  ID_AA64ISAR2_EL1
 } BSA_ACS_PE_REGS;
 
 uint64_t ArmReadMpidr(void);
@@ -187,6 +188,8 @@ uint64_t AA64ReadCtr(void);
 uint64_t AA64ReadIsar0(void);
 
 uint64_t AA64ReadIsar1(void);
+
+uint64_t AA64ReadIsar2(void);
 
 uint64_t AA64ReadSctlr3(void);
 

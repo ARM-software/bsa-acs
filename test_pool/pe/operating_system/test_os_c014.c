@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2020-2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2020-2021, 2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,40 +22,62 @@
 #define TEST_RULE  "B_PE_15"
 #define TEST_DESC  "Check PAuth if implementation         "
 
-static void check_pauth_algorithm(uint32_t index, uint64_t data)
+static void check_pauth_algorithm(uint32_t index, uint64_t data1, uint32_t data2)
 {
-    /* Read ID_AA64ISAR1_EL1[11:4] for address authentication and
-     * ID_AA64ISAR1_EL1[31:24] for generic authentication
-     * defined by Arm architecture
+
+    /* Read ID_AA64ISAR1_EL1.APA[7:4] and ID_AA64ISAR1_EL1.GPA[27:24]  ! = 0 indicates
+     * address and generic authentication support using QARMA5
+     *
+     * Read ID_AA64ISAR2_EL1.APA3[15:12] and ID_AA64ISAR2_EL1.GPA3[11:8] ! = 0 indicates
+     * address and generic authentication support using QARMA3
      */
-    if ((VAL_EXTRACT_BITS(data, 4, 7) == 0) && (VAL_EXTRACT_BITS(data, 24, 27) == 0)) {
-        if ((VAL_EXTRACT_BITS(data, 8, 11) != 0) && (VAL_EXTRACT_BITS(data, 28, 31) != 0))
-            val_set_status(index, RESULT_PASS(TEST_NUM, 1));
-        else
-            val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
-    }
-    else
+
+    if (((VAL_EXTRACT_BITS(data1, 4, 7) != 0) && (VAL_EXTRACT_BITS(data1, 24, 27) != 0)) ||
+        ((VAL_EXTRACT_BITS(data2, 8, 11) != 0) && (VAL_EXTRACT_BITS(data2, 12, 15) != 0)))
         val_set_status(index, RESULT_PASS(TEST_NUM, 1));
+    else
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
 }
 
 static
 void
 payload()
 {
-    uint64_t data = val_pe_reg_read(ID_AA64ISAR1_EL1);
     uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
+    uint32_t primary_pe_idx = val_pe_get_primary_index();
 
+    /* Read ID_AA64ISAR1_EL1 and ID_AA64ISAR2_EL1 for PAuth support */
+    uint64_t data1 = val_pe_reg_read(ID_AA64ISAR1_EL1);
+    uint64_t data2 = val_pe_reg_read(ID_AA64ISAR2_EL1);
 
-    /* Pointer signing is optional, Check if Pointer signing is implemented */
-    if ((VAL_EXTRACT_BITS(data, 4, 7) == 0) && (VAL_EXTRACT_BITS(data, 8, 11) == 0) &&
-        (VAL_EXTRACT_BITS(data, 24, 27) == 0) && (VAL_EXTRACT_BITS(data, 28, 31) == 0)) {
+    if (index == primary_pe_idx) {
+        val_print(ACS_PRINT_DEBUG, "\n       ID_AA64ISAR1_EL1 = %llx", data1);
+        val_print(ACS_PRINT_DEBUG, "\n       ID_AA64ISAR2_EL1 = %llx", data2);
+    }
+     /* PAuth is optional, For PAuth authentication support atleast one of generic or address
+      * authentication of any one of the standard algorithm is needed
+      *
+      * Read ID_AA64ISAR1_EL1.APA[7:4] and ID_AA64ISAR1_EL1.GPA[27:24]  ! = 0 indicates
+      * address and generic authentication support using QARMA5
+      *
+      * Read ID_AA64ISAR2_EL1.APA3[15:12] and ID_AA64ISAR2_EL1.GPA3[11:8] ! = 0 indicates
+      * address and generic authentication support using QARMA3
+      *
+      * Read ID_AA64ISAR1_EL1.API[11:8] and ID_AA64ISAR1_EL1.GPI[31:28] ! = 0 indicates
+      * address and generic authentication support using IMPDEF
+      */
+
+    if ((VAL_EXTRACT_BITS(data1, 4, 7) == 0) && (VAL_EXTRACT_BITS(data2, 12, 15) == 0) &&
+        (VAL_EXTRACT_BITS(data1, 24, 27) == 0) && (VAL_EXTRACT_BITS(data2, 8, 11) == 0) &&
+        (VAL_EXTRACT_BITS(data1, 8, 11) == 0) && (VAL_EXTRACT_BITS(data1, 28, 31) == 0)) {
+
         /* Pointer signing not implemented, Skip the test */
         val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
         return;
     }
 
     /* Implemented, Check for pointer authentication using standard algorithm */
-    check_pauth_algorithm(index, data);
+    check_pauth_algorithm(index, data1, data2);
 
 }
 
