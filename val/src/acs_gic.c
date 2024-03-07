@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021-2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -622,15 +622,26 @@ uint32_t val_gic_get_espi_intr_trigger_type(uint32_t int_id,
 **/
 void val_gic_set_intr_trigger(uint32_t int_id, INTR_TRIGGER_INFO_TYPE_e trigger_type)
 {
-  uint32_t status;
+  uint32_t reg_value;
+  uint32_t reg_offset;
+  uint32_t config_bit_shift;
 
   val_print(ACS_PRINT_DEBUG, "\n       Setting Trigger type as %d  ",
                                                                 trigger_type);
-  status = pal_gic_set_intr_trigger(int_id, trigger_type);
+  reg_offset = int_id / GICD_ICFGR_INTR_STRIDE;
+  config_bit_shift  = GICD_ICFGR_INTR_CONFIG1(int_id);
 
-  if (status)
-    val_print(ACS_PRINT_ERR, "\n       Error Could Not Configure Trigger Type",
-                                                                            0);
+  reg_value = val_mmio_read(val_get_gicd_base() + GICD_ICFGR + (4 * reg_offset));
+
+  if (trigger_type == INTR_TRIGGER_INFO_EDGE_RISING)
+      reg_value = reg_value | ((uint32_t)1 << config_bit_shift);
+  else
+      reg_value = reg_value & (~((uint32_t)1 << config_bit_shift));
+
+  val_print(ACS_PRINT_INFO, "\n       Writing to Register Address : 0x%llx ",
+                         val_get_gicd_base() + GICD_ICFGR + (4 * reg_offset));
+
+  val_mmio_write(val_get_gicd_base() + GICD_ICFGR + (4 * reg_offset), reg_value);
 }
 
 /**
