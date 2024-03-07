@@ -356,7 +356,7 @@ void
 val_pe_default_esr(uint64_t interrupt_type, void *context)
 {
     uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
-    val_print(ACS_PRINT_WARN, "\n        Unexpected exception of type %d occured", interrupt_type);
+    val_print(ACS_PRINT_WARN, "\n        Unexpected exception of type %d occurred", interrupt_type);
 
 #ifndef TARGET_LINUX
     if (pal_target_is_dt() || pal_target_is_bm()) {
