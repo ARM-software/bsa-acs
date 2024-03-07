@@ -522,7 +522,7 @@ static int smmu_handle_evt(uint64_t *event)
                 val_print(ACS_PRINT_TEST, "\n\n    TLB conflict occurred     ", 0);
                 break;
         case EVT_ID_CFG_CONFLICT:
-                val_print(ACS_PRINT_TEST, "\n\n    Configuration cache conflict occured    ", 0);
+                val_print(ACS_PRINT_TEST, "\n\n    Configuration cache conflict occurred    ", 0);
                 break;
         case EVT_ID_PAGE_REQUEST:
                 val_print(ACS_PRINT_TEST, "\n\n    Speculation Page Req hint     ", 0);
@@ -608,7 +608,7 @@ static void smmu_evtq_thread(void)
     ret = smmu_gerror_check(smmu);
     if (ret)
     {
-        val_print(ACS_PRINT_WARN, "\n    GERROR occured. Eventq is not writable.     ", 0);
+        val_print(ACS_PRINT_WARN, "\n    GERROR occurred. Eventq is not writable.     ", 0);
         return;
     }
 
