@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -234,6 +234,8 @@ uint32_t val_pcie_is_sig_target_abort(uint32_t bdf);
 void val_pcie_clear_sig_target_abort(uint32_t bdf);
 uint32_t val_pcie_link_cap_support(uint32_t bdf);
 uint32_t val_pcie_mem_get_offset(uint32_t bdf, PCIE_MEM_TYPE_INFO_e mem_type);
+void val_pcie_read_acsctrl(uint32_t arr[][1]);
+void val_pcie_write_acsctrl(uint32_t arr[][1]);
 
 /* IO-VIRT APIs */
 typedef enum {
