@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021-2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -119,10 +119,14 @@ payload (void)
                 if (irq_map->legacy_irq_map[current_irq_pin].irq_list[ccnt] ==
                     irq_map->legacy_irq_map[next_irq_pin].irq_list[ncnt]) {
                   status = 7;
-                  val_print (ACS_PRINT_ERR, "\n       Legacy interrupt %c routing",
+                  val_print(ACS_PRINT_ERR, "\n        BDF : %x", dev_bdf);
+                  val_print(ACS_PRINT_ERR, " Legacy interrupt %c",
                                              pin_name(current_irq_pin));
-                  val_print (ACS_PRINT_ERR, "\n       is the same as %c routing",
+                  val_print(ACS_PRINT_ERR, "(%d) routing", current_irq_pin);
+
+                  val_print(ACS_PRINT_ERR, "\n        is same as the %c",
                                              pin_name(next_irq_pin));
+                  val_print(ACS_PRINT_ERR, "(%d) routing", next_irq_pin);
                 }
               }
             }
