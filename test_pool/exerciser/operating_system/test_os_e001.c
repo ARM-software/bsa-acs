@@ -224,11 +224,15 @@ payload(void)
   uint32_t test_skip;
   uint64_t bar_base;
   uint32_t curr_bdf_failed = 0;
+  pcie_device_bdf_table *bdf_tbl_ptr;
+  bdf_tbl_ptr = val_pcie_bdf_table_ptr();
 
   fail_cnt = 0;
   test_skip = 1;
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
   instance = val_exerciser_get_info(EXERCISER_NUM_CARDS);
+
+  uint32_t acsctrl_default[bdf_tbl_ptr->num_entries][1];
 
   /* Check If PCIe Hierarchy supports P2P. */
   if (val_pcie_p2p_support() == NOT_IMPLEMENTED) {
@@ -245,6 +249,10 @@ payload(void)
     val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
     return;
   }
+
+  /* Store ACS Control reg bits in an array for every Exerciser and reset them
+     to default at the end. */
+  val_pcie_read_acsctrl(acsctrl_default);
 
   while (instance-- != 0)
   {
@@ -312,6 +320,9 @@ payload(void)
       /* Clear error status bits of the Req RP*/
       clear_error_status(req_rp_bdf);
   }
+
+  /* Write back default values of ACS Control reg. */
+  val_pcie_write_acsctrl(acsctrl_default);
 
   if (test_skip == 1)
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 3));

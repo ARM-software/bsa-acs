@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019-2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -217,6 +217,7 @@
 #define DSTS_SHIFT     16
 #define DS_UNCORR_MASK 0x6
 #define DS_CORR_MASK   0x1
+#define ACSCTRL_SHIFT  0x0F
 
 /* DPC Capability struct offsets and shifts */
 #define DPC_CTRL_OFFSET        0x4

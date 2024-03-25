@@ -2512,3 +2512,69 @@ uint32_t val_pcie_scan_bridge_devices_and_check_memtype(uint32_t bdf)
 
   return status;
 }
+
+/**
+  @brief  Read ACS Control register for all the BDFs and store it in an array.
+
+  @param  arr - 2-D array to store tbl_index and ACS Control reg values.
+  @return None
+
+**/
+void val_pcie_read_acsctrl(uint32_t arr[][1])
+{
+  uint32_t cap_base;
+  uint32_t reg_value;
+  uint32_t bdf;
+  uint32_t tbl_index = 0;
+
+  /* Get the PCI Express Capability structure offset and
+   * use that offset to read Access Control Service register
+   */
+
+  while (tbl_index < g_pcie_bdf_table->num_entries)
+  {
+      bdf = g_pcie_bdf_table->device[tbl_index].bdf;
+      val_pcie_find_capability(bdf, PCIE_ECAP, ECID_ACS, &cap_base);
+      val_pcie_read_cfg(bdf, cap_base + ACSCR_OFFSET, &reg_value);
+      arr[tbl_index][0] = reg_value;
+
+      val_print(ACS_PRINT_INFO, "\n       ACS Control Reg value read for BDF 0x%x is", bdf);
+      val_print(ACS_PRINT_INFO, " %llx", arr[tbl_index][0]);
+      tbl_index++;
+  }
+
+  return;
+}
+
+/**
+  @brief  Write back the default ACS Control register for all the BDFs which were stored in array
+          before.
+
+  @param  arr - 2-D array to store tbl_index and ACS Control reg values.
+  @return None
+
+**/
+void val_pcie_write_acsctrl(uint32_t arr[][1])
+{
+
+  uint32_t cap_base;
+  uint32_t bdf;
+  uint32_t tbl_index = 0;
+
+  /* Get the PCI Express Capability structure offset and
+   * use that offset to write Access Control Service register
+   */
+
+  while (tbl_index < g_pcie_bdf_table->num_entries)
+  {
+      bdf = g_pcie_bdf_table->device[tbl_index].bdf;
+      val_pcie_find_capability(bdf, PCIE_ECAP, ECID_ACS, &cap_base);
+      val_pcie_write_cfg(bdf, cap_base + ACSCR_OFFSET, arr[tbl_index][0]);
+
+      val_print(ACS_PRINT_INFO, "\n       ACS Control Reg value written for BDF 0x%x is", bdf);
+      val_print(ACS_PRINT_INFO, " %llx", arr[tbl_index][0]);
+      tbl_index++;
+  }
+
+  return;
+}

@@ -359,6 +359,7 @@ payload(void)
 
   tbl_index = 0;
   bdf_tbl_ptr = val_pcie_bdf_table_ptr();
+  uint32_t acsctrl_default[bdf_tbl_ptr->num_entries][1];
 
   /* Check If PCIe Hierarchy supports P2P. */
   if (val_pcie_p2p_support() == NOT_IMPLEMENTED) {
@@ -375,6 +376,9 @@ payload(void)
     val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
     return;
   }
+
+  /* Store ACS Control reg bits in an array for every BDF and reset them to default at the end. */
+  val_pcie_read_acsctrl(acsctrl_default);
 
   while (tbl_index < bdf_tbl_ptr->num_entries)
   {
@@ -471,11 +475,14 @@ payload(void)
                   val_print(ACS_PRINT_ERR, "\n       ACS Redirected Req Check Failed for 0x%x",
                                                                                    req_rp_bdf);
               }
-           }
+         }
       }
 
 
   }
+
+  /* Write back default values of ACS Control reg. */
+  val_pcie_write_acsctrl(acsctrl_default);
 
   if (test_skip == 1)
       val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 3));
