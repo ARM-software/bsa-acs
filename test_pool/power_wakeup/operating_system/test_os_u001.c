@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2019, 2021-2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2019, 2021-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +15,11 @@
  * limitations under the License.
  **/
 
-#include "val/include/bsa_acs_val.h"
-#include "val/include/bsa_acs_pe.h"
-#include "val/include/val_interface.h"
+#include "val/common/include/acs_val.h"
+#include "val/common/include/acs_pe.h"
+#include "val/bsa/include/bsa_val_interface.h"
 
-#include "val/include/bsa_acs_wakeup.h"
+#include "val/bsa/include/bsa_acs_wakeup.h"
 
 #define TEST_NUM1  (ACS_WAKEUP_TEST_NUM_BASE + 1)
 #define TEST_RULE1 "B_WAK_01, B_WAK_02, B_WAK_03, B_WAK_04, B_WAK_05 \
@@ -352,14 +352,14 @@ os_u001_entry(uint32_t num_pe)
       if (status_test != ACS_STATUS_SKIP)
           val_run_test_payload(TEST_NUM1, num_pe, payload1, 0);
       status |= val_check_for_error(TEST_NUM1, num_pe, TEST_RULE1);
-      val_report_status(0, BSA_ACS_END(TEST_NUM1), NULL);
+      val_report_status(0, ACS_END(TEST_NUM1), NULL);
 
       /* EL1 VIR */
       status_test = val_initialize_test(TEST_NUM2, TEST_DESC2, num_pe);
       if (status_test != ACS_STATUS_SKIP)
           val_run_test_payload(TEST_NUM2, num_pe, payload2, 0);
       status |= val_check_for_error(TEST_NUM2, num_pe, TEST_RULE2);
-      val_report_status(0, BSA_ACS_END(TEST_NUM2), NULL);
+      val_report_status(0, ACS_END(TEST_NUM2), NULL);
   }
 
   /* EL2 PHY */
@@ -369,7 +369,7 @@ os_u001_entry(uint32_t num_pe)
       if (status_test != ACS_STATUS_SKIP)
           val_run_test_payload(TEST_NUM3, num_pe, payload3, 0);
       status |= val_check_for_error(TEST_NUM3, num_pe, TEST_RULE3);
-      val_report_status(0, BSA_ACS_END(TEST_NUM3), NULL);
+      val_report_status(0, ACS_END(TEST_NUM3), NULL);
   }
 
   /* Watchdog */
@@ -377,14 +377,14 @@ os_u001_entry(uint32_t num_pe)
   if (status_test != ACS_STATUS_SKIP)
       val_run_test_payload(TEST_NUM4, num_pe, payload4, 0);
   status = val_check_for_error(TEST_NUM4, num_pe, TEST_RULE4);
-  val_report_status(0, BSA_ACS_END(TEST_NUM4), NULL);
+  val_report_status(0, ACS_END(TEST_NUM4), NULL);
 
   /* System Timer */
   status_test = val_initialize_test(TEST_NUM5, TEST_DESC5, num_pe);
   if (status_test != ACS_STATUS_SKIP)
       val_run_test_payload(TEST_NUM5, num_pe, payload5, 0);
   status |= val_check_for_error(TEST_NUM5, num_pe, TEST_RULE5);
-  val_report_status(0, BSA_ACS_END(TEST_NUM5), NULL);
+  val_report_status(0, ACS_END(TEST_NUM5), NULL);
 
   return status;
 }

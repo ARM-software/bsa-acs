@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2020,2021,2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020,2021,2023-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +15,10 @@
  * limitations under the License.
  **/
 
-#include "val/include/bsa_acs_val.h"
-#include "val/include/val_interface.h"
-
-#include "val/include/bsa_acs_pcie.h"
-#include "val/include/bsa_acs_pe.h"
-#include "val/include/bsa_acs_memory.h"
+#include "val/common/include/acs_val.h"
+#include "val/common/include/acs_pcie.h"
+#include "val/common/include/acs_pe.h"
+#include "val/common/include/acs_memory.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 18)
 #define TEST_RULE  "PCI_PP_05"
@@ -114,7 +112,7 @@ os_p018_entry(uint32_t num_pe)
   /* get the result from all PE and check for failure */
   status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
+  val_report_status(0, ACS_END(TEST_NUM), NULL);
 
   return status;
 }

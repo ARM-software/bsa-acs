@@ -23,14 +23,15 @@
  * location with newest data. PE reads the location and must get NEWEST VAL.
  */
 
-#include "val/include/bsa_acs_val.h"
-#include "val/include/val_interface.h"
-#include "val/include/bsa_acs_memory.h"
-#include "val/include/bsa_acs_exerciser.h"
+#include "val/common/include/acs_val.h"
+#include "val/common/include/acs_memory.h"
+#include "val/common/include/acs_exerciser.h"
 
-#include "val/include/bsa_acs_smmu.h"
-#include "val/include/bsa_acs_pcie.h"
-#include "val/include/bsa_acs_pcie_enumeration.h"
+#include "val/common/include/acs_smmu.h"
+#include "val/common/include/acs_pcie.h"
+#include "val/common/include/acs_pcie_enumeration.h"
+#include "val/bsa/include/bsa_acs_pcie.h"
+#include "val/bsa/include/bsa_acs_memory.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 8)
 #define TEST_RULE  "PCI_IC_14, RE_ORD_4, IE_ORD_4"
@@ -238,7 +239,7 @@ os_e008_entry (void)
   /* Get the result from all PE and check for failure */
   status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
+  val_report_status(0, ACS_END(TEST_NUM), NULL);
 
   return status;
 }

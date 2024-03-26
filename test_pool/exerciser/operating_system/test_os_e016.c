@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,15 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-#include "val/include/bsa_acs_val.h"
-#include "val/include/val_interface.h"
+#include "val/common/include/acs_val.h"
 
-#include "val/include/bsa_acs_pcie.h"
-#include "val/include/bsa_acs_memory.h"
-#include "val/include/bsa_acs_peripherals.h"
-#include "val/include/bsa_acs_pe.h"
-#include "val/include/bsa_acs_pcie_enumeration.h"
-#include "val/include/bsa_acs_exerciser.h"
+#include "val/common/include/acs_pcie.h"
+#include "val/common/include/acs_memory.h"
+#include "val/common/include/acs_peripherals.h"
+#include "val/common/include/acs_pe.h"
+#include "val/common/include/acs_pcie_enumeration.h"
+#include "val/common/include/acs_exerciser.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 16)
 #define TEST_DESC  "PCIe Memory access check              "
@@ -180,7 +179,7 @@ os_e016_entry(void)
   /* Get the result from all PE and check for failure */
   status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
+  val_report_status(0, ACS_END(TEST_NUM), NULL);
 
   return status;
 }
