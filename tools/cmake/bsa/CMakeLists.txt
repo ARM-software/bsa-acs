@@ -1,5 +1,5 @@
 ## @file
- # Copyright (c) 2023, Arm Limited or its affiliates. All rights reserved.
+ # Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
  # SPDX-License-Identifier : Apache-2.0
  #
  # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,14 +15,14 @@
  # limitations under the License.
  ##
 
-project(acs_host LANGUAGES C ASM)
+project(bsa LANGUAGES C ASM)
 
-set(EXE_NAME "${PROJECT_NAME}")
+set(EXE_NAME ${PROJECT_NAME})
 
 set(VAL_LIB ${EXE_NAME}_val_lib)
 set(PAL_LIB ${EXE_NAME}_pal_lib)
 
 
-include(${ROOT_DIR}/platform/pal_baremetal/pal.cmake)
-include(${ROOT_DIR}/val/val_host.cmake)
+include(${ROOT_DIR}/pal/baremetal/bsa/pal_bsa.cmake)
+include(${ROOT_DIR}/val/bsa/val_bsa.cmake)
 include(${ROOT_DIR}/test_pool/test.cmake)

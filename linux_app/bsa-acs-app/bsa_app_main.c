@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2020-2021, 2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018,2020-2021, 2023-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,7 +66,6 @@ main (int argc, char **argv)
     int   c = 0,i=0;
     char *endptr, *pt;
     int   status;
-    int   run_exerciser = 0;
 
     struct option long_opt[] =
     {
@@ -96,9 +95,6 @@ main (int argc, char **argv)
            g_skip_test_num[i++] = a;
            pt = strtok(NULL, ",");
          }
-         break;
-       case 'e':
-         run_exerciser = 1;
          break;
        case '?':
          if (isprint (optopt))
@@ -131,19 +127,11 @@ main (int argc, char **argv)
         return 0;
     }
 
-    printf("\n      *** Starting Memory Map tests ***\n");
     execute_tests_memory(1, g_print_level);
 
-    printf("\n      *** Starting Peripherals tests ***\n");
     execute_tests_peripheral(1, g_print_level);
 
-    if (run_exerciser) {
-        printf("\n      *** PCIe Exerciser tests only runs on UEFI ***\n");
-        //execute_tests_exerciser(1, g_print_level);
-    } else {
-        printf("\n      *** Starting PCIe tests ***\n");
-        execute_tests_pcie(1, g_print_level);
-    }
+    execute_tests_pcie(1, g_print_level);
 
     printf("\n                    *** BSA tests complete ***\n\n");
 

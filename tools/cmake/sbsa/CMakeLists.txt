@@ -15,8 +15,14 @@
  # limitations under the License.
  ##
 
-set(ARM_ARCH_MAJOR_DFLT 9)
-set(ARM_ARCH_MINOR_DFLT 0)
-set(TARGET_DFLT RDN2)
-set(ACS_DFLT "bsa")
-set(SBSA_DIR_DFLT ${ROOT_DIR}/../sbsa-acs)
+project(sbsa LANGUAGES C ASM)
+
+set(EXE_NAME ${PROJECT_NAME})
+
+set(VAL_LIB ${EXE_NAME}_val_lib)
+set(PAL_LIB ${EXE_NAME}_pal_lib)
+
+
+include(${ROOT_DIR}/pal/baremetal/sbsa/pal_sbsa.cmake)
+include(${ROOT_DIR}/val/sbsa/val_sbsa.cmake)
+include(${SBSA_DIR}/test_pool/test.cmake)

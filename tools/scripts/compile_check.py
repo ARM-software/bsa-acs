@@ -1,5 +1,5 @@
 ## @file
- # Copyright (c) 2023, Arm Limited or its affiliates. All rights reserved.
+ # Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
  # SPDX-License-Identifier : Apache-2.0
  #
  # Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,8 +25,8 @@ IGNORE_FILE_TYPES = ['', '.inf', '.mk', '.md', '.cmake', 'json', '.dts', '.h']
 def compile_check(COMPILED_FILE, ROOT_DIR, TARGET):
 
     VAL_PATH = os.path.join(ROOT_DIR,'val')
-    PLAT_COMMON = os.path.join(ROOT_DIR,'platform', 'pal_baremetal', "common")
-    PLAT_PATH = os.path.join(ROOT_DIR,'platform', 'pal_baremetal', TARGET)
+    PLAT_COMMON = os.path.join(ROOT_DIR,'platform', 'baremetal', "common")
+    PLAT_PATH = os.path.join(ROOT_DIR,'platform', 'baremetal', TARGET)
     TEST_PATH = os.path.join(ROOT_DIR,'test_pool')
 
     global_filelist = []

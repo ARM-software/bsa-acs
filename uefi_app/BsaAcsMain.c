@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,9 +23,11 @@
 #include  <Library/CacheMaintenanceLib.h>
 #include  <Protocol/LoadedImage.h>
 
-#include "val/include/val_interface.h"
-#include "val/include/bsa_acs_pe.h"
-#include "val/include/bsa_acs_val.h"
+#include "val/common/include/val_interface.h"
+#include "val/bsa/include/bsa_val_interface.h"
+#include "val/bsa/include/bsa_acs_pe.h"
+#include "val/common/include/acs_pe.h"
+#include "val/common/include/acs_val.h"
 
 #include "BsaAcs.h"
 
@@ -36,9 +38,9 @@ UINT32  g_print_level;
 UINT32  g_sw_view[3] = {1, 1, 1}; //Operating System, Hypervisor, Platform Security
 UINT32  *g_skip_test_num;
 UINT32  g_num_skip;
-UINT32  g_bsa_tests_total;
-UINT32  g_bsa_tests_pass;
-UINT32  g_bsa_tests_fail;
+UINT32  g_acs_tests_total;
+UINT32  g_acs_tests_pass;
+UINT32  g_acs_tests_fail;
 UINT64  g_stack_pointer;
 UINT64  g_exception_ret_addr;
 UINT64  g_ret_addr;
@@ -56,7 +58,7 @@ UINT32  g_num_modules = 0;
    purpose to complete BSA run on these systems */
 UINT32  g_el1physkip = FALSE;
 
-SHELL_FILE_HANDLE g_bsa_log_file_handle;
+SHELL_FILE_HANDLE g_acs_log_file_handle;
 SHELL_FILE_HANDLE g_dtb_log_file_handle;
 
 STATIC VOID FlushImage (VOID)
@@ -430,13 +432,13 @@ ShellAppMain (
     // Options with Values
   CmdLineArg  = ShellCommandLineGetValue (ParamPackage, L"-f");
   if (CmdLineArg == NULL) {
-    g_bsa_log_file_handle = NULL;
+    g_acs_log_file_handle = NULL;
   } else {
-    Status = ShellOpenFileByName(CmdLineArg, &g_bsa_log_file_handle,
+    Status = ShellOpenFileByName(CmdLineArg, &g_acs_log_file_handle,
              EFI_FILE_MODE_WRITE | EFI_FILE_MODE_READ | EFI_FILE_MODE_CREATE, 0x0);
     if(EFI_ERROR(Status)) {
          Print(L"Failed to open log file %s\n", CmdLineArg);
-         g_bsa_log_file_handle = NULL;
+         g_acs_log_file_handle = NULL;
     }
   }
 
@@ -557,9 +559,9 @@ ShellAppMain (
   //
   // Initialize global counters
   //
-  g_bsa_tests_total = 0;
-  g_bsa_tests_pass  = 0;
-  g_bsa_tests_fail  = 0;
+  g_acs_tests_total = 0;
+  g_acs_tests_pass  = 0;
+  g_acs_tests_fail  = 0;
 
   val_print(ACS_PRINT_TEST, "\n\n BSA Architecture Compliance Suite", 0);
   val_print(ACS_PRINT_TEST, "\n          Version %d.", BSA_ACS_MAJOR_VER);
@@ -597,40 +599,40 @@ ShellAppMain (
   FlushImage();
 
   /***  Starting PE tests             ***/
-  Status = val_pe_execute_tests(val_pe_get_num(), g_sw_view);
+  Status = val_bsa_pe_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting Memory Map tests     ***/
-  Status |= val_memory_execute_tests(val_pe_get_num(), g_sw_view);
+  Status |= val_bsa_memory_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting GIC tests            ***/
-  Status |= val_gic_execute_tests(val_pe_get_num(), g_sw_view);
+  Status |= val_bsa_gic_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting System MMU tests     ***/
-  Status |= val_smmu_execute_tests(val_pe_get_num(), g_sw_view);
+  Status |= val_bsa_smmu_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting Timer tests          ***/
-  Status |= val_timer_execute_tests(val_pe_get_num(), g_sw_view);
+  Status |= val_bsa_timer_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting Wakeup semantic tests ***/
-  Status |= val_wakeup_execute_tests(val_pe_get_num(), g_sw_view);
+  Status |= val_bsa_wakeup_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting Peripheral tests     ***/
-  Status |= val_peripheral_execute_tests(val_pe_get_num(), g_sw_view);
+  Status |= val_bsa_peripheral_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting Watchdog tests       ***/
-  Status |= val_wd_execute_tests(val_pe_get_num(), g_sw_view);
+  Status |= val_bsa_wd_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting PCIe tests           ***/
-  Status |= val_pcie_execute_tests(val_pe_get_num(), g_sw_view);
+  Status |= val_bsa_pcie_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting PCIe Exerciser tests ***/
-  Status |= val_exerciser_execute_tests(g_sw_view);
+  Status |= val_bsa_exerciser_execute_tests(g_sw_view);
 
 print_test_status:
   val_print(ACS_PRINT_TEST, "\n     -------------------------------------------------------\n", 0);
-  val_print(ACS_PRINT_TEST, "     Total Tests run  = %4d", g_bsa_tests_total);
-  val_print(ACS_PRINT_TEST, "  Tests Passed  = %4d", g_bsa_tests_pass);
-  val_print(ACS_PRINT_TEST, "  Tests Failed = %4d\n", g_bsa_tests_fail);
+  val_print(ACS_PRINT_TEST, "     Total Tests run  = %4d", g_acs_tests_total);
+  val_print(ACS_PRINT_TEST, "  Tests Passed  = %4d", g_acs_tests_pass);
+  val_print(ACS_PRINT_TEST, "  Tests Failed = %4d\n", g_acs_tests_fail);
   val_print(ACS_PRINT_TEST, "     -------------------------------------------------------\n", 0);
 
   freeBsaAcsMem();
@@ -641,8 +643,8 @@ print_test_status:
 
   val_print(ACS_PRINT_TEST, "\n      *** BSA tests complete. Reset the system. ***\n\n", 0);
 
-  if (g_bsa_log_file_handle) {
-    ShellCloseFile(&g_bsa_log_file_handle);
+  if (g_acs_log_file_handle) {
+    ShellCloseFile(&g_acs_log_file_handle);
   }
 
   val_pe_context_restore(AA64WriteSp(g_stack_pointer));

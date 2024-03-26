@@ -1,5 +1,5 @@
 ## @file
- # Copyright (c) 2023, Arm Limited or its affiliates. All rights reserved.
+ # Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
  # SPDX-License-Identifier : Apache-2.0
  #
  # Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,11 +28,14 @@
  list(APPEND TEST_INCLUDE
      ${ROOT_DIR}/
      ${ROOT_DIR}/val/include/
+     ${ROOT_DIR}/val/bsa/include/
      ${ROOT_DIR}/val/src/
-     ${ROOT_DIR}/platform/pal_baremetal/common/include/
-     ${ROOT_DIR}/platform/pal_baremetal/common/src/
-     ${ROOT_DIR}/platform/pal_baremetal/${TARGET}/include/
-     ${ROOT_DIR}/platform/pal_baremetal/${TARGET}/src/
+     ${ROOT_DIR}/val/common/src/
+     ${ROOT_DIR}/val/common/include/
+     ${ROOT_DIR}/pal/baremetal/common/include/
+     ${ROOT_DIR}/pal/baremetal/common/src/
+     ${ROOT_DIR}/pal/baremetal/target/${TARGET}/common/include/
+     ${ROOT_DIR}/pal/baremetal/${TARGET}/src/
  )
 
  set(TEST_LIB ${EXE_NAME}_test_lib)

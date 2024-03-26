@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +15,12 @@
  * limitations under the License.
 **/
 
-#include "val/include/val_interface.h"
-#include "val/include/bsa_acs_pe.h"
-#include "val/include/bsa_acs_val.h"
-
-#include "val/include/bsa_acs_memory.h"
+#include "val/common/include/pal_interface.h"
+#include "val/common/include/val_interface.h"
+#include "val/bsa/include/bsa_val_interface.h"
+#include "val/common/include/acs_pe.h"
+#include "val/common/include/acs_val.h"
+#include "val/common/include/acs_memory.h"
 #include "BsaAcs.h"
 
 uint32_t  g_print_level;
@@ -27,9 +28,9 @@ uint32_t  g_execute_nist;
 uint32_t  g_print_mmio;
 uint32_t  g_curr_module;
 uint32_t  g_enable_module;
-uint32_t  g_bsa_tests_total;
-uint32_t  g_bsa_tests_pass;
-uint32_t  g_bsa_tests_fail;
+uint32_t  g_acs_tests_total;
+uint32_t  g_acs_tests_pass;
+uint32_t  g_acs_tests_fail;
 uint64_t  g_stack_pointer;
 uint64_t  g_exception_ret_addr;
 uint64_t  g_ret_addr;
@@ -203,9 +204,9 @@ ShellAppMainbsa(
   //
   // Initialize global counters
   //
-  g_bsa_tests_total = 0;
-  g_bsa_tests_pass  = 0;
-  g_bsa_tests_fail  = 0;
+  g_acs_tests_total = 0;
+  g_acs_tests_pass  = 0;
+  g_acs_tests_fail  = 0;
 
   val_print(ACS_PRINT_TEST, "\n\n BSA Architecture Compliance Suite\n", 0);
   val_print(ACS_PRINT_TEST, "\n          Version %d.", BSA_ACS_MAJOR_VER);
@@ -250,40 +251,40 @@ ShellAppMainbsa(
   val_pe_initialize_default_exception_handler(val_pe_default_esr);
 
   /***  Starting PE tests             ***/
-  Status = val_pe_execute_tests(val_pe_get_num(), g_sw_view);
+  Status = val_bsa_pe_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting Memory Map tests     ***/
-  Status |= val_memory_execute_tests(val_pe_get_num(), g_sw_view);
+  Status |= val_bsa_memory_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting GIC tests            ***/
-  Status |= val_gic_execute_tests(val_pe_get_num(), g_sw_view);
+  Status |= val_bsa_gic_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting System MMU tests     ***/
-  Status |= val_smmu_execute_tests(val_pe_get_num(), g_sw_view);
+  Status |= val_bsa_smmu_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting Timer tests          ***/
-  Status |= val_timer_execute_tests(val_pe_get_num(), g_sw_view);
+  Status |= val_bsa_timer_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting Wakeup semantic tests ***/
-  Status |= val_wakeup_execute_tests(val_pe_get_num(), g_sw_view);
+  Status |= val_bsa_wakeup_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting Peripheral tests     ***/
-  Status |= val_peripheral_execute_tests(val_pe_get_num(), g_sw_view);
+  Status |= val_bsa_peripheral_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting Watchdog tests       ***/
-  Status |= val_wd_execute_tests(val_pe_get_num(), g_sw_view);
+  Status |= val_bsa_wd_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting PCIe tests           ***/
-  Status |= val_pcie_execute_tests(val_pe_get_num(), g_sw_view);
+  Status |= val_bsa_pcie_execute_tests(val_pe_get_num(), g_sw_view);
 
   /***  Starting PCIe Exerciser tests ***/
-  Status |= val_exerciser_execute_tests(g_sw_view);
+  Status |= val_bsa_exerciser_execute_tests(g_sw_view);
 
 print_test_status:
   val_print(ACS_PRINT_TEST, "\n     -------------------------------------------------------\n", 0);
-  val_print(ACS_PRINT_TEST, "     Total Tests run  = %4d", g_bsa_tests_total);
-  val_print(ACS_PRINT_TEST, "  Tests Passed  = %4d", g_bsa_tests_pass);
-  val_print(ACS_PRINT_TEST, "  Tests Failed = %4d\n", g_bsa_tests_fail);
+  val_print(ACS_PRINT_TEST, "     Total Tests run  = %4d", g_acs_tests_total);
+  val_print(ACS_PRINT_TEST, "  Tests Passed  = %4d", g_acs_tests_pass);
+  val_print(ACS_PRINT_TEST, "  Tests Failed = %4d\n", g_acs_tests_fail);
   val_print(ACS_PRINT_TEST, "     -------------------------------------------------------\n", 0);
 
   freeBsaAcsMem();
