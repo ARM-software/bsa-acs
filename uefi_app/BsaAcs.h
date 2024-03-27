@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,7 @@
 
   #define BSA_ACS_MAJOR_VER      1
   #define BSA_ACS_MINOR_VER      0
-  #define BSA_ACS_SUBMINOR_VER   7
+  #define BSA_ACS_SUBMINOR_VER   8
 
   #define G_PRINT_LEVEL ACS_PRINT_TEST
 
