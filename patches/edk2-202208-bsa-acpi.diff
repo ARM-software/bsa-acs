@@ -7,7 +7,7 @@ index 38fde3dc71..c329cb0030 100644
  
  [LibraryClasses.common]
 +  BsaValLib|ShellPkg/Application/bsa-acs/val/BsaValLib.inf
-+  BsaPalLib|ShellPkg/Application/bsa-acs/platform/pal_uefi_acpi/BsaPalLib.inf
++  BsaPalLib|ShellPkg/Application/bsa-acs/pal/uefi_acpi/BsaPalLib.inf
    UefiApplicationEntryPoint|MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
    UefiDriverEntryPoint|MdePkg/Library/UefiDriverEntryPoint/UefiDriverEntryPoint.inf
    UefiBootServicesTableLib|MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf

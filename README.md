@@ -18,7 +18,7 @@ A few tests are executed by running the BSA ACS Linux application which in turn 
 The tests can also be executed in a Bare-metal environment. The initialization of the Bare-metal environment is specific to the environment and is out of scope of this document.
 
 ## Release details
- - Code quality: v1.0.7
+ - Code quality: v1.0.8
  - The tests are written for version 1.0 (c) of the BSA specification.
  - The tests can be run at both the Pre-Silicon and Silicon level.
  - For complete coverage of the BSA rules, availability of an Exerciser is required for Exerciser tests to be run during verficiation at Pre-Silicon level.
@@ -37,7 +37,7 @@ The tests can also be executed in a Bare-metal environment. The initialization o
   - For details on the BSA ACS UEFI Shell Application and Linux Application see the [arm BSA ACS User Guide](docs/arm_bsa_architecture_compliance_user_guide.pdf).
   - For details on the BSA ACS Bare-metal support, see the
     - [arm BSA ACS Bare-metal User Guide](docs/arm_bsa_architecture_compliance_bare-metal_user_guide.pdf).
-    - [Bare-metal Code](platform/pal_baremetal/). <br />
+    - [Bare-metal Code](pal/baremetal/). <br />
 Note: The Bare-metal PCIe enumeration code provided as part of the BSA ACS should be used and should not be replaced. This code is vital in analyzing of the test result.
 
 ### Running Exerciser tests for complete coverage
@@ -55,9 +55,9 @@ Prebuilt images for each release are available in the prebuilt_images folder of 
     Before you start the ACS build, ensure that the following requirements are met.
 
 - Any mainstream Linux-based OS distribution running on a x86 or AArch64 machine.
-- git clone the [EDK2 tree](https://github.com/tianocore/edk2). Recommended edk2 tag is edk2-stable202302
+- git clone the [EDK2 tree](https://github.com/tianocore/edk2). Recommended edk2 tag is edk2-stable202402
 - git clone the [EDK2 port of libc](https://github.com/tianocore/edk2-libc) to local <edk2_path>.
-- Install GCC-ARM 10.3 [toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads).
+- Install GCC-ARM 13.2 [toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads).
 - Install the build prerequisite packages to build EDK2.<br />
 Note:<br />
 - The details of the packages are beyond the scope of this document.
@@ -70,7 +70,7 @@ Note:<br />
 3.  git clone https://github.com/ARM-software/bsa-acs.git ShellPkg/Application/bsa-acs
 4.  Add the following to the [LibraryClasses.common] section in ShellPkg/ShellPkg.dsc
 >          BsaValLib|ShellPkg/Application/bsa-acs/val/BsaValLib.inf
->          BsaPalLib|ShellPkg/Application/bsa-acs/platform/pal_uefi_acpi/BsaPalLib.inf
+>          BsaPalLib|ShellPkg/Application/bsa-acs/pal/uefi_acpi/BsaPalLib.inf
 
 5.  Add the following in the [components] section of ShellPkg/ShellPkg.dsc
 >          ShellPkg/Application/bsa-acs/uefi_app/BsaAcs.inf
@@ -83,7 +83,7 @@ Note:<br />
 4.  Add the following to the [LibraryClasses.common] section in ShellPkg/ShellPkg.dsc
 >          FdtLib|EmbeddedPkg/Library/FdtLib/FdtLib.inf
 >          BsaValLib|ShellPkg/Application/bsa-acs/val/BsaValLib.inf
->          BsaPalLib|ShellPkg/Application/bsa-acs/platform/pal_uefi_dt/BsaPalLib.inf
+>          BsaPalLib|ShellPkg/Application/bsa-acs/pal/uefi_dt/BsaPalLib.inf
 
 5.  Add the following in the [components] section of ShellPkg/ShellPkg.dsc
 >          ShellPkg/Application/bsa-acs/uefi_app/BsaAcs.inf
@@ -97,7 +97,7 @@ Note:<br />
 
 ####    1.2 Build environment
 ##### If the build environment is Linux, perform the following steps:
-1.  export GCC49_AARCH64_PREFIX= GCC10.3 toolchain path pointing to /bin/aarch64-linux-gnu- in case of x86 machine.<br /> For an AArch64 build it should point to /usr/bin/
+1.  export GCC49_AARCH64_PREFIX= GCC13.2 toolchain path pointing to /bin/aarch64-linux-gnu- in case of x86 machine.<br /> For an AArch64 build it should point to /usr/bin/
 2.  export PACKAGES_PATH= path pointing to edk2-libc
 3.  source edksetup.sh
 4.  make -C BaseTools/Source/C
@@ -183,27 +183,27 @@ The patch for the kernel tree and the Linux PAL are hosted separately on [linux-
 
 ### 1.1 Building the kernel module
 #### Prerequisites
-- Linux kernel source version 5.11, 5.13, 5.15, 6.0, 6.4.
-- Install GCC-ARM 10.3 [toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads).
+- Linux kernel source version 5.11, 5.13, 5.15, 6.0, 6.4, 6.7.
+- Install GCC-ARM 13.2 [toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads).
 - Build environment for AArch64 Linux kernel.<br />
 NOTE: <br />
-- Linux version 6.4 is recommened version.
+- Linux version 6.7 is recommended version.
 
 #### Porting steps for Linux kernel
-1. git clone https://git.gitlab.arm.com/linux-arm/linux-acs.git bsa-acs-drv
+1. git clone https://git.gitlab.arm.com/linux-arm/linux-acs.git linux-acs
 2. git clone https://github.com/ARM-software/bsa-acs.git bsa-acs
-3. git clone https://github.com/torvalds/linux.git -b v6.4
-4. export CROSS_COMPILE=<GCC10.3 toolchain path> pointing to /bin/aarch64-linux-gnu-
-5. git apply <local_dir>/bsa-acs-drv/kernel/src/0001-BSA-ACS-Linux-6.4.patch to your kernel source tree.
+3. git clone https://github.com/torvalds/linux.git -b v6.7
+4. export CROSS_COMPILE=<GCC13.2 toolchain path> pointing to /bin/aarch64-linux-gnu-
+5. git apply <local_dir>/linux-acs/kernel/src/0001-BSA-ACS-Linux-6.7.patch to your kernel source tree.
 6. make ARCH=arm64 defconfig && make -j $(nproc) ARCH=arm64
 
-NOTE: The steps mentions Linux version 6.4, as it is latest version which is verified at ACS end.
+NOTE: The steps mentions Linux version 6.7, as it is latest version which is verified at ACS end.
 
 #### 1.2 Build steps for BSA kernel module
-1. cd <local_dir>/bsa-acs-drv/files
+1. cd <local_dir>/linux-acs/files
 2. export CROSS_COMPILE=<ARM64 toolchain path>/bin/aarch64-linux-gnu-
-3. export KERNEL_SRC=<linux kernel path>
-4. ./setup.sh <local_dir/bsa-acs>
+3. export KERNEL_SRC=<linux_kernel_path>
+4. ./bsa_setup.sh <local_dir/bsa-acs>
 5. ./linux_bsa_acs.sh
 
 Successful completion of above steps will generate bsa_acs.ko
@@ -231,9 +231,9 @@ shell> ./bsa
 
 The Bare-metal build environment is platform specific.
 
-To provide a baseline, the build steps to integrate and run the Bare-metal tests from UEFI shell are provided in [README.md](platform/pal_baremetal/RDN2/README.md).
+To provide a baseline, the build steps to integrate and run the Bare-metal tests from UEFI shell are provided in [README.md](pal/baremetal/target/RDN2/README.md).
 
-For details on generating the binaries to run on Bare-metal environment, refer [README.md](platform/pal_baremetal/README.md)
+For details on generating the binaries to run on Bare-metal environment, refer [README.md](pal/baremetal/README.md)
 
 ## Security implication
 The Arm SystemReady ACS test suite may run at a higher privilege level. An attacker may utilize these tests to elevate the privilege which can potentially reveal the platform security assets. To prevent the leakage of Secure information, Arm strongly recommends that you run the ACS test suite only on development platforms. If it is run on production systems, the system should be scrubbed after running the test suite.
@@ -259,6 +259,7 @@ The Arm SystemReady ACS test suite may run at a higher privilege level. An attac
 --------------------------------------------------------------------------------------------
 |    BSA Spec Version   |   BSA ACS Version   |      BSA Tag ID     |    Pre-Si Support    |
 |-----------------------|:-------------------:|:-------------------:|:--------------------:|
+|       BSA v1.0(c)     |        v1.0.8       |   v24.03_REL1.0.8   |       Yes            |
 |       BSA v1.0(c)     |        v1.0.7       |   v23.12_REL1.0.7   |       Yes            |
 |       BSA v1.0(c)     |        v1.0.6       |v23.11_BootFramework |       Yes            |
 |       BSA v1.0(c)     |        v1.0.6       |   v23.09_REL1.0.6   |       Yes            |
@@ -283,4 +284,4 @@ BSA ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2021-2023, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2021-2024, Arm Limited and Contributors. All rights reserved.*

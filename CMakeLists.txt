@@ -1,5 +1,5 @@
 ## @file
- # Copyright (c) 2023, Arm Limited or its affiliates. All rights reserved.
+ # Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
  # SPDX-License-Identifier : Apache-2.0
  #
  # Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,11 +43,34 @@ include(${ROOT_DIR}/tools/cmake/toolchain/default.cmake)
 ### Valid value range for command line argument ###
 
 list(APPEND ARM_ARCH_MAJOR_LIST 8 9)
+list(APPEND ACS_LIST "bsa" "sbsa")
 
 ###
 
+# Check while ACS we are compiling. BSA/ SBSA.
+if(NOT DEFINED ACS)
+    set(ACS ${ACS_DFLT} CACHE INTERNAL "Defaulting ACS to ${ACS}" FORCE)
+else()
+    set(ACS ${ACS} CACHE INTERNAL "ACS is set to ${ACS}" FORCE)
+endif()
+
+if(NOT ${ACS} IN_LIST ACS_LIST)
+    message(FATAL_ERROR "[ACS] : Error: Unspported value for -DACS=, supported ACS are : ${ACS_LIST}")
+else()
+    message(STATUS "[ACS] : ACS is set to ${ACS}")
+endif()
+
+if(ACS MATCHES "sbsa")
+    if(NOT DEFINED SBSA_DIR)
+        set(SBSA_DIR ${SBSA_DIR_DFLT} CACHE INTERNAL "Defaulting SBSA_DIR to ${SBSA_DIR}" FORCE)
+    else()
+        set(SBSA_DIR ${SBSA_DIR} CACHE INTERNAL "SBSA_DIR is set to ${SBSA_DIR}" FORCE)
+    endif()
+    message(STATUS "[ACS] : SBSA_DIR is set to ${SBSA_DIR}")
+endif()
+
 # Check for valid targets
-_get_sub_dir_list(TARGET_LIST ${ROOT_DIR}/platform/pal_baremetal/)
+_get_sub_dir_list(TARGET_LIST ${ROOT_DIR}/pal/baremetal/target/)
 if(NOT DEFINED TARGET)
     set(TARGET ${TARGET_DFLT} CACHE INTERNAL "Defaulting target to ${TARGET}" FORCE)
 else()
@@ -95,12 +118,17 @@ foreach(clean_item ${CLEAN_LIST})
 endforeach()
 ###
 
-add_subdirectory(${ROOT_DIR}/tools/cmake/acs_host)
+if(ACS MATCHES "sbsa")
+    add_subdirectory(${ROOT_DIR}/tools/cmake/sbsa)
+elseif(ACS MATCHES "bsa")
+    add_subdirectory(${ROOT_DIR}/tools/cmake/bsa)
+endif()
+
 
 ### Throw waring for the files which is not compiled ###
 
-list(REMOVE_DUPLICATES COMPILE_LIST)
-execute_process(COMMAND python ${ROOT_DIR}/tools/scripts/compile_check.py "${COMPILE_LIST}" "${ROOT_DIR}" "${TARGET}" OUTPUT_VARIABLE NOT_COMPILED_FILES)
-if(NOT ${NOT_COMPILED_FILES} MATCHES NULL)
-    message(WARNING "Following files are not compiled ${NOT_COMPILED_FILES}")
-endif()
+# list(REMOVE_DUPLICATES COMPILE_LIST)
+# execute_process(COMMAND python ${ROOT_DIR}/tools/scripts/compile_check.py "${COMPILE_LIST}" "${ROOT_DIR}" "${TARGET}" OUTPUT_VARIABLE NOT_COMPILED_FILES)
+# if(NOT ${NOT_COMPILED_FILES} MATCHES NULL)
+#     message(WARNING "Following files are not compiled ${NOT_COMPILED_FILES}")
+# endif()

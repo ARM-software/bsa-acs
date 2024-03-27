@@ -1,0 +1,89 @@
+## @file
+#  Copyright (c) 2020-2023, Arm Limited or its affiliates. All rights reserved.
+#  SPDX-License-Identifier : Apache-2.0
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SbsaValNistLib
+  FILE_GUID                      = cdd4fb8f-06c5-4a28-8cb8-7f5b664e278c
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = SbsaValNistLib|UEFI_APPLICATION UEFI_DRIVER
+
+[Sources.common]
+  common/src/AArch64/PeRegSysSupport.S
+  common/src/AArch64/PeTestSupport.S
+  common/src/AArch64/ArchTimerSupport.S
+  common/src/AArch64/GicSupport.S
+  common/src/acs_iovirt.c
+  common/src/acs_status.c
+  common/src/acs_pe.c
+  common/src/acs_pe_infra.c
+  common/src/acs_gic.c
+  common/src/acs_gic_support.c
+  common/src/acs_pcie.c
+  common/src/acs_smmu.c
+  common/src/acs_mmu.c
+  common/src/acs_test_infra.c
+  common/src/acs_timer.c
+  common/src/acs_timer_support.c
+  common/src/acs_wd.c
+  common/src/acs_peripherals.c
+  common/src/acs_memory.c
+  common/src/acs_exerciser.c
+  common/src/acs_pgt.c
+  common/src/acs_mmu.c
+  common/sys_arch_src/smmu_v3/smmu_v3.c
+  common/sys_arch_src/gic/gic.c
+  common/sys_arch_src/pcie/pcie.c
+  common/sys_arch_src/gic/acs_exception.c
+  common/sys_arch_src/gic/AArch64/acs_exception_asm.S
+  common/sys_arch_src/gic/v3/gic_v3.c
+  common/sys_arch_src/gic/v3/gic_v3_extended.c
+  common/sys_arch_src/gic/v3/AArch64/v3_asm.S
+  common/sys_arch_src/gic/v2/gic_v2.c
+  common/sys_arch_src/gic/its/acs_gic_its.c
+  common/sys_arch_src/gic/its/acs_gic_redistributor.c
+  sbsa/src/AArch64/MpamSupport.s
+  sbsa/src/AArch64/RasSupport.S
+  sbsa/src/sbsa_acs_pe.c
+  sbsa/src/sbsa_acs_pe_infra.c
+  sbsa/src/sbsa_acs_pcie.c
+  sbsa/src/sbsa_acs_iovirt.c
+  sbsa/src/sbsa_acs_memory.c
+  sbsa/src/sbsa_acs_exerciser.c
+  sbsa/src/sbsa_acs_ras.c
+  sbsa/src/sbsa_execute_test.c
+  sbsa/src/sbsa_acs_pmu.c
+  sbsa/src/sbsa_acs_mpam.c
+  sbsa/src/sbsa_acs_nist.c
+
+ [Packages]
+  StdLib/StdLib.dec
+
+ [LibraryClasses]
+  LibC
+  LibStdLib
+  LibStdio
+  LibMath
+  DevShell
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[BuildOptions]
+  GCC:*_*_*_ASM_FLAGS  =  -march=armv8.2-a+sve+profile
+  GCC:*_*_*_CC_FLAGS   = -O0 -I${WORKSPACE}/ShellPkg/Application/bsa-acs/val/ -I${WORKSPACE}/ShellPkg/Application/bsa-acs/val/sbsa -I${WORKSPACE}/ShellPkg/Application/bsa-acs/val/common -I${WORKSPACE}/ShellPkg/Application/bsa-acs/ -DSBSA

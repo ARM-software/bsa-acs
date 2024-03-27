@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2023, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,7 @@
 
 #define BSA_APP_VERSION_MAJOR     1
 #define BSA_APP_VERSION_MINOR     0
-#define BSA_APP_VERSION_SUBMINOR  7
+#define BSA_APP_VERSION_SUBMINOR  8
 
 #define G_SW_OS            0
 #define G_SW_HYP           1

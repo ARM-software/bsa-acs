@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018,2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018,2021,2024, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-#include "val/include/bsa_acs_val.h"
-#include "val/include/bsa_acs_pe.h"
-#include "val/include/val_interface.h"
+#include "val/common/include/acs_val.h"
+#include "val/common/include/acs_pe.h"
 
 #define TEST_NUM   (ACS_PE_TEST_NUM_BASE  +  3)
 #define TEST_RULE  "B_PE_03"
@@ -56,7 +55,7 @@ os_c003_entry(uint32_t num_pe)
   /* get the result from all PE and check for failure */
   status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
+  val_report_status(0, ACS_END(TEST_NUM), NULL);
 
   return status;
 }

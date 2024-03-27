@@ -15,14 +15,14 @@
  * limitations under the License.
  **/
 
-#include "val/include/bsa_acs_val.h"
-#include "val/include/val_interface.h"
+#include "val/common/include/acs_val.h"
 
-#include "val/include/bsa_acs_peripherals.h"
-#include "val/include/bsa_acs_memory.h"
-#include "val/include/bsa_acs_pe.h"
+#include "val/common/include/acs_peripherals.h"
+#include "val/common/include/acs_memory.h"
+#include "val/common/include/acs_pe.h"
+#include "val/bsa/include/bsa_acs_memory.h"
 
-#define TEST_NUM   (ACS_MEMORY_MAP_TEST_BASE + 2)
+#define TEST_NUM   (ACS_MEMORY_MAP_TEST_NUM_BASE + 2)
 #define TEST_RULE  "B_MEM_01"
 #define TEST_DESC  "Mem Access Response in finite time    "
 
@@ -132,7 +132,7 @@ os_m002_entry(uint32_t num_pe)
   else
       status = ACS_STATUS_FAIL;
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
+  val_report_status(0, ACS_END(TEST_NUM), NULL);
 
   return status;
 }

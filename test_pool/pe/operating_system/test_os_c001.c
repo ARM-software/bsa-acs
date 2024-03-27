@@ -15,8 +15,8 @@
  * limitations under the License.
  **/
 
-#include "val/include/bsa_acs_val.h"
-#include "val/include/bsa_acs_pe.h"
+#include "val/common/include/acs_val.h"
+#include "val/common/include/acs_pe.h"
 
 #define TEST_NUM   (ACS_PE_TEST_NUM_BASE  +  1)
 #define TEST_RULE  "B_PE_01"
@@ -80,9 +80,9 @@ reg_details reg_list[] = {
     {MVFR0_EL1,        0x0,            "MVFR0_EL1"       , AA32},
     {MVFR1_EL1,        0x0,            "MVFR1_EL1"       , AA32},
     {MVFR2_EL1,        0x0,            "MVFR2_EL1"       , AA32},
-    {PMCEID0_EL0,      0x0,            "PMCEID0_EL0"     , PMUV3},
-    {PMCEID1_EL0,      0x0,            "PMCEID1_EL0"     , PMUV3},
-    {PMCR_EL0,         MASK_PMCR,      "PMCR_EL0"        , PMUV3},
+    {PMCEID0_EL0,      0x0,            "PMCEID0_EL0",     PMUV3},
+    {PMCEID1_EL0,      0x0,            "PMCEID1_EL0",     PMUV3},
+    {PMCR_EL0,         MASK_PMCR,      "PMCR_EL0",        PMUV3},
     {PMBIDR_EL1,       0x0,            "PMBIDR_EL1"      , SPE },
     {PMSIDR_EL1,       0x0,            "PMSIDR_EL1"      , SPE },
     {ERRIDR_EL1,       0x0,            "ERRIDR_EL1"      , RAS },
@@ -271,7 +271,7 @@ os_c001_entry(uint32_t num_pe)
   /* get the result from all PE and check for failure */
   status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-  val_report_status(0, BSA_ACS_END(TEST_NUM), NULL);
+  val_report_status(0, ACS_END(TEST_NUM), NULL);
 
   return status;
 }

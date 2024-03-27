@@ -1,5 +1,5 @@
 ## @file
-#  Copyright (c) 2016-2021, Arm Limited or its affiliates. All rights reserved.
+#  Copyright (c) 2016-2021,2024, Arm Limited or its affiliates. All rights reserved.
 #  SPDX-License-Identifier : Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,42 +24,53 @@
   LIBRARY_CLASS                  = BsaValLib|UEFI_APPLICATION UEFI_DRIVER
 
 [Sources.common]
-  src/AArch64/PeRegSysSupport.S
-  src/AArch64/PeTestSupport.S
-  src/AArch64/ArchTimerSupport.S
-  src/AArch64/GicSupport.S
-  src/acs_status.c
-  src/acs_pe.c
-  src/acs_pe_infra.c
-  src/acs_gic.c
-  src/acs_gic_v2m.c
-  src/acs_gic_support.c
-  src/acs_pcie.c
-  src/acs_iovirt.c
-  src/acs_smmu.c
-  src/acs_test_infra.c
-  src/acs_timer.c
-  src/acs_timer_support.c
-  src/acs_wd.c
-  src/acs_wakeup.c
-  src/acs_peripherals.c
-  src/acs_memory.c
-  src/acs_exerciser.c
-  src/acs_pgt.c
-  sys_arch_src/smmu_v3/smmu_v3.c
-  sys_arch_src/gic/gic.c
-  sys_arch_src/gic/bsa_exception.c
-  sys_arch_src/gic/AArch64/bsa_exception_asm.S
-  sys_arch_src/gic/v3/gic_v3.c
-  sys_arch_src/gic/v3/gic_v3_extended.c
-  sys_arch_src/gic/v3/AArch64/v3_asm.S
-  sys_arch_src/gic/v2/gic_v2.c
-  sys_arch_src/pcie/pcie.c
-  sys_arch_src/gic/its/bsa_gic_its.c
-  sys_arch_src/gic/its/bsa_gic_redistributor.c
+  common/src/AArch64/PeRegSysSupport.S
+  common/src/AArch64/PeTestSupport.S
+  common/src/AArch64/ArchTimerSupport.S
+  common/src/AArch64/GicSupport.S
+  common/src/acs_status.c
+  common/src/acs_pe.c
+  common/src/acs_pe_infra.c
+  common/src/acs_gic.c
+  common/src/acs_gic_support.c
+  common/src/acs_pcie.c
+  common/src/acs_iovirt.c
+  common/src/acs_smmu.c
+  common/src/acs_mmu.c
+  common/src/acs_test_infra.c
+  common/src/acs_timer.c
+  common/src/acs_timer_support.c
+  common/src/acs_wd.c
+  common/src/acs_peripherals.c
+  common/src/acs_memory.c
+  common/src/acs_exerciser.c
+  common/src/acs_pgt.c
+  common/sys_arch_src/smmu_v3/smmu_v3.c
+  common/sys_arch_src/gic/gic.c
+  common/sys_arch_src/gic/acs_exception.c
+  common/sys_arch_src/gic/AArch64/acs_exception_asm.S
+  common/sys_arch_src/gic/v3/gic_v3.c
+  common/sys_arch_src/gic/v3/gic_v3_extended.c
+  common/sys_arch_src/gic/v3/AArch64/v3_asm.S
+  common/sys_arch_src/gic/v2/gic_v2.c
+  common/sys_arch_src/pcie/pcie.c
+  common/sys_arch_src/gic/its/acs_gic_its.c
+  common/sys_arch_src/gic/its/acs_gic_redistributor.c
+  bsa/src/bsa_acs_gic.c
+  bsa/src/bsa_execute_test.c
+  bsa/src/bsa_acs_memory.c
+  bsa/src/bsa_acs_peripherals.c
+  bsa/src/bsa_acs_wd.c 
+  bsa/src/bsa_acs_wakeup.c
+  bsa/src/bsa_acs_gic_v2m.c
+  bsa/src/bsa_acs_pcie.c
+  bsa/src/bsa_acs_iovirt.c
+  bsa/src/bsa_acs_timer.c 
+  bsa/src/bsa_acs_misc.c
+  bsa/src/bsa_acs_smmu.c
 
 [Packages]
   MdePkg/MdePkg.dec
 
 [BuildOptions]
-  GCC:*_*_*_ASM_FLAGS  =  -march=armv8.2-a
+  GCC:*_*_*_ASM_FLAGS  =  -march=armv8.2-a+sve+profile
