@@ -137,6 +137,13 @@ val_ras_get_info(uint32_t info_type, uint32_t param1, uint64_t *ret_data)
       } else
         return ACS_STATUS_FAIL;
       break;
+  case RAS_INFO_PE_FLAG:
+      if (g_ras_info_table->node[param1].type == NODE_TYPE_PE) {
+        *ret_data = g_ras_info_table->node[param1].node_data.pe.flags;
+        return ACS_STATUS_PASS;
+       } else
+         return ACS_STATUS_FAIL;
+       break;
   case RAS_INFO_MC_RES_PROX_DOMAIN:
       if (g_ras_info_table->node[param1].type == NODE_TYPE_MC) {
         *ret_data = g_ras_info_table->node[param1].node_data.mc.proximity_domain;
@@ -239,7 +246,7 @@ val_ras_get_info(uint32_t info_type, uint32_t param1, uint64_t *ret_data)
               /* affinity field read from ACPI */
               pe_affinity = g_ras_info_table->node[j].node_data.pe.affinity;
             else {
-              pe_affinity = val_ras_reg_read(RAS_ERR_ERRDEVAFF, j, 0);
+              pe_affinity = val_ras_reg_read(j, RAS_ERR_ERRDEVAFF, 0);
               if (pe_affinity == INVALID_RAS_REG_VAL) {
                 val_print(ACS_PRINT_ERR,
                 "\n       RAS_GET_INFO : Invalid pe_affinity (ERR_ERRDEVAFF) for RAS node = %d ",

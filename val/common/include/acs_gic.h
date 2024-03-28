@@ -78,4 +78,5 @@ val_gic_is_valid_espi(uint32_t int_id);
 uint32_t
 val_gic_is_valid_eppi(uint32_t int_id);
 
+uint32_t val_gic_is_valid_ppi(uint32_t int_id);
 #endif

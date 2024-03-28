@@ -84,6 +84,7 @@
 #define PASID_LEN_MASK      0x7ul
 #define PASID_EN_SHIFT      6
 #define DMA_TO_DEVICE_MASK  0xFFFFFFEF
+#define BAR64_MASK          0xFFFFFFFFFFFFFFF0
 
 /* shift_bit */
 #define SHIFT_1BIT             1
@@ -117,6 +118,11 @@
 #define TXN_START      1
 #define TXN_STOP       0
 
+/* RAS related Offset, shift and mask */
+#define RAS_OFFSET     0x10000
+#define CTRL_OFFSET    0x08
+#define STATUS_OFFSET  0x10
+
 typedef enum {
     TYPE0 = 0x0,
     TYPE1 = 0x1,
@@ -148,7 +154,10 @@ typedef enum {
     NUM_TRANSACTIONS  = 0xA,
     ADDRESS_ATTRIBUTES = 0xB,
     DATA_ATTRIBUTES = 0xC,
-    ERROR_INJECT_TYPE = 0xD
+    ERROR_INJECT_TYPE = 0xD,
+    ENABLE_POISON_MODE = 0xE,
+    ENABLE_RAS_CTRL = 0xF,
+    DISABLE_POISON_MODE = 0x10
 } EXERCISER_PARAM_TYPE;
 
 typedef enum {

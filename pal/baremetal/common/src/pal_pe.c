@@ -136,6 +136,7 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
       PeTable->pe_info[PeIndex].pmu_gsiv = platform_pe_cfg.pe_info[PeIndex].pmu_gsiv;
       PeTable->pe_info[PeIndex].gmain_gsiv = platform_pe_cfg.pe_info[PeIndex].gmain_gsiv;
       PeTable->pe_info[PeIndex].acpi_proc_uid = PeIndex;
+      PeTable->pe_info[PeIndex].trbe_interrupt = platform_pe_cfg.pe_info[PeIndex].trbe_interrupt;
       pal_pe_data_cache_ops_by_va((uint64_t)(&PeTable->pe_info[PeIndex]), CLEAN_AND_INVALIDATE);
 
       MpidrAff0Max = UPDATE_AFF_MAX(MpidrAff0Max, PeTable->pe_info[PeIndex].mpidr, 0x00000000ff);

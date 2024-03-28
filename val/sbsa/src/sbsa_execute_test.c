@@ -33,6 +33,7 @@
 #include "sbsa/include/sbsa_acs_pmu.h"
 #include "sbsa/include/sbsa_acs_ras.h"
 #include "sbsa/include/sbsa_acs_nist.h"
+#include "sbsa/include/sbsa_acs_ete.h"
 
 extern uint32_t pcie_bdf_table_list_flag;
 extern pcie_device_bdf_table *g_pcie_bdf_table;
@@ -117,8 +118,16 @@ val_sbsa_pe_execute_tests(uint32_t level, uint32_t num_pe)
       status |= c034_entry(num_pe);
       status |= c035_entry(num_pe);
       status |= c036_entry(num_pe);
-      status |= c037_entry(num_pe);
   }
+
+  if (level > 7) {
+      status |= c037_entry(num_pe);
+      status |= c038_entry(num_pe);
+      status |= c039_entry(num_pe);
+      status |= c040_entry(num_pe);
+      status |= c041_entry(num_pe);
+      status |= c042_entry(num_pe);
+   }
 
   val_print_test_end(status, "PE");
 
@@ -276,7 +285,7 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
       return ACS_STATUS_SKIP;
     }
 
-    #ifndef TARGET_LINUX
+#ifndef TARGET_LINUX
       status |= p003_entry(num_pe);
       status |= p016_entry(num_pe);
       status |= p020_entry(num_pe);
@@ -319,14 +328,17 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
       status |= p059_entry(num_pe);
       status |= p060_entry(num_pe);
       status |= p063_entry(num_pe); /* iEP/RP only */
-    #endif
   }
 
   if (level > 6) {
-  #ifndef TARGET_LINUX
     status |= p061_entry(num_pe);
-  #endif
   }
+
+  if (level > 7) {
+    status |= p064_entry(num_pe);
+    status |= p065_entry(num_pe);
+  }
+#endif
 
   val_print_test_end(status, "PCIe");
 
@@ -397,7 +409,11 @@ val_sbsa_smmu_execute_tests(uint32_t level, uint32_t num_pe)
      status |= i014_entry(num_pe);
      status |= i015_entry(num_pe);
   }
-#endif
+
+  if (g_sbsa_level > 7)
+     status |= i017_entry(num_pe);
+#endif  // TARGET_LINUX
+
 #if defined(TARGET_LINUX) || defined(TARGET_EMULATION)
   if (level > 6)
      status |= i016_entry(num_pe);
@@ -526,6 +542,14 @@ val_sbsa_exerciser_execute_tests(uint32_t level)
       status |= e007_entry();
       status |= e008_entry();
   }
+
+  if (level > 7) {
+      status |= e009_entry();
+      status |= e010_entry();
+      status |= e011_entry();
+      status |= e012_entry();
+  }
+
   val_print_test_end(status, "Exerciser");
 
   val_smmu_stop();
@@ -722,11 +746,62 @@ val_sbsa_ras_execute_tests(uint32_t level, uint32_t num_pe)
   status |= ras011_entry(num_pe);
   status |= ras012_entry(num_pe);
 
+  if (level > 7)
+      status |= ras013_entry(num_pe);
+
   val_print_test_end(status, "RAS");
 
   return status;
 }
 
+uint32_t
+val_sbsa_ete_execute_tests(uint32_t level, uint32_t num_pe)
+{
+  (void) level;
+  uint32_t status = ACS_STATUS_PASS, i;
+  uint32_t ete_status = ACS_STATUS_PASS;
+  uint32_t trbe_status = ACS_STATUS_PASS;
+
+  for (i = 0; i < g_num_skip; i++) {
+      if (g_skip_test_num[i] == ACS_ETE_TEST_NUM_BASE) {
+          val_print(ACS_PRINT_INFO, "      USER Override - Skipping all ETE tests \n", 0);
+          return ACS_STATUS_SKIP;
+      }
+  }
+
+  /* Check if there are any tests to be executed in current module with user override options*/
+  status = val_check_skip_module(ACS_ETE_TEST_NUM_BASE);
+  if (status) {
+      val_print(ACS_PRINT_INFO, "\n USER Override - Skipping all ETE tests \n", 0);
+      return ACS_STATUS_SKIP;
+  }
+
+  val_print_test_start("ETE");
+  g_curr_module = 1 << ETE_MODULE;
+
+  ete_status = ete001_entry(num_pe);
+
+  if (ete_status == ACS_STATUS_FAIL) {
+      val_print(ACS_PRINT_ERR, "\n FEAT_ETE Not Supported, Skipping FEAT_ETE tests \n", 0);
+  } else {
+      ete_status |= ete002_entry(num_pe);
+      ete_status |= ete003_entry(num_pe);
+      ete_status |= ete004_entry(num_pe);
+  }
+  trbe_status = ete005_entry(num_pe);
+
+  if (trbe_status == ACS_STATUS_FAIL) {
+      val_print(ACS_PRINT_ERR, "\n FEAT_TRBE Not Supported, Skipping FEAT_TRBE tests \n", 0);
+  } else {
+      trbe_status |= ete006_entry(num_pe);
+      trbe_status |= ete007_entry(num_pe);
+      trbe_status |= ete008_entry(num_pe);
+  }
+
+  val_print_test_end((ete_status | trbe_status), "ETE");
+
+  return (ete_status | trbe_status);
+}
 
 #ifndef TARGET_BM_BOOT
 /**

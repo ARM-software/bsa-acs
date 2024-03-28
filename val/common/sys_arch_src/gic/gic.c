@@ -229,3 +229,18 @@ val_bsa_gic_check_eppi_interrupt(uint32_t int_id)
   else
     return 0;
 }
+
+/**
+  @brief  API used to check whether int_id is a ppi interrupt
+  @param  interrupt
+  @return 1: ppi interrupt
+**/
+uint32_t
+val_bsa_gic_check_ppi(uint32_t int_id)
+{
+  if ((val_bsa_gic_eppi_support() && v3_is_extended_ppi(int_id)) || (int_id > 15 && int_id < 32))
+    return 1;
+  else
+    return 0;
+}
+

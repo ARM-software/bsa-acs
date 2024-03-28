@@ -165,7 +165,7 @@ pal_exerciser_start_dma_direction (
 /**
   @brief This function finds the PCI capability and return 0 if it finds.
 
-  @param ID    PCI capability IF 
+  @param ID    PCI capability IF
   @param Bdf   BDF value for the device
   @param Value 1 PCIE capability 0 PCI capability
   @param Offset capability offset
@@ -236,6 +236,7 @@ UINT32 pal_exerciser_set_param (
   UINT32 CapabilityOffset = 0;
   UINT64 Base;
   UINT64 Ecam;
+  UINT32 bdf;
 
   Base = pal_exerciser_get_ecsr_base(Bdf,0);
   Ecam = pal_pcie_get_mcfg_ecam(); // Getting the ECAM address
@@ -319,6 +320,31 @@ UINT32 pal_exerciser_set_param (
                 return 2;
         else
                 return 3;
+
+      case ENABLE_POISON_MODE:
+        pal_exerciser_find_pcie_capability(DVSEC, Bdf, PCIE, &CapabilityOffset);
+        Data = pal_mmio_read(Ecam + CapabilityOffset +
+                             pal_exerciser_get_pcie_config_offset(Bdf) + DVSEC_CTRL);
+        Data = Data | (1 << 18);
+        pal_mmio_write(Ecam + CapabilityOffset + DVSEC_CTRL +
+                             pal_exerciser_get_pcie_config_offset(Bdf), Data);
+        return 0;
+
+      case ENABLE_RAS_CTRL:
+        bdf = (UINT32)Value2;
+        Base = pal_exerciser_get_ecsr_base(bdf, 0);
+        Base = Base & BAR64_MASK;
+        pal_mmio_write((Base + RAS_OFFSET + CTRL_OFFSET), 0x1);
+        return 0;
+
+      case DISABLE_POISON_MODE:
+        pal_exerciser_find_pcie_capability(DVSEC, Bdf, PCIE, &CapabilityOffset);
+        Data = pal_mmio_read(Ecam + CapabilityOffset +
+                             pal_exerciser_get_pcie_config_offset(Bdf) + DVSEC_CTRL);
+        Data = Data & (0 << 18);
+        pal_mmio_write(Ecam + CapabilityOffset + DVSEC_CTRL +
+                             pal_exerciser_get_pcie_config_offset(Bdf), Data);
+        return 0;
 
       default:
           return 1;

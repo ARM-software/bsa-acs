@@ -46,7 +46,6 @@ GCC_ASM_EXPORT(ArmWriteCntkCtl)
 GCC_ASM_EXPORT(ArmReadCntpTval)
 GCC_ASM_EXPORT(ArmWriteCntpTval)
 GCC_ASM_EXPORT(ArmReadCntpCtl)
-GCC_ASM_EXPORT(ArmWriteCntpCtl)
 GCC_ASM_EXPORT(ArmReadCntvTval)
 GCC_ASM_EXPORT(ArmWriteCntvTval)
 GCC_ASM_EXPORT(ArmReadCntvCtl)
@@ -66,6 +65,7 @@ GCC_ASM_EXPORT(ArmReadCnthvCtl)
 GCC_ASM_EXPORT(ArmWriteCnthvCtl)
 GCC_ASM_EXPORT(ArmReadCnthvTval)
 GCC_ASM_EXPORT(ArmWriteCnthvTval)
+GCC_ASM_EXPORT(ArmWriteCntpCtl)
 
 ASM_PFX(ArmReadCntFrq):
   mrs   x0, cntfrq_el0           // Read CNTFRQ
@@ -91,7 +91,6 @@ ASM_PFX(ArmWriteCntkCtl):
 ASM_PFX(ArmReadCntpTval):
   mrs   x0, cntp_tval_el0        // Read CNTP_TVAL (PL1 physical timer value register)
   ret
-
 
 ASM_PFX(ArmWriteCntpTval):
   msr   cntp_tval_el0, x0        // Write to CNTP_TVAL (PL1 physical timer value register)

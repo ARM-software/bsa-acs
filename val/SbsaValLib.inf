@@ -69,6 +69,7 @@
   sbsa/src/sbsa_execute_test.c
   sbsa/src/sbsa_acs_pmu.c
   sbsa/src/sbsa_acs_mpam.c
+  sbsa/src/sbsa_acs_ete.c
 
 [Packages]
   MdePkg/MdePkg.dec

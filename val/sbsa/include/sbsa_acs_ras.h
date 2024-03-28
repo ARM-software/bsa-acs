@@ -85,7 +85,8 @@ typedef enum {
     RAS_INFO_ERI_ID,             /* ERI Interrupt ID */
     RAS_INFO_FHI_ID,             /* FHI Interrupt ID */
     RAS_INFO_PFG_SUPPORT,        /* Pseudo Fault Inj Support */
-    RAS_INFO_NODE_INDEX_FOR_AFF  /* RAS Node Index for Affinity */
+    RAS_INFO_NODE_INDEX_FOR_AFF,  /* RAS Node Index for Affinity */
+    RAS_INFO_PE_FLAG             /* Resource Flag for RAS PE Node */
 } RAS_INFO_TYPE;
 
 uint32_t val_ras_setup_error(RAS_ERR_IN_t in_param, RAS_ERR_OUT_t *out_param);
@@ -110,6 +111,7 @@ uint32_t ras009_entry(uint32_t num_pe);
 uint32_t ras010_entry(uint32_t num_pe);
 uint32_t ras011_entry(uint32_t num_pe);
 uint32_t ras012_entry(uint32_t num_pe);
+uint32_t ras013_entry(uint32_t num_pe);
 
 uint64_t AA64ReadErrIdr1(void);
 uint64_t AA64ReadErrAddr1(void);

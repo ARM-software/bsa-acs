@@ -199,6 +199,20 @@ val_pe_reg_read(uint32_t reg_id)
           return AA64ReadDbgbcr15El1();
       case ID_AA64ZFR0_EL1:
           return AA64ReadZfr0();
+      case BRBIDR0_EL1:
+          return AA64ReadBrbidr0();
+      case TRBIDR_EL1:
+          return AA64ReadTrbidr();
+      case TRCIDR0:
+          return AA64ReadTrcidr0();
+       case TRCIDR4:
+          return AA64ReadTrcidr4();
+       case TRCIDR5:
+          return AA64ReadTrcidr5();
+       case HCR_EL2:
+          return ArmReadHcr();
+       case VTCR_EL2:
+          return AA64ReadVtcr();
       default:
            val_report_status(val_pe_get_index_mpid(val_pe_get_mpid()),
                                                  RESULT_FAIL(0, 0xFF), NULL);
@@ -268,6 +282,40 @@ val_pe_reg_write(uint32_t reg_id, uint64_t write_data)
 }
 
 /**
+  @brief   This API indicates the presence of exception level 3
+           1. Caller       -  Test Suite
+           2. Prerequisite -  None
+  @param   None
+  @return  1 if EL3 is present, 0 if EL3 is not implemented
+**/
+uint8_t
+val_is_el3_enabled()
+{
+  uint64_t data;
+  data = val_pe_reg_read(ID_AA64PFR0_EL1);
+  return ((data >> 12) & 0xF);
+
+}
+
+/**
+  @brief   This API indicates the presence of exception level 2
+           1. Caller       -  Test Suite
+           2. Prerequisite -  None
+  @param   None
+  @return  1 if EL2 is present, 0 if EL2 is not implemented
+**/
+uint8_t
+val_is_el2_enabled()
+{
+
+  uint64_t data;
+  data = val_pe_reg_read(ID_AA64PFR0_EL1);
+  return ((data >> 8) & 0xF);
+
+}
+
+
+/**
   @brief   This API returns the PMU Overflow Signal Interrupt ID for a given PE index
            1. Caller       -  Test Suite, VAL
            2. Prerequisite -  val_create_peinfo_table
@@ -288,6 +336,29 @@ val_pe_get_pmu_gsiv(uint32_t index)
   entry = g_pe_info_table->pe_info;
 
   return entry[index].pmu_gsiv;
+
+}
+/**
+  @brief   This API returns the GIC TRBE Interrupt ID for a given PE index
+           1. Caller       -  Test Suite
+           2. Prerequisite -  val_create_peinfo_table
+  @param   index - the index of PE whose GIC TRBE interrupt ID is returned.
+  @return  GIC TRBE interrupt ID
+**/
+uint32_t
+val_pe_get_gicc_trbe_interrupt(uint32_t index)
+{
+
+  PE_INFO_ENTRY *entry;
+
+  if (index > g_pe_info_table->header.num_of_pe) {
+        val_report_status(index, RESULT_FAIL(0, 0xFF), NULL);
+        return 0xFFFFFF;
+  }
+
+  entry = g_pe_info_table->pe_info;
+
+  return entry[index].trbe_interrupt;
 
 }
 
@@ -323,6 +394,12 @@ val_pe_get_gmain_gsiv(uint32_t index)
 
   @return  Status 0 if Success
 **/
+void
+val_pe_spe_disable(void)
+{
+  DisableSpe();
+}
+
 uint32_t val_pe_reg_read_tcr(uint32_t ttbr1, PE_TCR_BF *tcr)
 {
     uint64_t val = val_pe_reg_read(TCR_ELx);
@@ -392,3 +469,5 @@ uint32_t val_pe_reg_read_ttbr(uint32_t ttbr1, uint64_t *ttbr_ptr)
     *ttbr_ptr = ReadTtbr[ttbr1][(el >> 2) - 1]();
     return 0;
 }
+
+

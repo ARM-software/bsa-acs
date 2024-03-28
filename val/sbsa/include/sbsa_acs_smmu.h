@@ -55,5 +55,7 @@ uint32_t
 i015_entry(uint32_t num_pe);
 uint32_t
 i016_entry(uint32_t num_pe);
+uint32_t
+i017_entry(uint32_t num_pe);
 
 #endif

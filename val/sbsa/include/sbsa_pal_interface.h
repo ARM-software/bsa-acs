@@ -25,9 +25,16 @@ uint32_t pal_get_device_path(const char *hid, char hid_path[][MAX_NAMED_COMP_LEN
 uint32_t pal_smmu_is_etr_behind_catu(char *etr_path);
 #endif
 
-
+/* PCIe related PAL APIs */
 uint32_t pal_pcie_get_rp_transaction_frwd_support(uint32_t seg, uint32_t bus,
                                                             uint32_t dev, uint32_t fn);
+
+/* Exerciser related PAL APIs */
+void     pal_exerciser_disable_rp_pio_register(uint32_t bdf);
+uint32_t pal_exerciser_check_poison_data_forwarding_support(void);
+uint32_t pal_exerciser_get_pcie_ras_compliant_err_node(uint32_t bdf, uint32_t rp_bdf);
+uint64_t pal_exerciser_get_ras_status(uint32_t ras_node, uint32_t e_bdf, uint32_t erp_bdf);
+uint32_t pal_exerciser_set_bar_response(uint32_t bdf);
 
 /* NIST related APIs */
 uint32_t pal_nist_generate_rng(uint32_t *rng_buffer);

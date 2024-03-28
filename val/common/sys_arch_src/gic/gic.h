@@ -65,5 +65,6 @@ void val_bsa_gic_clear_espi_interrupt(uint32_t int_id);
 uint32_t val_bsa_gic_eppi_support(void);
 uint32_t val_bsa_gic_max_eppi_val(void);
 uint32_t val_bsa_gic_check_eppi_interrupt(uint32_t int_id);
+uint32_t val_bsa_gic_check_ppi(uint32_t int_id);
 
 #endif /*__GIC_H__ */

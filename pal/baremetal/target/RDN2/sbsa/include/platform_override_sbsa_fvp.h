@@ -16,7 +16,7 @@
 **/
 
 /* Settings */
-#define PLATFORM_OVERRIDE_SBSA_LEVEL   0x7         //The permissible levels are 3,4,5,6 and 7
+#define PLATFORM_OVERRIDE_SBSA_LEVEL        0x7    //The permissible levels are 3,4,5,6 and 7
 #define PLATFORM_OVERRIDE_SBSA_PRINT_LEVEL  0x3    //The permissible levels are 1,2,3,4 and 5
 
 /* System Last-Level cache info
@@ -36,6 +36,11 @@
 #define CS_COMPONENT_0_IDENTIFIER    "ARMHC97C"
 #define CS_COMPONENT_0_DEVICE_NAME   "\\_SB_.ETR0"
 
+/* PCIe RAS Related Offset */
+
+#define RAS_OFFSET     0x10000
+#define CTRL_OFFSET    0x08
+#define STATUS_OFFSET  0x10
 
 /* Cache config and MASKS*/
 #define SIZE_MASK           0x1

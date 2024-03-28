@@ -174,3 +174,39 @@ val_pcie_get_atomicop_requester_capable(uint32_t bdf)
 
   return 0;
 }
+
+void
+val_pcie_enable_ordering(uint32_t bdf)
+{
+
+  uint32_t pciecs_base;
+  uint32_t reg_value;
+
+  /* Get the PCI Express Capability structure offset and
+   * use that offset to read the Device Status register
+   */
+  val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &pciecs_base);
+  val_pcie_read_cfg(bdf, pciecs_base + DCTLR_OFFSET, &reg_value);
+
+  val_pcie_write_cfg(bdf, pciecs_base + DCTLR_OFFSET, reg_value | (1 << DCTLR_ERE_SHIFT));
+
+}
+
+void
+val_pcie_disable_ordering(uint32_t bdf)
+{
+
+  uint32_t pciecs_base;
+  uint32_t reg_value;
+  uint32_t dis_mask;
+
+  /* Get the PCI Express Capability structure offset and
+   * use that offset to read the Device Status register
+   */
+  val_pcie_find_capability(bdf, PCIE_CAP, CID_PCIECS, &pciecs_base);
+  val_pcie_read_cfg(bdf, pciecs_base + DCTLR_OFFSET, &reg_value);
+
+  dis_mask = ~(1 << DCTLR_ERE_SHIFT);
+  val_pcie_write_cfg(bdf, pciecs_base + DCTLR_OFFSET, reg_value & dis_mask);
+
+}
