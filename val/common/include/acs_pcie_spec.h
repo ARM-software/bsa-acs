@@ -231,6 +231,10 @@
 #define DPC_CTRL_TRG_EN_MASK   0x3
 #define DPC_SOURCE_ID_SHIFT    16
 #define DPC_TRIGGER_SHIFT      0x1
+#define DPC_DISABLE_MASK       0xFFFCFFFF
+#define DPC_INTR_ENABLE        0x80000
+#define DPC_RP_EXT_OFFSET      0x5
+#define DPC_RP_EXT_MASK        0x1
 
 /* AER Capability struct offsets and shifts */
 #define ERR_CNT                  0x18
@@ -247,29 +251,6 @@
 #define AER_SOURCE_ID_SHIFT      16
 #define AER_SOURCE_ID_MASK       0xFFFF
 #define AER_ERROR_MASK           0xFFFFFFFF
-
-/* DPC Capability struct offsets and shifts */
-#define DPC_CTRL_OFFSET        0x4
-#define DPC_STATUS_OFFSET      0x8
-#define DPC_STATUS_RESET       0xFFFFFFFF
-#define DPC_STATUS_MASK        0x1
-#define DPC_TRIGGER_MASK       0x6
-#define DPC_TRIGGER_FATAL      0x2
-#define DPC_TRIGGER_NON_FATAL  0x1
-#define DPC_CTRL_TRG_EN_SHIFT  16
-#define DPC_CTRL_TRG_EN_MASK   0x3
-#define DPC_SOURCE_ID_SHIFT    16
-#define DPC_TRIGGER_SHIFT      0x1
-#define DPC_DISABLE_MASK       0xFFFCFFFF
-#define DPC_INTR_ENABLE        0x80000
-
-/* AER Capability struct offsets and shifts */
-#define AER_UNCORR_STATUS_OFFSET 0x4
-#define AER_UNCORR_MASK_OFFSET   0x8
-#define AER_UNCORR_SEVR_OFFSET   0xC
-#define AER_UNCORR_SEVR_FATAL    0xFFFFFFFF
-#define AER_UNCORR_SEVR_NONFATAL 0x0
-#define AER_ROOT_ERR_OFFSET      0x30
 
 /* EA Capability struct offsets */
 #define EA_ENTRY_TYPE_OFFSET       8
@@ -308,6 +289,7 @@
 #define DCTLR_NFERE_SHIFT 1
 #define DCTLR_FERE_SHIFT  2
 #define DCTLR_URRE_SHIFT  3
+#define DCTLR_ERE_SHIFT   4
 #define DCTLR_PFE_SHIFT   9
 #define DCTLR_APE_SHIFT   10
 #define DCTLR_ENS_SHIFT   11
