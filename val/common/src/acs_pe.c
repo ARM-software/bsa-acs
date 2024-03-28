@@ -281,6 +281,39 @@ val_pe_reg_write(uint32_t reg_id, uint64_t write_data)
 
 }
 
+/**
+  @brief   This API indicates the presence of exception level 3
+           1. Caller       -  Test Suite
+           2. Prerequisite -  None
+  @param   None
+  @return  1 if EL3 is present, 0 if EL3 is not implemented
+**/
+uint8_t
+val_is_el3_enabled()
+{
+  uint64_t data;
+  data = val_pe_reg_read(ID_AA64PFR0_EL1);
+  return ((data >> 12) & 0xF);
+
+}
+
+/**
+  @brief   This API indicates the presence of exception level 2
+           1. Caller       -  Test Suite
+           2. Prerequisite -  None
+  @param   None
+  @return  1 if EL2 is present, 0 if EL2 is not implemented
+**/
+uint8_t
+val_is_el2_enabled()
+{
+
+  uint64_t data;
+  data = val_pe_reg_read(ID_AA64PFR0_EL1);
+  return ((data >> 8) & 0xF);
+
+}
+
 
 /**
   @brief   This API returns the PMU Overflow Signal Interrupt ID for a given PE index
@@ -361,6 +394,11 @@ val_pe_get_gmain_gsiv(uint32_t index)
 
   @return  Status 0 if Success
 **/
+void
+val_pe_spe_disable(void)
+{
+  DisableSpe();
+}
 
 uint32_t val_pe_reg_read_tcr(uint32_t ttbr1, PE_TCR_BF *tcr)
 {

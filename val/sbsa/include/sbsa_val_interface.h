@@ -31,6 +31,8 @@
 #define BIT29 (1 << 29)
 #endif
 
+void val_print_primary_pe(uint32_t level, char8_t *string, uint64_t data, uint32_t index);
+
 typedef enum {
   PE_FEAT_MPAM,
   PE_FEAT_PMU,

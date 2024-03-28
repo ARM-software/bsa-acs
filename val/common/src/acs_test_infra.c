@@ -51,6 +51,26 @@ val_print(uint32_t level, char8_t *string, uint64_t data)
 }
 
 /**
+  @brief  This API calls val_print API to print a formatted string
+          to the output console if current PE index is Primary PE index .
+          1. Caller       - Application layer
+          2. Prerequisite - None.
+
+  @param level   the print verbosity (1 to 5)
+  @param string  formatted ASCII string
+  @param data    64-bit data. set to 0 if no data is to sent to console.
+  @param index   the index of the PE
+
+  @return        None
+ **/
+void val_print_primary_pe(uint32_t level, char8_t *string, uint64_t data, uint32_t index)
+{
+
+  if (index == val_pe_get_primary_index())
+      val_print(level, string, data);
+}
+
+/**
   @brief  This API prints out module header to the output console.
           1. Caller       - Application layer
           2. Prerequisite - None.
