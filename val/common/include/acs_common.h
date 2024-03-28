@@ -49,7 +49,7 @@
 #define ACS_PMU_TEST_NUM_BASE        1100
 #define ACS_RAS_TEST_NUM_BASE        1200
 #define ACS_NIST_TEST_NUM_BASE       1300
-
+#define ACS_ETE_TEST_NUM_BASE        1400
 /* Module specific print APIs */
 
 typedef enum {
@@ -66,6 +66,7 @@ typedef enum {
     MPAM_MODULE,
     PMU_MODULE,
     RAS_MODULE,
+    ETE_MODULE,
     NIST_MODULE
 } MODULE_ID_e;
 

@@ -230,6 +230,19 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
           Ptr->pmu_gsiv   = Entry->PerformanceInterruptGsiv;
           Ptr->gmain_gsiv = Entry->VGICMaintenanceInterrupt;
           Ptr->acpi_proc_uid = Entry->AcpiProcessorUid;
+
+          /* Trbe value is not available in Acpi table less than 6.5 so dummy value will be given
+           * Read Trbe Interrupt if Acpi table is greater than or equal to 6.5
+           */
+
+          if (gMadtHdr->Header.Revision < 6)
+               Ptr->trbe_interrupt = 1;
+          else
+              Ptr->trbe_interrupt = ((EFI_ACPI_6_5_GIC_STRUCTURE *)
+                                     ((UINT8 *)Entry))->TrbeInterrupt;
+
+          acs_print(ACS_PRINT_DEBUG, L"  MADT Revision %llx \n", gMadtHdr->Header.Revision);
+
           for (i = 0; i < MAX_L1_CACHE_RES; i++)
               Ptr->level_1_res[i] = DEFAULT_CACHE_IDX; //initialize cache index fields with all 1's
           acs_print(ACS_PRINT_DEBUG, L" MPIDR %llx PE num %x\n", Ptr->mpidr, Ptr->pe_num);

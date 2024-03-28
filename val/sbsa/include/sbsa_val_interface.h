@@ -37,10 +37,10 @@ typedef enum {
   PE_FEAT_RAS
 } PE_FEAT_NAME;
 
+/* PE related APIs */
 uint32_t val_pe_get_index_uid(uint32_t uid);
 uint32_t val_pe_get_uid(uint64_t mpidr);
 uint32_t val_pe_feat_check(PE_FEAT_NAME pe_feature);
-
 
 #if defined(TARGET_LINUX) || defined(TARGET_EMULATION)
 uint32_t val_get_device_path(const char *hid, char hid_path[][MAX_NAMED_COMP_LENGTH]);
@@ -118,6 +118,9 @@ uint32_t val_ras_get_info(uint32_t info_type, uint32_t param1, uint64_t *ret_dat
 void val_ras2_create_info_table(uint64_t *ras2_info_table);
 void val_ras2_free_info_table(void);
 uint64_t val_ras2_get_mem_info(RAS2_MEM_INFO_e type, uint32_t index);
+
+/* ETE */
+uint32_t val_sbsa_ete_execute_tests(uint32_t level, uint32_t num_pe);
 
 /* HMAT APIs */
 void val_hmat_create_info_table(uint64_t *hmat_info_table);

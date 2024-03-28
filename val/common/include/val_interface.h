@@ -67,6 +67,7 @@ uint32_t val_pe_get_num(void);
 uint64_t val_pe_get_mpid_index(uint32_t index);
 uint32_t val_pe_get_pmu_gsiv(uint32_t index);
 uint32_t val_pe_get_gmain_gsiv(uint32_t index);
+uint32_t val_pe_get_gicc_trbe_interrupt(uint32_t index);
 uint64_t val_pe_get_mpid(void);
 uint32_t val_pe_get_index_mpid(uint64_t mpid);
 uint32_t val_pe_install_esr(uint32_t exception_type, void (*esr)(uint64_t, void *));

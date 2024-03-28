@@ -225,4 +225,10 @@ p062_entry(uint32_t num_pe);
 uint32_t
 p063_entry(uint32_t num_pe);
 
+uint32_t
+p064_entry(uint32_t num_pe);
+
+uint32_t
+p065_entry(uint32_t num_pe);
+
 #endif
