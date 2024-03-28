@@ -399,3 +399,15 @@ val_gic_is_valid_eppi(uint32_t int_id)
 {
   return val_bsa_gic_check_eppi_interrupt(int_id);
 }
+
+/**
+  @brief  API used to check whether int_id is a PPI
+  @param  interrupt
+  @return 1: eppi interrupt, 0: non-eppi interrupt
+**/
+uint32_t
+val_gic_is_valid_ppi(uint32_t int_id)
+{
+  return val_bsa_gic_check_ppi(int_id);
+}
+

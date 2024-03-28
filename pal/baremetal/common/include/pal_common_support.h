@@ -99,6 +99,7 @@ void *mem_alloc(size_t alignment, size_t size);
 #define REG_ACC_DATA         0x7
 
 #define BAR_MASK        0xFFFFFFF0
+#define BAR64_MASK      0xFFFFFFFFFFFFFFF0
 
 /* Class Code Masks */
 #define CC_SUB_MASK     0xFF   /* Sub Class */
@@ -261,6 +262,7 @@ typedef struct {
   uint32_t   gmain_gsiv;                    /* GIC Maintenance Interrupt ID */
   uint32_t   acpi_proc_uid;                 /* ACPI Processor UID */
   uint32_t   level_1_res[MAX_L1_CACHE_RES]; /* index of level 1 cache(s) in cache_info_table */
+  uint32_t   trbe_interrupt;                /* TRBE Interrupt */
 } PE_INFO_ENTRY;
 
 typedef struct {
@@ -693,7 +695,10 @@ typedef enum {
     NUM_TRANSACTIONS  = 0xA,
     ADDRESS_ATTRIBUTES = 0xB,
     DATA_ATTRIBUTES = 0xC,
-    ERROR_INJECT_TYPE = 0xD
+    ERROR_INJECT_TYPE = 0xD,
+    ENABLE_POISON_MODE = 0xE,
+    ENABLE_RAS_CTRL = 0xF,
+    DISABLE_POISON_MODE = 0x10
 } EXERCISER_PARAM_TYPE;
 
 typedef enum {
@@ -719,6 +724,9 @@ typedef enum {
     ATS_TXN_REQ          = 0xd,
     INJECT_ERROR         = 0xe
 } EXERCISER_OPS;
+/**
+  @brief  Instance of system pmu info
+**/
 
 #define PCIE_INTERRUPT_LINE  0x3c
 #define PCIE_INTERRUPT_PIN   0x3d

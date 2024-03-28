@@ -106,6 +106,7 @@ typedef struct {
   UINT32   gmain_gsiv;  ///< GIC Maintenance Interrupt ID
   UINT32   acpi_proc_uid;                 /* ACPI Processor UID */
   UINT32   level_1_res[MAX_L1_CACHE_RES]; /* index of level 1 cache(s) in cache_info_table */
+  UINT32   trbe_interrupt;                /* TRBE Interrupt */
 }PE_INFO_ENTRY;
 
 typedef struct {

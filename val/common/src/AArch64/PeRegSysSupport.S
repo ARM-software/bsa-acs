@@ -136,6 +136,23 @@ GCC_ASM_EXPORT (AA64ReadDbgbcr13El1)
 GCC_ASM_EXPORT (AA64ReadDbgbcr14El1)
 GCC_ASM_EXPORT (AA64ReadDbgbcr15El1)
 GCC_ASM_EXPORT (AA64ReadZfr0)
+GCC_ASM_EXPORT (AA64ReadBrbidr0)
+GCC_ASM_EXPORT (AA64ReadTrbidr)
+GCC_ASM_EXPORT (AA64ReadTrcidr0)
+GCC_ASM_EXPORT (AA64ReadTrcidr4)
+GCC_ASM_EXPORT (AA64ReadTrcidr5)
+GCC_ASM_EXPORT (AA64ReadVtcr)
+GCC_ASM_EXPORT (AA64SetupTraceAccess)
+GCC_ASM_EXPORT (AA64EnableETETrace)
+GCC_ASM_EXPORT (AA64EnableTRBUTrace)
+GCC_ASM_EXPORT (AA64GenerateETETrace)
+GCC_ASM_EXPORT (AA64DisableTRBUTrace)
+GCC_ASM_EXPORT (AA64DisableETETrace)
+GCC_ASM_EXPORT (AA64ReadTrbPtrEl1)
+GCC_ASM_EXPORT (AA64EnableTFO)
+GCC_ASM_EXPORT (AA64DisableTFO)
+GCC_ASM_EXPORT (AA64ReadTrblimitr1)
+GCC_ASM_EXPORT (AA64WriteTrblimitr1)
 
 ASM_PFX(ArmReadMpidr):
   mrs   x0, mpidr_el1           // read EL1 MPIDR
@@ -534,4 +551,181 @@ ASM_PFX(AA64ReadDbgbcr15El1):
 
 ASM_PFX(AA64ReadZfr0):
   mrs x0, id_aa64zfr0_el1
+  ret
+
+ASM_PFX(AA64ReadBrbidr0):
+  mrs x0, brbidr0_el1
+  ret
+
+ASM_PFX(AA64ReadTrbidr):
+  mrs x0, trbidr_el1
+  ret
+
+ASM_PFX(AA64ReadTrcidr0):
+  mrs x0, trcidr0
+  ret
+
+ASM_PFX(AA64ReadTrcidr4):
+  mrs x0, trcidr4
+  ret
+
+ASM_PFX(AA64ReadTrcidr5):
+  mrs x0, trcidr5
+  ret
+
+ASM_PFX(AA64ReadVtcr):
+  mrs x0, vtcr_el2
+  ret
+
+ASM_PFX(AA64ReadTrblimitr1):
+  mrs x0, TRBLIMITR_EL1
+  ret
+
+ASM_PFX(AA64WriteTrblimitr1):
+  msr TRBLIMITR_EL1, x0
+  isb
+  ret
+
+ASM_PFX(AA64SetupTraceAccess):
+  // Allows TRBU reg writes from EL1 and EL2
+  // Programming of MDCR_EL3.NSTB = 0b11 is done in arm-tf
+  mrs x1, MDCR_EL2
+  bic x1, x1, #(3<<24) // MDCR_EL2.E2TB = 0b00 for EL2 tracing
+  msr MDCR_EL2, x1
+  isb
+  msr OSLAR_EL1, xzr
+  isb
+  ret
+
+ASM_PFX(AA64EnableTFO):
+  /* Set OSLK */
+  mov x1, 0x1
+  msr OSLAR_EL1, x1
+  isb
+  mrs x1, MDSCR_EL1
+  orr x1, x1, #(1<<31)
+  msr MDSCR_EL1, x1
+  isb
+  mrs x1, TRBMAR_EL1
+  orr x1, x1, #(1<<10)
+  msr TRBMAR_EL1, x1
+  isb
+  ret
+
+ASM_PFX(AA64DisableTFO):
+  /* Set OSLK */
+  mov x1, 0x1
+  msr OSLAR_EL1, x1
+  isb
+  mrs x1, MDSCR_EL1
+  bic x1, x1, #(1<<31) // MDSCR_EL1.TFO=0b0
+  msr MDSCR_EL1, x1
+  isb
+  ret
+
+ASM_PFX(AA64EnableETETrace):
+  /* Set TRCRSR.TA as active */
+  mov x0, #(1<<12)
+  MSR TRCRSR, x0
+  isb
+
+  /* Enable Trace Unit */
+  mov x0, #(1<<0)
+  msr TRCPRGCTLR, x0
+  isb
+  ret
+
+ASM_PFX(AA64EnableTRBUTrace):
+    /* Add an offset for different PE */
+    mov x0, x0, lsl #12   // x0 has Current PE Index
+    add x1, x1, x0        // Updated Base Address for Curent PE
+
+    /* Update TRBBASER_EL1, TRBPTR_EL1 */
+    msr TRBBASER_EL1, x1
+    isb
+    msr TRBPTR_EL1, x1
+    isb
+
+    /* Program TRBLIMITR_EL1 */
+    add x1, x1, x2
+    orr x1, x1, #(3<<1)  // TRBLIMITR_EL1.FM_CIRCULAR_BUFFER_MODE
+    orr x1, x1, #(3<<3)  // TRBLIMITR_EL1_TM_IGNORE_TRIGGER
+    orr x1, x1, #(1<<60)  // TRBLIMITR_EL1.LIMIT
+    msr TRBLIMITR_EL1, x1
+    isb
+
+    /* Update TRFCR_EL2 to enable trace at EL2 */
+    mrs x1, S3_4_C1_C2_1
+    orr x1, x1, #(1<<1) // TRFCR_EL2.E2TRE = 0b1
+    orr x1, x1, #(1<<3) // TRFCR_EL2.CX = 0b1
+    orr x1, x1, #(3<<5) // TRFCR_EL2.TS = 0b11
+    msr S3_4_C1_C2_1, x1
+    isb
+
+    /* TRCCONFIGR.TS = 1 */
+    mrs x1, trcconfigr
+    orr x1, x1, #(1<<11)
+    msr trcconfigr, x1
+    isb
+
+    /* Set TRBU as Running, TRBSR_EL1.S = 0 */
+    msr TRBSR_EL1, xzr
+    isb
+
+    /* Set TRCVICTLR.SSSTATUS = 1 (started), all exception levels enabled */
+    mov x1, 0x201
+    msr TRCVICTLR, x1
+    isb
+    ret
+
+ASM_PFX(AA64DisableTRBUTrace):
+    /* Flush trace unit before disabling TRBU */
+    tsb CSYNC
+
+    /* TRBSR_EL1.S Set TRBU as Stopped */
+    mov x0, 0x20000
+    msr TRBSR_EL1, x0
+    isb
+
+    /* TRBLIMITR_EL1 Disable TRBU */
+    msr TRBLIMITR_EL1, xzr
+    isb
+    ret
+
+ASM_PFX(AA64GenerateETETrace):
+  /* Generate trace for sample instructions */
+  MOV x0, #1000
+  MOV x2, x0
+  CMP x2, xzr
+  B branch
+  return:
+    ret
+
+  branch:
+    SUB x0, x0, #1
+    CMP x0, xzr
+    BNE branch
+    B return
+
+
+ASM_PFX(AA64DisableETETrace):
+  /* Disable trace */
+  ISB
+  TSB CSYNC
+  ISB
+
+  MSR TRCPRGCTLR, xzr
+  ISB
+
+  B branch1
+  return1:
+    ret
+
+  branch1:
+    MOV x2, x0
+    CMP x2, xzr
+    B return1
+
+ASM_PFX(AA64ReadTrbPtrEl1):
+  mrs   x0, TRBPTR_EL1
   ret

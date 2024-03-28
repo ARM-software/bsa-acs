@@ -20,6 +20,19 @@
 
 #include "common/include/acs_exerciser.h"
 
+/* PCIe RAS related Offset, shift and mask */
+
+#define PN_SHIFT       22
+#define UE_ER_SHIFT    28
+#define UET_SHIFT      20
+#define DE_SHIFT       23
+
+#define SERR_MASK      0xFF
+#define PN_MASK        0x1
+#define UE_ER_MASK     0x3
+#define UET_MASK       0x3
+#define DE_MASK        0x1
+
 uint32_t e001_entry(void);
 uint32_t e002_entry(void);
 uint32_t e003_entry(void);
@@ -28,6 +41,10 @@ uint32_t e005_entry(void);
 uint32_t e006_entry(void);
 uint32_t e007_entry(void);
 uint32_t e008_entry(void);
+uint32_t e009_entry(void);
+uint32_t e010_entry(void);
+uint32_t e011_entry(void);
+uint32_t e012_entry(void);
 
 typedef enum {
     CORR_RCVR_ERR = 0x0,
@@ -59,4 +76,9 @@ typedef enum {
 } EXERCISER_ERROR_CODE;
 
 uint32_t val_get_exerciser_err_info(EXERCISER_ERROR_CODE type);
+void     val_exerciser_disable_rp_pio_register(uint32_t bdf);
+uint32_t val_exerciser_check_poison_data_forwarding_support(void);
+uint32_t val_exerciser_get_pcie_ras_compliant_err_node(uint32_t bdf, uint32_t rp_bdf);
+uint64_t val_exerciser_get_ras_status(uint32_t ras_node, uint32_t e_bdf, uint32_t erp_bdf);
+uint32_t val_exerciser_set_bar_response(uint32_t bdf);
 #endif

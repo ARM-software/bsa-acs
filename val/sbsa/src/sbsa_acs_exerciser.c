@@ -17,6 +17,7 @@
 
 #include "common/include/acs_val.h"
 #include "sbsa/include/sbsa_acs_exerciser.h"
+#include "sbsa/include/sbsa_val_interface.h"
 
 extern uint32_t pcie_bdf_table_list_flag;
 
@@ -77,4 +78,40 @@ uint32_t val_get_exerciser_err_info(EXERCISER_ERROR_CODE type)
          val_print(ACS_PRINT_ERR, "\n   Invalid error offset ", 0);
          return 0;
     }
+}
+
+/**
+  @brief   This API disables the RP-PIO register support of the RP
+  @param   type         - RP BDF of which the RP-PIO needs to be disabled
+  @return  None
+**/
+void val_exerciser_disable_rp_pio_register(uint32_t bdf)
+{
+
+  pal_exerciser_disable_rp_pio_register(bdf);
+  return;
+}
+
+uint32_t
+val_exerciser_check_poison_data_forwarding_support(void)
+{
+  return pal_exerciser_check_poison_data_forwarding_support();
+}
+
+uint32_t
+val_exerciser_get_pcie_ras_compliant_err_node(uint32_t bdf, uint32_t rp_bdf)
+{
+  return pal_exerciser_get_pcie_ras_compliant_err_node(bdf, rp_bdf);
+}
+
+uint64_t
+val_exerciser_get_ras_status(uint32_t ras_node, uint32_t e_bdf, uint32_t erp_bdf)
+{
+  return pal_exerciser_get_ras_status(ras_node, e_bdf, erp_bdf);
+}
+
+uint32_t
+val_exerciser_set_bar_response(uint32_t bdf)
+{
+  return pal_exerciser_set_bar_response(bdf);
 }

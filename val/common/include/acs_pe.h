@@ -26,6 +26,11 @@
 #define PE_AFFINITY_LVL_2  0xFF00FF0000ULL
 #define PE_AFFINITY_LVL_3  0xFF00000000ULL
 
+/* PE PMU Version */
+
+#define PE_PMUv3p5 0x06
+#define PE_PMUv3p7 0x07
+
 //
 //  AARCH64 processor exception types.
 //
@@ -173,7 +178,15 @@ typedef enum {
   DBGBCR14_EL1,
   DBGBCR15_EL1,
   ID_AA64ZFR0_EL1,
-  ID_AA64ISAR2_EL1
+  ID_AA64ISAR2_EL1,
+  BRBIDR0_EL,
+  BRBIDR0_EL1,
+  TRBIDR_EL1,
+  TRCIDR0,
+  TRCIDR4,
+  TRCIDR5,
+  HCR_EL2,
+  VTCR_EL2
 } BSA_ACS_PE_REGS;
 
 uint64_t ArmReadMpidr(void);
@@ -219,6 +232,8 @@ void AA64WriteMdcr2(uint64_t write_data);
 uint64_t AA64ReadVbar2(void);
 
 void AA64WriteVbar2(uint64_t write_data);
+
+void DisableSpe(void);
 
 void AA64WritePmcr(uint64_t write_data);
 
@@ -367,6 +382,18 @@ uint64_t AA64ReadDbgbcr14El1(void);
 uint64_t AA64ReadDbgbcr15El1(void);
 
 uint64_t AA64ReadZfr0(void);
+
+uint64_t AA64ReadBrbidr0(void);
+
+uint64_t AA64ReadTrbidr(void);
+
+uint64_t AA64ReadVtcr(void);
+
+uint64_t AA64ReadTrcidr0(void);
+
+uint64_t AA64ReadTrcidr4(void);
+
+uint64_t AA64ReadTrcidr5(void);
 
 void ArmCallWFI(void);
 

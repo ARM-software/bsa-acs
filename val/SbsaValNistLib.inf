@@ -65,6 +65,7 @@
   sbsa/src/sbsa_acs_iovirt.c
   sbsa/src/sbsa_acs_memory.c
   sbsa/src/sbsa_acs_exerciser.c
+  sbsa/src/sbsa_acs_ete.c
   sbsa/src/sbsa_acs_ras.c
   sbsa/src/sbsa_execute_test.c
   sbsa/src/sbsa_acs_pmu.c

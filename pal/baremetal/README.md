@@ -83,7 +83,7 @@ On a successful build, *.bin, *.elf, *.img and debug binaries are generated at *
 
 - ./run_model.sh
 
-**Note:** <acs>.bin stands for either bsa.bin or sbsa.bin. Any platform specific changes can be done by using TARGET_BM_BOOT macro defintion. The baremetal reference code is located in [baremetal](.). To customize the bare-metal code for different platforms, create a directory <platform_name> in [target](target/) folder and copy the reference code from [RDN2](target/RDN2) to <platform_name>.
+**Note:** <acs>.bin stands for either bsa.bin or sbsa.bin. Any platform specific changes can be done by using TARGET_BM_BOOT macro defintion. The baremetal reference code is located in [baremetal](.). To customize the bare-metal code for different platforms, create a directory <platform_name> in [target](target/) folder and copy the reference code from [include](target/RDN2/include) and [source](target/RDN2/src) folders from [RDN2](target/RDN2) to <platform_name>.
 
 
 For more details on how to port the reference code to a specific platform and for further customisation please refer to the [User Guide](../../docs/arm_bsa_architecture_compliance_bare-metal_user_guide.pdf)

@@ -20,6 +20,9 @@
 #include "platform_override_struct.h"
 #include "platform_override_sbsa_struct.h"
 
+/* If set, ACS also includes SBSA Future Requirement tests.  */
+uint32_t  g_sbsa_run_fr       = FALSE;
+
 PLATFORM_OVERRIDE_CS_COMP_NODE_DATA platform_cs_comp_node_data = {
     .component[0].identifier    = CS_COMPONENT_0_IDENTIFIER,
     .component[0].dev_name      = CS_COMPONENT_0_DEVICE_NAME,
