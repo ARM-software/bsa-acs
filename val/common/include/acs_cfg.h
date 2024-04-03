@@ -37,5 +37,6 @@ extern uint32_t g_build_sbsa;
 extern uint32_t g_curr_module;
 extern uint32_t g_el1physkip;
 extern uint32_t g_sys_last_lvl_cache;
+extern uint32_t g_crypto_support;
 
 #endif

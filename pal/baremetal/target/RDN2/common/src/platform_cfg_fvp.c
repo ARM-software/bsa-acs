@@ -47,8 +47,15 @@ uint32_t  g_num_modules      = sizeof(g_module_array)/sizeof(g_module_array[0]);
 
 /* VE systems run acs at EL1 and in some systems crash is observed during acess
    of EL1 phy and virt timer, Below command line option is added only for debug
-   purpose to complete BSA run on these systems */
+   purpose to complete BSA run on these systems
+*/
 uint32_t  g_el1physkip       = FALSE;
+
+/* B_PE_06 and S_L5PE_05 rules are conditional implementation based on export restrictions
+   In case due to export restrictions, cryptography algorithm support is not present, set
+   g_crypto_support to FALSE (Default value is TRUE)
+*/
+uint32_t g_crypto_support    = TRUE;
 
 PE_INFO_TABLE platform_pe_cfg = {
 

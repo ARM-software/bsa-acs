@@ -50,6 +50,7 @@ UINT32  g_print_mmio;
 UINT32  g_curr_module;
 UINT32  g_enable_module;
 UINT32  *g_execute_tests;
+UINT32  g_crypto_support = TRUE;
 UINT32  g_num_tests = 0;
 UINT32  *g_execute_modules;
 UINT32  g_num_modules = 0;
@@ -273,6 +274,7 @@ HelpMsg (
          "        To skip a particular test within a module, use the exact testcase number\n"
          "-t      If Test ID(s) set, will only run the specified test(s), all others will be skipped.\n"
          "-m      If Module ID(s) set, will only run the specified module(s), all others will be skipped.\n"
+         "-no_crypto_ext  Pass this flag if cryptography extension not supported due to export restrictions\n"
          "-p2p    Pass this flag to indicate that PCIe Hierarchy Supports Peer-to-Peer\n"
          "-cache  Pass this flag to indicate that if the test system supports PCIe address translation cache\n"
          "-timeout  Set timeout multiple for wakeup tests\n"
@@ -302,6 +304,7 @@ STATIC CONST SHELL_PARAM_ITEM ParamList[] = {
   {L"-ps", TypeFlag},    // -ps   # Binary Flag to enable the execution of platform security tests.
   {L"-dtb", TypeValue},  // -dtb  # Binary Flag to enable dtb dump
   {L"-sbsa", TypeFlag},  // -sbsa # Enable sbsa requirements for bsa binary\n"
+  {L"-no_crypto_ext", TypeFlag},  // -no_crypto_ext  # Skip tests which have export restrictions
   {L"-mmio", TypeFlag}, // -mmio # Enable pal_mmio prints
   {L"-el1physkip", TypeFlag}, // -el1physkip # Skips EL1 register checks
   {NULL, TypeMax}
@@ -462,6 +465,10 @@ ShellAppMain (
      HelpMsg();
      return 0;
   }
+
+  // Options with Flags
+  if ((ShellCommandLineGetFlag (ParamPackage, L"-no_crypto_ext")))
+     g_crypto_support = FALSE;
 
   // Options with Values
   if (ShellCommandLineGetFlag (ParamPackage, L"-t")) {
