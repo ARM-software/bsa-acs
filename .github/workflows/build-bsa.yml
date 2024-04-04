@@ -1,4 +1,4 @@
-name: BSA-ACS UEFI application build
+name: BSA-ACS application build
 
 on:
   push:
@@ -26,7 +26,7 @@ jobs:
           git clone https://github.com/tianocore/edk2-libc edk2/edk2-libc
 
       - name: Checkout bsa-acs repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: 'edk2/ShellPkg/Application/bsa-acs'
 
@@ -51,7 +51,7 @@ jobs:
           make -C BaseTools/Source/C
           source ShellPkg/Application/bsa-acs/tools/scripts/acsbuild.sh
       - name: Save Bsa.efi as an artifact
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v4
         with:
           name: Bsa_acpi_target.efi
           path: edk2/Build/Shell/DEBUG_GCC49/AARCH64/Bsa.efi
@@ -71,7 +71,7 @@ jobs:
           git clone https://github.com/tianocore/edk2-libc edk2/edk2-libc
 
       - name: Checkout bsa-acs repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: 'edk2/ShellPkg/Application/bsa-acs'
 
@@ -96,8 +96,44 @@ jobs:
           make -C BaseTools/Source/C
           source ShellPkg/Application/bsa-acs/tools/scripts/acsbuild.sh
       - name: Save Bsa.efi as an artifact
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v4
         with:
           name: Bsa_dt_target.efi
           path: edk2/Build/Shell/DEBUG_GCC49/AARCH64/Bsa.efi
+          if-no-files-found: error
+
+  baremetal-compilation:
+    name: Baremetal CMake compilation check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout bsa-acs repository
+        uses: actions/checkout@v4
+        with:
+          repository: ARM-software/bsa-acs
+
+      - name: Remove build folder if present in BSA-ACS
+        run: |
+              rm -rf build
+
+      - name: Download Arm GCC cross-compiler
+        run: |
+              mkdir -p /opt/cross
+              cd /opt/cross
+              wget https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-elf.tar.xz
+              tar -xf arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-elf.tar.xz
+
+      - name: Compile BSA Baremetal ACS for RDN2 Platform
+        run: |
+              export CROSS_COMPILE=/opt/cross/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-
+              mkdir build
+              cd build
+              cmake ../ -G "Unix Makefiles" -DCROSS_COMPILE=$CROSS_COMPILE -DTARGET=RDN2
+              make
+
+      - name: Save Baremetel bsa.bin as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Bsa_baremetal_RDN2.bin
+          path: build/output/bsa.bin
           if-no-files-found: error
