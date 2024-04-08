@@ -29,6 +29,13 @@ payload()
   uint64_t data = 0;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
+  if (!g_crypto_support) {
+        val_print_primary_pe(ACS_PRINT_DEBUG, "\n       Crypto extension not supported",
+                                                                                      0, index);
+        val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
+        return;
+  }
+
   data = val_pe_reg_read(ID_AA64ISAR0_EL1);
 
   //bits 7:4, 11:8, 15:12 must be non-zero

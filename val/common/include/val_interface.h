@@ -52,6 +52,7 @@ void val_free_shared_mem(void);
 void val_print(uint32_t level, char8_t *string, uint64_t data);
 void val_print_raw(uint64_t uart_addr, uint32_t level, char8_t *string,
                                                                 uint64_t data);
+void val_print_primary_pe(uint32_t level, char8_t *string, uint64_t data, uint32_t index);
 void val_print_test_start(char8_t *string);
 void val_print_test_end(uint32_t status, char8_t *string);
 void val_set_test_data(uint32_t index, uint64_t addr, uint64_t test_data);
