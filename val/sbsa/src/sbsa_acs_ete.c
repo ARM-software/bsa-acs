@@ -136,9 +136,9 @@ uint64_t val_ete_generate_trace(uint64_t buffer_addr, uint32_t self_hosted_trace
 
     /* Update TRBLIMITR_EL1_E/XE Based on SelfHostedTraceEnabled & Enable Trace Buffer Unit */
     if (self_hosted_trace_enabled == SH_TRACE_ENABLE_TRUE)
-        AA64EnableTRBUTrace(index, buffer_addr, TRBLIMITR_EL1_E);
+        AA64EnableTRBUTrace(index, buffer_addr, ACS_TRBLIMITR_EL1_E);
     else
-        AA64EnableTRBUTrace(index, buffer_addr, TRBLIMITR_EL1_XE | TRBLIMITR_EL1_nVM);
+        AA64EnableTRBUTrace(index, buffer_addr, ACS_TRBLIMITR_EL1_XE | ACS_TRBLIMITR_EL1_nVM);
 
     AA64EnableETETrace();
 
