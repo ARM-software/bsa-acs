@@ -18,9 +18,9 @@
 #ifndef __SBSA_AVS_ETE_H
 #define __SBSA_AVS_ETE_H
 
-#define TRBLIMITR_EL1_E     (1 << 0)
-#define TRBLIMITR_EL1_nVM   (1 << 5)
-#define TRBLIMITR_EL1_XE    (1 << 6)
+#define ACS_TRBLIMITR_EL1_E     (1 << 0)
+#define ACS_TRBLIMITR_EL1_nVM   (1 << 5)
+#define ACS_TRBLIMITR_EL1_XE    (1 << 6)
 
 #define TR_I_ADDR_CTXT_L_32IS0  0x82
 #define TR_I_ADDR_CTXT_L_32IS1  0x83
