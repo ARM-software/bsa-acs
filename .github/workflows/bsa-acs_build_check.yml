@@ -135,3 +135,91 @@ jobs:
           name: Bsa_baremetal_RDN2.bin
           path: build/output/bsa.bin
           if-no-files-found: error
+
+  linux-compilation:
+    name: BSA linux compilation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout bsa-acs repository
+        uses: actions/checkout@v4
+        with:
+          repository: ARM-software/bsa-acs
+
+      - name: Download Arm GCC cross-compiler and Linux 6.7 and Linux ACS
+        run: |
+              cd ..
+              git clone https://github.com/torvalds/linux.git -b v6.7 linux6.7
+              git clone https://git.gitlab.arm.com/linux-arm/linux-acs.git
+              ls
+              mkdir -p /opt/cross
+              cd /opt/cross
+              wget https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-linux-gnu.tar.xz
+              tar -xf arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-linux-gnu.tar.xz
+              cd -
+
+      - name: Compile Linux
+        run: |
+              cd ..
+              export GCC=/opt/cross/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
+              cd linux6.7
+              git apply ../linux-acs/kernel/src/0001-BSA-ACS-Linux-6.7.patch
+              mkdir out
+              cp arch/arm64/configs/defconfig out/.config
+              make ARCH=arm64 CROSS_COMPILE=$GCC O=out olddefconfig
+              make ARCH=arm64 CROSS_COMPILE=$GCC O=out -j $(nproc)
+              cd -
+              
+      - name: Save Linux Kernel as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Linux Kernel
+          path: /home/runner/work/bsa-acs/linux6.7/out/arch/arm64/boot/Image.gz
+          if-no-files-found: error 
+          
+      - name: Compile BSA Linux ACS module and app
+        run: |
+              cd ..
+              export CROSS_COMPILE=/opt/cross/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
+              export KERNEL_SRC=$PWD/linux6.7/out
+              mkdir linux-bsa
+              cd linux-acs/acs-drv/files
+              ./bsa_setup.sh $PWD/../../../bsa-acs
+              ./linux_bsa_acs.sh
+              cp bsa_acs.ko /home/runner/work/bsa-acs/linux-bsa/
+              cd -
+              cd bsa-acs/linux_app/bsa-acs-app
+              make
+              cp bsa /home/runner/work/bsa-acs/linux-bsa/
+    
+      - name: Save BSA kernel module and app as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BSA Kernel Module and App
+          path: /home/runner/work/bsa-acs/linux-bsa/*
+          if-no-files-found: error
+          
+      - name: Compile SBSA Linux ACS module and app
+        run: |
+              cd ..
+              git clone https://github.com/ARM-software/sbsa-acs.git
+              export CROSS_COMPILE=/opt/cross/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
+              export KERNEL_SRC=$PWD/linux6.7/out
+              mkdir linux-sbsa
+              cd linux-acs/acs-drv/files
+              rm -r test_pool
+              rm -r val
+              ./sbsa_setup.sh $PWD/../../../bsa-acs $PWD/../../../sbsa-acs
+              ./linux_sbsa_acs.sh
+              cp sbsa_acs.ko /home/runner/work/bsa-acs/linux-sbsa/
+              cd -
+              cd sbsa-acs/linux_app/sbsa-acs-app
+              make
+              cp sbsa /home/runner/work/bsa-acs/linux-sbsa/
+
+      - name: Save SBSA kernel module and app as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBSA Kernel Module and App
+          path: /home/runner/work/bsa-acs/linux-sbsa/*
+          if-no-files-found: error
