@@ -54,7 +54,6 @@ extern uint32_t g_pcie_integrated_devices;
 uint32_t
 val_sbsa_pe_execute_tests(uint32_t level, uint32_t num_pe)
 {
-
   uint32_t status = ACS_STATUS_PASS, i;
 
   for (i = 0; i < g_num_skip; i++) {
@@ -74,19 +73,21 @@ val_sbsa_pe_execute_tests(uint32_t level, uint32_t num_pe)
   val_print_test_start("PE");
   g_curr_module = 1 << PE_MODULE;
 
-  status |= c001_entry(num_pe);
-  status |= c002_entry(num_pe);
-  status |= c003_entry(num_pe);
-  status |= c004_entry(num_pe);
+  if (((level > 2) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 3)) {
+      status |= c001_entry(num_pe);
+      status |= c002_entry(num_pe);
+      status |= c003_entry(num_pe);
+      status |= c004_entry(num_pe);
+  }
 
-  if (level > 3) {
+  if (((level > 3)  && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 4)) {
       status |= c005_entry(num_pe);
       status |= c006_entry(num_pe);
       status |= c007_entry(num_pe);
       status |= c008_entry(num_pe);
   }
 
-  if (level > 4) {
+  if (((level > 4)  && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 5)) {
       status |= c009_entry(num_pe);
       status |= c010_entry(num_pe);
       status |= c011_entry(num_pe);
@@ -97,7 +98,7 @@ val_sbsa_pe_execute_tests(uint32_t level, uint32_t num_pe)
       status |= c016_entry(num_pe);
   }
 
-  if (level > 5) {
+  if (((level > 5)  && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 6)) {
       status |= c017_entry(num_pe);
       status |= c018_entry(num_pe);
       status |= c019_entry(num_pe);
@@ -111,7 +112,7 @@ val_sbsa_pe_execute_tests(uint32_t level, uint32_t num_pe)
       status |= c027_entry(num_pe);
   }
 
-  if (level > 6) {
+  if (((level > 6)  && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)) {
       status |= c028_entry(num_pe);
       status |= c029_entry(num_pe);
       status |= c030_entry(num_pe);
@@ -123,7 +124,7 @@ val_sbsa_pe_execute_tests(uint32_t level, uint32_t num_pe)
       status |= c036_entry(num_pe);
   }
 
-  if (level > 7) {
+  if (((level > 7)  && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8)) {
       status |= c037_entry(num_pe);
       status |= c038_entry(num_pe);
       status |= c039_entry(num_pe);
@@ -150,9 +151,11 @@ uint32_t
 val_sbsa_gic_execute_tests(uint32_t level, uint32_t num_pe)
 {
 
-  uint32_t status, i;
-  uint32_t module_skip;
-  status = 0;
+  uint32_t status = 0, i, module_skip;
+
+  if (!(((level > 2) && (g_sbsa_only_level == 0)) ||
+                  (g_sbsa_only_level == 3) || (g_sbsa_only_level == 5)))
+      return ACS_STATUS_SKIP;
 
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_GIC_TEST_NUM_BASE) {
@@ -172,11 +175,11 @@ val_sbsa_gic_execute_tests(uint32_t level, uint32_t num_pe)
   val_print_test_start("GIC");
   g_curr_module = 1 << GIC_MODULE;
 
-  status = g001_entry(num_pe);
+  if (((level > 2) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 3))
+      status = g001_entry(num_pe);
 
-  if (level > 4) {
+  if (((level > 4) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 5))
       status = g002_entry(num_pe);
-  }
 
   val_print_test_end(status, "GIC");
 
@@ -196,7 +199,9 @@ uint32_t
 val_sbsa_wd_execute_tests(uint32_t level, uint32_t num_pe)
 {
   uint32_t status = ACS_STATUS_PASS, i;
-  (void) level;
+
+  if (!(((level > 5) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 6)))
+      return ACS_STATUS_SKIP;
 
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_WD_TEST_NUM_BASE) {
@@ -215,7 +220,8 @@ val_sbsa_wd_execute_tests(uint32_t level, uint32_t num_pe)
   val_print_test_start("Watchdog");
   g_curr_module = 1 << WD_MODULE;
 
-  status |= w001_entry(num_pe);
+  if (((level > 5) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 6))
+      status |= w001_entry(num_pe);
 
   val_print_test_end(status, "Watchdog");
 
@@ -234,6 +240,20 @@ uint32_t
 val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
 {
   uint32_t status = ACS_STATUS_PASS, i;
+
+#ifdef TARGET_LINUX
+  if (!(((level > 2) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 3)
+                     || (g_sbsa_only_level == 6)))
+      return ACS_STATUS_SKIP;
+#elif defined TARGET_EMULATION
+  if (!(((level > 2) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 3)
+                     || (g_sbsa_only_level == 4) || (g_sbsa_only_level >= 6)))
+      return ACS_STATUS_SKIP;
+#else
+ if (!(((level > 2) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 4)
+                    || (g_sbsa_only_level >= 6)))
+      return ACS_STATUS_SKIP;
+#endif
 
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_PCIE_TEST_NUM_BASE) {
@@ -259,20 +279,19 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
   g_curr_module = 1 << PCIE_MODULE;
 
   #if defined(TARGET_LINUX) || defined(TARGET_EMULATION)
-    status |= p009_entry(num_pe);  /* This covers GIC rule */
+    if (((level > 2) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 3))
+      status |= p009_entry(num_pe);  /* This covers GIC rule */
   #endif
 
-  if (level > 3) {
-  /* Only the test p062 will be run at L4+ with the test number (ACS_PER_TEST_NUM_BASE + 1) */
   #ifndef TARGET_LINUX
+  if (((level > 3) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 4)) {
+  /* Only the test p062 will be run at L4+ with the test number (ACS_PER_TEST_NUM_BASE + 1) */
     status = p062_entry(num_pe);
-  #endif
   }
+  #endif
 
-  if (level > 5) {
-
+  if (((level > 5) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 6)) {
     status = p001_entry(num_pe);
-
     if (status == ACS_STATUS_FAIL) {
       val_print(ACS_PRINT_WARN, "\n     *** Skipping remaining PCIE tests ***\n", 0);
       return status;
@@ -318,10 +337,12 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
       status |= p045_entry(num_pe); /* iEP/RP only */
       status |= p046_entry(num_pe);
       status |= p047_entry(num_pe); /* iEP/RP only */
-#ifdef TARGET_EMULATION
+#endif
+#if defined(TARGET_EMULATION) && !defined(TARGET_LINUX)
       status |= p048_entry(num_pe); /* iEP/RP only */
       status |= p049_entry(num_pe);
 #endif
+#ifndef TARGET_LINUX
       status |= p050_entry(num_pe);
       status |= p051_entry(num_pe); /* iEP/RP only */
       status |= p052_entry(num_pe);
@@ -335,11 +356,11 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
   }
 
 #ifndef TARGET_LINUX
-  if (level > 6) {
+  if (((level > 6) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)) {
     status |= p061_entry(num_pe);
   }
 
-  if (level > 7) {
+  if (((level > 7) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8)) {
     status |= p064_entry(num_pe);
     status |= p065_entry(num_pe);
   }
@@ -363,8 +384,10 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
 uint32_t
 val_sbsa_smmu_execute_tests(uint32_t level, uint32_t num_pe)
 {
-  uint32_t status = ACS_STATUS_PASS, i;
-  uint32_t num_smmu;
+  uint32_t status = ACS_STATUS_PASS, i, num_smmu;
+
+  if (!(((level > 3) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level >= 4)))
+      return ACS_STATUS_SKIP;
 
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_SMMU_TEST_NUM_BASE) {
@@ -390,16 +413,17 @@ val_sbsa_smmu_execute_tests(uint32_t level, uint32_t num_pe)
   g_curr_module = 1 << SMMU_MODULE;
 
 #ifndef TARGET_LINUX
-  status = i001_entry(num_pe) ;
+  if (((level > 3) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 4))
+      status = i001_entry(num_pe) ;
 
-  if (level > 4) {
+  if (((level > 4) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 5)) {
       status |= i002_entry(num_pe);
       status |= i003_entry(num_pe);
       status |= i004_entry(num_pe);
       status |= i005_entry(num_pe);
   }
 
-  if (level > 5) {
+  if (((level > 5) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 6)) {
       status |= i006_entry(num_pe);
       status |= i007_entry(num_pe);
       status |= i008_entry(num_pe);
@@ -410,17 +434,17 @@ val_sbsa_smmu_execute_tests(uint32_t level, uint32_t num_pe)
       status |= i013_entry(num_pe);
   }
 
-  if (level > 6) {
+if (((level > 6) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)) {
      status |= i014_entry(num_pe);
      status |= i015_entry(num_pe);
   }
 
-  if (g_sbsa_level > 7)
+if (((level > 7) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8))
      status |= i017_entry(num_pe);
 #endif  // TARGET_LINUX
 
 #if defined(TARGET_LINUX) || defined(TARGET_EMULATION)
-  if (level > 6)
+  if (((level > 6) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7))
      status |= i016_entry(num_pe);
 #endif
   val_print_test_end(status, "SMMU");
@@ -441,9 +465,10 @@ uint32_t
 val_sbsa_memory_execute_tests(uint32_t level, uint32_t num_pe)
 {
 
-  uint32_t status = 0;
-  uint32_t i;
-  (void) level;
+  uint32_t status = 0, i;
+
+  if (!(((level > 2) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 3)))
+      return ACS_STATUS_SKIP;
 
   for (i = 0 ; i < g_num_skip ; i++) {
       if (g_skip_test_num[i] == ACS_MEMORY_MAP_TEST_NUM_BASE) {
@@ -462,7 +487,8 @@ val_sbsa_memory_execute_tests(uint32_t level, uint32_t num_pe)
   val_print_test_start("Memory");
   g_curr_module = 1 << MEM_MAP_MODULE;
 
-  status = m001_entry(num_pe);
+  if (((level > 2) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 3))
+      status = m001_entry(num_pe);
 
   val_print_test_end(status, "Memory");
 
@@ -482,6 +508,10 @@ val_sbsa_exerciser_execute_tests(uint32_t level)
   uint32_t num_instances;
   uint32_t instance;
   uint32_t num_smmu;
+
+  if (!(((level > 2) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 3)
+         || (g_sbsa_only_level == 6) || (g_sbsa_only_level == 7) || (g_sbsa_only_level == 8)))
+  return ACS_STATUS_SKIP;
 
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_EXERCISER_TEST_NUM_BASE) {
@@ -533,22 +563,24 @@ val_sbsa_exerciser_execute_tests(uint32_t level)
   val_print_test_start("PCIe Exerciser");
 
   g_curr_module = 1 << EXERCISER_MODULE;
-  status = e001_entry();
 
-  if (level > 5) {
+  if (((level > 2) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 3))
+      status = e001_entry();
+
+  if (((level > 5) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 6)) {
       status |= e002_entry();
       status |= e003_entry();
       status |= e004_entry();
   }
 
-  if (level > 6) {
+  if (((level > 6) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)) {
       status |= e005_entry();
       status |= e006_entry();
       status |= e007_entry();
       status |= e008_entry();
   }
 
-  if (level > 7) {
+  if (((level > 7) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8)) {
       status |= e009_entry();
       status |= e010_entry();
       status |= e011_entry();
@@ -577,7 +609,9 @@ val_sbsa_pmu_execute_tests(uint32_t level, uint32_t num_pe)
   uint32_t status = ACS_STATUS_FAIL;
   uint32_t skip_module;
   uint32_t i, pmu_node_count;
-  (void) level;
+
+  if (!(((level > 6) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)))
+      return ACS_STATUS_SKIP;
 
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_PMU_TEST_NUM_BASE) {
@@ -603,25 +637,26 @@ val_sbsa_pmu_execute_tests(uint32_t level, uint32_t num_pe)
   val_print_test_start("PMU");
   g_curr_module = 1 << PMU_MODULE;
 
-  /* run tests which don't check PMU nodes */
-  status  = pmu001_entry(num_pe);
-  status |= pmu002_entry(num_pe);
-  status |= pmu003_entry(num_pe);
-  status |= pmu006_entry(num_pe);
+ if (((level > 6) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)) {
+      /* run tests which don't check PMU nodes */
+      status  = pmu001_entry(num_pe);
+      status |= pmu002_entry(num_pe);
+      status |= pmu003_entry(num_pe);
+      status |= pmu006_entry(num_pe);
 
-  pmu_node_count = val_pmu_get_info(PMU_NODE_COUNT, 0);
-  if (pmu_node_count == 0) {
-      val_print(ACS_PRINT_TEST,
+      pmu_node_count = val_pmu_get_info(PMU_NODE_COUNT, 0);
+      if (pmu_node_count == 0) {
+          val_print(ACS_PRINT_TEST,
                 "\n       PMU nodes not found. Skipping remaining PMU tests\n", 0);
-      return ACS_STATUS_SKIP;
+          return ACS_STATUS_SKIP;
+      }
+
+      status |= pmu004_entry(num_pe);
+      status |= pmu005_entry(num_pe);
+      status |= pmu007_entry(num_pe);
+      status |= pmu008_entry(num_pe);
+      status |= pmu009_entry(num_pe);
   }
-
-  status |= pmu004_entry(num_pe);
-  status |= pmu005_entry(num_pe);
-  status |= pmu007_entry(num_pe);
-  status |= pmu008_entry(num_pe);
-  status |= pmu009_entry(num_pe);
-
   val_print_test_end(status, "PMU");
 
   return status;
@@ -641,7 +676,9 @@ val_sbsa_mpam_execute_tests(uint32_t level, uint32_t num_pe)
   uint32_t status = ACS_STATUS_FAIL, i;
   uint32_t skip_module;
   uint32_t msc_node_cnt;
-  (void) level;
+
+  if (!(((level > 6) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)))
+      return ACS_STATUS_SKIP;
 
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_MPAM_TEST_NUM_BASE) {
@@ -667,21 +704,23 @@ val_sbsa_mpam_execute_tests(uint32_t level, uint32_t num_pe)
   val_print_test_start("MPAM");
   g_curr_module = 1 << MPAM_MODULE;
 
-  /* run tests which don't check MPAM MSCs */
-  status = mpam001_entry(num_pe);
+ if (((level > 6) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)) {
+      /* run tests which don't check MPAM MSCs */
+      status = mpam001_entry(num_pe);
 
-  msc_node_cnt = val_mpam_get_msc_count();
-  if (msc_node_cnt == 0) {
-      val_print(ACS_PRINT_TEST,
+      msc_node_cnt = val_mpam_get_msc_count();
+      if (msc_node_cnt == 0) {
+          val_print(ACS_PRINT_TEST,
                 "\n       MPAM MSCs not found. Skipping remaining MPAM tests\n", 0);
-      return ACS_STATUS_SKIP;
-  }
+          return ACS_STATUS_SKIP;
+      }
 
-  status |= mpam002_entry(num_pe);
-  status |= mpam003_entry(num_pe);
-  status |= mpam004_entry(num_pe);
-  status |= mpam005_entry(num_pe);
-  status |= mpam006_entry(num_pe);
+      status |= mpam002_entry(num_pe);
+      status |= mpam003_entry(num_pe);
+      status |= mpam004_entry(num_pe);
+      status |= mpam005_entry(num_pe);
+      status |= mpam006_entry(num_pe);
+  }
   val_print_test_end(status, "MPAM");
 
   return status;
@@ -702,7 +741,10 @@ val_sbsa_ras_execute_tests(uint32_t level, uint32_t num_pe)
   uint32_t status, i;
   uint32_t skip_module;
   uint64_t num_ras_nodes = 0;
-  (void) level;
+
+  if (!(((level > 6) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)
+                     || (g_sbsa_only_level == 8)))
+      return ACS_STATUS_SKIP;
 
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_RAS_TEST_NUM_BASE) {
@@ -738,20 +780,22 @@ val_sbsa_ras_execute_tests(uint32_t level, uint32_t num_pe)
 
   val_print_test_start("RAS");
 
-  status = ras001_entry(num_pe);
-  status |= ras002_entry(num_pe);
-  status |= ras003_entry(num_pe);
-  status |= ras004_entry(num_pe);
-  status |= ras005_entry(num_pe);
-  status |= ras006_entry(num_pe);
-  status |= ras007_entry(num_pe);
-  status |= ras008_entry(num_pe);
-  status |= ras009_entry(num_pe);
-  status |= ras010_entry(num_pe);
-  status |= ras011_entry(num_pe);
-  status |= ras012_entry(num_pe);
+  if (((level > 6) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)) {
+      status = ras001_entry(num_pe);
+      status |= ras002_entry(num_pe);
+      status |= ras003_entry(num_pe);
+      status |= ras004_entry(num_pe);
+      status |= ras005_entry(num_pe);
+      status |= ras006_entry(num_pe);
+      status |= ras007_entry(num_pe);
+      status |= ras008_entry(num_pe);
+      status |= ras009_entry(num_pe);
+      status |= ras010_entry(num_pe);
+      status |= ras011_entry(num_pe);
+      status |= ras012_entry(num_pe);
+  }
 
-  if (level > 7)
+  if (((level > 7) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8))
       status |= ras013_entry(num_pe);
 
   val_print_test_end(status, "RAS");
@@ -762,10 +806,12 @@ val_sbsa_ras_execute_tests(uint32_t level, uint32_t num_pe)
 uint32_t
 val_sbsa_ete_execute_tests(uint32_t level, uint32_t num_pe)
 {
-  (void) level;
   uint32_t status = ACS_STATUS_PASS, i;
   uint32_t ete_status = ACS_STATUS_PASS;
   uint32_t trbe_status = ACS_STATUS_PASS;
+
+  if (!(((level > 7) && (g_sbsa_only_level == 8))))
+      return ACS_STATUS_SKIP;
 
   for (i = 0; i < g_num_skip; i++) {
       if (g_skip_test_num[i] == ACS_ETE_TEST_NUM_BASE) {
@@ -784,23 +830,25 @@ val_sbsa_ete_execute_tests(uint32_t level, uint32_t num_pe)
   val_print_test_start("ETE");
   g_curr_module = 1 << ETE_MODULE;
 
-  ete_status = ete001_entry(num_pe);
+  if (((level > 7) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8)) {
+      ete_status = ete001_entry(num_pe);
 
-  if (ete_status == ACS_STATUS_FAIL) {
-      val_print(ACS_PRINT_ERR, "\n FEAT_ETE Not Supported, Skipping FEAT_ETE tests \n", 0);
-  } else {
-      ete_status |= ete002_entry(num_pe);
-      ete_status |= ete003_entry(num_pe);
-      ete_status |= ete004_entry(num_pe);
-  }
-  trbe_status = ete005_entry(num_pe);
+      if (ete_status == ACS_STATUS_FAIL) {
+          val_print(ACS_PRINT_ERR, "\n FEAT_ETE Not Supported, Skipping FEAT_ETE tests \n", 0);
+      } else {
+          ete_status |= ete002_entry(num_pe);
+          ete_status |= ete003_entry(num_pe);
+          ete_status |= ete004_entry(num_pe);
+      }
+      trbe_status = ete005_entry(num_pe);
 
-  if (trbe_status == ACS_STATUS_FAIL) {
-      val_print(ACS_PRINT_ERR, "\n FEAT_TRBE Not Supported, Skipping FEAT_TRBE tests \n", 0);
-  } else {
-      trbe_status |= ete006_entry(num_pe);
-      trbe_status |= ete007_entry(num_pe);
-      trbe_status |= ete008_entry(num_pe);
+      if (trbe_status == ACS_STATUS_FAIL) {
+          val_print(ACS_PRINT_ERR, "\n FEAT_TRBE Not Supported, Skipping FEAT_TRBE tests \n", 0);
+      } else {
+          trbe_status |= ete006_entry(num_pe);
+          trbe_status |= ete007_entry(num_pe);
+          trbe_status |= ete008_entry(num_pe);
+      }
   }
 
   val_print_test_end((ete_status | trbe_status), "ETE");

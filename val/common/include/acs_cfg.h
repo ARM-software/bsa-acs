@@ -26,6 +26,7 @@ extern uint32_t g_acs_tests_total;
 extern uint32_t g_acs_tests_pass;
 extern uint32_t g_acs_tests_fail;
 extern uint32_t g_sbsa_level;
+extern uint32_t g_sbsa_only_level;
 extern uint64_t g_stack_pointer;
 extern uint64_t g_exception_ret_addr;
 extern uint64_t g_ret_addr;
