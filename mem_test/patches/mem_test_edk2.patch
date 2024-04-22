@@ -1,0 +1,58 @@
+diff --git a/BaseTools/Scripts/GccBase.lds b/BaseTools/Scripts/GccBase.lds
+index 9f27e83bb0..79e8c9f023 100644
+--- a/BaseTools/Scripts/GccBase.lds
++++ b/BaseTools/Scripts/GccBase.lds
+@@ -21,6 +21,7 @@ SECTIONS {
+   . = PECOFF_HEADER_SIZE;
+ 
+   .text : ALIGN(CONSTANT(COMMONPAGESIZE)) {
++    _textbsa = .;
+     *(.text .text.* .stub .gnu.linkonce.t.*)
+     *(.rodata .rodata.* .gnu.linkonce.r.*)
+     *(.got .got.*)
+diff --git a/ShellPkg/Library/UefiShellCEntryLib/UefiShellCEntryLib.c b/ShellPkg/Library/UefiShellCEntryLib/UefiShellCEntryLib.c
+index 17e48443ac..a2b3adefdf 100644
+--- a/ShellPkg/Library/UefiShellCEntryLib/UefiShellCEntryLib.c
++++ b/ShellPkg/Library/UefiShellCEntryLib/UefiShellCEntryLib.c
+@@ -16,6 +16,9 @@
+ #include <Library/ShellCEntryLib.h>
+ #include <Library/DebugLib.h>
+ 
++EFI_SYSTEM_TABLE *mySystemTable;
++EFI_HANDLE myImageHandle;
++
+ /**
+   UEFI entry point for an application that will in turn call the
+   ShellAppMain function which has parameters similar to a standard C
+@@ -51,6 +54,9 @@ ShellCEntryLib (
+   EfiShellParametersProtocol = NULL;
+   EfiShellInterface          = NULL;
+ 
++  mySystemTable = SystemTable;
++  myImageHandle = ImageHandle;
++
+   Status = SystemTable->BootServices->OpenProtocol (
+                                         ImageHandle,
+                                         &gEfiShellParametersProtocolGuid,
+diff --git a/ShellPkg/ShellPkg.dsc b/ShellPkg/ShellPkg.dsc
+index 557b0ec0f3..bccbed89b5 100644
+--- a/ShellPkg/ShellPkg.dsc
++++ b/ShellPkg/ShellPkg.dsc
+@@ -27,6 +27,9 @@
+   UefiDriverEntryPoint|MdePkg/Library/UefiDriverEntryPoint/UefiDriverEntryPoint.inf
+   UefiBootServicesTableLib|MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
+   DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLibOptionalDevicePathProtocol.inf
++  BsaValLib|ShellPkg/Application/bsa-acs/val/BsaValLib.inf
++  BsaPalLib|ShellPkg/Application/bsa-acs/pal/uefi_acpi/BsaPalLib.inf
++  LibCFlat|ShellPkg/Application/bsa-acs/mem_test/LibCFlat.inf
+ !if $(TARGET) == RELEASE
+   DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
+ !else
+@@ -102,6 +105,7 @@
+   ShellPkg/Library/UefiShellDebug1CommandsLib/UefiShellDebug1CommandsLib.inf
+   ShellPkg/Library/UefiShellNetwork1CommandsLib/UefiShellNetwork1CommandsLib.inf
+   ShellPkg/Library/UefiShellNetwork2CommandsLib/UefiShellNetwork2CommandsLib.inf
++  ShellPkg/Application/bsa-acs/uefi_app/BsaAcsMem.inf
+ 
+   ShellPkg/Application/Shell/Shell.inf {
+     <PcdsFixedAtBuild>

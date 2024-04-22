@@ -62,6 +62,14 @@ UINT32  g_el1physkip = FALSE;
 SHELL_FILE_HANDLE g_acs_log_file_handle;
 SHELL_FILE_HANDLE g_dtb_log_file_handle;
 
+#ifdef ENABLE_MEMTEST
+extern EFI_SYSTEM_TABLE *mySystemTable;
+extern EFI_HANDLE myImageHandle;
+extern char _textbsa;
+typedef unsigned long efi_status_t;
+efi_status_t  mem_model_execute_tests(EFI_HANDLE myImageHandle, EFI_SYSTEM_TABLE *mySystemTable);
+#endif
+
 STATIC VOID FlushImage (VOID)
 {
   EFI_LOADED_IMAGE_PROTOCOL   *ImageInfo;
@@ -649,6 +657,14 @@ print_test_status:
   }
 
   val_print(ACS_PRINT_TEST, "\n      *** BSA tests complete. Reset the system. ***\n\n", 0);
+
+#ifdef ENABLE_MEMTEST
+  /***  Starting memory model consistency tests ***/
+  val_print(ACS_PRINT_TEST, "\n\n      *** Starting memory model consistency tests ***  \n", 0);
+  val_print(ACS_PRINT_TEST, "\nInitializing kvm-unit-tests framework ...", 0);
+  val_print(ACS_PRINT_TEST, "\nLoad address of the image is: 0x%lx\n", (unsigned long)&_textbsa);
+  mem_model_execute_tests(myImageHandle, mySystemTable);
+#endif
 
   if (g_acs_log_file_handle) {
     ShellCloseFile(&g_acs_log_file_handle);
