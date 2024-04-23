@@ -50,7 +50,7 @@
                                         /*[(268+32*5) B Each + 24 B Header]*/
   #define PERIPHERAL_INFO_TBL_SZ 2048   /*Supports max 20 PCIe EPs (USB and SATA controllers)*/
                                         /*[72 B Each + 16 B Header]*/
-  #define PCIE_INFO_TBL_SZ       512    /*Supports max 20 RC's    */
+  #define PCIE_INFO_TBL_SZ       1024   /*Supports max 40 RC's    */
                                         /*[24 B Each + 4 B Header]*/
 
   #ifdef _AARCH64_BUILD_
