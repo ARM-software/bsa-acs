@@ -1,5 +1,5 @@
 ## @file
-#  Copyright (c) 2020-2023, Arm Limited or its affiliates. All rights reserved.
+#  Copyright (c) 2020-2024, Arm Limited or its affiliates. All rights reserved.
 #  SPDX-License-Identifier : Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -87,4 +87,4 @@
 
 [BuildOptions]
   GCC:*_*_*_ASM_FLAGS  =  -march=armv8.2-a+sve+profile
-  GCC:*_*_*_CC_FLAGS   = -O0 -I${WORKSPACE}/ShellPkg/Application/bsa-acs/val/ -I${WORKSPACE}/ShellPkg/Application/bsa-acs/val/sbsa -I${WORKSPACE}/ShellPkg/Application/bsa-acs/val/common -I${WORKSPACE}/ShellPkg/Application/bsa-acs/ -DSBSA
+  GCC:*_*_*_CC_FLAGS   = -O0 -DSBSA
