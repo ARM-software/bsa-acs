@@ -235,6 +235,10 @@ To provide a baseline, the build steps to integrate and run the Bare-metal tests
 
 For details on generating the binaries to run on Bare-metal environment, refer [README.md](pal/baremetal/README.md)
 
+## ACS build steps - Memory model consistency tests
+To evaluate the correctness and consistency of a system's memory model, memory model consistency tests (litmus tests) can be optionally built into BSA UEFI application,
+the build and run steps are provided in [mem_test/README.md](mem_test/README.md).
+
 ## Security implication
 The Arm SystemReady ACS test suite may run at a higher privilege level. An attacker may utilize these tests to elevate the privilege which can potentially reveal the platform security assets. To prevent the leakage of Secure information, Arm strongly recommends that you run the ACS test suite only on development platforms. If it is run on production systems, the system should be scrubbed after running the test suite.
 

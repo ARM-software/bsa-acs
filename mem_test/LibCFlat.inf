@@ -1,0 +1,92 @@
+## @file
+#  Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
+#  SPDX-License-Identifier : Apache-2.0
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = LibCFlat
+  FILE_GUID                      = 49c4f0f6-0151-4280-a58c-8344ea411d31
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = LibCFlat|UEFI_APPLICATION UEFI_DRIVER
+
+[Sources.common]
+
+  kvm-unit-tests/lib/argv.c
+  kvm-unit-tests/lib/printf.c
+  kvm-unit-tests/lib/string.c
+  kvm-unit-tests/lib/abort.c
+  kvm-unit-tests/lib/report.c
+  kvm-unit-tests/lib/stack.c
+  kvm-unit-tests/lib/arm64/processor.c
+  kvm-unit-tests/lib/arm64/spinlock.c
+  kvm-unit-tests/lib/arm64/gic-v3-its.c
+  kvm-unit-tests/lib/arm64/gic-v3-its-cmd.c
+  litmus-tests/utils.c
+  litmus-tests/kvm_timeofday.c
+  litmus-tests/litmus_rand.c
+  kvm-unit-tests/lib/util.c
+  kvm-unit-tests/lib/getchar.c
+  kvm-unit-tests/lib/alloc_phys.c
+  kvm-unit-tests/lib/alloc_page.c
+  kvm-unit-tests/lib/vmalloc.c
+  kvm-unit-tests/lib/alloc.c
+  kvm-unit-tests/lib/devicetree.c
+  kvm-unit-tests/lib/acpi.c
+  kvm-unit-tests/lib/pci.c
+  kvm-unit-tests/lib/pci-host-generic.c
+  kvm-unit-tests/lib/pci-testdev.c
+  kvm-unit-tests/lib/virtio.c
+  kvm-unit-tests/lib/virtio-mmio.c
+  kvm-unit-tests/lib/chr-testdev.c
+  kvm-unit-tests/lib/arm/io.c
+  kvm-unit-tests/lib/arm/setup.c
+  kvm-unit-tests/lib/arm/mmu.c
+  kvm-unit-tests/lib/arm/bitops.c
+  kvm-unit-tests/lib/arm/psci.c
+  kvm-unit-tests/lib/arm/smp.c
+  kvm-unit-tests/lib/arm/delay.c
+  kvm-unit-tests/lib/arm/gic.c
+  kvm-unit-tests/lib/arm/gic-v2.c
+  kvm-unit-tests/lib/arm/gic-v3.c
+  kvm-unit-tests/lib/arm/timer.c
+  efi_bsa_entry.c
+  kvm-unit-tests/lib/auxinfo.c
+
+# adding libfdt file sources
+  kvm-unit-tests/lib/libfdt/fdt.c
+  kvm-unit-tests/lib/libfdt/fdt_ro.c
+  kvm-unit-tests/lib/libfdt/fdt_wip.c
+  kvm-unit-tests/lib/libfdt/fdt_sw.c
+  kvm-unit-tests/lib/libfdt/fdt_rw.c
+  kvm-unit-tests/lib/libfdt/fdt_strerror.c
+  kvm-unit-tests/lib/libfdt/fdt_empty_tree.c
+  kvm-unit-tests/lib/libfdt/fdt_addresses.c
+  kvm-unit-tests/lib/libfdt/fdt_overlay.c
+  kvm-unit-tests/lib/libfdt/fdt_check.c
+
+# eabi_compat.o
+  kvm-unit-tests/lib/arm/eabi_compat.c
+# for smc etc
+  memTestBsaSupport.S
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[BuildOptions]
+  GCC:*_*_*_ASM_FLAGS  = -march=armv8.2-a -I${WORKSPACE}/ShellPkg/Application/bsa-acs/mem_test/kvm-unit-tests/lib/arm64
+  GCC:*_*_*_CC_FLAGS == -g -gdwarf-4 -mstrict-align -fno-common -mno-outline-atomics -DNOSWP -std=gnu99 -ffreestanding -g -fno-strict-aliasing -Wwrite-strings -Wempty-body -Wuninitialized -Wignored-qualifiers -Wno-missing-braces -fomit-frame-pointer -fno-stack-protector -Wno-frame-address -DCONFIG_EFI -fshort-wchar -fPIC -Wclobbered -Wunused-but-set-parameter -Wmissing-parameter-type -Wold-style-declaration -Woverride-init -Wmissing-prototypes -Wstrict-prototypes -DSTRING_ARRAY_NAME=LibCFlatStrings -fno-builtin -Wall -Werror -Wno-array-bounds -include AutoGen.h -mlittle-endian -fno-short-enums -fverbose-asm -funsigned-char -ffunction-sections -fdata-sections -Wno-address -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-pic -fno-pie -ffixed-x18 -mcmodel=small -O0 -DBSA_ACS -Wstrict-prototypes -I${WORKSPACE}/ShellPkg/Application/bsa-acs/mem_test/kvm-unit-tests/lib -I${WORKSPACE}/ShellPkg/Application/bsa-acs/mem_test/kvm-unit-tests/lib/libfdt -I${WORKSPACE}/ShellPkg/Application/bsa-acs/mem_test/kvm-unit-tests/lib/arm64 -fno-jump-tables
+  GCC:*_*_*_PP_FLAGS = -I ${WORKSPACE}/ShellPkg/Application/bsa-acs/mem_test/kvm-unit-tests/lib/arm64
