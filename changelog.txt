@@ -87,3 +87,8 @@ v24.03_REL1.0.8
 * Bug fixes and enhancements
 * Improvements for better prints
 * Document updates
+
+v24.04_MEMTEST_REL1.0.0
+* Added memory model consistency tests (litmus tests) to BSA ACS.
+* Added support to compile kvm-unit-tests test framework as a library, required by litmus tests.
+* Added required documentation to build and run litmus tests.
