@@ -242,10 +242,10 @@ jobs:
         with:
           repository: ARM-software/bsa-acs
 
-      - name: Download Arm GCC cross-compiler and Linux 6.7 and Linux ACS
+      - name: Download Arm GCC cross-compiler and Linux 6.8 and Linux ACS
         run: |
               cd ..
-              git clone https://github.com/torvalds/linux.git -b v6.7 linux6.7
+              git clone https://github.com/torvalds/linux.git -b v6.8 linux6.8
               git clone https://git.gitlab.arm.com/linux-arm/linux-acs.git
               ls
               mkdir -p /opt/cross
@@ -258,8 +258,8 @@ jobs:
         run: |
               cd ..
               export GCC=/opt/cross/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
-              cd linux6.7
-              git apply ../linux-acs/kernel/src/0001-BSA-ACS-Linux-6.7.patch
+              cd linux6.8
+              git apply ../linux-acs/kernel/src/0001-BSA-ACS-Linux-6.8.patch
               mkdir out
               cp arch/arm64/configs/defconfig out/.config
               make ARCH=arm64 CROSS_COMPILE=$GCC O=out olddefconfig
@@ -270,14 +270,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Linux Kernel
-          path: /home/runner/work/bsa-acs/linux6.7/out/arch/arm64/boot/Image.gz
+          path: /home/runner/work/bsa-acs/linux6.8/out/arch/arm64/boot/Image.gz
           if-no-files-found: error 
           
       - name: Compile BSA Linux ACS module and app
         run: |
               cd ..
               export CROSS_COMPILE=/opt/cross/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
-              export KERNEL_SRC=$PWD/linux6.7/out
+              export KERNEL_SRC=$PWD/linux6.8/out
               mkdir linux-bsa
               cd linux-acs/acs-drv/files
               ./bsa_setup.sh $PWD/../../../bsa-acs
@@ -300,7 +300,7 @@ jobs:
               cd ..
               git clone https://github.com/ARM-software/sbsa-acs.git
               export CROSS_COMPILE=/opt/cross/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
-              export KERNEL_SRC=$PWD/linux6.7/out
+              export KERNEL_SRC=$PWD/linux6.8/out
               mkdir linux-sbsa
               cd linux-acs/acs-drv/files
               rm -r test_pool
