@@ -183,21 +183,21 @@ The patch for the kernel tree and the Linux PAL are hosted separately on [linux-
 
 ### 1.1 Building the kernel module
 #### Prerequisites
-- Linux kernel source version 5.11, 5.13, 5.15, 6.0, 6.4, 6.7.
+- Linux kernel source version 5.11, 5.13, 5.15, 6.0, 6.4, 6.7, 6.8
 - Install GCC-ARM 13.2 [toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads).
 - Build environment for AArch64 Linux kernel.<br />
 NOTE: <br />
-- Linux version 6.7 is recommended version.
+- Linux version 6.8 is recommended version.
 
 #### Porting steps for Linux kernel
 1. git clone https://git.gitlab.arm.com/linux-arm/linux-acs.git linux-acs
 2. git clone https://github.com/ARM-software/bsa-acs.git bsa-acs
-3. git clone https://github.com/torvalds/linux.git -b v6.7
+3. git clone https://github.com/torvalds/linux.git -b v6.8
 4. export CROSS_COMPILE=<GCC13.2 toolchain path> pointing to /bin/aarch64-linux-gnu-
-5. git apply <local_dir>/linux-acs/kernel/src/0001-BSA-ACS-Linux-6.7.patch to your kernel source tree.
+5. git apply <local_dir>/linux-acs/kernel/src/0001-BSA-ACS-Linux-6.8.patch to your kernel source tree.
 6. make ARCH=arm64 defconfig && make -j $(nproc) ARCH=arm64
 
-NOTE: The steps mentions Linux version 6.7, as it is latest version which is verified at ACS end.
+NOTE: The steps mentions Linux version 6.8, as it is latest version which is verified at ACS end.
 
 #### 1.2 Build steps for BSA kernel module
 1. cd <local_dir>/linux-acs/files
