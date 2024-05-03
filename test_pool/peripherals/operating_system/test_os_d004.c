@@ -19,6 +19,7 @@
 
 #include "val/common/include/acs_smmu.h"
 #include "val/bsa/include/bsa_acs_dma.h"
+#include "val/bsa/include/bsa_acs_peripherals.h"
 
 #define TEST_NUM   (ACS_PER_TEST_NUM_BASE + 5)
 #define TEST_RULE  "B_PER_09, B_PER_10"

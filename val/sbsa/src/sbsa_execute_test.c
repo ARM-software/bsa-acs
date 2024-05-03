@@ -24,8 +24,6 @@
 #include "sbsa/include/sbsa_val_interface.h"
 #include "sbsa/include/sbsa_acs_smmu.h"
 #include "sbsa/include/sbsa_acs_pcie.h"
-
-#ifndef TARGET_LINUX
 #include "sbsa/include/sbsa_acs_pe.h"
 #include "sbsa/include/sbsa_acs_memory.h"
 #include "sbsa/include/sbsa_acs_gic.h"
@@ -36,7 +34,6 @@
 #include "sbsa/include/sbsa_acs_ras.h"
 #include "sbsa/include/sbsa_acs_nist.h"
 #include "sbsa/include/sbsa_acs_ete.h"
-#endif
 
 extern uint32_t pcie_bdf_table_list_flag;
 extern pcie_device_bdf_table *g_pcie_bdf_table;

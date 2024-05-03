@@ -18,7 +18,7 @@
 #ifndef __SBSA_ACS_SMMU_H__
 #define __SBSA_ACS_SMMU_H__
 
-#include "common/include/acs_smmu.h"
+#include "../../common/include/acs_smmu.h"
 
 /* PMCG CNTBaseN register offset*/
 #define SMMU_PMCG_CFGR 0xE00

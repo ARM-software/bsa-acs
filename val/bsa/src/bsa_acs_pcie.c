@@ -22,6 +22,8 @@
 #include "common/include/acs_pcie.h"
 #include "common/sys_arch_src/pcie/pcie.h"
 #include "bsa/include/bsa_pal_interface.h"
+#include "bsa/include/bsa_val_interface.h"
+#include "bsa/include/bsa_acs_pcie.h"
 
 #define WARN_STR_LEN 7
 

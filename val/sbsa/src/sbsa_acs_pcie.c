@@ -19,6 +19,7 @@
 #include "common/include/acs_val.h"
 #include "common/include/acs_common.h"
 #include "common/include/acs_pcie.h"
+#include "sbsa/include/sbsa_acs_pcie.h"
 
 uint64_t
 pal_get_mcfg_ptr(void);

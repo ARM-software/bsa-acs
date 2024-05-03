@@ -19,6 +19,7 @@
 #include "common/include/acs_common.h"
 #include "bsa/include/bsa_acs_dma.h"
 #include "bsa/include/bsa_pal_interface.h"
+#include "bsa/include/bsa_val_interface.h"
 
 DMA_INFO_TABLE  *g_dma_info_table;
 

@@ -18,6 +18,7 @@
 #include "val/common/include/acs_pe.h"
 #include "val/common/include/acs_pcie.h"
 #include "val/common/include/acs_memory.h"
+#include "val/bsa/include/bsa_acs_pcie.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 61)
 #define TEST_RULE  "PCI_MM_01, PCI_MM_02, PCI_MM_03"
