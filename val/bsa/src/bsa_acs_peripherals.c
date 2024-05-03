@@ -19,6 +19,7 @@
 #include "common/include/acs_peripherals.h"
 #include "common/include/acs_common.h"
 #include "common/include/acs_pcie.h"
+#include "bsa/include/bsa_val_interface.h"
 
 void val_peripheral_uart_setup(void)
 {

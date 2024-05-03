@@ -19,6 +19,7 @@
 
 #include "val/common/include/acs_pcie.h"
 #include "val/bsa/include/bsa_acs_pcie.h"
+#include "val/bsa/include/bsa_acs_memory.h"
 
 #define TEST_NUM   (ACS_MEMORY_MAP_TEST_NUM_BASE + 4)
 #define TEST_RULE  "B_MEM_03, B_MEM_04, B_MEM_06"

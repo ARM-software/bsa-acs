@@ -19,6 +19,7 @@
 
 #include "val/common/include/acs_smmu.h"
 #include "val/bsa/include/bsa_acs_dma.h"
+#include "val/bsa/include/bsa_acs_pcie.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 62)
 #define TEST_RULE  "PCI_MM_05, PCI_MM_06, PCI_MM_07"

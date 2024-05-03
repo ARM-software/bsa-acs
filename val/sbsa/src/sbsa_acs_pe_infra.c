@@ -21,6 +21,7 @@
 #include "common/include/acs_std_smc.h"
 #include "common/sys_arch_src/gic/acs_exception.h"
 #include "common/include/val_interface.h"
+#include "sbsa/include/sbsa_val_interface.h"
 
 /**
   @brief   Pointer to the memory location of the PE Information table

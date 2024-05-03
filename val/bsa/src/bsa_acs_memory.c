@@ -23,6 +23,7 @@
 #include "common/include/val_interface.h"
 #include "bsa/include/bsa_pal_interface.h"
 #include "bsa/include/bsa_val_interface.h"
+#include "bsa/include/bsa_acs_memory.h"
 
 extern MEMORY_INFO_TABLE *g_memory_info_table;
 
