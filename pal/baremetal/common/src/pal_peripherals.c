@@ -134,7 +134,7 @@ UART_CONFIG:
     per_info->width = 1;
     per_info->irq   = platform_uart_cfg.GlobalSystemInterrupt;
     per_info->type  = PERIPHERAL_TYPE_UART;
-    per_info->bdf = 0;
+    per_info->bdf   = 0;
 
     if(platform_uart_cfg.PciVendorId != 0xFFFF)
     {
