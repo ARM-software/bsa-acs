@@ -18,6 +18,7 @@
 #include "val/common/include/acs_val.h"
 #include "val/common/include/acs_smmu.h"
 #include "val/common/include/acs_pcie.h"
+#include "val/bsa/include/bsa_acs_pcie.h"
 
 #define TEST_NUM   (ACS_PCIE_TEST_NUM_BASE + 42)
 #define TEST_RULE  "PCI_PAS_1"
@@ -29,6 +30,8 @@ static void payload(void)
 {
   int num_per = 0, num_smmu = 0, skip = 1;
   uint32_t max_pasids = 0;
+  uint32_t status;
+  uint32_t bdf;
   uint32_t index = val_pe_get_index_mpid (val_pe_get_mpid());
 
   num_per = val_peripheral_get_info(NUM_ALL, 0);
@@ -37,7 +40,25 @@ static void payload(void)
   /* If PASID is supported, test the max number of PASIDs supported */
   for (num_per--; num_per >= 0; num_per--)
   {
-     max_pasids = val_peripheral_get_info(MAX_PASIDS, num_per);
+     bdf = (uint32_t)val_peripheral_get_info(ANY_BDF, num_per);
+     /* Presently, BDF is 0x0 for UART devices */
+     if (bdf == 0)
+         continue;
+
+     status = val_pcie_get_max_pasid_width(bdf, &max_pasids);
+     if (status == PCIE_CAP_NOT_FOUND)
+     {
+         val_print(ACS_PRINT_DEBUG, "\n       PASID extended capability not supported.", 0);
+         val_print(ACS_PRINT_DEBUG, " Skipping for BDF: 0x%x", bdf);
+         continue;
+     }
+     else if (status)
+     {
+         val_print(ACS_PRINT_ERR,
+                   "\n       Error in obtaining the PASID max width for BDF: 0x%x", bdf);
+         val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+         break;
+     }
      val_print(ACS_PRINT_DEBUG, "\n       Peripheral check - Max PASID bits - 0x%x", max_pasids);
 
      if (max_pasids > 0)
@@ -46,7 +67,7 @@ static void payload(void)
         if (max_pasids < MIN_PASID_SUPPORT)
         {
            val_print(ACS_PRINT_ERR, "\n       Max PASID support less than 16 bits  ", 0);
-           val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+           val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
            break;
         }
      }
@@ -71,7 +92,7 @@ static void payload(void)
                  if (max_pasids < MIN_PASID_SUPPORT)
                  {
                     val_print(ACS_PRINT_ERR, "\n      Max PASID support less than 16 bits  ", 0);
-                    val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+                    val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
                     break;
                  }
              }
