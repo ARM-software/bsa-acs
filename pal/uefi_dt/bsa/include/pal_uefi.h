@@ -91,6 +91,9 @@ typedef struct {
   UINT32 num_of_pe;
 }PE_INFO_HDR;
 
+#define DEFAULT_CACHE_IDX 0xFFFFFFFF
+#define MAX_L1_CACHE_RES 2 /* Generally PE Level 1 have a data and a instruction cache */
+
 /**
   @brief  structure instance for PE entry
 **/
@@ -100,6 +103,9 @@ typedef struct {
   UINT64   mpidr;     ///< PE MPIDR
   UINT32   pmu_gsiv;  ///< PMU Interrupt ID
   UINT32   gmain_gsiv;  ///< GIC Maintenance Interrupt ID
+  UINT32   acpi_proc_uid;                 /* ACPI Processor UID */
+  UINT32   level_1_res[MAX_L1_CACHE_RES]; /* index of level 1 cache(s) in cache_info_table */
+  UINT32   trbe_interrupt;                /* TRBE Interrupt */
 }PE_INFO_ENTRY;
 
 typedef struct {
@@ -300,8 +306,14 @@ typedef union {
 
 #define MAX_NAMED_COMP_LENGTH 256
 
+typedef struct {
+  UINT64 smmu_base;                     /* SMMU base to which component is attached, else NULL */
+  UINT32 cca;                           /* Cache Coherency Attribute */
+  CHAR8 name[MAX_NAMED_COMP_LENGTH];    /* Device object name */
+} IOVIRT_NAMED_COMP_INFO_BLOCK;
+
 typedef union {
-  CHAR8 name[MAX_NAMED_COMP_LENGTH];
+  IOVIRT_NAMED_COMP_INFO_BLOCK named_comp;
   IOVIRT_RC_INFO_BLOCK rc;
   IOVIRT_PMCG_INFO_BLOCK pmcg;
   UINT32 its_count;
@@ -419,7 +431,11 @@ typedef struct {
 UINT32 pal_pcie_get_root_port_bdf(UINT32 *seg, UINT32 *bus, UINT32 *dev, UINT32 *func);
 UINT32 pal_pcie_max_pasid_bits(UINT32 bdf);
 
+
 /* Memory INFO table */
+#define MEM_MAP_SUCCESS  0x0
+#define MEM_MAP_NO_MEM   0x10000001
+#define MEM_MAP_FAILURE  0x2
 
 #define MEM_INFO_TBL_MAX_ENTRY  500 /* Maximum entries to be added in Mem info table*/
 
@@ -428,6 +444,7 @@ typedef enum {
   MEMORY_TYPE_NORMAL,
   MEMORY_TYPE_RESERVED,
   MEMORY_TYPE_NOT_POPULATED,
+  MEMORY_TYPE_PERSISTENT,
   MEMORY_TYPE_LAST_ENTRY
 }MEM_INFO_TYPE_e;
 
