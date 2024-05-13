@@ -21,9 +21,9 @@
 #include "platform_override_sbsa_struct.h"
 
 /* To only run tests for a Specific level of compliance */
-uint32_t g_sbsa_only_level = 3;
+uint32_t g_sbsa_only_level = 0;
 /* If set, ACS also includes SBSA Future Requirement tests.  */
-uint32_t  g_sbsa_run_fr       = FALSE;
+uint32_t  g_sbsa_run_fr    = FALSE;
 
 PLATFORM_OVERRIDE_CS_COMP_NODE_DATA platform_cs_comp_node_data = {
     .component[0].identifier    = CS_COMPONENT_0_IDENTIFIER,
