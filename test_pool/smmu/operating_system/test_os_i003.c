@@ -18,6 +18,7 @@
 #include "val/common/include/acs_val.h"
 #include "val/common/include/acs_smmu.h"
 #include "val/common/include/acs_pe.h"
+#include "val/common/include/acs_memory.h"
 
 #define TEST_NUM   (ACS_SMMU_TEST_NUM_BASE + 3)
 #define TEST_RULE  "B_SMMU_06"
@@ -29,48 +30,52 @@ payload()
 {
 
   uint64_t data_pa_range, data_oas;
-  uint32_t num_smmu;
+  uint32_t num_smmu, smmu_52bit = 1;
   uint32_t index;
+  uint32_t memmap_addr_52bit;
 
   index = val_pe_get_index_mpid(val_pe_get_mpid());
 
-  data_pa_range = VAL_EXTRACT_BITS(val_pe_reg_read(ID_AA64MMFR0_EL1), 0, 3);
-  if (data_pa_range != 0x6) {
-   val_print(ACS_PRINT_DEBUG, "\n       Large PA Not Supported by PE        "
-                                      "                  ", 0);
+  num_smmu = val_smmu_get_info(SMMU_NUM_CTRL, 0);
+  if (num_smmu == 0) {
+    val_print(ACS_PRINT_DEBUG, "\n       No SMMU Controllers are discovered", 0);
     val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
     return;
   }
 
-  num_smmu = val_smmu_get_info(SMMU_NUM_CTRL, 0);
-  if (num_smmu == 0) {
-    val_print(ACS_PRINT_DEBUG, "\n       No SMMU Controllers are discovered "
-                                    "                   ", 0);
-    val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
-    return;
-  }
+  /* Check if uefi memory map has any 52 bit addr */
+  memmap_addr_52bit = val_memory_region_has_52bit_addr();
+  val_print(ACS_PRINT_DEBUG, "\n       uefi mem map has 52 bit addr: %d", memmap_addr_52bit);
+
+  data_pa_range = VAL_EXTRACT_BITS(val_pe_reg_read(ID_AA64MMFR0_EL1), 0, 3);
+  val_print(ACS_PRINT_DEBUG, "\n       PE pa range value: %d", data_pa_range);
 
   while (num_smmu--) {
-      if (val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) == 2) {
-          val_print(ACS_PRINT_ERR, "\n       Large PA Not Supported in"
-                                    " SMMUv2", 0);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
-          return;
-      }
+      /* SMMUv2 does not support 52 bit addressing */
+      if (val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) == 2)
+          smmu_52bit = smmu_52bit & 0;
 
-      data_oas = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_IDR5, num_smmu), 0, 2);
-
-      /* If PE Supports Large PA then SMMU_IDR5.OAS = 0b110 */
-      if (data_pa_range == 0x6) {
-          if (data_oas != 0x6) {
-              val_print(ACS_PRINT_WARN, "\n       Large PA Not Supported in SMMU %x", num_smmu);
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
-              return;
-          }
+      if (val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) == 3) {
+          data_oas = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_IDR5, num_smmu), 0, 2);
+          val_print(ACS_PRINT_DEBUG, "\n       SMMU %d OAS value:", num_smmu);
+          val_print(ACS_PRINT_DEBUG, " %d", data_oas);
+	  /* check if smmuv3 supporting 52 bit oas */
+          if (data_oas != 0x6)
+              smmu_52bit = smmu_52bit & 0;
       }
   }
 
-  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
+  if (smmu_52bit && (data_pa_range == 0x6)) {
+      val_set_status(index, RESULT_PASS(TEST_NUM, 1));
+      return;
+  }
+
+  if (((smmu_52bit == 0) || (data_pa_range != 0x6)) && memmap_addr_52bit) {
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+      return;
+  }
+
+  val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
 }
 
 uint32_t

@@ -27,6 +27,11 @@ MEMORY_INFO_TABLE  *g_memory_info_table;
 
 #define SIZE_4KB   0x00001000
 
+#define ADDR_52BIT_MASK 0xFFFFFFFFFFFFULL
+
+#define CHECK_ADDR_52BIT(addr) (((uint64_t)(addr)) & ~ADDR_52BIT_MASK)
+
+
 #ifdef TARGET_BM_BOOT
 /**
  *   @brief    Add regions assigned to host into its translation table data structure.
@@ -349,4 +354,25 @@ void
 val_memory_free_aligned(void *addr)
 {
   pal_mem_free_aligned(addr);
+}
+
+/**
+ * @brief Checks if uefi memory map has 52 bit addr
+ * @param void
+ * @return 1 52 bit addr present, else 0
+**/
+uint32_t val_memory_region_has_52bit_addr(void)
+{
+  uint32_t index = 0;
+
+  while (g_memory_info_table->info[index].type != MEMORY_TYPE_LAST_ENTRY) {
+      val_print(ACS_PRINT_INFO, " \n       Mem Phy Addr %lx",
+		      g_memory_info_table->info[index].phy_addr);
+
+      if (CHECK_ADDR_52BIT(g_memory_info_table->info[index].phy_addr))
+          return 1;
+      index++;
+  }
+
+  return 0;
 }

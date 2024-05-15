@@ -36,5 +36,6 @@ void *val_memory_alloc_pages(uint32_t num_pages);
 void val_memory_free_pages(void *page_base, uint32_t num_pages);
 void *val_aligned_alloc(uint32_t alignment, uint32_t size);
 void val_memory_free_aligned(void *addr);
+uint32_t val_memory_region_has_52bit_addr(void);
 
 #endif // __ACS_PERIPHERAL_H__
