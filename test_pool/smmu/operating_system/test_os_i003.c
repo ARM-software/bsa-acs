@@ -51,7 +51,7 @@ payload()
   val_print(ACS_PRINT_DEBUG, "\n       PE pa range value: %d", data_pa_range);
 
   while (num_smmu--) {
-      /* SMMUv2 does not support 52 bit addressing */
+      /* SMMUv2 does not support 52 bit OAS */
       if (val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) == 2)
           smmu_52bit = smmu_52bit & 0;
 
@@ -59,7 +59,7 @@ payload()
           data_oas = VAL_EXTRACT_BITS(val_smmu_read_cfg(SMMUv3_IDR5, num_smmu), 0, 2);
           val_print(ACS_PRINT_DEBUG, "\n       SMMU %d OAS value:", num_smmu);
           val_print(ACS_PRINT_DEBUG, " %d", data_oas);
-	  /* check if smmuv3 supporting 52 bit oas */
+          /* check if smmuv3 supporting 52 bit oas */
           if (data_oas != 0x6)
               smmu_52bit = smmu_52bit & 0;
       }
@@ -71,10 +71,17 @@ payload()
   }
 
   if (((smmu_52bit == 0) || (data_pa_range != 0x6)) && memmap_addr_52bit) {
+      val_print(ACS_PRINT_ERR, "\n       PE or SMMU doesn't support 52-bit, \
+                                                         but uefi mem map has 52-bit addr", 0);
       val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
       return;
   }
 
+  /* There is no architecturally defined method to check is SPAS is 52-bit, test is only doing one
+     check if uefi mem map returns any 52-bit addr, there will be cases where
+     system physical addr space is 52-bit addr,but uefi mem map doesn't map any 52 bit addr.
+     In this case if PE or SMMU is not supporting 52-bit addressing, test will skip
+  */
   val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
 }
 

@@ -367,8 +367,7 @@ uint32_t val_memory_region_has_52bit_addr(void)
 
   while (g_memory_info_table->info[index].type != MEMORY_TYPE_LAST_ENTRY) {
       val_print(ACS_PRINT_INFO, " \n       Mem Phy Addr %lx",
-		      g_memory_info_table->info[index].phy_addr);
-
+                                   g_memory_info_table->info[index].phy_addr);
       if (CHECK_ADDR_52BIT(g_memory_info_table->info[index].phy_addr))
           return 1;
       index++;
