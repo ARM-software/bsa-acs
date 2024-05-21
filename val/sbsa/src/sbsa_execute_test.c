@@ -410,8 +410,10 @@ val_sbsa_smmu_execute_tests(uint32_t level, uint32_t num_pe)
   g_curr_module = 1 << SMMU_MODULE;
 
 #ifndef TARGET_LINUX
-  if (((level > 3) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 4))
+  if (((level > 3) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 4)) {
       status = i001_entry(num_pe) ;
+      status |= i013_entry(num_pe);
+  }
 
   if (((level > 4) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 5)) {
       status |= i002_entry(num_pe);
@@ -428,7 +430,6 @@ val_sbsa_smmu_execute_tests(uint32_t level, uint32_t num_pe)
       status |= i010_entry(num_pe);
       status |= i011_entry(num_pe);
       status |= i012_entry(num_pe);
-      status |= i013_entry(num_pe);
   }
 
 if (((level > 6) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)) {
