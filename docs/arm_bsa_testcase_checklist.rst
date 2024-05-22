@@ -1,16 +1,14 @@
-#############
+###########################
 BSA ACS Testcase checklist
-#############
+###########################
  
 The below table provides the following details
 
 #. BSA rules covered by a test.
-#. SystemReady certification band for which test is required.
-#. Runtime environment where test executes.
+#. SystemReady certification band(IR, ES and SR) for which test is required.
+#. Runtime environment(UEFI, BareMetal and Linux) where test executes.
 #. Tests for which exerciser is required.
 
-+-------+--------------------------------------------+------------------------------------------------------------+-----------------+----------------------+-------------------+
-|       |                                            |                                                            |SystemReady band |Runtime Environment   |                   |
 +-------+--------------------------------------------+------------------------------------------------------------+-----+-----+-----+-----+----------+-----+-------------------+
 |Test No|Test Description                            |Rule ID                                                     |IR   |ES   |SR   |UEFI |BareMetal*|Linux|Exerciser Required?|
 +=======+============================================+============================================================+=====+=====+=====+=====+==========+=====+===================+
@@ -245,4 +243,4 @@ The below table provides the following details
 |917    |Check BME functionality of RP               |IE_REG_3, PCI_IN_05                                         |No   |No   |No   |Yes  |Yes       |No   |Yes                |
 +-------+--------------------------------------------+------------------------------------------------------------+-----+-----+-----+-----+----------+-----+-------------------+
 
-*For running tests on a bare-metal environment, integration of ACS with platform boot code is required. See `arm BSA Bare-metal User Guide <docs/arm_bsa_architecture_compliance_bare-metal_user_guide.pdf>`_
+For running tests on a bare-metal environment, integration of ACS with platform boot code is required. See `arm BSA Bare-metal User Guide <arm_bsa_architecture_compliance_bare-metal_user_guide.pdf>`_

@@ -16,7 +16,7 @@ To build the RDN2 software stack and download the pre-built model of the FVP, fo
    cd rdn2_path
    ```
 
-2. Download the required sources for setting up the RDN2 software stack by following the steps outlined in the [Setup Workspace](https://neoverse-reference-design.docs.arm.com/en/latest/platforms/common/setup-workspace.html#setup-workspace-label) documentation.
+2. Download the required sources for setting up the RDN2 software stack by following the steps outlined in the [Setup Workspace](https://neoverse-reference-design.docs.arm.com/en/latest/user_guides/getting_started.html) documentation.
 
 3. Download the latest version of RDN2 FVP from [Arm Ecosystem FVPs](https://developer.arm.com/downloads/-/arm-ecosystem-fvps) and set the MODEL PATH
    ```
