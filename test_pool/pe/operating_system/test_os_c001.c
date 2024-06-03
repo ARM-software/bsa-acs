@@ -34,7 +34,7 @@
 #define MASK_MIDR         0x00F0FFFF
 #define MASK_MPIDR        0xFF3FFFFFFF
 #define MASK_CTR          0xC000
-#define MASK_CCSIDR       0xFFFFFF8
+#define MASK_CCSIDR_LS    0xFFFFFFFFFFFFFFF8
 #define MASK_PMCR         0xFFFF
 
 #define MAX_CACHE_LEVEL   7
@@ -50,14 +50,14 @@ typedef struct{
 }reg_details;
 
 reg_details reg_list[] = {
-    {CCSIDR_EL1,       MASK_CCSIDR,    "CCSIDR_EL1"      , 0x0 },
+    {CCSIDR_EL1,       MASK_CCSIDR_LS, "CCSIDR_EL1"      , 0x0 },
     {ID_AA64PFR0_EL1,  0x0,            "ID_AA64PFR0_EL1" , 0x0 },
     {ID_AA64PFR1_EL1,  0x0,            "ID_AA64PFR1_EL1" , 0x0 },
     {ID_AA64DFR0_EL1,  0x0,            "ID_AA64DFR0_EL1" , 0x0 },
     {ID_AA64DFR1_EL1,  0x0,            "ID_AA64DFR1_EL1" , 0x0 },
     {ID_AA64MMFR0_EL1, MASK_AA64MMFR0, "ID_AA64MMFR0_EL1", 0x0 },
     {ID_AA64MMFR1_EL1, 0x0,            "ID_AA64MMFR1_EL1", 0x0 },
-    //{ID_AA64MMFR2_EL1, 0x0,            "ID_AA64MMFR2_EL1", 0x0 },
+  //{ID_AA64MMFR2_EL1, 0x0,            "ID_AA64MMFR2_EL1", 0x0 },
     {CTR_EL0,          MASK_CTR,       "CTR_EL0"         , 0x0 },
     {ID_AA64ISAR0_EL1, 0x0,            "ID_AA64ISAR0_EL1", 0x0 },
     {ID_AA64ISAR1_EL1, 0x0,            "ID_AA64ISAR1_EL1", 0x0 },
@@ -171,7 +171,8 @@ id_regs_check(void)
           reg_read_data = return_reg_value(reg_list[0].reg_name, reg_list[0].dependency);
 
           if ((reg_read_data & (~reg_list[0].reg_mask)) != (cache_list[i] & (~reg_list[0].reg_mask))) {
-              val_set_test_data(index, (reg_read_data & (~reg_list[0].reg_mask)), 0);
+	      /* index 0 (CCSIDR_EL1) reg value also depends on cache index selected, saving cache index in upper 32 bits */
+              val_set_test_data(index, (reg_read_data & (~reg_list[0].reg_mask)), (uint64_t)(i + 1) << 32);
               val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
               return;
           }
@@ -185,7 +186,7 @@ id_regs_check(void)
       if((reg_read_data & (~reg_list[i].reg_mask)) != (rd_data_array[i] & (~reg_list[i].reg_mask)))
       {
           val_set_test_data(index, (reg_read_data & (~reg_list[i].reg_mask)), i);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
           return;
       }
       reg_read_data = 0;
@@ -201,7 +202,7 @@ payload(uint32_t num_pe)
 {
   uint32_t my_index = val_pe_get_index_mpid(val_pe_get_mpid());
   uint32_t i;
-  uint32_t timeout;
+  uint32_t timeout, cache_index;
   uint64_t reg_read_data, debug_data=0, array_index=0;
 
   if (num_pe == 1) {
@@ -219,7 +220,8 @@ payload(uint32_t num_pe)
          val_pe_reg_write(CSSELR_EL1, i << 1);
          cache_list[i] = return_reg_value(reg_list[0].reg_name, reg_list[0].dependency);
          val_data_cache_ops_by_va((addr_t)(cache_list + i), CLEAN_AND_INVALIDATE);
-         val_print(ACS_PRINT_INFO, "\n       cache size read is %x ", cache_list[i]);
+         val_print(ACS_PRINT_INFO, "\n       cache index: %d ", i);
+	 val_print(ACS_PRINT_INFO, "       line size read is %x ", cache_list[i] & (~MASK_CCSIDR_LS));
       }
       i++;
   }
@@ -237,16 +239,25 @@ payload(uint32_t num_pe)
 
           if(timeout == 0) {
               val_print(ACS_PRINT_ERR, "\n       **Timed out** for PE index = %d", i);
-              val_set_status(i, RESULT_FAIL(TEST_NUM, 2));
+              val_set_status(i, RESULT_FAIL(TEST_NUM, 3));
               return;
           }
 
           if(IS_TEST_FAIL(val_get_status(i))) {
               val_get_test_data(i, &debug_data, &array_index);
-              val_print(ACS_PRINT_ERR, "\n       Reg compare failed for PE index=%d for Register: ", i);
-              val_print(ACS_PRINT_ERR, reg_list[array_index].reg_desc, 0);
-              val_print(ACS_PRINT_ERR, "\n       Current PE value = 0x%llx", rd_data_array[array_index] & (~reg_list[array_index].reg_mask));
-              val_print(ACS_PRINT_ERR, "         Other PE value = 0x%llx", debug_data);
+              val_print(ACS_PRINT_INFO, "\n       array_index value 0x%lx", array_index);
+	      val_print(ACS_PRINT_ERR, "\n       Reg compare failed for PE=%d for reg: ", i);
+	      if (array_index >> 32) {
+	          cache_index = (array_index >> 32) - 1;
+		  val_print(ACS_PRINT_ERR, reg_list[0].reg_desc, 0);
+		  val_print(ACS_PRINT_ERR, " and cache index: %d", cache_index);
+		  val_print(ACS_PRINT_ERR, "\n       Primary PE value = 0x%llx", cache_list[i] & (~reg_list[0].reg_mask));
+	      }
+	      else {
+                  val_print(ACS_PRINT_ERR, reg_list[array_index].reg_desc, 0);
+                  val_print(ACS_PRINT_ERR, "\n       Primary PE value = 0x%llx", rd_data_array[array_index] & (~reg_list[array_index].reg_mask));
+	      }
+              val_print(ACS_PRINT_ERR, "\n       Current PE value = 0x%llx", debug_data);
               return;
           }
       }
