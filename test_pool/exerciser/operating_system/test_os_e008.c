@@ -58,7 +58,7 @@ test_sequence2(void *dram_buf1_virt, void *dram_buf1_phys, uint32_t e_bdf, uint3
 
   /* Write dram_buf2 with known data and flush the buffer to main memory */
   val_memory_set(dram_buf2_virt, dma_len, NEWEST_DATA);
-  val_data_cache_ops_by_va((addr_t)dram_buf2_virt, CLEAN_AND_INVALIDATE);
+  val_pe_cache_clean_invalidate_range((uint64_t)dram_buf2_virt, (uint64_t)dma_len);
 
   /* Perform DMA OUT to copy contents of dram_buf2 to exerciser memory */
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf2_phys, dma_len, instance);
@@ -76,8 +76,8 @@ test_sequence2(void *dram_buf1_virt, void *dram_buf1_phys, uint32_t e_bdf, uint3
   }
 
   /* Invalidate dram_buf1 and dram_buf2 contents present in CPU caches */
-  val_data_cache_ops_by_va((addr_t)dram_buf1_virt, INVALIDATE);
-  val_data_cache_ops_by_va((addr_t)dram_buf2_virt, INVALIDATE);
+  val_pe_cache_invalidate_range((uint64_t)dram_buf1_virt, (uint64_t)dma_len);
+  val_pe_cache_invalidate_range((uint64_t)dram_buf2_virt, (uint64_t)dma_len);
 
   /* Compare the contents of ddr_buf1 and ddr_buf2 for NEW_DATA */
   if (val_memory_compare(dram_buf1_virt, dram_buf2_virt, dma_len)) {
@@ -107,7 +107,7 @@ test_sequence1(void *dram_buf1_virt, void *dram_buf1_phys, uint32_t e_bdf, uint3
   val_memory_set(dram_buf1_virt, dma_len, NEW_DATA);
 
   /* Maintain software coherency */
-  val_data_cache_ops_by_va((addr_t)dram_buf1_virt, CLEAN_AND_INVALIDATE);
+  val_pe_cache_clean_invalidate_range((uint64_t)dram_buf1_virt, (uint64_t)dma_len);
 
   /* Perform DMA OUT to copy contents of dram_buf1 to exerciser memory */
   val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf1_phys, dma_len, instance);
@@ -125,7 +125,7 @@ test_sequence1(void *dram_buf1_virt, void *dram_buf1_phys, uint32_t e_bdf, uint3
   }
 
   /* Invalidate dram_buf2 contents present in CPU caches */
-  val_data_cache_ops_by_va((addr_t)dram_buf2_virt, INVALIDATE);
+  val_pe_cache_invalidate_range((uint64_t)dram_buf2_virt, (uint64_t)dma_len);
 
   /* Compare the contents of ddr_buf1 and ddr_buf2 for NEW_DATA */
   if (val_memory_compare(dram_buf1_virt, dram_buf2_virt, dma_len)) {

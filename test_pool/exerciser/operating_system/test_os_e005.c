@@ -49,7 +49,7 @@ write_test_data(void *buf, uint32_t size)
     *((char8_t *)buf + index) = TEST_DATA;
   }
 
-  val_data_cache_ops_by_va((addr_t)buf, CLEAN_AND_INVALIDATE);
+  val_pe_cache_clean_invalidate_range((uint64_t)buf, (uint64_t)size);
 }
 
 static
@@ -63,7 +63,7 @@ clear_dram_buf(void *buf, uint32_t size)
     *((char8_t *)buf + index) = 0;
   }
 
-  val_data_cache_ops_by_va((addr_t)buf, CLEAN_AND_INVALIDATE);
+  val_pe_cache_clean_invalidate_range((uint64_t)buf, (uint64_t)size);
 }
 
 /*
