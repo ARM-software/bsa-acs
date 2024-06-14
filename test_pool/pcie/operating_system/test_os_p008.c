@@ -93,6 +93,7 @@ payload(void)
   uint32_t pe_index;
   uint32_t ecam_index;
   uint32_t num_ecam;
+  uint32_t end_bus_max=255;
   uint32_t end_bus;
   uint32_t sub_bus;
   uint32_t cfg_addr;
@@ -125,7 +126,7 @@ payload(void)
       val_print(ACS_PRINT_INFO, "\n       Maximum bus value is 0x%x", bus_index);
 
       /* Bus value must not exceed 255 */
-      if (bus_index > end_bus) {
+      if (bus_index > end_bus_max) {
           val_print(ACS_PRINT_DEBUG, "\n       Bus index exceeded END_BUS Number", 0);
           val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
           return;
