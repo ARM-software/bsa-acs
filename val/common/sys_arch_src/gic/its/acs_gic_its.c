@@ -252,6 +252,23 @@ WriteCmdQMAPI(
 }
 
 static void
+WriteCmdQMAPTI(
+   uint32_t     its_index,
+   uint64_t     *CMDQ_BASE,
+   uint64_t     device_id,
+   uint32_t     int_id,
+   uint32_t     Clctn_ID
+  )
+{
+    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index]),
+                     (uint64_t)((device_id << ITS_CMD_SHIFT_DEVID) | ARM_ITS_CMD_MAPTI));
+    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 1), ((uint64_t)(int_id-ARM_LPI_MINID) | ((uint64_t)int_id << 32)));
+    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 2), (uint64_t)(Clctn_ID));
+    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 3), (uint64_t)(0));
+    g_cwriter_ptr[its_index] = g_cwriter_ptr[its_index] + ITS_NEXT_CMD_PTR;
+}
+
+static void
 WriteCmdQINV(
    uint32_t     its_index,
    uint64_t     *CMDQ_BASE,
@@ -261,7 +278,7 @@ WriteCmdQINV(
 {
     val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index]),
                      (uint64_t)((device_id << ITS_CMD_SHIFT_DEVID) | ARM_ITS_CMD_INV));
-    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 1), (uint64_t)(int_id));
+    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 1), (uint64_t)(int_id-ARM_LPI_MINID));
     val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 2), (uint64_t)(0x0));
     val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 3), (uint64_t)(0x0));
     g_cwriter_ptr[its_index] = g_cwriter_ptr[its_index] + ITS_NEXT_CMD_PTR;
@@ -277,7 +294,7 @@ WriteCmdQDISCARD(
 {
     val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index]),
                      (uint64_t)((device_id << ITS_CMD_SHIFT_DEVID) | ARM_ITS_CMD_DISCARD));
-    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 1), (uint64_t)(int_id));
+    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 1), (uint64_t)(int_id-ARM_LPI_MINID));
     val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 2), (uint64_t)(0x0));
     val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 3), (uint64_t)(0x0));
     g_cwriter_ptr[its_index] = g_cwriter_ptr[its_index] + ITS_NEXT_CMD_PTR;
@@ -433,7 +450,7 @@ void val_its_create_lpi_map(uint32_t its_index, uint32_t device_id,
   WriteCmdQMAPC(its_index, (uint64_t *)(ItsCommandBase),
                 0x1 /*Clctn_ID*/, RDBase, 0x1 /*Valid*/);
   /* Map Interrupt using MAPI */
-  WriteCmdQMAPI(its_index, (uint64_t *)(ItsCommandBase), device_id, int_id, 0x1 /*Clctn_ID*/);
+  WriteCmdQMAPTI(its_index, (uint64_t *)(ItsCommandBase), device_id, int_id, 0x1 /*Clctn_ID*/);
   /* Invalid Entry */
   WriteCmdQINV(its_index, (uint64_t *)(ItsCommandBase), device_id, int_id);
   /* ITS SYNC Command */
@@ -466,9 +483,9 @@ uint32_t val_its_get_max_lpi(void)
   /* Return The Minimum IDBits supported in ITS */
   for (index = 0; index < g_gic_its_info->GicNumIts; index++)
   {
-    min_idbits = (min_idbits < g_gic_its_info->GicIts[index].IDBits) ?
+    min_idbits = (min_idbits < (g_gic_its_info->GicIts[index].IDBits + 14)) ?
                  (min_idbits) :
-                 (g_gic_its_info->GicIts[index].IDBits);
+                 (g_gic_its_info->GicIts[index].IDBits + 14);
   }
   return ((1 << (min_idbits+1)) - 1);
 }
@@ -497,13 +514,13 @@ SetInitialConfiguration(
   gits_typer_bits = ARM_GITS_TYPER_IDbits(val_mmio_read64(ItsBase + ARM_GITS_TYPER));
 
   /* Check least bits implemented is 14 if LPIs are supported. */
-  if (GET_MIN(gicd_typer_idbits, gits_typer_bits) < ARM_LPI_MIN_IDBITS) {
+  if (gicd_typer_idbits < ARM_LPI_MIN_IDBITS) {
     return 1;
   }
 
   write_value = val_mmio_read64(g_gic_its_info->GicRdBase + ARM_GICR_PROPBASER);
-  write_value |= GET_MIN(gicd_typer_idbits, gits_typer_bits);
-  g_gic_its_info->GicIts[its_index].IDBits = GET_MIN(gicd_typer_idbits, gits_typer_bits);
+  write_value |= gicd_typer_idbits;
+  g_gic_its_info->GicIts[its_index].IDBits = gits_typer_bits;
 
   val_mmio_write64((g_gic_its_info->GicRdBase + ARM_GICR_PROPBASER), write_value);
 

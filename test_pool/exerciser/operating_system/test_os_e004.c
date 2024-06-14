@@ -23,6 +23,7 @@
 #include "val/common/include/acs_smmu.h"
 #include "val/common/include/acs_pcie_enumeration.h"
 #include "val/common/include/acs_exerciser.h"
+#include "val/common/sys_arch_src/gic/its/acs_gic_its.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 4)
 #define TEST_RULE  "PCI_MSI_2,ITS_DEV_6"
@@ -140,7 +141,7 @@ payload (void)
 
     /* Part 1 : ITS_DEV_6 */
     /* Trigger the interrupt by writing to GITS_TRANSLATER from PE */
-    val_mmio_write(its_base + GITS_TRANSLATER, lpi_int_id + instance);
+    val_mmio_write(its_base + GITS_TRANSLATER, (lpi_int_id - ARM_LPI_MINID) + instance);
 
     /* PE busy polls to check the completion of interrupt service routine */
     timeout = TIMEOUT_MEDIUM;
