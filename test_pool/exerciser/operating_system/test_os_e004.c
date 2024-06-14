@@ -27,6 +27,7 @@
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 4)
 #define TEST_RULE  "PCI_MSI_2,ITS_DEV_6"
 #define TEST_DESC  "MSI(-X) triggers intr with unique ID  "
+#define LPI_MINID  8192
 
 static uint32_t irq_pending;
 static uint32_t lpi_int_id = 0x204C;
@@ -140,7 +141,7 @@ payload (void)
 
     /* Part 1 : ITS_DEV_6 */
     /* Trigger the interrupt by writing to GITS_TRANSLATER from PE */
-    val_mmio_write(its_base + GITS_TRANSLATER, lpi_int_id + instance);
+    val_mmio_write(its_base + GITS_TRANSLATER, (lpi_int_id - LPI_MINID) + instance);
 
     /* PE busy polls to check the completion of interrupt service routine */
     timeout = TIMEOUT_MEDIUM;

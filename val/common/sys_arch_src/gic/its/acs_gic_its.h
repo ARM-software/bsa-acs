@@ -156,6 +156,7 @@
 #define ARM_ITS_CMD_MAPD    0x8
 #define ARM_ITS_CMD_MAPC    0x9
 #define ARM_ITS_CMD_MAPI    0xB
+#define ARM_ITS_CMD_MAPTI   0xA
 #define ARM_ITS_CMD_INV     0xC
 #define ARM_ITS_CMD_DISCARD 0xF
 #define ARM_ITS_CMD_SYNC    0x5
