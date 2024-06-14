@@ -75,6 +75,8 @@
 #define PROPBASER_PA_SHIFT                      12
 #define PROPBASER_PA_LEN                        40
 #define ARM_GICR_PROPBASER_PA_MASK              (((1ul << PROPBASER_PA_LEN) - 1) << PROPBASER_PA_SHIFT)
+#define ARM_GICR_PROPBASER_ATTR_MASK            (0xf80ul)
+#define ARM_GICR_PROPBASER_ATTR_VALUE           (0xB80ul) /* OS NM WB RWA*/
 
 #define PENDBASER_PA_SHIFT                      16
 #define PENDBASER_PA_LEN                        36
