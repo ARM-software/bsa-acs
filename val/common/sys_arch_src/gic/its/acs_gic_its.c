@@ -111,6 +111,7 @@ ArmGicSetItsCommandQueueBase(
   write_value = val_mmio_read64(ItsBase + ARM_GITS_CBASER) & (~ARM_GITS_CBASER_PA_MASK);
   write_value = write_value | (Address & ARM_GITS_CBASER_PA_MASK);
   write_value = write_value | ARM_GITS_CBASER_VALID | (NUM_PAGES_8 - 1);
+  write_value = write_value | ((7ULL << 59) | (7ULL << 53) | (2ULL << 10));
 
   val_mmio_write64(ItsBase + ARM_GITS_CBASER, write_value);
 
@@ -168,6 +169,7 @@ static uint32_t ArmGicSetItsTables(uint32_t its_index)
   write_value = write_value | (Address & ARM_GITS_BASER_PA_MASK);
   write_value = write_value | ARM_GITS_BASER_VALID;
   write_value = write_value | (Pages-1);
+  write_value = write_value | ((7ULL << 59) | (7ULL << 53) | (2ULL << 10));
   val_mmio_write64(ItsBase + ARM_GITS_BASER(it), write_value);
 
   }
