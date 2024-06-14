@@ -26,6 +26,10 @@
 #define SIZE_4KB    0x00001000
 #define SIZE_64KB   0x00010000
 
+#define PAGE_SIZE_4K        0x1000
+#define PAGE_SIZE_16K       (4 * 0x1000)
+#define PAGE_SIZE_64K       (16 * 0x1000)
+
 #define PAGE_MASK   0xFFF
 #define PAGE_SHIFT   12
 
@@ -105,6 +109,16 @@
 #define BASER_PA_LEN                                36
 #define ARM_GITS_BASER_PA_MASK                      (((1ul << BASER_PA_LEN) - 1) << BASER_PA_SHIFT)
 #define ARM_GITS_BASER_VALID                        (1ul << 63)
+#define ARM_GITS_BASER_PAGE_SHIFT                   8
+#define ARM_GITS_BASER_PAGE_MASK                    (3ul << ARM_GITS_BASER_PAGE_SHIFT)
+#define ARM_GITS_BASER_MAX_PAGES 256
+#define ARM_GITS_BASER_INDIRECT_LVL1_ENTRY_SIZE 8
+
+#define ARM_GITS_BASER_MAX_PAGESZ 3
+#define ARM_GITS_BASER_PGSZ_4K    0
+#define ARM_GITS_BASER_PGSZ_16K   1
+#define ARM_GITS_BASER_PGSZ_64K   2
+
 
 #define ARM_GITS_TBL_TYPE_DEVICE    0x1
 #define ARM_GITS_TBL_TYPE_CLCN      0x4
