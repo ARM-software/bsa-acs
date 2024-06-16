@@ -747,8 +747,8 @@ pal_iovirt_create_info_table_dt(IOVIRT_INFO_TABLE *IoVirtTable)
           SetMem(data, sizeof(NODE_DATA), 0);
 
           (*data).rc.segment = 0;
-          iommu_node =  fdt32_to_cpu(Preg_val[1]);
-         Preg_val = (UINT32 *)fdt_getprop_namelen((void *)dt_ptr, iommu_node, "reg", 3, &prop_len);
+          iommu_node = fdt_node_offset_by_phandle((void *)dt_ptr, fdt32_to_cpu(Preg_val[1]));
+          Preg_val = (UINT32 *)fdt_getprop_namelen((void *)dt_ptr, iommu_node, "reg", 3, &prop_len);
           (*data).rc.smmu_base    = fdt32_to_cpu(Preg_val[0]);
           (*data).rc.smmu_base    = ((*data).rc.smmu_base << 32) | fdt32_to_cpu(Preg_val[1]);
       } else {
