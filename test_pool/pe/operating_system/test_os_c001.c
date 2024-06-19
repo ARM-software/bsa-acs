@@ -17,6 +17,7 @@
 
 #include "val/common/include/acs_val.h"
 #include "val/common/include/acs_pe.h"
+#include "val/common/include/acs_memory.h"
 
 #define TEST_NUM   (ACS_PE_TEST_NUM_BASE  +  1)
 #define TEST_RULE  "B_PE_01"
@@ -49,8 +50,17 @@ typedef struct{
     uint8_t  dependency;
 }reg_details;
 
+typedef struct{
+    uint64_t pe_cache[MAX_CACHE_LEVEL];
+    uint64_t cache_status[MAX_CACHE_LEVEL];
+    uint64_t reg_data[NUM_OF_REGISTERS];
+    uint64_t reg_status[NUM_OF_REGISTERS];
+} pe_reg_info;
+
+pe_reg_info *g_pe_reg_info;
+
 reg_details reg_list[] = {
-    {CCSIDR_EL1,       MASK_CCSIDR_LS, "CCSIDR_EL1"      , 0x0 },
+    {CCSIDR_EL1,       MASK_CCSIDR_LS, "CCSIDR_EL1",        0x0},
     {ID_AA64PFR0_EL1,  0x0,            "ID_AA64PFR0_EL1" , 0x0 },
     {ID_AA64PFR1_EL1,  0x0,            "ID_AA64PFR1_EL1" , 0x0 },
     {ID_AA64DFR0_EL1,  0x0,            "ID_AA64DFR0_EL1" , 0x0 },
@@ -160,38 +170,58 @@ id_regs_check(void)
 {
   uint64_t reg_read_data;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
-  uint32_t i = 0;
+  uint32_t i = 0, check = 0;
+  pe_reg_info *secondary_buffer;
+  uint64_t buffer_ptr, addr;
 
   /* Loop CLIDR to check if a cache level is implemented before comparing */
+  val_get_test_data(index, &addr, &buffer_ptr);
+  secondary_buffer = (pe_reg_info *)buffer_ptr;
+  secondary_buffer = secondary_buffer + index;
+
   while (i < MAX_CACHE_LEVEL) {
       reg_read_data = val_pe_reg_read(CLIDR_EL1);
       if (reg_read_data & ((0x7) << (i * 3))) {
+
           /* Select the correct cache in csselr register */
           val_pe_reg_write(CSSELR_EL1, i << 1);
+          reg_read_data = 0;
           reg_read_data = return_reg_value(reg_list[0].reg_name, reg_list[0].dependency);
 
+          secondary_buffer->pe_cache[i] = reg_read_data;
+          val_data_cache_ops_by_va((addr_t)&secondary_buffer->pe_cache[i], CLEAN_AND_INVALIDATE);
+
           if ((reg_read_data & (~reg_list[0].reg_mask)) != (cache_list[i] & (~reg_list[0].reg_mask))) {
-	      /* index 0 (CCSIDR_EL1) reg value also depends on cache index selected, saving cache index in upper 32 bits */
-              val_set_test_data(index, (reg_read_data & (~reg_list[0].reg_mask)), (uint64_t)(i + 1) << 32);
-              val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
-              return;
+              secondary_buffer->cache_status[i] = 1;
+              val_data_cache_ops_by_va((addr_t)&secondary_buffer->cache_status[i],
+                                                                      CLEAN_AND_INVALIDATE);
+              check = 1;
           }
       }
+      reg_read_data = 0;
       i++;
   }
 
   for (i = 1; i < NUM_OF_REGISTERS; i++) {
       reg_read_data = return_reg_value(reg_list[i].reg_name, reg_list[i].dependency);
 
-      if((reg_read_data & (~reg_list[i].reg_mask)) != (rd_data_array[i] & (~reg_list[i].reg_mask)))
+      secondary_buffer->reg_data[i] = reg_read_data;
+      val_data_cache_ops_by_va((addr_t)&secondary_buffer->reg_data[i], CLEAN_AND_INVALIDATE);
+
+      if ((reg_read_data & (~reg_list[i].reg_mask)) != (rd_data_array[i] &
+                                                                    (~reg_list[i].reg_mask)))
       {
-          val_set_test_data(index, (reg_read_data & (~reg_list[i].reg_mask)), i);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
-          return;
+          secondary_buffer->reg_status[i] = 1;
+          val_data_cache_ops_by_va((addr_t)&secondary_buffer->reg_status[i], CLEAN_AND_INVALIDATE);
+          check = 1;
       }
       reg_read_data = 0;
   }
-  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
+
+  if (check == 1)
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+  else
+      val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 
   return;
 }
@@ -202,8 +232,12 @@ payload(uint32_t num_pe)
 {
   uint32_t my_index = val_pe_get_index_mpid(val_pe_get_mpid());
   uint32_t i;
-  uint32_t timeout, cache_index;
-  uint64_t reg_read_data, debug_data=0, array_index=0;
+  uint32_t timeout;
+  uint64_t reg_read_data;
+  uint64_t total_fail = 0;
+  uint64_t reg_fail = 0;
+  uint64_t cache_fail = 0;
+  volatile pe_reg_info *pe_buffer;
 
   if (num_pe == 1) {
       val_print(ACS_PRINT_DEBUG, "\n       Skipping as num of PE is 1    ", 0);
@@ -213,28 +247,44 @@ payload(uint32_t num_pe)
 
   /* Loop CLIDR to check if a cache level is implemented */
   i = 0;
+
   while (i < MAX_CACHE_LEVEL) {
       reg_read_data = val_pe_reg_read(CLIDR_EL1);
       if (reg_read_data & ((0x7) << (i * 3))) {
+
          /* Select the correct cache level in csselr register */
          val_pe_reg_write(CSSELR_EL1, i << 1);
          cache_list[i] = return_reg_value(reg_list[0].reg_name, reg_list[0].dependency);
          val_data_cache_ops_by_va((addr_t)(cache_list + i), CLEAN_AND_INVALIDATE);
-         val_print(ACS_PRINT_INFO, "\n       cache index: %d ", i);
-	 val_print(ACS_PRINT_INFO, "       line size read is %x ", cache_list[i] & (~MASK_CCSIDR_LS));
+         val_print(ACS_PRINT_INFO, "\n       PRIMARY PE Index: %d", my_index);
+         val_print(ACS_PRINT_INFO, ", cache index: %d", i);
+         val_print(ACS_PRINT_INFO, ", size read: %llx\n", cache_list[i]);
       }
       i++;
   }
 
   for (i = 1; i < NUM_OF_REGISTERS; i++) {
       rd_data_array[i] = return_reg_value(reg_list[i].reg_name, reg_list[i].dependency);
+      val_print(ACS_PRINT_INFO, "\n       PRIMARY PE Index: %d, ", my_index);
+      val_print(ACS_PRINT_INFO, reg_list[i].reg_desc, 0);
+      val_print(ACS_PRINT_INFO, " : %llx \n", rd_data_array[i]);
       val_data_cache_ops_by_va((addr_t)(rd_data_array + i), CLEAN_AND_INVALIDATE);
+  }
+
+  /* Allocate memory to save all PE register read values and status of reg value
+     comparision pass and fail */
+  g_pe_reg_info = (pe_reg_info *) val_memory_calloc(num_pe, sizeof(pe_reg_info));
+
+  if (g_pe_reg_info == NULL) {
+      val_print(ACS_PRINT_ERR, "\n       Allocation for secondary PE Registers Failed \n", 0);
+      val_set_status(my_index, RESULT_FAIL(TEST_NUM, 1));
+      return;
   }
 
   for (i = 0; i < num_pe; i++) {
       if (i != my_index) {
-          timeout=TIMEOUT_LARGE;
-          val_execute_on_pe(i, id_regs_check, 0);
+          timeout = TIMEOUT_LARGE;
+          val_execute_on_pe(i, id_regs_check, (uint64_t)g_pe_reg_info);
           while ((--timeout) && (IS_RESULT_PENDING(val_get_status(i))));
 
           if(timeout == 0) {
@@ -243,28 +293,61 @@ payload(uint32_t num_pe)
               return;
           }
 
-          if(IS_TEST_FAIL(val_get_status(i))) {
-              val_get_test_data(i, &debug_data, &array_index);
-              val_print(ACS_PRINT_INFO, "\n       array_index value 0x%lx", array_index);
-	      val_print(ACS_PRINT_ERR, "\n       Reg compare failed for PE=%d for reg: ", i);
-	      if (array_index >> 32) {
-	          cache_index = (array_index >> 32) - 1;
-		  val_print(ACS_PRINT_ERR, reg_list[0].reg_desc, 0);
-		  val_print(ACS_PRINT_ERR, " and cache index: %d", cache_index);
-		  val_print(ACS_PRINT_ERR, "\n       Primary PE value = 0x%llx", cache_list[i] & (~reg_list[0].reg_mask));
-	      }
-	      else {
-                  val_print(ACS_PRINT_ERR, reg_list[array_index].reg_desc, 0);
-                  val_print(ACS_PRINT_ERR, "\n       Primary PE value = 0x%llx", rd_data_array[array_index] & (~reg_list[array_index].reg_mask));
-	      }
-              val_print(ACS_PRINT_ERR, "\n       Current PE value = 0x%llx", debug_data);
-              return;
+          pe_buffer = g_pe_reg_info + i;
+
+          for (int cache_index = 0; cache_index < MAX_CACHE_LEVEL; cache_index++) {
+             if (!(pe_buffer->cache_status[cache_index]) &&
+                                                    (pe_buffer->pe_cache[cache_index] != 0))
+             {
+                 val_print(ACS_PRINT_INFO, "\n       PE Index: %d", i);
+                 val_print(ACS_PRINT_INFO, ", cache index: %d", cache_index);
+                 val_print(ACS_PRINT_INFO, ", size read: %llx\n",
+                                                             pe_buffer->pe_cache[cache_index]);
+             }
+             else if (pe_buffer->pe_cache[cache_index] != 0)
+             {
+                   val_print(ACS_PRINT_ERR, "\n       PE Index: %d", i);
+                   val_print(ACS_PRINT_ERR, ", cache index: %d", cache_index);
+                   val_print(ACS_PRINT_ERR, ", size read: %llx     FAIL\n",
+                                                             pe_buffer->pe_cache[cache_index]);
+                   val_print(ACS_PRINT_ERR, "          PRIMARY PE VALUE : %llx \n",
+                                              cache_list[cache_index] & (~reg_list[0].reg_mask));
+                   val_print(ACS_PRINT_ERR, "          CURRENT PE VALUE : %llx \n",
+                                      pe_buffer->pe_cache[cache_index] & (~reg_list[0].reg_mask));
+                   cache_fail = cache_fail + 1;
+             }
           }
+
+          for (int reg_index = 1; reg_index < NUM_OF_REGISTERS; reg_index++) {
+             if (!(pe_buffer->reg_status[reg_index])) {
+                 val_print(ACS_PRINT_INFO, "\n       PE Index: %d, ", i);
+                 val_print(ACS_PRINT_INFO, reg_list[reg_index].reg_desc, 0);
+                 val_print(ACS_PRINT_INFO, "  : %llx\n", pe_buffer->reg_data[reg_index]);
+             } else  {
+                 val_print(ACS_PRINT_ERR, "\n       PE Index: %d, ", i);
+                 val_print(ACS_PRINT_ERR, reg_list[reg_index].reg_desc, 0);
+                 val_print(ACS_PRINT_ERR, "   : %llx    FAIL\n", pe_buffer->reg_data[reg_index]);
+                 val_print(ACS_PRINT_ERR, "          PRIMARY PE VALUE : %llx \n",
+                                              rd_data_array[reg_index] & (~reg_list[i].reg_mask));
+                 val_print(ACS_PRINT_ERR, "          CURRENT PE VALUE : %llx \n",
+                                         pe_buffer->reg_data[reg_index] & (~reg_list[i].reg_mask));
+                 reg_fail = reg_fail + 1;
+             }
+          }
+          total_fail = total_fail + reg_fail + cache_fail;
+          reg_fail = 0;
+          cache_fail = 0;
       }
   }
+  if (total_fail) {
+      val_print(ACS_PRINT_ERR, "\n    Total Register and cache fail for all PE: %d \n", total_fail);
+      val_set_status(total_fail, RESULT_FAIL(TEST_NUM, 3));
+  }
+  else
+      val_set_status(1, RESULT_PASS(TEST_NUM, 2));
 
+  val_memory_free((void *) g_pe_reg_info);
   return;
-
 }
 
 uint32_t
