@@ -45,6 +45,11 @@ payload()
 
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
   bdf_tbl_ptr = val_pcie_bdf_table_ptr();
+  if ((!bdf_tbl_ptr) || (!bdf_tbl_ptr->num_entries)) {
+      val_print(ACS_PRINT_DEBUG, "\n       No entries in BDF table", 0);
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+      return;
+  }
 
   /* Check for all the function present in bdf table */
   for (tbl_index = 0; tbl_index < bdf_tbl_ptr->num_entries; tbl_index++)
