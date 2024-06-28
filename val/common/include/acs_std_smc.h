@@ -48,6 +48,7 @@
  * Standard Service Call range.
  * The list below is not exhaustive.
  */
+#define ARM_SMC_ID_PSCI_SMCCC_VERSION          0x80000000
 #define ARM_SMC_ID_PSCI_VERSION                0x84000000
 #define ARM_SMC_ID_PSCI_CPU_SUSPEND_AARCH64    0xc4000001
 #define ARM_SMC_ID_PSCI_CPU_SUSPEND_AARCH32    0x84000001

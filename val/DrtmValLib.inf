@@ -1,0 +1,55 @@
+## @file
+#  Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+#  SPDX-License-Identifier : Apache-2.0
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = DrtmValLib
+  FILE_GUID                      = cdd4fb8f-06c5-4a28-8cb8-7f5b664e278c
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = DrtmValLib|UEFI_APPLICATION UEFI_DRIVER
+
+[Sources.common]
+  ../
+  ../../
+  common/src/acs_test_infra.c
+  common/src/acs_status.c
+  common/src/acs_memory.c
+  common/src/acs_pe_infra.c
+  common/sys_arch_src/gic/AArch64/acs_exception_asm.S
+  common/sys_arch_src/gic/acs_exception.c
+  common/src/acs_pe.c
+  common/src/acs_gic.c
+  common/src/acs_gic_support.c
+  common/sys_arch_src/gic/gic.c
+  common/sys_arch_src/gic/v3/gic_v3.c
+  common/sys_arch_src/gic/v3/gic_v3_extended.c
+  common/sys_arch_src/gic/v3/AArch64/v3_asm.S
+  common/sys_arch_src/gic/v2/gic_v2.c
+  common/src/AArch64/PeRegSysSupport.S
+  common/src/AArch64/PeTestSupport.S
+  common/src/AArch64/GicSupport.S
+  drtm/src/drtm_execute_test.c
+  drtm/src/drtm_acs_interface.c
+  drtm/src/AArch64/Drtm.S
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[BuildOptions]
+  GCC:*_*_*_ASM_FLAGS  =  -march=armv8.2-a+sve+profile
+  GCC:*_*_*_CC_FLAGS   =  -O0 -DDRTM
