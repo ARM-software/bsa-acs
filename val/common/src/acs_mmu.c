@@ -342,5 +342,3 @@ uint32_t val_enable_mmu(void)
     return ACS_STATUS_PASS;
 }
 #endif // TARGET_BM_BOOT
-
-

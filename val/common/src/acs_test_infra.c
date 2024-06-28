@@ -646,7 +646,7 @@ void
 val_pe_update_elr(void *context, uint64_t offset)
 {
 
-#ifndef SBSA
+#if !defined(SBSA) && !defined(DRTM)
     if (pal_target_is_dt()) {
 #ifndef TARGET_LINUX
         bsa_gic_update_elr(offset);
