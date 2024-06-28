@@ -126,6 +126,68 @@ val_get_gicd_base(void)
 }
 
 /**
+  @brief   This API returns the base address of the GIC Redistributor for a PE
+           1. Caller       -  Test Suite
+           2. Prerequisite -  val_gic_create_info_table
+  @param   mpidr - PE mpidr value
+  @return  Address of GIC Redistributor
+**/
+addr_t
+val_gic_get_pe_rdbase(uint64_t mpidr)
+{
+  uint32_t     gicrd_baselen;
+  uint32_t     gicr_rdindex = 0;
+  uint64_t     affinity, pe_affinity;
+  uint64_t     gicrd_granularity;
+  uint64_t     gicrd_base, pe_gicrd_base;
+
+  pe_affinity = (mpidr & (PE_AFF0 | PE_AFF1 | PE_AFF2)) | ((mpidr & PE_AFF3) >> 8);
+  gicrd_granularity = GICR_CTLR_FRAME_SIZE + GICR_SGI_PPI_FRAME_SIZE;
+
+  gicr_rdindex = 0;
+
+  /* If System doesn't have GICR RD strcture, then use GICCC RD base */
+  if (g_gic_info_table->header.num_gicr_rd == 0) {
+      gicrd_base = val_get_gicr_base(&gicrd_baselen, 0);
+      val_print(ACS_PRINT_DEBUG, "       gicrd_base 0x%lx\n", gicrd_base);
+
+      /* If information is present in GICC Structure */
+      if (gicrd_baselen == 0)
+      {
+          affinity = (val_mmio_read64(gicrd_base + GICR_TYPER) & GICR_TYPER_AFF) >> 32;
+          if (affinity == pe_affinity) {
+              return gicrd_base;
+          }
+          return 0;
+      }
+  }
+
+  /* Use GICR RD base structure */
+  while (gicr_rdindex < g_gic_info_table->header.num_gicr_rd) {
+      gicrd_base = val_get_gicr_base(&gicrd_baselen, gicr_rdindex);
+      val_print(ACS_PRINT_INFO, "       gicr_rdindex %d", gicr_rdindex);
+      val_print(ACS_PRINT_INFO, "       gicrd_base 0x%lx\n", gicrd_base);
+
+      pe_gicrd_base = gicrd_base;
+      while (pe_gicrd_base < (gicrd_base + gicrd_baselen))
+      {
+          val_print(ACS_PRINT_INFO, "       GICR_TYPER 0x%lx\n",
+                    val_mmio_read64(pe_gicrd_base + GICR_TYPER));
+
+          affinity = (val_mmio_read64(pe_gicrd_base + GICR_TYPER) & GICR_TYPER_AFF) >> 32;
+          if (affinity == pe_affinity)
+              return pe_gicrd_base;
+
+          /* Move to the next GIC Redistributor frame */
+          pe_gicrd_base += gicrd_granularity;
+      }
+      gicr_rdindex++;
+  }
+
+  return 0;
+}
+
+/**
   @brief   This API returns the base address of the GIC Redistributor
            1. Caller       -  Test Suite
            2. Prerequisite -  val_gic_create_info_table
