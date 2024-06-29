@@ -33,4 +33,9 @@ if [ "$1" == "ENABLE_MEMTEST" ]; then
     return 0;
 fi
 
+if [ "$1" == "ENABLE_DRTM" ]; then
+    build -a AARCH64 -t GCC49 -p ShellPkg/ShellPkg.dsc -m ShellPkg/Application/bsa-acs/drtm/uefi_app/DrtmAcs.inf
+    return 0;
+fi
+
     build -a AARCH64 -t GCC49 -p ShellPkg/ShellPkg.dsc -m ShellPkg/Application/bsa-acs/uefi_app/BsaAcs.inf

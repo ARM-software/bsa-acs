@@ -61,8 +61,6 @@ hyp_g002_entry(uint32_t num_pe);
 uint32_t
 hyp_g003_entry(uint32_t num_pe);
 
-addr_t
-val_gic_get_pe_rdbase(uint64_t mpidr);
 
 uint32_t os_v2m001_entry(uint32_t num_pe);
 uint32_t os_v2m002_entry(uint32_t num_pe);
