@@ -42,6 +42,10 @@ payload()
   while (count != 0) {
       if (val_peripheral_get_info(USB_PLATFORM_TYPE, count - 1) == PLATFORM_TYPE_DT) {
           interface = val_peripheral_get_info(USB_INTERFACE_TYPE, count - 1);
+          if (interface == USB_TYPE_OHCI) {
+              count--;
+              continue;
+          }
           if ((interface != USB_TYPE_EHCI) && (interface != USB_TYPE_XHCI)) {
               val_print(ACS_PRINT_WARN, "\n       Detected USB CTRL %d supports", count - 1);
               val_print(ACS_PRINT_WARN, " %x interface and not EHCI/XHCI", interface);
