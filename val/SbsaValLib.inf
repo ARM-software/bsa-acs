@@ -70,6 +70,7 @@
   sbsa/src/sbsa_acs_pmu.c
   sbsa/src/sbsa_acs_mpam.c
   sbsa/src/sbsa_acs_ete.c
+  sbsa/src/sbsa_acs_pcc.c
 
 [Packages]
   MdePkg/MdePkg.dec

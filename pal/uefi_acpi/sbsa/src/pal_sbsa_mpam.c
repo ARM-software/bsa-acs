@@ -156,6 +156,13 @@ pal_mpam_create_info_table(MPAM_INFO_TABLE *MpamTable)
       curr_entry->msc_addr_len  =  msc_node->mmio_size;
       curr_entry->max_nrdy = msc_node->max_nrdy_usec;
       curr_entry->rsrc_count = msc_node->num_resource_nodes;
+      curr_entry->intrf_type = msc_node->InterfaceType;
+      curr_entry->identifier = msc_node->identifier;
+
+      /* if MSC interface type is PCC (0x0A), store PCC information in pcc_info_table */
+      if (curr_entry->identifier == MPAM_INTERFACE_TYPE_PCC) {
+          pal_pcc_store_info(curr_entry->msc_base_addr);
+      }
 
       /* Each MSC can have multiple resource node, Populate info table resource
         node from acpi table resource node*/
