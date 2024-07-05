@@ -105,7 +105,9 @@ typedef enum {
   MPAM_MSC_ADDR_LEN,
   MPAM_MSC_RSRC_DESC1,
   MPAM_MSC_RSRC_DESC2,
-  MPAM_MSC_NRDY
+  MPAM_MSC_NRDY,
+  MPAM_MSC_ID,
+  MPAM_MSC_INTERFACE_TYPE
 } MPAM_INFO_e;
 
 /* RAS APIs */
@@ -171,5 +173,11 @@ uint32_t val_sbsa_pmu_execute_tests(uint32_t level, uint32_t num_pe);
 uint32_t val_sbsa_mpam_execute_tests(uint32_t level, uint32_t num_pe);
 uint32_t val_sbsa_ras_execute_tests(uint32_t level, uint32_t num_pe);
 uint32_t val_sbsa_nist_execute_tests(uint32_t level, uint32_t num_pe);
+
+/* PCC related APIs */
+void val_pcc_create_info_table(uint64_t *pcc_info_table);
+void *val_pcc_cmd_response(uint32_t subspace_id, uint32_t command, void *data, uint32_t data_size);
+uint32_t val_pcc_get_ss_info_idx(uint32_t subspace_id);
+void val_pcc_free_info_table(void);
 
 #endif

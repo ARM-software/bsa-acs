@@ -291,4 +291,85 @@ typedef struct {
 
 void pal_hmat_create_info_table(HMAT_INFO_TABLE *HmatTable);
 
+/* Platform Communication Channel (PCC) info table */
+typedef struct {
+  uint8_t   addr_space_id;
+  uint8_t   reg_bit_width;
+  uint8_t   reg_bit_offset;
+  uint8_t   access_size;
+  uint64_t  addr;
+} ACPI_GENERIC_ADDRESS_STRUCTURE;
+
+typedef struct {
+  uint64_t                         base_addr;               /* base addr of shared mem-region */
+  ACPI_GENERIC_ADDRESS_STRUCTURE   doorbell_reg;            /* doorbell register */
+  uint64_t                         doorbell_preserve;       /* doorbell register preserve mask */
+  uint64_t                         doorbell_write;          /* doorbell register set mask */
+  uint32_t                         min_req_turnaround_usec; /* minimum request turnaround time */
+  ACPI_GENERIC_ADDRESS_STRUCTURE   cmd_complete_chk_reg;    /* command complete check register */
+  uint64_t                         cmd_complete_chk_mask;   /* command complete check mask */
+  ACPI_GENERIC_ADDRESS_STRUCTURE   cmd_complete_update_reg; /* command complete update register */
+  uint64_t                         cmd_complete_update_preserve;
+                                                            /* command complete update preserve */
+  uint64_t                         cmd_complete_update_set; /* command complete update set mask */
+} PCC_SUBSPACE_TYPE_3;
+
+typedef union {
+  PCC_SUBSPACE_TYPE_3 pcc_ss_type_3;
+} PCC_TYPE_SPECIFIC_INFO;
+
+typedef struct {
+  uint32_t                 subspace_idx;    /* PCC subspace index in PCCT ACPI table */
+  uint32_t                 subspace_type;   /* type of PCC subspace */
+  PCC_TYPE_SPECIFIC_INFO   type_spec_info;  /* PCC subspace type specific info */
+} PCC_INFO;
+
+typedef struct {
+  uint32_t  subspace_cnt; /* number of PCC subspace info stored */
+  PCC_INFO  pcc_info[];   /* array of PCC info blocks */
+} PCC_INFO_TABLE;
+
+
+typedef struct {
+  uint32_t reserved : 4;        /* Bits [31:28] Reserved must be zero */
+  uint32_t token : 10;          /* Bits [27:18] Token Caller-defined value */
+  uint32_t protocol_id : 8;     /* Bits [17:10] Protocol ID */
+  uint32_t message_type : 2;    /* Bits [09:08] Message Type */
+  uint32_t message_id : 8;      /* Bits [07:00] Message ID */
+} SCMI_PROTOCOL_MESSAGE_HEADER;
+
+typedef struct {
+  uint32_t msc_id;            /* Identifier of the MSC */
+  uint32_t flags;             /* Reserved, must be zero */
+  uint32_t offset;            /* MPAM register offset to read from */
+} PCC_MPAM_MSC_READ_CMD_PARA;
+
+typedef struct {
+  int32_t  status;             /* command response status code */
+  uint32_t val;                /* value read from the register */
+} PCC_MPAM_MSC_READ_RESP_PARA;
+
+typedef struct {
+  uint32_t msc_id;            /* Identifier of the MSC */
+  uint32_t flags;             /* Reserved, must be zero */
+  uint32_t val;               /* value to be written to the register */
+  uint32_t offset;            /* MPAM register offset to write */
+} PCC_MPAM_MSC_WRITE_CMD_PARA;
+
+typedef struct {
+  int32_t  status;             /* command response status code */
+} PCC_MPAM_MSC_WRITE_RESP_PARA;
+
+#define MPAM_FB_PROTOCOL_ID    0x1A
+#define MPAM_MSG_TYPE_CMD      0x0
+#define MPAM_MSC_READ_CMD_ID   0x4
+#define MPAM_MSC_WRITE_CMD_ID  0x5
+#define MPAM_PCC_CMD_SUCCESS   0x0
+#define MPAM_PCC_SAFE_RETURN   0x0
+#define RETURN_FAILURE         0xFFFFFFFF
+#define PCC_TY3_CMD_OFFSET     12
+#define PCC_TY3_COMM_SPACE     16
+
+void pal_pcc_create_info_table(PCC_INFO_TABLE *PccInfoTable);
+
 #endif
