@@ -15,11 +15,12 @@
  * limitations under the License.
  **/
 
-#include "sbsa/include/sbsa_val_interface.h"
 #include "common/include/acs_val.h"
 #include "common/include/acs_common.h"
 #include "common/include/acs_pcie.h"
 #include "sbsa/include/sbsa_acs_pcie.h"
+#include "sbsa/include/sbsa_val_interface.h"
+#include "sbsa/include/sbsa_pal_interface.h"
 
 uint64_t
 pal_get_mcfg_ptr(void);
@@ -210,4 +211,16 @@ val_pcie_disable_ordering(uint32_t bdf)
   dis_mask = ~(1 << DCTLR_ERE_SHIFT);
   val_pcie_write_cfg(bdf, pciecs_base + DCTLR_OFFSET, reg_value & dis_mask);
 
+}
+
+/**
+  @brief  Returns the Steering Tag value discovered
+
+  @param  None
+  @return Returns the steering tag value
+**/
+uint32_t val_pcie_dsm_ste_tags(void)
+{
+
+    return pal_pcie_dsm_ste_tags();
 }
