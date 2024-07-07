@@ -92,3 +92,9 @@ v24.04_MEMTEST_REL1.0.0
 * Added memory model consistency tests (litmus tests) to BSA ACS.
 * Added support to compile kvm-unit-tests test framework as a library, required by litmus tests.
 * Added required documentation to build and run litmus tests.
+
+v24.06_DRTM_0.5_ALP1
+* DRTM Initial Infrastructure
+* Interface and dynamic launch tests
+* Build scripts for DRTM Image
+* Documentation changes

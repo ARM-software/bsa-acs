@@ -21,8 +21,6 @@
 #include  <Library/PrintLib.h>
 #include  <Library/BaseMemoryLib.h>
 #include <Protocol/Cpu.h>
-
-
 #include "common/include/pal_uefi.h"
 
 UINT8   *gSharedMemory;

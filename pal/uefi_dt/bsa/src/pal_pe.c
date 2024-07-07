@@ -38,9 +38,11 @@ pal_strncmp(CHAR8 *str1, CHAR8 *str2, UINT32 len);
 
 static char pmu_dt_arr[][PMU_COMPATIBLE_STR_LEN] = {
     "arm,armv8-pmuv3",
+    "arm,cortex-a76-pmu",
     "arm,cortex-a73-pmu",
     "arm,cortex-a72-pmu",
     "arm,cortex-a57-pmu",
+    "arm,cortex-a55-pmu",
     "arm,cortex-a53-pmu",
     "arm,cortex-a35-pmu",
     "arm,cortex-a17-pmu",

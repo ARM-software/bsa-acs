@@ -469,5 +469,3 @@ uint32_t val_pe_reg_read_ttbr(uint32_t ttbr1, uint64_t *ttbr_ptr)
     *ttbr_ptr = ReadTtbr[ttbr1][(el >> 2) - 1]();
     return 0;
 }
-
-
