@@ -50,7 +50,7 @@ payload1()
 {
   uint32_t intid;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
-  uint32_t delay_loop = 100;
+  uint64_t delay_loop = val_get_counter_frequency() * g_wakeup_timeout;
   uint64_t timer_expire_val = val_get_counter_frequency() * g_wakeup_timeout;
 
   intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
@@ -79,11 +79,11 @@ payload1()
   if (!g_el1phy_int_received) {
       val_timer_set_phy_el1(0);
       intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
-      val_gic_clear_interrupt(intid);
+      val_gic_end_of_interrupt(intid);
       val_print(ACS_PRINT_DEBUG, "\n       PE wakeup by some other events/int", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM1, 2));
   }
-  val_print(ACS_PRINT_DEBUG, "\n       delay loop remainig value %d", delay_loop);
+  val_print(ACS_PRINT_INFO, "\n       delay loop remainig value %d", delay_loop);
   return;
 }
 

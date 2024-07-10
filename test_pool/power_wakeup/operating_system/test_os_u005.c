@@ -131,7 +131,7 @@ payload5()
           /* Add a delay loop after WFI called in case PE needs some time to enter WFI state
            * exit in case test or failsafe int is received
           */
-          delay_loop = 100;
+          delay_loop = val_get_counter_frequency() * g_wakeup_timeout;
           while (delay_loop && (g_timer_int_rcvd == 0) && (g_failsafe_int_rcvd == 0)) {
               delay_loop--;
           }
@@ -150,7 +150,7 @@ payload5()
               val_set_status(index, RESULT_SKIP(TEST_NUM5, 4));
               val_print(ACS_PRINT_DEBUG, "\n       PE wakeup by some other events/int or didn't enter WFI", 0);
           }
-          val_print(ACS_PRINT_DEBUG, "\n       delay loop remainig value %d", delay_loop);
+          val_print(ACS_PRINT_INFO, "\n       delay loop remainig value %d", delay_loop);
 
       } else{
           val_print(ACS_PRINT_WARN, "\n       GIC Install Handler Failed...", 0);

@@ -130,7 +130,7 @@ payload4()
           /* Add a delay loop after WFI called in case PE needs some time to enter WFI state
            * exit in case test or failsafe int is received
           */
-          delay_loop = 100;
+          delay_loop = val_get_counter_frequency() * g_wakeup_timeout;
 	  while (delay_loop && (g_wd_int_received == 0) && (g_failsafe_int_received == 0)) {
               delay_loop--;
           }
