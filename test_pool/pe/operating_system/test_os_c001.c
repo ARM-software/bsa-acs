@@ -36,7 +36,6 @@
 #define MASK_MPIDR        0xFF3FFFFFFF
 #define MASK_CTR          0xC000
 #define MASK_CCSIDR_LS    0xFFFFFFFFFFFFFFF8
-#define MASK_PMCR         0xFFFF
 
 #define MAX_CACHE_LEVEL   7
 
@@ -92,7 +91,7 @@ reg_details reg_list[] = {
     {MVFR2_EL1,        0x0,            "MVFR2_EL1"       , AA32},
     {PMCEID0_EL0,      0x0,            "PMCEID0_EL0",     PMUV3},
     {PMCEID1_EL0,      0x0,            "PMCEID1_EL0",     PMUV3},
-    {PMCR_EL0,         MASK_PMCR,      "PMCR_EL0",        PMUV3},
+    {PMCR_EL0,         0x0,            "PMCR_EL0",        PMUV3},
     {PMBIDR_EL1,       0x0,            "PMBIDR_EL1"      , SPE },
     {PMSIDR_EL1,       0x0,            "PMSIDR_EL1"      , SPE },
     {ERRIDR_EL1,       0x0,            "ERRIDR_EL1"      , RAS },
