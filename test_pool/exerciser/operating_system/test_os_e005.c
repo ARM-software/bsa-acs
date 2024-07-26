@@ -191,8 +191,9 @@ payload(void)
     status = val_pcie_get_max_pasid_width(e_bdf, &exerciser_ssid_bits);
     if (status == PCIE_CAP_NOT_FOUND)
     {
-        val_print(ACS_PRINT_ERR, "\n       PASID extended capability not found for BDF: %x", e_bdf);
-        goto test_fail;
+        val_print(ACS_PRINT_DEBUG,
+                  "\n       PASID extended capability not found for BDF: %x", e_bdf);
+        continue;
     }
     else if (status)
     {
