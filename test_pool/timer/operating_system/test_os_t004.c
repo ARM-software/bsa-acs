@@ -20,6 +20,8 @@
 #include "val/common/include/acs_timer.h"
 #include "val/bsa/include/bsa_acs_wakeup.h"
 
+#include "val/common/include/acs_gic.h"
+#include "val/common/sys_arch_src/gic/v3/gic_v3.h"
 
 #define TEST_NUM   (ACS_TIMER_TEST_NUM_BASE + 4)
 #define TEST_RULE  "B_TIME_08"
@@ -84,11 +86,19 @@ payload()
           return;
       }
 
-      /* Install ISR */
       intid = val_timer_get_info(TIMER_INFO_SYS_INTID, timer_num);
+
+      /* Check intid is SPI or ESPI */
+      if (!(IsSpi(intid)) && !(val_gic_is_valid_espi(intid))) {
+          val_print(ACS_PRINT_ERR, "\n       Interrupt-%d is neither SPI nor ESPI", intid);
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+          return;
+      }
+
+      /* Install ISR */
       if (val_gic_install_isr(intid, isr)) {
           val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
           return;
       }
 
@@ -100,7 +110,7 @@ payload()
 
       if (timeout == 0) {
           val_print(ACS_PRINT_ERR, "\n       Sys timer interrupt not received on %d   ", intid);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
           return;
       }
   }

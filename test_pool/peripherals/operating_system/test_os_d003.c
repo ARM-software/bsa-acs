@@ -22,6 +22,7 @@
 
 #include "val/common/include/acs_peripherals.h"
 #include "val/common/include/acs_gic.h"
+#include "val/common/sys_arch_src/gic/v3/gic_v3.h"
 
 #define TEST_NUM   (ACS_PER_TEST_NUM_BASE + 3)
 #define TEST_RULE  "B_PER_05"
@@ -206,9 +207,17 @@ payload1()
               /* PASS will be set from ISR */
               val_set_status(index, RESULT_PENDING(TEST_NUM1));
 
+              /* Check int_id is SPI or ESPI */
+              if (!(IsSpi(int_id)) && !(val_gic_is_valid_espi(int_id))) {
+                 val_print(ACS_PRINT_ERR, "\n       Interrupt-%d is neither SPI nor ESPI", int_id);
+                 val_set_status(index, RESULT_FAIL(TEST_NUM1, 2));
+                 return;
+              }
+
+              /* Install ISR */
               if (val_gic_install_isr(int_id, isr)) {
                  val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
-                 val_set_status(index, RESULT_FAIL(TEST_NUM1, 2));
+                 val_set_status(index, RESULT_FAIL(TEST_NUM1, 3));
                  return;
               }
 
@@ -234,7 +243,7 @@ payload1()
   }
 
   if (test_fail)
-    val_set_status(index, RESULT_FAIL(TEST_NUM1, 3));
+    val_set_status(index, RESULT_FAIL(TEST_NUM1, 4));
   else
     val_set_status(index, RESULT_PASS(TEST_NUM1, 2));
 
