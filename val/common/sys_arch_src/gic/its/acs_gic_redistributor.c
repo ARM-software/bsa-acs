@@ -53,6 +53,8 @@ ArmGicSetItsConfigTableBase(
   write_value = val_mmio_read64(GicRedistributorBase + ARM_GICR_PROPBASER);
   write_value = write_value & (~ARM_GICR_PROPBASER_PA_MASK);
   write_value = write_value | (Address & ARM_GICR_PROPBASER_PA_MASK);
+  write_value = write_value & (~ARM_GICR_PROPBASER_ATTR_MASK);
+  write_value = write_value | (ARM_GICR_PROPBASER_ATTR_VALUE);
 
   val_mmio_write64(GicRedistributorBase + ARM_GICR_PROPBASER, write_value);
 
