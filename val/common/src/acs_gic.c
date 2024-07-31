@@ -73,10 +73,10 @@ val_gic_create_info_table(uint64_t *gic_info_table)
 
 #if !defined(SBSA) && !defined(DRTM)
   if (pal_target_is_dt())
-      val_bsa_gic_init();
+      val_gic_init();
 #endif
   if (pal_target_is_bm())
-      val_bsa_gic_init();
+      val_gic_init();
 
   return ACS_STATUS_PASS;
 }
@@ -418,26 +418,10 @@ val_gic_espi_supported(void)
 {
   uint32_t espi_support;
 
-  espi_support = val_bsa_gic_espi_support();
+  espi_support = val_gic_espi_support();
 
   val_print(ACS_PRINT_INFO, "\n    ESPI supported %d  ", espi_support);
   return espi_support;
-}
-
-/**
-  @brief   This API returns max extended SPI interrupt value
-  @param   None
-  @return  max extended spi int value
-**/
-uint32_t
-val_gic_max_espi_val(void)
-{
-  uint32_t max_espi_val;
-
-  max_espi_val = val_bsa_gic_max_espi_val();
-
-  val_print(ACS_PRINT_INFO, "\n    max ESPI value %d  ", max_espi_val);
-  return max_espi_val;
 }
 
 /**
@@ -448,7 +432,7 @@ val_gic_max_espi_val(void)
 uint32_t
 val_gic_is_valid_espi(uint32_t int_id)
 {
-  return val_bsa_gic_check_espi_interrupt(int_id);
+  return val_gic_check_espi_interrupt(int_id);
 }
 
 /**
@@ -459,7 +443,7 @@ val_gic_is_valid_espi(uint32_t int_id)
 uint32_t
 val_gic_is_valid_eppi(uint32_t int_id)
 {
-  return val_bsa_gic_check_eppi_interrupt(int_id);
+  return val_gic_check_eppi_interrupt(int_id);
 }
 
 /**
@@ -470,6 +454,6 @@ val_gic_is_valid_eppi(uint32_t int_id)
 uint32_t
 val_gic_is_valid_ppi(uint32_t int_id)
 {
-  return val_bsa_gic_check_ppi(int_id);
+  return val_gic_check_ppi(int_id);
 }
 

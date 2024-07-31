@@ -81,7 +81,7 @@ void val_gic_clear_interrupt(uint32_t int_id)
     uint32_t reg_shift  = int_id % 32;
 
     if (val_gic_is_valid_espi(int_id))
-      val_bsa_gic_clear_espi_interrupt(int_id);
+      val_gic_clear_espi_interrupt(int_id);
     else if ((int_id > 31) && (int_id < 1020)) {
         val_mmio_write(val_get_gicd_base() + GICD_ICPENDR0 + (4 * reg_offset),
                         ((uint32_t)1 << reg_shift));

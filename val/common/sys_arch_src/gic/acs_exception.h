@@ -32,7 +32,7 @@ void bsa_gic_end_intr(uint32_t interrupt_id);
 void bsa_gic_vector_table_init(void);
 uint32_t common_exception_handler(uint32_t exception_type);
 
-uint32_t val_gic_bsa_install_esr(uint32_t exception_type, void (*esr)(uint64_t, void *));
-uint32_t val_gic_bsa_install_isr(uint32_t interrupt_id, void (*isr)(void));
+uint32_t val_acs_install_esr(uint32_t exception_type, void (*esr)(uint64_t, void *));
+uint32_t val_acs_install_isr(uint32_t interrupt_id, void (*isr)(void));
 
 

@@ -35,7 +35,7 @@ static void default_irq_handler(uint64_t exception_type, void *context)
   (void) exception_type;
   (void) context;
 
-  iar_ack_val = val_bsa_gic_acknowledgeInterrupt();
+  iar_ack_val = val_gic_acknowledgeInterrupt();
   ack_interrupt = iar_ack_val & 0xFFFFFF;
 
   /* Call Interrupt handler if installed otherwise print err. */
@@ -48,7 +48,7 @@ static void default_irq_handler(uint64_t exception_type, void *context)
   }
 
   /* End Of Interrupt */
-  val_bsa_gic_endofInterrupt(ack_interrupt);
+  val_gic_endofInterrupt(ack_interrupt);
 
   return;
 }
@@ -61,24 +61,24 @@ void bsa_gic_vector_table_init(void)
   bsa_gic_set_el2_vector_table();
 
   /* Install Default handler for IRQ */
-  val_gic_bsa_install_esr(EXCEPT_AARCH64_IRQ, default_irq_handler);
+  val_acs_install_esr(EXCEPT_AARCH64_IRQ, default_irq_handler);
 }
 
-uint32_t val_gic_bsa_install_isr(uint32_t interrupt_id, void (*isr)(void))
+uint32_t val_acs_install_isr(uint32_t interrupt_id, void (*isr)(void))
 {
   /* Step 1: Disable Interrupt before registering Handler */
-  val_bsa_gic_disableInterruptSource(interrupt_id);
+  val_gic_disableInterruptSource(interrupt_id);
 
   /* Step 2: Register ISR for the particular interrupt */
   g_intr_handler[interrupt_id] = (irq_handler) isr;
 
   /* Step 3: Enable Interrupt */
-  val_bsa_gic_enableInterruptSource(interrupt_id);
+  val_gic_enableInterruptSource(interrupt_id);
 
   return 0;
 }
 
-uint32_t val_gic_bsa_install_esr(uint32_t exception_type, void (*esr)(uint64_t, void *))
+uint32_t val_acs_install_esr(uint32_t exception_type, void (*esr)(uint64_t, void *))
 {
   g_esr_handler[exception_type] = (bsa_fp) esr;
   return 0;

@@ -53,18 +53,18 @@
 #define PE_AFF3   (0xFFULL << 32)
 
 
-void val_bsa_gic_init(void);
-void val_bsa_gic_disableInterruptSource(uint32_t int_id);
-void val_bsa_gic_enableInterruptSource(uint32_t int_id);
-uint32_t val_bsa_gic_acknowledgeInterrupt(void);
-void val_bsa_gic_endofInterrupt(uint32_t int_id);
-uint32_t val_bsa_gic_espi_support(void);
-uint32_t val_bsa_gic_max_espi_val(void);
-uint32_t val_bsa_gic_check_espi_interrupt(uint32_t int_id);
-void val_bsa_gic_clear_espi_interrupt(uint32_t int_id);
-uint32_t val_bsa_gic_eppi_support(void);
-uint32_t val_bsa_gic_max_eppi_val(void);
-uint32_t val_bsa_gic_check_eppi_interrupt(uint32_t int_id);
-uint32_t val_bsa_gic_check_ppi(uint32_t int_id);
+void val_gic_init(void);
+void val_gic_disableInterruptSource(uint32_t int_id);
+void val_gic_enableInterruptSource(uint32_t int_id);
+uint32_t val_gic_acknowledgeInterrupt(void);
+void val_gic_endofInterrupt(uint32_t int_id);
+uint32_t val_gic_espi_support(void);
+uint32_t val_gic_max_espi_val(void);
+uint32_t val_gic_check_espi_interrupt(uint32_t int_id);
+void val_gic_clear_espi_interrupt(uint32_t int_id);
+uint32_t val_gic_eppi_support(void);
+uint32_t val_gic_max_eppi_val(void);
+uint32_t val_gic_check_eppi_interrupt(uint32_t int_id);
+uint32_t val_gic_check_ppi(uint32_t int_id);
 
 #endif /*__GIC_H__ */
