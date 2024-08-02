@@ -19,6 +19,9 @@
 #include "val/common/include/acs_val.h"
 #include "val/bsa/include/bsa_val_interface.h"
 
+#include "val/common/include/acs_gic.h"
+#include "val/common/sys_arch_src/gic/v3/gic_v3.h"
+
 #include "val/common/include/acs_wd.h"
 
 #define TEST_NUM   (ACS_WD_TEST_NUM_BASE + 2)
@@ -72,9 +75,17 @@ payload()
         int_id       = val_wd_get_info(wd_num, WD_INFO_GSIV);
         val_print(ACS_PRINT_DEBUG, "\n       WS0 Interrupt id  %d        ", int_id);
 
+        /* Check intid is SPI or ESPI */
+        if (!(IsSpi(int_id)) && !(val_gic_is_valid_espi(int_id))) {
+            val_print(ACS_PRINT_ERR, "\n       Interrupt-%d is neither SPI nor ESPI", int_id);
+            val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+            return;
+        }
+
+        /* Install ISR */
         if (val_gic_install_isr(int_id, isr)) {
             val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
-            val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+            val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
             return;
         }
 
@@ -87,7 +98,7 @@ payload()
         status = val_wd_set_ws0(wd_num, timer_expire_ticks);
         if (status) {
             val_print(ACS_PRINT_ERR, "\n       Setting watchdog timeout failed", 0);
-            val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
+            val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
             return;
         }
 
@@ -95,7 +106,7 @@ payload()
 
         if (timeout == 0) {
             val_print(ACS_PRINT_ERR, "\n       WS0 Interrupt not received on %d   ", int_id);
-            val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
+            val_set_status(index, RESULT_FAIL(TEST_NUM, 5));
             return;
         }
 
@@ -104,7 +115,7 @@ payload()
     if (!ns_wdg) {
         if (g_build_sbsa) {
             val_print(ACS_PRINT_ERR, "\n       No non-secure Watchdogs reported", 0);
-            val_set_status(index, RESULT_FAIL(TEST_NUM, 5));
+            val_set_status(index, RESULT_FAIL(TEST_NUM, 6));
         } else {
             val_print(ACS_PRINT_WARN, "\n       No non-secure Watchdogs reported", 0);
             val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
