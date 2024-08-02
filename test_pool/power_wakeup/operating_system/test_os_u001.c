@@ -324,6 +324,7 @@ payload5()
           val_timer_set_system_timer((addr_t)cnt_base_n, timer_expire_val);
           val_power_enter_semantic(BSA_POWER_SEM_B);
           wakeup_clear_failsafe();
+          return;
       } else{
           val_print(ACS_PRINT_WARN, "\n       GIC Install Handler Failed...", 0);
           val_set_status(index, RESULT_FAIL(TEST_NUM5, 1));
