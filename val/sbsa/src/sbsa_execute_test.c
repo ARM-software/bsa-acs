@@ -368,6 +368,10 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
     status |= p066_entry(num_pe);
 #endif
 
+#ifndef TARGET_LINUX
+  status |= p067_entry(num_pe); /* iEP/RP only */
+#endif
+
   val_print_test_end(status, "PCIe");
 
   return status;
