@@ -28,7 +28,7 @@
   @param  int id
   @return true if SPI
 **/
-static uint32_t
+uint32_t
 IsSpi(uint32_t int_id)
 {
   if (int_id >= 32 && int_id < 1020)
