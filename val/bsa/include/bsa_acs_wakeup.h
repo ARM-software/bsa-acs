@@ -20,6 +20,10 @@
 
 uint32_t os_u001_entry(uint32_t num_pe);
 uint32_t os_u002_entry(uint32_t num_pe);
+uint32_t os_u003_entry(uint32_t num_pe);
+uint32_t os_u004_entry(uint32_t num_pe);
+uint32_t os_u005_entry(uint32_t num_pe);
+uint32_t os_u006_entry(uint32_t num_pe);
 
 #endif
 

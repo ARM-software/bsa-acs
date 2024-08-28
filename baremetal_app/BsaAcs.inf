@@ -121,6 +121,10 @@
   ../test_pool/smmu/hypervisor/test_hyp_i004.c
   ../test_pool/power_wakeup/operating_system/test_os_u001.c
   ../test_pool/power_wakeup/operating_system/test_os_u002.c
+  ../test_pool/power_wakeup/operating_system/test_os_u003.c
+  ../test_pool/power_wakeup/operating_system/test_os_u004.c
+  ../test_pool/power_wakeup/operating_system/test_os_u005.c
+  ../test_pool/power_wakeup/operating_system/test_os_u006.c
   ../test_pool/peripherals/operating_system/test_os_d001.c
   ../test_pool/peripherals/operating_system/test_os_d002.c
   ../test_pool/peripherals/operating_system/test_os_d003.c
