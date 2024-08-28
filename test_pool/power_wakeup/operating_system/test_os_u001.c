@@ -21,10 +21,10 @@
 
 #include "val/bsa/include/bsa_acs_wakeup.h"
 
-#define TEST_NUM1  (ACS_WAKEUP_TEST_NUM_BASE + 1)
-#define TEST_RULE1 "B_WAK_01, B_WAK_02, B_WAK_03, B_WAK_04, B_WAK_05 \
+#define TEST_NUM  (ACS_WAKEUP_TEST_NUM_BASE + 1)
+#define TEST_RULE "B_WAK_01, B_WAK_02, B_WAK_03, B_WAK_04, B_WAK_05 \
                     \n       B_WAK_06, B_WAK_07, B_WAK_10, B_WAK_11"
-#define TEST_DESC1 "Wake from EL1 PHY Timer Int           "
+#define TEST_DESC "Wake from EL1 PHY Timer Int           "
 
 extern uint32_t g_wakeup_timeout;
 static uint32_t g_el1phy_int_received;
@@ -39,7 +39,7 @@ isr1()
   val_timer_set_phy_el1(0);
   val_print(ACS_PRINT_INFO, "       Received EL1 PHY interrupt\n", 0);
   g_el1phy_int_received = 1;
-  val_set_status(index, RESULT_PASS(TEST_NUM1, 1));
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
   val_gic_end_of_interrupt(intid);
 }
@@ -56,7 +56,7 @@ payload1()
   intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
   if (val_gic_install_isr(intid, isr1)) {
     val_print(ACS_PRINT_WARN, "\n       GIC Install Handler Failed...", 0);
-    val_set_status(index, RESULT_FAIL(TEST_NUM1, 2));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
     return;
   }
   g_el1phy_int_received = 0;
@@ -81,7 +81,7 @@ payload1()
       intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
       val_gic_end_of_interrupt(intid);
       val_print(ACS_PRINT_DEBUG, "\n       PE wakeup by some other events/int", 0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM1, 2));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
   }
   val_print(ACS_PRINT_INFO, "\n       delay loop remainig value %d", delay_loop);
   return;
@@ -95,14 +95,14 @@ os_u001_entry(uint32_t num_pe)
   num_pe = 1;  //This Timer test is run on single processor
 
   if (!g_el1physkip) {
-      status = val_initialize_test(TEST_NUM1, TEST_DESC1, num_pe);
+      status = val_initialize_test(TEST_NUM, TEST_DESC, num_pe);
 
       if (status != ACS_STATUS_SKIP)
-          val_run_test_payload(TEST_NUM1, num_pe, payload1, 0);
+          val_run_test_payload(TEST_NUM, num_pe, payload1, 0);
 
-      status = val_check_for_error(TEST_NUM1, num_pe, TEST_RULE1);
+      status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
 
-      val_report_status(0, ACS_END(TEST_NUM1), NULL);
+      val_report_status(0, ACS_END(TEST_NUM), NULL);
 
   }
   return status;
