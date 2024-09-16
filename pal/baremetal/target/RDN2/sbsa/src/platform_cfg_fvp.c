@@ -719,6 +719,8 @@ PLATFORM_OVERRIDE_MPAM_INFO_TABLE platform_mpam_cfg = {
 
     /* Example : MPAM MSC Blocks to be filled */
     /*
+    .msc_node[0].intrf_type    = PLATFORM_MPAM_MSC0_INTR_TYPE,
+    .msc_node[0].identifier    = PLATFORM_MPAM_MSC0_ID,
     .msc_node[0].msc_base_addr = PLATFORM_MPAM_MSC0_BASE_ADDR,
     .msc_node[0].msc_addr_len  = PLATFORM_MPAM_MSC0_ADDR_LEN,
     .msc_node[0].max_nrdy      = PLATFORM_MPAM_MSC0_MAX_NRDY,
@@ -728,5 +730,36 @@ PLATFORM_OVERRIDE_MPAM_INFO_TABLE platform_mpam_cfg = {
     .msc_node[0].rsrc_node[0].locator_type  = PLATFORM_MPAM_MSC0_RSRC0_LOCATOR_TYPE,
     .msc_node[0].rsrc_node[0].descriptor1   = PLATFORM_MPAM_MSC0_RSRC0_DESCRIPTOR1,
     .msc_node[0].rsrc_node[0].descriptor2   = PLATFORM_MPAM_MSC0_RSRC0_DESCRIPTOR2,
+    */
+};
+
+PLATFORM_OVERRIDE_PCC_INFO_TABLE platform_pcc_cfg = {
+    .subspace_cnt = PLATFORM_PCC_SUBSPACE_COUNT,
+
+    /* Example : PCC information to be filled */
+    /*
+    .pcc_info[0].subspace_idx  = PLATFORM_PCC_SUBSPACE0_INDEX,
+    .pcc_info[0].subspace_type = PLATFORM_PCC_SUBSPACE0_TYPE,
+
+    .pcc_info[0].type_spec_info.pcc_ss_type_3.base_addr
+                                                 = PLATFORM_PCC_SUBSPACE0_BASE,
+    .pcc_info[0].type_spec_info.pcc_ss_type_3.doorbell_reg
+                                                = PLATFORM_PCC_SUBSPACE0_DOORBELL_REG,
+    .pcc_info[0].type_spec_info.pcc_ss_type_3.doorbell_preserve
+                                                = PLATFORM_PCC_SUBSPACE0_DOORBELL_PRESERVE,
+    .pcc_info[0].type_spec_info.pcc_ss_type_3.doorbell_write
+                                                = PLATFORM_PCC_SUBSPACE0_DOORBELL_WRITE,
+    .pcc_info[0].type_spec_info.pcc_ss_type_3.min_req_turnaround_usec
+                                                = PLATFORM_PCC_SUBSPACE0_MIN_REQ_TURN_TIME,
+    .pcc_info[0].type_spec_info.pcc_ss_type_3.cmd_complete_chk_reg
+                                                = PLATFORM_PCC_SUBSPACE0_CMD_COMPLETE_CHK_REG,
+    .pcc_info[0].type_spec_info.pcc_ss_type_3.cmd_complete_chk_mask
+                                                = PLATFORM_PCC_SUBSPACE0_CMD_COMPLETE_CHK_MASK,
+    .pcc_info[0].type_spec_info.pcc_ss_type_3.cmd_complete_update_reg
+                                                = PLATFORM_PCC_SUBSPACE0_CMD_COMPLETE_UPDATE_REG,
+    .pcc_info[0].type_spec_info.pcc_ss_type_3.cmd_complete_update_preserve
+                                                = PLATFORM_PCC_SUBSPACE0_CMD_UPDATE_PRESERVE,
+    .pcc_info[0].type_spec_info.pcc_ss_type_3.cmd_complete_update_set
+                                                = PLATFORM_PCC_SUBSPACE0_CMD_COMPLETE_UPDATE_SET
     */
 };

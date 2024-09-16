@@ -179,6 +179,8 @@ typedef struct {
 } PLATFORM_OVERRIDE_MPAM_RESOURCE_NODE;
 
 typedef struct {
+    uint8_t     intrf_type;    /* type of interface to this MPAM MSC */
+    uint32_t    identifier;    /* unique id to reference the node */
     uint64_t    msc_base_addr; /* base addr of mem-map MSC reg */
     uint32_t    msc_addr_len;  /*  MSC mem map size */
     uint32_t    max_nrdy;      /* max time in microseconds that MSC not ready
@@ -193,3 +195,45 @@ typedef struct {
     PLATFORM_OVERRIDE_MPAM_MSC_NODE   msc_node[MPAM_MAX_MSC_NODE]; /* Details of MSC node */
 } PLATFORM_OVERRIDE_MPAM_INFO_TABLE;
 
+/* Platform Communication Channel (PCC) info table */
+#ifndef GAS_STRUCT
+#define GAS_STRUCT
+typedef struct {
+  uint8_t   addr_space_id;
+  uint8_t   reg_bit_width;
+  uint8_t   reg_bit_offset;
+  uint8_t   access_size;
+  uint64_t  addr;
+} GENERIC_ADDRESS_STRUCTURE;
+#endif
+
+typedef struct {
+  uint64_t                         base_addr;               /* base addr of shared mem-region */
+  GENERIC_ADDRESS_STRUCTURE        doorbell_reg;            /* doorbell register */
+  uint64_t                         doorbell_preserve;       /* doorbell register preserve mask */
+  uint64_t                         doorbell_write;          /* doorbell register set mask */
+  uint32_t                         min_req_turnaround_usec; /* minimum request turnaround time */
+  GENERIC_ADDRESS_STRUCTURE        cmd_complete_chk_reg;    /* command complete check register */
+  uint64_t                         cmd_complete_chk_mask;   /* command complete check mask */
+  GENERIC_ADDRESS_STRUCTURE        cmd_complete_update_reg; /* command complete update register */
+  uint64_t                         cmd_complete_update_preserve;
+                                                            /* command complete update preserve */
+  uint64_t                         cmd_complete_update_set; /* command complete update set mask */
+} PLATFORM_OVERRIDE_PCC_SUBSPACE_TYPE_3;
+
+typedef union {
+  PLATFORM_OVERRIDE_PCC_SUBSPACE_TYPE_3 pcc_ss_type_3; /* PCC type 3 info */
+} PLATFORM_OVERRIDE_PCC_TYPE_SPECIFIC_INFO;
+
+typedef struct {
+  uint32_t                 subspace_idx;    /* PCC subspace index in PCCT ACPI table */
+  uint32_t                 subspace_type;   /* type of PCC subspace */
+  PLATFORM_OVERRIDE_PCC_TYPE_SPECIFIC_INFO
+                           type_spec_info;  /* PCC subspace type specific info */
+} PLATFORM_OVERRIDE_PCC_INFO;
+
+typedef struct {
+  uint32_t                    subspace_cnt; /* number of PCC subspace info stored */
+  PLATFORM_OVERRIDE_PCC_INFO  pcc_info[PLATFORM_PCC_SUBSPACE_COUNT];
+                                            /* array of PCC info blocks */
+} PLATFORM_OVERRIDE_PCC_INFO_TABLE;

@@ -132,6 +132,8 @@ pal_mpam_create_info_table(MPAM_INFO_TABLE *MpamTable)
 
   for (Index = 0; Index < platform_mpam_cfg.msc_count; Index++)
   {
+      curr_entry->identifier    = platform_mpam_cfg.msc_node[Index].identifier;
+      curr_entry->intrf_type    = platform_mpam_cfg.msc_node[Index].intrf_type;
       curr_entry->msc_base_addr = platform_mpam_cfg.msc_node[Index].msc_base_addr;
       curr_entry->msc_addr_len  = platform_mpam_cfg.msc_node[Index].msc_addr_len;
       curr_entry->max_nrdy      = platform_mpam_cfg.msc_node[Index].max_nrdy;

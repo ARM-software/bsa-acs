@@ -55,13 +55,17 @@ typedef struct {
 /*
  * @brief Mpam MSC Node
  */
+
 typedef struct {
-    uint64_t    msc_base_addr; /* base addr of mem-map MSC reg */
-    uint32_t    msc_addr_len;  /*  MSC mem map size */
+    uint8_t     intrf_type;     /* type of interface to this MPAM MSC */
+    uint32_t    identifier;    /* unique id to reference the node */
+    uint64_t    msc_base_addr; /* base addr of mem-mapped reg space or PCC
+                                  subspace ID based on interface type. */
+    uint32_t    msc_addr_len;  /* MSC mem map size */
     uint32_t    max_nrdy;      /* max time in microseconds that MSC not ready
-                                after config change */
+                                  after config change */
     uint32_t    rsrc_count;    /* number of resource nodes */
-    MPAM_RESOURCE_NODE rsrc_node[]; /* Details of resource node */
+    MPAM_RESOURCE_NODE rsrc_node[];   /* Details of resource node */
 } MPAM_MSC_NODE;
 
 /*
@@ -292,23 +296,26 @@ typedef struct {
 void pal_hmat_create_info_table(HMAT_INFO_TABLE *HmatTable);
 
 /* Platform Communication Channel (PCC) info table */
+#ifndef GAS_STRUCT
+#define GAS_STRUCT
 typedef struct {
   uint8_t   addr_space_id;
   uint8_t   reg_bit_width;
   uint8_t   reg_bit_offset;
   uint8_t   access_size;
   uint64_t  addr;
-} ACPI_GENERIC_ADDRESS_STRUCTURE;
+} GENERIC_ADDRESS_STRUCTURE;
+#endif
 
 typedef struct {
   uint64_t                         base_addr;               /* base addr of shared mem-region */
-  ACPI_GENERIC_ADDRESS_STRUCTURE   doorbell_reg;            /* doorbell register */
+  GENERIC_ADDRESS_STRUCTURE        doorbell_reg;            /* doorbell register */
   uint64_t                         doorbell_preserve;       /* doorbell register preserve mask */
   uint64_t                         doorbell_write;          /* doorbell register set mask */
   uint32_t                         min_req_turnaround_usec; /* minimum request turnaround time */
-  ACPI_GENERIC_ADDRESS_STRUCTURE   cmd_complete_chk_reg;    /* command complete check register */
+  GENERIC_ADDRESS_STRUCTURE        cmd_complete_chk_reg;    /* command complete check register */
   uint64_t                         cmd_complete_chk_mask;   /* command complete check mask */
-  ACPI_GENERIC_ADDRESS_STRUCTURE   cmd_complete_update_reg; /* command complete update register */
+  GENERIC_ADDRESS_STRUCTURE        cmd_complete_update_reg; /* command complete update register */
   uint64_t                         cmd_complete_update_preserve;
                                                             /* command complete update preserve */
   uint64_t                         cmd_complete_update_set; /* command complete update set mask */
@@ -369,6 +376,7 @@ typedef struct {
 #define RETURN_FAILURE         0xFFFFFFFF
 #define PCC_TY3_CMD_OFFSET     12
 #define PCC_TY3_COMM_SPACE     16
+#define PCCT_SUBSPACE_TYPE_3_EXTENDED_PCC 0x03
 
 void pal_pcc_create_info_table(PCC_INFO_TABLE *PccInfoTable);
 
