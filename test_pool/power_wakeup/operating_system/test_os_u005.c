@@ -151,6 +151,7 @@ payload5()
               val_print(ACS_PRINT_DEBUG, "\n       PE wakeup by some other events/int or didn't enter WFI", 0);
           }
           val_print(ACS_PRINT_INFO, "\n       delay loop remainig value %d", delay_loop);
+	  return;
 
       } else{
           val_print(ACS_PRINT_WARN, "\n       GIC Install Handler Failed...", 0);
