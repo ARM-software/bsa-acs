@@ -26,7 +26,9 @@ uint32_t pcie_index = 0, enumerate = 1;
 uint64_t g_bar64_p_start;
 uint64_t g_rp_bar64_value;
 uint64_t g_bar64_p_max;
-uint32_t g_64_bus, g_bar64_size;
+uint32_t g_64_bus = 0;
+uint32_t g_bar64_size = 0;
+uint32_t g_rp_bar64_size = 0;
 
 /*32-bit address initialisation*/
 uint32_t g_bar32_np_start;
@@ -36,6 +38,7 @@ uint32_t g_bar32_np_max;
 uint32_t g_bar32_p_max;
 uint32_t g_np_bar_size = 0, g_p_bar_size = 0;
 uint32_t g_np_bus = 0, g_p_bus = 0;
+uint32_t g_rp_bar32_size = 0;
 
 /**
   @brief   This API reads 32-bit data from PCIe config space pointed by Bus,
@@ -111,7 +114,8 @@ get_resource_base_32(uint32_t bus, uint32_t dev, uint32_t func, uint32_t bar32_p
   uint32_t mem_bar_p;
 
   /*Update the 32 bit NP-BAR start address for the next iteration*/
-  if (bar32_np_base != g_bar32_np_start)
+  if ((bar32_np_base != g_bar32_np_start) ||
+       ((bar32_np_base == g_bar32_np_start) && (g_np_bar_size != 0)))
   {
       if ((g_bar32_np_start << 12) != 0)
           g_bar32_np_start  = (g_bar32_np_start & MEM_BASE32_LIM_MASK) + BAR_INCREMENT;
@@ -123,7 +127,8 @@ get_resource_base_32(uint32_t bus, uint32_t dev, uint32_t func, uint32_t bar32_p
    }
 
   /*Update the 32 bit P-BAR start address for the next iteration*/
-  if (bar32_p_base != g_bar32_p_start)
+  if ((bar32_p_base != g_bar32_p_start) ||
+      ((bar32_p_base == g_bar32_p_start) && (g_p_bar_size != 0)))
   {
       if ((g_bar32_p_start  << 12) != 0)
           g_bar32_p_start  = (g_bar32_p_start & MEM_BASE32_LIM_MASK) + BAR_INCREMENT;
@@ -161,7 +166,8 @@ get_resource_base_64(uint32_t bus, uint32_t dev, uint32_t func, uint64_t bar64_p
   uint32_t mem_bar_p = ((bar64_p_lower32_limit << 16) | bar64_p_lower32_base);
 
   /*Configure Memory base and Memory limit register*/
-  if ((bar64_p_base != g_bar64_p_max) && (g_bar64_p_start <= g_bar64_p_max))
+  if ((bar64_p_base != g_bar64_p_start) ||
+      ((bar64_p_base == g_bar64_p_start) && (g_bar64_size != 0)))
   {
       if ((g_bar64_p_start  << 12) != 0)
           g_bar64_p_start  = (g_bar64_p_start & MEM_BASE64_LIM_MASK) + BAR_INCREMENT;
@@ -187,7 +193,7 @@ pal_pcie_rp_program_bar(uint32_t bus, uint32_t dev, uint32_t func)
       pal_pci_cfg_read(bus, dev, func, offset, &bar_reg_value);
       if (BAR_REG(bar_reg_value) == BAR_64_BIT)
       {
-          print(ACS_PRINT_INFO, "The BAR supports P_MEM 64-bit addr decoding capability\n", 0);
+          print(ACS_PRINT_INFO, "The RP BAR supports P_MEM 64-bit addr decoding capability\n", 0);
 
           /** BAR supports 64-bit address therefore, write all 1's
             *  to BARn and BARn+1 and identify the size requested
@@ -212,11 +218,13 @@ pal_pcie_rp_program_bar(uint32_t bus, uint32_t dev, uint32_t func)
           pal_pci_cfg_write(bus, dev, func, offset, g_rp_bar64_value);
           pal_pci_cfg_write(bus, dev, func, offset + 4, g_rp_bar64_value >> 32);
           offset = offset + 8;
+	  g_rp_bar64_size = bar_size;
+	  g_rp_bar64_value = g_rp_bar64_value + g_rp_bar64_size;
       }
 
       else
       {
-          print(ACS_PRINT_INFO, "The BAR supports P_MEM 32-bit addr decoding capability\n", 0);
+          print(ACS_PRINT_INFO, "The RP BAR supports P_MEM 32-bit addr decoding capability\n", 0);
 
           /**BAR supports 32-bit address. Write all 1's
            * to BARn and identify the size requested
@@ -236,6 +244,8 @@ pal_pcie_rp_program_bar(uint32_t bus, uint32_t dev, uint32_t func)
           print(ACS_PRINT_INFO, "Value written to BAR register is %x\n", g_rp_bar32_value);
           g_rp_bar32_value = g_rp_bar32_value + bar_size;
           offset = offset + 4;
+	  g_rp_bar32_size = bar_size;
+	  g_rp_bar32_value = g_rp_bar32_value + g_rp_bar32_size;
       }
   }
 
@@ -498,6 +508,10 @@ uint32_t pal_pcie_enumerate_device(uint32_t bus, uint32_t sec_bus)
             bar32_p_base = g_bar32_p_start;
             bar32_np_base = g_bar32_np_start;
             bar64_p_base = g_bar64_p_start;
+
+            g_np_bar_size = 0;
+            g_p_bar_size = 0;
+            g_bar64_size = 0;
         }
 
         if (PCIE_HEADER_TYPE(header_value) == TYPE0_HEADER)
@@ -555,7 +569,7 @@ pal_clear_pri_bus()
 void pal_pcie_enumerate(void)
 {
     uint32_t pri_bus, sec_bus;
-    uint32_t hb_count = 0, count = 0;
+    uint32_t hb_count = 0, count;
     if (g_pcie_info_table->num_entries == 0)
     {
          print(ACS_PRINT_TEST, "\nSkipping Enumeration", 0);
@@ -566,6 +580,7 @@ void pal_pcie_enumerate(void)
     while (pcie_index < g_pcie_info_table->num_entries)
     {
        hb_count = platform_root_pcie_cfg.block[pcie_index].hb_enteries;
+       count = 0;
        while (count < hb_count)
        {
            /* Initiliase the P and NP BAR addresses for the hierarchies*/
@@ -579,9 +594,9 @@ void pal_pcie_enumerate(void)
            sec_bus = pri_bus + 1;
            pal_pcie_enumerate_device(pri_bus, sec_bus);
            pal_clear_pri_bus();
-           pcie_index++;
            count++;
        }
+       pcie_index++;
     }
     enumerate = 0;
     pcie_index = 0;
