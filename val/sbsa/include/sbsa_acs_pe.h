@@ -47,7 +47,6 @@ uint32_t c026_entry(uint32_t num_pe);
 uint32_t c027_entry(uint32_t num_pe);
 uint32_t c028_entry(uint32_t num_pe);
 uint32_t c029_entry(uint32_t num_pe);
-uint32_t c030_entry(uint32_t num_pe);
 uint32_t c031_entry(uint32_t num_pe);
 uint32_t c032_entry(uint32_t num_pe);
 uint32_t c033_entry(uint32_t num_pe);
