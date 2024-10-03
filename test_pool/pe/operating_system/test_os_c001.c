@@ -23,7 +23,7 @@
 #define TEST_RULE  "B_PE_01"
 #define TEST_DESC  "Check Arch symmetry across PE         "
 
-#define NUM_OF_REGISTERS  32
+#define NUM_OF_REGISTERS  37
 
 #define RAS               1
 #define SPE               2
@@ -67,7 +67,7 @@ reg_details reg_list[] = {
     {ID_AA64DFR1_EL1,  0x0,            "ID_AA64DFR1_EL1" , 0x0 },
     {ID_AA64MMFR0_EL1, MASK_AA64MMFR0, "ID_AA64MMFR0_EL1", 0x0 },
     {ID_AA64MMFR1_EL1, 0x0,            "ID_AA64MMFR1_EL1", 0x0 },
-  //{ID_AA64MMFR2_EL1, 0x0,            "ID_AA64MMFR2_EL1", 0x0 },
+    {ID_AA64MMFR2_EL1, 0x0,            "ID_AA64MMFR2_EL1", 0x0 },
     {CTR_EL0,          MASK_CTR,       "CTR_EL0"         , 0x0 },
     {ID_AA64ISAR0_EL1, 0x0,            "ID_AA64ISAR0_EL1", 0x0 },
     {ID_AA64ISAR1_EL1, 0x0,            "ID_AA64ISAR1_EL1", 0x0 },
@@ -95,10 +95,6 @@ reg_details reg_list[] = {
     {PMBIDR_EL1,       0x0,            "PMBIDR_EL1"      , SPE },
     {PMSIDR_EL1,       0x0,            "PMSIDR_EL1"      , SPE },
     {ERRIDR_EL1,       0x0,            "ERRIDR_EL1"      , RAS },
-    {ERR0FR_EL1,       0x0,            "ERR0FR_EL1"      , RAS },
-    {ERR1FR_EL1,       0x0,            "ERR1FR_EL1"      , RAS },
-    {ERR2FR_EL1,       0x0,            "ERR2FR_EL1"      , RAS },
-    {ERR3FR_EL1,       0x0,            "ERR3FR_EL1"      , RAS },
     {LORID_EL1,        0x0,            "LORID_EL1"       , LOR }
 };
 

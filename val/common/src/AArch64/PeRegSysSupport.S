@@ -332,7 +332,7 @@ ASM_PFX(ArmReadMmfr3):
   ret
 
 ASM_PFX(ArmReadMmfr4):
-  //mrs   x0, id_mmfr4_el1
+  mrs   x0, id_mmfr4_el1
   ret
 
 ASM_PFX(ArmReadPfr0):
@@ -380,15 +380,15 @@ ASM_PFX(AA64ReadPmbidr):
   ret
 
 ASM_PFX(AA64ReadPmsidr):
-  //mrs   x0, pmsidr_el1
+  mrs   x0, pmsidr_el1
   ret
 
 ASM_PFX(AA64ReadLorid):
-  //mrs   x0, lorid_el1
+  mrs   x0, lorid_el1
   ret
 
 ASM_PFX(AA64ReadErridr):
-  //mrs   x0, erridr_el1
+  mrs   x0, erridr_el1
   ret
 
 ASM_PFX(AA64ReadErr0fr):
