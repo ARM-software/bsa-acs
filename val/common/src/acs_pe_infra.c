@@ -84,6 +84,11 @@ val_pe_create_info_table(uint64_t *pe_info_table)
       return ACS_STATUS_ERR;
   }
 
+  #ifndef TARGET_LINUX
+  val_print(ACS_PRINT_TEST, " Primary PE: MIDR_EL1                 :    0x%llx \n",
+                                                                     val_pe_reg_read(MIDR_EL1));
+  #endif
+
   /* store primary PE index for debug message printing purposes on
      multi PE tests */
   g_primary_pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
