@@ -47,6 +47,7 @@
   sbsa/src/pal_sbsa_pptt.c
   sbsa/src/pal_sbsa_pmu.c
   sbsa/src/pal_sbsa_exerciser.c
+  sbsa/src/pal_sbsa_pcc.c
 
 [Packages]
   ArmPkg/ArmPkg.dec

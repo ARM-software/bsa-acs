@@ -99,7 +99,12 @@ void val_mpam_csumon_enable(uint32_t msc_index);
 void val_mpam_csumon_disable(uint32_t msc_index);
 uint32_t val_mpam_read_csumon(uint32_t msc_index);
 uint64_t val_srat_get_prox_domain(uint64_t mem_range_index);
-
+uint32_t val_mpam_mmr_read(uint32_t msc_index, uint32_t reg_offset);
+uint64_t val_mpam_mmr_read64(uint32_t msc_index, uint32_t reg_offset);
+void     val_mpam_mmr_write(uint32_t msc_index, uint32_t reg_offset, uint32_t data);
+void     val_mpam_mmr_write64(uint32_t msc_index, uint32_t reg_offset, uint64_t data);
+uint32_t val_mpam_pcc_read(uint32_t msc_index, uint32_t reg_offset);
+void     val_mpam_pcc_write(uint32_t msc_index, uint32_t reg_offset, uint32_t data);
 
 
 uint32_t mpam001_entry(uint32_t num_pe);

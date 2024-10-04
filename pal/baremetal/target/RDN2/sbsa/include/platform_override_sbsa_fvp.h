@@ -660,6 +660,8 @@
 #define MPAM_MAX_RSRC_NODE                    0x0
 #define PLATFORM_MPAM_MSC_COUNT               0x0
 
+#define PLATFORM_MPAM_MSC0_INTR_TYPE          0x0
+#define PLATFORM_MPAM_MSC0_ID                 0x3
 #define PLATFORM_MPAM_MSC0_BASE_ADDR          0x1010028000
 #define PLATFORM_MPAM_MSC0_ADDR_LEN           0x2004
 #define PLATFORM_MPAM_MSC0_MAX_NRDY           10000000
@@ -670,4 +672,23 @@
 #define PLATFORM_MPAM_MSC0_RSRC0_DESCRIPTOR1  0x0
 #define PLATFORM_MPAM_MSC0_RSRC0_DESCRIPTOR2  0x0
 
+
+/* PCC Config */
+/* Following values are for placeholding purpose, doesn't correspond to RDN2 system */
+#define PLATFORM_PCC_SUBSPACE_COUNT                         0x0
+#define PLATFORM_PCC_SUBSPACE0_INDEX                        0x0
+#define PLATFORM_PCC_SUBSPACE0_TYPE                         0x3
+#define PLATFORM_PCC_SUBSPACE0_BASE                         0x0
+#define PLATFORM_PCC_SUBSPACE0_DOORBELL_PRESERVE            0x0
+#define PLATFORM_PCC_SUBSPACE0_DOORBELL_WRITE               0x0
+#define PLATFORM_PCC_SUBSPACE0_MIN_REQ_TURN_TIME            0x0
+#define PLATFORM_PCC_SUBSPACE0_CMD_COMPLETE_CHK_MASK        0x0
+#define PLATFORM_PCC_SUBSPACE0_CMD_UPDATE_PRESERVE          0x0
+#define PLATFORM_PCC_SUBSPACE0_CMD_COMPLETE_UPDATE_SET      0x0
+
+/* Following fields follow GENERIC_ADDRESS_STRUCTURE
+   defined in platform_override_sbsa_struct.h */
+#define PLATFORM_PCC_SUBSPACE0_DOORBELL_REG                 {0x0, 0x0, 0x0, 0x0, 0xDEADDEAD}
+#define PLATFORM_PCC_SUBSPACE0_CMD_COMPLETE_UPDATE_REG      {0x0, 0x0, 0x0, 0x0, 0xDEADDEAD}
+#define PLATFORM_PCC_SUBSPACE0_CMD_COMPLETE_CHK_REG         {0x0, 0x0, 0x0, 0x0, 0xDEADDEAD}
 /** End config **/

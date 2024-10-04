@@ -129,6 +129,10 @@ val_mpam_get_info(MPAM_INFO_e type, uint32_t msc_index, uint32_t rsrc_index)
               return msc_entry->msc_addr_len;
           case MPAM_MSC_NRDY:
               return msc_entry->max_nrdy;
+          case MPAM_MSC_ID:
+              return msc_entry->identifier;
+          case MPAM_MSC_INTERFACE_TYPE:
+              return msc_entry->intrf_type;
           default:
               val_print(ACS_PRINT_ERR,
                        "\n   This MPAM info option for type %d is not supported", type);
@@ -273,10 +277,7 @@ val_mpam_get_msc_count(void)
 uint32_t
 val_mpam_msc_get_version(uint32_t msc_index)
 {
-    addr_t base;
-
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
-    return BITFIELD_READ(AIDR_VERSION, val_mmio_read(base + REG_MPAMF_AIDR));
+    return BITFIELD_READ(AIDR_VERSION, val_mpam_mmr_read(msc_index, REG_MPAMF_AIDR));
 }
 
 /**
@@ -287,10 +288,7 @@ val_mpam_msc_get_version(uint32_t msc_index)
 uint32_t
 val_mpam_msc_supports_mon(uint32_t msc_index)
 {
-    addr_t base;
-
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
-    return BITFIELD_READ(IDR_HAS_MSMON, val_mmio_read64(base + REG_MPAMF_IDR));
+    return BITFIELD_READ(IDR_HAS_MSMON, val_mpam_mmr_read64(msc_index, REG_MPAMF_IDR));
 }
 
 /**
@@ -301,10 +299,7 @@ val_mpam_msc_supports_mon(uint32_t msc_index)
 uint32_t
 val_mpam_supports_cpor(uint32_t msc_index)
 {
-    addr_t base;
-
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
-    return BITFIELD_READ(IDR_HAS_CPOR_PART, val_mmio_read64(base + REG_MPAMF_IDR));
+    return BITFIELD_READ(IDR_HAS_CPOR_PART, val_mpam_mmr_read64(msc_index, REG_MPAMF_IDR));
 }
 
 /**
@@ -316,10 +311,7 @@ val_mpam_supports_cpor(uint32_t msc_index)
 uint32_t
 val_mpam_msc_supports_ris(uint32_t msc_index)
 {
-    addr_t base;
-
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
-    return BITFIELD_READ(IDR_HAS_RIS, val_mmio_read64(base + REG_MPAMF_IDR));
+    return BITFIELD_READ(IDR_HAS_RIS, val_mpam_mmr_read64(msc_index, REG_MPAMF_IDR));
 }
 
 /**
@@ -333,11 +325,9 @@ val_mpam_msc_supports_ris(uint32_t msc_index)
 uint32_t
 val_mpam_msc_supports_mbwumon(uint32_t msc_index)
 {
-    addr_t base;
-
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
     if (val_mpam_msc_supports_mon(msc_index))
-        return BITFIELD_READ(MSMON_IDR_MSMON_MBWU, val_mmio_read(base + REG_MPAMF_MSMON_IDR));
+        return BITFIELD_READ(MSMON_IDR_MSMON_MBWU,
+                   val_mpam_mmr_read(msc_index, REG_MPAMF_MSMON_IDR));
     else
         return 0;
 }
@@ -378,10 +368,8 @@ val_mpam_msc_get_mscbw(uint32_t msc_index, uint32_t rsrc_index)
 uint32_t
 val_mpam_mbwu_supports_long(uint32_t msc_index)
 {
-    addr_t base;
-
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
-    return BITFIELD_READ(MBWUMON_IDR_HAS_LONG, val_mmio_read(base + REG_MPAMF_MBWUMON_IDR));
+    return BITFIELD_READ(MBWUMON_IDR_HAS_LONG,
+                val_mpam_mmr_read(msc_index, REG_MPAMF_MBWUMON_IDR));
 }
 
 /**
@@ -392,10 +380,7 @@ val_mpam_mbwu_supports_long(uint32_t msc_index)
 uint32_t
 val_mpam_mbwu_supports_lwd(uint32_t msc_index)
 {
-    addr_t base;
-
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
-    return BITFIELD_READ(MBWUMON_IDR_LWD, val_mmio_read(base + REG_MPAMF_MBWUMON_IDR));
+    return BITFIELD_READ(MBWUMON_IDR_LWD, val_mpam_mmr_read(msc_index, REG_MPAMF_MBWUMON_IDR));
 }
 
 /**
@@ -409,11 +394,9 @@ val_mpam_mbwu_supports_lwd(uint32_t msc_index)
 uint32_t
 val_mpam_supports_csumon(uint32_t msc_index)
 {
-    addr_t base;
-
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
     if (val_mpam_msc_supports_mon(msc_index))
-        return BITFIELD_READ(MSMON_IDR_MSMON_CSU, val_mmio_read(base + REG_MPAMF_MSMON_IDR));
+        return BITFIELD_READ(MSMON_IDR_MSMON_CSU,
+                   val_mpam_mmr_read(msc_index, REG_MPAMF_MSMON_IDR));
     else
         return 0;
 }
@@ -429,10 +412,7 @@ val_mpam_supports_csumon(uint32_t msc_index)
 uint32_t
 val_mpam_get_csumon_count(uint32_t msc_index)
 {
-    addr_t base;
-
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
-    return BITFIELD_READ(CSUMON_IDR_NUM_MON, val_mmio_read(base + REG_MPAMF_CSUMON_IDR));
+    return BITFIELD_READ(CSUMON_IDR_NUM_MON, val_mpam_mmr_read(msc_index, REG_MPAMF_CSUMON_IDR));
 }
 
 /**
@@ -448,23 +428,21 @@ val_mpam_get_csumon_count(uint32_t msc_index)
 void
 val_mpam_memory_configure_ris_sel(uint32_t msc_index, uint32_t rsrc_index)
 {
-    addr_t base;
     uint32_t data;
     uint8_t ris_index;
 
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
     ris_index = val_mpam_get_info(MPAM_MSC_RSRC_RIS, msc_index, rsrc_index);
 
     /*configure MSMON_CFG_MON_SEL.RIS field and write MSMON_CFG_MON_SEL.MON_SEL
        field to be 0 */
     data = BITFIELD_SET(MON_SEL_RIS, ris_index);
-    val_mmio_write(base + REG_MSMON_CFG_MON_SEL, data);
+    val_mpam_mmr_write(msc_index, REG_MSMON_CFG_MON_SEL, data);
 
     /* configure MPAMCFG_PART_SEL.RIS field and write MPAMCFG_PART_SEL.
        PARTID_SEL field to DEFAULT PARTID*/
     data = BITFIELD_SET(PART_SEL_RIS, ris_index)
                            | BITFIELD_SET(PART_SEL_PARTID_SEL, DEFAULT_PARTID);
-    val_mmio_write(base + REG_MPAMCFG_PART_SEL, data);
+    val_mpam_mmr_write(msc_index, REG_MPAMCFG_PART_SEL, data);
 }
 
 /**
@@ -482,26 +460,23 @@ void
 val_mpam_memory_configure_mbwumon(uint32_t msc_index)
 {
     uint32_t data = 0;
-    addr_t base;
-
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
 
     /* select monitor instance zero by writing zero to MSMON_CFG_MON_SEL.MON_SEL */
-    data = val_mmio_read(base + REG_MSMON_CFG_MON_SEL);
+    data = val_mpam_mmr_read(msc_index, REG_MSMON_CFG_MON_SEL);
     /* retaining other configured fields e.g, RIS index if supported */
     data = BITFIELD_WRITE(data, MON_SEL_MON_SEL, 0);
-    val_mmio_write(base + REG_MSMON_CFG_MON_SEL, data);
+    val_mpam_mmr_write(msc_index, REG_MSMON_CFG_MON_SEL, data);
 
     /* disable monitor instance before configuration */
     val_mpam_memory_mbwumon_disable(msc_index);
 
     /* configure monitor ctrl reg for default partid and default pmg */
     data = BITFIELD_SET(MBWU_CTL_MATCH_PARTID, 1) | BITFIELD_SET(MBWU_CTL_MATCH_PMG, 1);
-    val_mmio_write(base + REG_MSMON_CFG_MBWU_CTL, data);
+    val_mpam_mmr_write(msc_index, REG_MSMON_CFG_MBWU_CTL, data);
 
     /* configure monitor filter reg for default partid and default pmg */
     data = BITFIELD_SET(MBWU_FLT_PARTID, DEFAULT_PARTID) | BITFIELD_SET(MBWU_FLT_PMG, DEFAULT_PMG);
-    val_mmio_write(base + REG_MSMON_CFG_MBWU_FLT, data);
+    val_mpam_mmr_write(msc_index, REG_MSMON_CFG_MBWU_FLT, data);
 
     /* reset the MBWU monitor count */
     val_mpam_memory_mbwumon_reset(msc_index);
@@ -520,11 +495,8 @@ val_mpam_memory_configure_mbwumon(uint32_t msc_index)
 void
 val_mpam_memory_mbwumon_enable(uint32_t msc_index)
 {
-    addr_t base;
-
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
     /* enable the monitor instance to collect information according to the configuration */
-    val_mmio_write(base + REG_MSMON_CFG_MBWU_CTL, BITFIELD_SET(MBWU_CTL_EN, 1));
+    val_mpam_mmr_write(msc_index, REG_MSMON_CFG_MBWU_CTL, BITFIELD_SET(MBWU_CTL_EN, 1));
 }
 
 /**
@@ -540,11 +512,8 @@ val_mpam_memory_mbwumon_enable(uint32_t msc_index)
 void
 val_mpam_memory_mbwumon_disable(uint32_t msc_index)
 {
-    addr_t base;
-
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
     /* disable the monitor */
-    val_mmio_write(base + REG_MSMON_CFG_MBWU_CTL, BITFIELD_SET(MBWU_CTL_EN, 0));
+    val_mpam_mmr_write(msc_index, REG_MSMON_CFG_MBWU_CTL, BITFIELD_SET(MBWU_CTL_EN, 0));
 }
 
 /**
@@ -559,34 +528,34 @@ val_mpam_memory_mbwumon_disable(uint32_t msc_index)
 uint64_t
 val_mpam_memory_mbwumon_read_count(uint32_t msc_index)
 {
-    addr_t base;
     uint64_t count = MPAM_MON_NOT_READY;
 
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
-
     /*if MSMON_MBWU_L is implemented*/
-    if (BITFIELD_READ(MBWUMON_IDR_LWD, val_mmio_read64(base + REG_MPAMF_MBWUMON_IDR))) {
-        if (BITFIELD_READ(MBWUMON_IDR_HAS_LONG, val_mmio_read64(base + REG_MPAMF_MBWUMON_IDR))) {
+    if (BITFIELD_READ(MBWUMON_IDR_LWD, val_mpam_mmr_read64(msc_index, REG_MPAMF_MBWUMON_IDR))) {
+        if (BITFIELD_READ(MBWUMON_IDR_HAS_LONG,
+            val_mpam_mmr_read64(msc_index, REG_MPAMF_MBWUMON_IDR))) {
             // (63 bits)
-            if (BITFIELD_READ(MSMON_MBWU_L_NRDY, val_mmio_read64(base + REG_MSMON_MBWU_L)) == 0)
+            if (BITFIELD_READ(MSMON_MBWU_L_NRDY,
+                val_mpam_mmr_read64(msc_index, REG_MSMON_MBWU_L)) == 0)
                 count = BITFIELD_READ(MSMON_MBWU_L_63BIT_VALUE,
-                                      val_mmio_read64(base + REG_MSMON_MBWU_L));
+                                      val_mpam_mmr_read64(msc_index, REG_MSMON_MBWU_L));
         }
         else {
             // (44 bits)
-            if (BITFIELD_READ(MSMON_MBWU_L_NRDY, val_mmio_read64(base + REG_MSMON_MBWU_L)) == 0)
+            if (BITFIELD_READ(MSMON_MBWU_L_NRDY,
+                val_mpam_mmr_read64(msc_index, REG_MSMON_MBWU_L)) == 0)
                 count = BITFIELD_READ(MSMON_MBWU_L_44BIT_VALUE,
-                                      val_mmio_read64(base + REG_MSMON_MBWU_L));
+                                      val_mpam_mmr_read64(msc_index, REG_MSMON_MBWU_L));
         }
     }
     else {
         // (31 bits)
-        if (BITFIELD_READ(MSMON_MBWU_NRDY, val_mmio_read(base + REG_MSMON_MBWU)) == 0) {
+        if (BITFIELD_READ(MSMON_MBWU_NRDY, val_mpam_mmr_read(msc_index, REG_MSMON_MBWU)) == 0) {
             count = BITFIELD_READ(MSMON_MBWU_VALUE,
-                                  val_mmio_read(base + REG_MSMON_MBWU));
+                                  val_mpam_mmr_read(msc_index, REG_MSMON_MBWU));
             /* shift the count if scaling is enabled */
             count = count << BITFIELD_READ(MBWUMON_IDR_SCALE,
-                                  val_mmio_read(base + REG_MPAMF_MBWUMON_IDR));
+                                  val_mpam_mmr_read(msc_index, REG_MPAMF_MBWUMON_IDR));
         }
     }
     return(count);
@@ -603,15 +572,11 @@ val_mpam_memory_mbwumon_read_count(uint32_t msc_index)
 void
 val_mpam_memory_mbwumon_reset(uint32_t msc_index)
 {
-    addr_t base;
-
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
-
     /*if MSMON_MBWU_L is implemented*/
-    if (BITFIELD_READ(MBWUMON_IDR_LWD, val_mmio_read64(base + REG_MPAMF_MBWUMON_IDR)))
-        val_mmio_write64(base + REG_MSMON_MBWU_L, 0);
+    if (BITFIELD_READ(MBWUMON_IDR_LWD, val_mpam_mmr_read64(msc_index, REG_MPAMF_MBWUMON_IDR)))
+        val_mpam_mmr_write64(msc_index, REG_MSMON_MBWU_L, 0);
     else
-       val_mmio_write(base + REG_MSMON_MBWU, 0);
+       val_mpam_mmr_write(msc_index, REG_MSMON_MBWU, 0);
 }
 
 
@@ -800,10 +765,7 @@ val_srat_free_info_table(void)
 uint32_t
 val_mpam_get_max_pmg(uint32_t msc_index)
 {
-    addr_t base;
-
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
-    return BITFIELD_READ(IDR_PMG_MAX, val_mmio_read64(base + REG_MPAMF_IDR));
+    return BITFIELD_READ(IDR_PMG_MAX, val_mpam_mmr_read64(msc_index, REG_MPAMF_IDR));
 }
 
 /**
@@ -814,10 +776,7 @@ val_mpam_get_max_pmg(uint32_t msc_index)
 uint32_t
 val_mpam_get_max_partid(uint32_t msc_index)
 {
-    addr_t base;
-
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
-    return BITFIELD_READ(IDR_PARTID_MAX, val_mmio_read64(base + REG_MPAMF_IDR));
+    return BITFIELD_READ(IDR_PARTID_MAX, val_mpam_mmr_read64(msc_index, REG_MPAMF_IDR));
 }
 
 /**
@@ -835,24 +794,21 @@ val_mpam_get_max_partid(uint32_t msc_index)
 void
 val_mpam_configure_cpor(uint32_t msc_index, uint16_t partid, uint32_t cpbm_percentage)
 {
-    addr_t base;
     uint16_t index;
     uint32_t unset_bitmask;
     uint32_t num_unset_bits;
     uint16_t num_cpbm_bits;
     uint32_t data;
 
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
-
     /* Get CPBM width */
     num_cpbm_bits = val_mpam_get_cpbm_width(msc_index);
 
     /* retaining other configured fields e.g, RIS index if supported */
-    data = val_mmio_read(base + REG_MPAMCFG_PART_SEL);
+    data = val_mpam_mmr_read(msc_index, REG_MPAMCFG_PART_SEL);
 
     /* Select PARTID */
     data = BITFIELD_WRITE(data, PART_SEL_PARTID_SEL, partid);
-    val_mmio_write(base + REG_MPAMCFG_PART_SEL, partid);
+    val_mpam_mmr_write(msc_index, REG_MPAMCFG_PART_SEL, partid);
 
     /*
      * Configure CPBM register to have a 1 in cpbm_percentage
@@ -860,13 +816,13 @@ val_mpam_configure_cpor(uint32_t msc_index, uint16_t partid, uint32_t cpbm_perce
      */
     num_cpbm_bits = (num_cpbm_bits * cpbm_percentage) / 100 ;
     for (index = 0; index < num_cpbm_bits - 31; index += 32)
-        val_mmio_write(base + REG_MPAMCFG_CPBM + index, CPOR_BITMAP_DEF_VAL);
+        val_mpam_mmr_write(msc_index, REG_MPAMCFG_CPBM + index, CPOR_BITMAP_DEF_VAL);
 
     /* Unset bits from above step are set */
     num_unset_bits = num_cpbm_bits - index;
     unset_bitmask = (1 << num_unset_bits) - 1;
     if (unset_bitmask)
-        val_mmio_write(base + REG_MPAMCFG_CPBM + index, unset_bitmask);
+        val_mpam_mmr_write(msc_index, REG_MPAMCFG_CPBM + index, unset_bitmask);
 
     /* Issue a DSB instruction */
     val_mem_issue_dsb();
@@ -882,11 +838,8 @@ val_mpam_configure_cpor(uint32_t msc_index, uint16_t partid, uint32_t cpbm_perce
 uint32_t
 val_mpam_get_cpbm_width(uint32_t msc_index)
 {
-    addr_t base;
-
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
     if (val_mpam_supports_cpor(msc_index))
-        return BITFIELD_READ(CPOR_IDR_CPBM_WD, val_mmio_read(base + REG_MPAMF_CPOR_IDR));
+        return BITFIELD_READ(CPOR_IDR_CPBM_WD, val_mpam_mmr_read(msc_index, REG_MPAMF_CPOR_IDR));
     else
         return 0;
 }
@@ -916,27 +869,24 @@ val_mem_issue_dsb(void)
 void
 val_mpam_configure_csu_mon(uint32_t msc_index, uint16_t partid, uint8_t pmg, uint16_t mon_sel)
 {
-    addr_t base;
     uint32_t data;
 
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
-
     /* retaining other configured fields e.g, RIS index if supported */
-    data = val_mmio_read(base + REG_MSMON_CFG_MON_SEL);
+    data = val_mpam_mmr_read(msc_index, REG_MSMON_CFG_MON_SEL);
     /* Select the monitor instance */
     data = BITFIELD_WRITE(data, MON_SEL_MON_SEL, mon_sel);
-    val_mmio_write(base + REG_MSMON_CFG_MON_SEL, data);
+    val_mpam_mmr_write(msc_index, REG_MSMON_CFG_MON_SEL, data);
 
     /* Configure the CSU monitor filter register for input PARTID & PMG */
     data = BITFIELD_SET(CSU_FLT_PARTID, partid) | BITFIELD_SET(CSU_FLT_PMG, pmg);
-    val_mmio_write(base + REG_MSMON_CFG_CSU_FLT, data);
+    val_mpam_mmr_write(msc_index, REG_MSMON_CFG_CSU_FLT, data);
 
     /*Disable the monitor */
     val_mpam_csumon_disable(msc_index);
 
     /* Configure the CSU monitor control register to match input PARTID & PMG */
     data = BITFIELD_SET(CSU_CTL_MATCH_PARTID, 1) | BITFIELD_SET(CSU_CTL_MATCH_PMG, 1);
-    val_mmio_write(base + REG_MSMON_CFG_CSU_CTL, data);
+    val_mpam_mmr_write(msc_index, REG_MSMON_CFG_CSU_CTL, data);
 
     /* Issue a DSB instruction */
     val_mem_issue_dsb();
@@ -957,13 +907,11 @@ val_mpam_configure_csu_mon(uint32_t msc_index, uint16_t partid, uint8_t pmg, uin
 void
 val_mpam_csumon_enable(uint32_t msc_index)
 {
-    addr_t base;
     uint32_t data;
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
 
     /* enable the monitor instance to collect information according to the configuration */
-    data = BITFIELD_WRITE(val_mmio_read(base + REG_MSMON_CFG_CSU_CTL), CSU_CTL_EN, 1);
-    val_mmio_write(base + REG_MSMON_CFG_CSU_CTL, data);
+    data = BITFIELD_WRITE(val_mpam_mmr_read(msc_index, REG_MSMON_CFG_CSU_CTL), CSU_CTL_EN, 1);
+    val_mpam_mmr_write(msc_index, REG_MSMON_CFG_CSU_CTL, data);
 }
 
 /**
@@ -980,13 +928,11 @@ val_mpam_csumon_enable(uint32_t msc_index)
 void
 val_mpam_csumon_disable(uint32_t msc_index)
 {
-    addr_t base;
     uint32_t data;
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
 
     /* enable the monitor instance to collect information according to the configuration */
-    data = BITFIELD_WRITE(val_mmio_read(base + REG_MSMON_CFG_CSU_CTL), CSU_CTL_EN, 0);
-    val_mmio_write(base + REG_MSMON_CFG_CSU_CTL, data);
+    data = BITFIELD_WRITE(val_mpam_mmr_read(msc_index, REG_MSMON_CFG_CSU_CTL), CSU_CTL_EN, 0);
+    val_mpam_mmr_write(msc_index, REG_MSMON_CFG_CSU_CTL, data);
 }
 
 /**
@@ -1001,14 +947,232 @@ val_mpam_csumon_disable(uint32_t msc_index)
 uint32_t
 val_mpam_read_csumon(uint32_t msc_index)
 {
-    addr_t base;
     uint32_t count;
 
-    base = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
-    if (BITFIELD_READ(MSMON_CSU_NRDY, val_mmio_read(base + REG_MSMON_CSU)) == 0) {
+    if (BITFIELD_READ(MSMON_CSU_NRDY, val_mpam_mmr_read(msc_index, REG_MSMON_CSU)) == 0) {
         count = BITFIELD_READ(MSMON_CSU_VALUE,
-                                      val_mmio_read(base + REG_MSMON_CSU));
+                                      val_mpam_mmr_read(msc_index, REG_MSMON_CSU));
         return count;
     }
     return 0;
+}
+
+/**
+  @brief   This API reads 32bit MPAM memory mapped register either
+           via MMIO or PCC interface.
+
+  @param   msc_index  - MPAM feature page index for this MSC.
+  @param   reg_offset - Register offset address.
+
+  @return  Read 32 bit value.
+**/
+uint32_t
+val_mpam_mmr_read(uint32_t msc_index, uint32_t reg_offset)
+{
+  uint64_t base_addr;
+  uint32_t intrf_type;
+
+  base_addr  = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
+  intrf_type = val_mpam_get_info(MPAM_MSC_INTERFACE_TYPE, msc_index, 0);
+
+  if (intrf_type == MPAM_INTERFACE_TYPE_MMIO) {
+      return val_mmio_read(base_addr + reg_offset);
+  } else if (intrf_type == MPAM_INTERFACE_TYPE_PCC) {
+      return val_mpam_pcc_read(msc_index, reg_offset);
+  } else {
+    val_print(ACS_PRINT_ERR,
+              "\n    Invalid interface type reported for MPAM MSC index = %x", msc_index);
+    return 0;  /* zero considered as safe return */
+    }
+}
+
+/**
+  @brief   This API reads 64bit MPAM memory mapped register either
+           via MMIO or PCC interface.
+
+  @param   msc_index  - MPAM feature page index for this MSC.
+  @param   reg_offset - Register offset address.
+
+  @return  Read 64 bit value.
+**/
+uint64_t
+val_mpam_mmr_read64(uint32_t msc_index, uint32_t reg_offset)
+{
+  uint64_t base_addr;
+  uint32_t intrf_type;
+
+  base_addr  = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
+  intrf_type = val_mpam_get_info(MPAM_MSC_INTERFACE_TYPE, msc_index, 0);
+
+  if (intrf_type == MPAM_INTERFACE_TYPE_MMIO) {
+      return val_mmio_read64(base_addr + reg_offset);
+  } else if (intrf_type == MPAM_INTERFACE_TYPE_PCC) {
+      /* PCC supports only supports 32 bit read at a time, hence reading twice
+         and concating */
+      return ((uint64_t)val_mpam_pcc_read(msc_index, reg_offset + 4) << 32)
+                                | val_mpam_pcc_read(msc_index, reg_offset);
+  } else {
+    val_print(ACS_PRINT_ERR,
+              "\n    Invalid interface type reported for MPAM MSC index = %x", msc_index);
+    return 0;  /* zero considered as safe return */
+  }
+}
+
+/**
+  @brief   This API writes 32bit MPAM memory mapped register either
+           via MMIO or PCC interface.
+
+  @param   msc_index  - MPAM feature page index for this MSC.
+  @param   reg_offset - Register offset address.
+  @param   data       - Data to be written to register.
+
+  @return  None
+**/
+void
+val_mpam_mmr_write(uint32_t msc_index, uint32_t reg_offset, uint32_t data)
+{
+  uint64_t base_addr;
+  uint32_t intrf_type;
+
+  base_addr  = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
+  intrf_type = val_mpam_get_info(MPAM_MSC_INTERFACE_TYPE, msc_index, 0);
+
+  if (intrf_type == MPAM_INTERFACE_TYPE_MMIO) {
+      val_mmio_write(base_addr + reg_offset, data);
+  } else if (intrf_type == MPAM_INTERFACE_TYPE_PCC) {
+      val_mpam_pcc_write(msc_index, reg_offset, data);
+  } else {
+    val_print(ACS_PRINT_ERR,
+              "\n    Invalid interface type reported for MPAM MSC index = %x", msc_index);
+  }
+}
+
+/**
+  @brief   This API writes 64bit MPAM memory mapped register either
+           via MMIO or PCC interface.
+
+  @param   msc_index  - MPAM feature page index for this MSC.
+  @param   reg_offset - Register offset address.
+  @param   data       - Data to be written to register.
+
+  @return  None
+**/
+void
+val_mpam_mmr_write64(uint32_t msc_index, uint32_t reg_offset, uint64_t data)
+{
+  uint64_t base_addr;
+  uint32_t intrf_type;
+
+  base_addr  = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
+  intrf_type = val_mpam_get_info(MPAM_MSC_INTERFACE_TYPE, msc_index, 0);
+
+  if (intrf_type == MPAM_INTERFACE_TYPE_MMIO) {
+      val_mmio_write64(base_addr + reg_offset, data);
+  } else if (intrf_type == MPAM_INTERFACE_TYPE_PCC) {
+      val_mpam_pcc_write(msc_index, reg_offset, (uint32_t)(data & 0xFFFFFFFF));
+      val_mpam_pcc_write(msc_index, reg_offset + 4, (uint32_t)(data >> 32));
+  } else {
+    val_print(ACS_PRINT_ERR,
+              "\n    Invalid interface type reported for MPAM MSC index = %x", msc_index);
+  }
+}
+
+/**
+  @brief   This API constructs header and parameter for the
+           MPAM_MSC_READ PCC command and calls doorbell protocol.
+
+  @param   msc_index  - MPAM feature page index for this MSC.
+  @param   reg_offset - Register offset address.
+
+  @return  None
+**/
+uint32_t
+val_mpam_pcc_read(uint32_t msc_index, uint32_t reg_offset)
+{
+  SCMI_PROTOCOL_MESSAGE_HEADER header;
+  PCC_MPAM_MSC_READ_CMD_PARA parameter;
+  PCC_MPAM_MSC_READ_RESP_PARA *response;
+  uint32_t subspace_id;
+
+  /* if MSC interface type is PCC (0x0A), the Base address field
+     captures index to PCCT ACPI structure */
+  subspace_id = (uint32_t)val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
+
+  /* construct the message header */
+  header.reserved = 0;
+  header.protocol_id = MPAM_FB_PROTOCOL_ID;
+  header.message_type = MPAM_MSG_TYPE_CMD;
+  header.message_id = MPAM_MSC_READ_CMD_ID;
+  /* token is user defined value for book keeping */
+  header.token = 1;
+
+  /* construct parameter payload */
+  parameter.msc_id = val_mpam_get_info(MPAM_MSC_ID, msc_index, 0);
+  parameter.flags = 0;
+  parameter.offset = reg_offset;
+
+  response = (PCC_MPAM_MSC_READ_RESP_PARA *) val_pcc_cmd_response(
+              (uint32_t)subspace_id, *(uint32_t *)&header, (void *)&parameter, sizeof(parameter));
+
+  if (response == NULL || response->status != MPAM_PCC_CMD_SUCCESS) {
+      val_print(ACS_PRINT_ERR,
+                "\n    Failed to read MPAM register with offset (0x%x) via PCC", reg_offset);
+      val_print(ACS_PRINT_ERR, " for MSC index = 0x%x", msc_index);
+      if (response != NULL) {
+          val_print(ACS_PRINT_ERR, "\n    PCC command response code = 0x%x", response->status);
+      }
+      return MPAM_PCC_SAFE_RETURN;
+  } else {
+      return response->val;
+  }
+}
+
+/**
+  @brief   This API constructs header and parameter for the
+           MPAM_MSC_WRITE PCC command and calls doorbell protocol.
+
+  @param   msc_index  - MPAM feature page index for this MSC.
+  @param   reg_offset - Register offset address.
+
+  @return  None
+**/
+void
+val_mpam_pcc_write(uint32_t msc_index, uint32_t reg_offset, uint32_t data)
+{
+  SCMI_PROTOCOL_MESSAGE_HEADER header;
+  PCC_MPAM_MSC_WRITE_CMD_PARA parameter;
+  PCC_MPAM_MSC_WRITE_RESP_PARA *response;
+  uint32_t subspace_id;
+
+  /* if MSC interface type is PCC (0x0A), the Base address field
+     captures index to PCCT ACPI structure */
+  subspace_id = val_mpam_get_info(MPAM_MSC_BASE_ADDR, msc_index, 0);
+
+  /* construct the message header */
+  header.reserved = 0;
+  header.protocol_id = MPAM_FB_PROTOCOL_ID;
+  header.message_type = MPAM_MSG_TYPE_CMD;
+  header.message_id = MPAM_MSC_WRITE_CMD_ID;
+  /* token is user defined value for book keeping */
+  header.token = 1;
+
+  /* construct parameter payload */
+  parameter.msc_id = val_mpam_get_info(MPAM_MSC_ID, msc_index, 0);
+  parameter.flags = 0;
+  parameter.val = data;
+  parameter.offset = reg_offset;
+
+  response = (PCC_MPAM_MSC_WRITE_RESP_PARA *) val_pcc_cmd_response(
+              (uint32_t)subspace_id, *(uint32_t *)&header, (void *)&parameter, sizeof(parameter));
+
+  if (response == NULL || response->status != MPAM_PCC_CMD_SUCCESS) {
+      val_print(ACS_PRINT_ERR,
+                "\n    Failed to read MPAM register with offset (0x%x) via PCC", reg_offset);
+      val_print(ACS_PRINT_ERR, " for MSC index = 0x%x", msc_index);
+      if (response != NULL) {
+          val_print(ACS_PRINT_ERR, "\n    PCC command response code = 0x%x", response->status);
+      }
+      return;
+  }
+  return;
 }

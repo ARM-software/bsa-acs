@@ -56,17 +56,22 @@ typedef struct {
 } MPAM_RESOURCE_NODE;
 
 /*
- * @brief Mpam MSC Node
+ * @brief MPAM MSC Node
  */
 typedef struct {
-    UINT64    msc_base_addr; /* base addr of mem-map MSC reg */
-    UINT32    msc_addr_len;  /*  MSC mem map size */
-    UINT32    max_nrdy;      /* max time in microseconds that MSC not ready
-                                after config change */
-    UINT32    rsrc_count;    /* number of resource nodes */
+    UINT8            intrf_type;    /* type of interface to this MPAM MSC */
+    UINT32           identifier;    /* unique id to reference the node */
+    UINT64           msc_base_addr; /* base addr of mem-mapped reg space or PCC
+                                       subspace ID based on interface type. */
+    UINT32           msc_addr_len;  /* MSC mem map size */
+    UINT32           max_nrdy;      /* max time in microseconds that MSC not ready
+                                         after config change */
+    UINT32           rsrc_count;    /* number of resource nodes */
     MPAM_RESOURCE_NODE rsrc_node[]; /* Details of resource node */
 } MPAM_MSC_NODE;
 
+#define MPAM_INTERFACE_TYPE_MMIO 0x00
+#define MPAM_INTERFACE_TYPE_PCC  0x0A
 /*
  * @brief Mpam info table
  */
@@ -79,6 +84,81 @@ typedef struct {
     UINT32          msc_count;  /* Number of MSC node */
     MPAM_MSC_NODE   msc_node[]; /* Details of MSC node */
 } MPAM_INFO_TABLE;
+
+
+/* Platform Communication Channel (PCC) info table */
+typedef struct {
+  UINT64                            base_addr;               /* base addr of shared mem-region */
+  EFI_ACPI_6_5_GENERIC_ADDRESS_STRUCTURE
+                                    doorbell_reg;            /* doorbell register */
+  UINT64                            doorbell_preserve;       /* doorbell register preserve mask */
+  UINT64                            doorbell_write;          /* doorbell register set mask */
+  UINT32                            min_req_turnaround_usec; /* minimum request turnaround time */
+  EFI_ACPI_6_5_GENERIC_ADDRESS_STRUCTURE
+                                    cmd_complete_chk_reg;    /* command complete check register */
+  UINT64                            cmd_complete_chk_mask;   /* command complete check mask */
+  EFI_ACPI_6_5_GENERIC_ADDRESS_STRUCTURE
+                                    cmd_complete_update_reg; /* command complete update register */
+  UINT64                            cmd_complete_update_preserve;
+                                                             /* command complete update preserve */
+  UINT64                            cmd_complete_update_set; /* command complete update set mask */
+} PCC_SUBSPACE_TYPE_3;
+
+typedef union {
+  PCC_SUBSPACE_TYPE_3 pcc_ss_type_3;
+} PCC_TYPE_SPECIFIC_INFO;
+
+typedef struct {
+  UINT32                  subspace_idx;    /* PCC subspace index in PCCT ACPI table */
+  UINT32                  subspace_type;   /* type of PCC subspace */
+  PCC_TYPE_SPECIFIC_INFO  type_spec_info;  /* PCC subspace type specific info */
+} PCC_INFO;
+
+typedef struct {
+  UINT32  subspace_cnt; /* number of PCC subspace info stored */
+  PCC_INFO  pcc_info[];   /* array of PCC info blocks */
+} PCC_INFO_TABLE;
+
+typedef struct {
+  UINT32 message_id : 8;      /* Bits [07:00] Message ID */
+  UINT32 message_type : 2;    /* Bits [09:08] Message Type */
+  UINT32 protocol_id : 8;     /* Bits [17:10] Protocol ID */
+  UINT32 token : 10;          /* Bits [27:18] Token Caller-defined value */
+  UINT32 reserved : 4;        /* Bits [31:28] Reserved must be zero */
+} SCMI_PROTOCOL_MESSAGE_HEADER;
+
+typedef struct {
+  UINT32 msc_id;            /* Identifier of the MSC */
+  UINT32 flags;             /* Reserved, must be zero */
+  UINT32 offset;            /* MPAM register offset to read from */
+} PCC_MPAM_MSC_READ_CMD_PARA;
+
+typedef struct {
+  INT32  status;             /* command response status code */
+  UINT32 val;                /* value read from the register */
+} PCC_MPAM_MSC_READ_RESP_PARA;
+
+typedef struct {
+  UINT32 msc_id;            /* Identifier of the MSC */
+  UINT32 flags;             /* Reserved, must be zero */
+  UINT32 val;               /* value to be written to the register */
+  UINT32 offset;            /* MPAM register offset to write */
+} PCC_MPAM_MSC_WRITE_CMD_PARA;
+
+typedef struct {
+  INT32  status;             /* command response status code */
+} PCC_MPAM_MSC_WRITE_RESP_PARA;
+
+#define MPAM_FB_PROTOCOL_ID    0x1A
+#define MPAM_MSG_TYPE_CMD      0x0
+#define MPAM_MSC_READ_CMD_ID   0x4
+#define MPAM_MSC_WRITE_CMD_ID  0x5
+#define MPAM_PCC_CMD_SUCCESS   0x0
+#define RETURN_FAILURE         0xFFFFFFFF
+#define PCC_TY3_CMD_OFFSET     12
+#define PCC_TY3_COMM_SPACE     16
+
+VOID pal_pcc_store_info(UINT32 subspace_idx);
 
 /**
   @brief  SRAT node type
