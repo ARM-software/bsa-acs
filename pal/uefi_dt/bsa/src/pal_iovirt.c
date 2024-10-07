@@ -80,7 +80,8 @@ dump_block(IOVIRT_BLOCK *block) {
       acs_print(ACS_PRINT_INFO, L"\n");
       return;
       case IOVIRT_NODE_NAMED_COMPONENT:
-      acs_print(ACS_PRINT_INFO, L"\n Named Component:\n Device Name:%a\n", block->data.named_comp.name);
+      acs_print(ACS_PRINT_INFO, L"\n Named Component:\n Device Name:%a\n",
+                 block->data.named_comp.name);
       break;
       case IOVIRT_NODE_PCI_ROOT_COMPLEX:
       acs_print(ACS_PRINT_INFO, L"\n Root Complex:\n PCI segment number:%d\n",
@@ -287,13 +288,15 @@ iort_add_block(IORT_TABLE *iort, IORT_NODE *iort_node, IOVIRT_INFO_TABLE *IoVirt
       count = &IoVirtTable->num_its_groups;
       break;
     case IOVIRT_NODE_NAMED_COMPONENT:
-      AsciiStrnCpyS((CHAR8*)(*data).named_comp.name, MAX_NAMED_COMP_LENGTH,
-                    (CHAR8*)((IORT_NAMED_COMPONENT*)node_data)->device_name, (MAX_NAMED_COMP_LENGTH -1));
+      AsciiStrnCpyS((CHAR8 *)(*data).named_comp.name, MAX_NAMED_COMP_LENGTH,
+                    (CHAR8 *)((IORT_NAMED_COMPONENT *)node_data)->device_name,
+                    (MAX_NAMED_COMP_LENGTH - 1));
       count = &IoVirtTable->num_named_components;
       break;
     case IOVIRT_NODE_PCI_ROOT_COMPLEX:
-      (*data).rc.segment = ((IORT_ROOT_COMPLEX*)node_data)->pci_segment_number;
-      (*data).rc.cca = (UINT32)(((IORT_ROOT_COMPLEX*)node_data)->memory_properties & IOVIRT_CCA_MASK);
+      (*data).rc.segment = ((IORT_ROOT_COMPLEX *)node_data)->pci_segment_number;
+      (*data).rc.cca = (UINT32)(((IORT_ROOT_COMPLEX *)node_data)->memory_properties &
+                                  IOVIRT_CCA_MASK);
       (*data).rc.ats_attr = ((IORT_ROOT_COMPLEX*)node_data)->ats_attribute;
       count = &IoVirtTable->num_pci_rcs;
       break;

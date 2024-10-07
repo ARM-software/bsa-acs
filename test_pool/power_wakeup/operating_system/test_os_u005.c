@@ -94,27 +94,27 @@ payload5()
   uint64_t timer_expire_val = val_get_counter_frequency() * g_wakeup_timeout;
 
   timer_num = val_timer_get_info(TIMER_INFO_NUM_PLATFORM_TIMERS, 0);
-  if(!timer_num){
+  if (!timer_num) {
       val_print(ACS_PRINT_DEBUG, "\n       No system timers implemented", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
-  while(timer_num--) {
-      if(val_timer_get_info(TIMER_INFO_IS_PLATFORM_TIMER_SECURE, timer_num))
+  while (timer_num--) {
+      if (val_timer_get_info(TIMER_INFO_IS_PLATFORM_TIMER_SECURE, timer_num))
           continue;
       ns_timer++;
 
       //Read CNTACR to determine whether access permission from NS state is permitted
       status = val_timer_skip_if_cntbase_access_not_allowed(timer_num);
-      if(status == ACS_STATUS_SKIP){
+      if (status == ACS_STATUS_SKIP) {
           val_print(ACS_PRINT_DEBUG, "       Timer cntbase can't accessed\n", 0);
           val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
           return;
       }
 
       cnt_base_n = val_timer_get_info(TIMER_INFO_SYS_CNT_BASE_N, timer_num);
-      if(cnt_base_n == 0){
+      if (cnt_base_n == 0) {
           val_print(ACS_PRINT_DEBUG, "       Timer cntbase is invalid\n", 0);
           val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
           return;
@@ -122,7 +122,7 @@ payload5()
 
       intid = val_timer_get_info(TIMER_INFO_SYS_INTID, timer_num);
       status = val_gic_install_isr(intid, isr5);
-      if(status == 0) {
+      if (status == 0) {
           wakeup_set_failsafe();
           /* enable System timer */
           val_timer_set_system_timer((addr_t)cnt_base_n, timer_expire_val);
@@ -140,7 +140,7 @@ payload5()
            * 1. test interrupt has come (PASS) isr5
            * 2. failsafe int recvd before test int (FAIL) isr_failsafe
            * 3. some other system interrupt or event has wakeup the PE (SKIP)
-           * 4. PE didn't enter WFI mode, treating as (SKIP), as finding 3rd and 4th case not feasible
+           * 4. PE didn't enter WFI mode, treating as (SKIP), as finding 3rd,4th case not feasible
            * 5. Hang, if PE didn't exit WFI (FAIL)
           */
           wakeup_clear_failsafe();
@@ -148,7 +148,8 @@ payload5()
               intid = val_timer_get_info(TIMER_INFO_SYS_INTID, timer_num);
 	      val_gic_clear_interrupt(intid);
               val_set_status(index, RESULT_SKIP(TEST_NUM, 4));
-              val_print(ACS_PRINT_DEBUG, "\n       PE wakeup by some other events/int or didn't enter WFI", 0);
+              val_print(ACS_PRINT_DEBUG,
+                        "\n       PE wakeup by some other events/int or didn't enter WFI", 0);
           }
           val_print(ACS_PRINT_INFO, "\n       delay loop remainig value %d", delay_loop);
 	  return;
@@ -160,7 +161,7 @@ payload5()
       }
   }
 
-  if(!ns_timer){
+  if (!ns_timer) {
       val_print(ACS_PRINT_WARN, "       No non-secure systimer implemented\n", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 5));
       return;

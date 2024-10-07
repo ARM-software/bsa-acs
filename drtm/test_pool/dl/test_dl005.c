@@ -240,8 +240,9 @@ payload(uint32_t num_pe)
     goto free_dlme_region;
   }
   /* R314060 : Check if Event Log size is not zero */
-  if (dlme_data_header->drtm_event_log_size == 0) {
-    val_print(ACS_PRINT_ERR, "\n       DLME Data Event Log Size is 0", 0);
+  /* R316010 : Minimum 64KB should be allocated for event log */
+  if (dlme_data_header->drtm_event_log_size < DRTM_SIZE_64K) {
+    val_print(ACS_PRINT_ERR, "\n       DLME Data Event Log Size is incorrect", 0);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 9));
     goto free_dlme_region;
   }
@@ -281,18 +282,38 @@ payload(uint32_t num_pe)
   }
 
   /* R314120 Part 4 : Regions must be sorted with first desc in table the lowest address */
-  for (uint32_t i = 1; i < prot_region->header.num_regions; i++) {
+  /* R313010 : All region addresses must be 4KB Aligned */
+  /* R313020 : All region addresses must not overlap */
+  for (uint32_t i = 0; i < prot_region->header.num_regions; i++) {
+    if (!(DRTM_IS_4KB_ALIGNED(prot_region->regions[i].start_addr))) {
+      val_print(ACS_PRINT_ERR, "\n       Protected Memory Regions Not 4KB Aligned", 0);
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 14));
+      test_fails++;
+    }
+
+    if (i == 0)
+      continue;
+
     if (prot_region->regions[i].start_addr < prot_region->regions[i-1].start_addr) {
       val_print(ACS_PRINT_ERR, "\n       Protected Regions Memory Regions Not Sorted", 0);
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 14));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 15));
       test_fails++;
     }
   }
 
-  for (uint32_t i = 1; i < addr_map->header.num_regions; i++) {
+  for (uint32_t i = 0; i < addr_map->header.num_regions; i++) {
+    if (!(DRTM_IS_4KB_ALIGNED(addr_map->regions[i].start_addr))) {
+      val_print(ACS_PRINT_ERR, "\n       Address Map Memory Regions Not 4KB Aligned", 0);
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 16));
+      test_fails++;
+    }
+
+    if (i == 0)
+      continue;
+
     if (addr_map->regions[i].start_addr < addr_map->regions[i-1].start_addr) {
       val_print(ACS_PRINT_ERR, "\n       Address Map Memory Regions Not Sorted", 0);
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 15));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 17));
       test_fails++;
     }
   }
@@ -303,14 +324,14 @@ payload(uint32_t num_pe)
     if ((tcb_hash_table->header.revision != 1) || (tcb_hash_table->header.num_hashes == 0)) {
       /* Fail The test */
       val_print(ACS_PRINT_ERR, "\n       TCB_HASH_TABLE Not Correctly Formatted", 0);
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 16));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 18));
       goto free_dlme_region;
     }
     /* R315040 In Success Case. Check if Maximum number of entries is greator than num_hashes */
     if (tcb_hash_table->header.num_hashes >
         VAL_EXTRACT_BITS(g_drtm_features.tcb_hash_features.value, 0, 7)) {
       val_print(ACS_PRINT_ERR, "\n       Number of hashes exceeds maximum allowed value", 0);
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 17));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 19));
       test_fails++;
     }
   }
@@ -322,7 +343,7 @@ payload(uint32_t num_pe)
     if ((uint32_t)(*((uint64_t *)acpi_region_address)) !=
                         ACS_ACPI_SIGNATURE('X', 'S', 'D', 'T')) {
       val_print(ACS_PRINT_ERR, "\n       ACPI XSDT Table Check Failed", 0);
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 18));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 20));
       test_fails++;
     }
   }
@@ -331,7 +352,7 @@ payload(uint32_t num_pe)
   if ((dlme_data_header->tcb_hash_table_size != 0) &&
       (dlme_data_header->acpi_table_region_size != 0)) {
     val_print(ACS_PRINT_ERR, "\n       TCB Hash Table & ACPI Table Region Check Failed", 0);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 19));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 21));
     test_fails++;
   }
 

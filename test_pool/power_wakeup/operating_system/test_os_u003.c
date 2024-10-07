@@ -102,7 +102,7 @@ payload3()
 
   val_power_enter_semantic(BSA_POWER_SEM_B);
 
-  /* Add a delay loop after WFI called in case PE needs some time to enter WFI state 
+  /* Add a delay loop after WFI called in case PE needs some time to enter WFI state
    * exit in case test or failsafe int is received
   */
   while (delay_loop && (g_el2phy_int_rcvd == 0) && (g_failsafe_int_rcvd == 0)) {
@@ -122,7 +122,8 @@ payload3()
       intid = val_timer_get_info(TIMER_INFO_PHY_EL2_INTID, 0);
       val_gic_end_of_interrupt(intid);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
-      val_print(ACS_PRINT_DEBUG, "\n       PE wakeup by some other events/int or didn't enter WFI", 0);
+      val_print(ACS_PRINT_DEBUG,
+                "\n       PE wakeup by some other events/int or didn't enter WFI", 0);
   }
   val_print(ACS_PRINT_INFO, "\n       delay loop remainig value %d", delay_loop);
   return;
