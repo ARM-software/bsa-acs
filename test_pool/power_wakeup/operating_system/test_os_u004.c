@@ -93,14 +93,14 @@ payload4()
 
   wd_num = val_wd_get_info(0, WD_INFO_COUNT);
 
-  if(!wd_num){
+  if (!wd_num) {
       val_print(ACS_PRINT_DEBUG, "\n       No watchdog implemented      ", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
-  while(wd_num--) {
-      if(val_wd_get_info(wd_num, WD_INFO_ISSECURE))
+  while (wd_num--) {
+      if (val_wd_get_info(wd_num, WD_INFO_ISSECURE))
           continue;
 
       ns_wdg++;
@@ -108,7 +108,7 @@ payload4()
       status = val_gic_install_isr(intid, isr4);
 
       if (status == 0) {
-          
+
           /* Set Interrupt Type Edge/Level Trigger */
           if (val_wd_get_info(wd_num, WD_INFO_IS_EDGE))
               val_gic_set_intr_trigger(intid, INTR_TRIGGER_INFO_EDGE_RISING);
@@ -139,7 +139,7 @@ payload4()
            * 1. test interrupt has come (PASS) isr4
            * 2. failsafe int recvd before test int (FAIL) isr_failsafe
            * 3. some other system interrupt or event has wakeup the PE (SKIP)
-           * 4. PE didn't enter WFI mode, treating as (SKIP), as finding 3rd and 4th case not feasible
+           * 4. PE didn't enter WFI mode, treating as (SKIP), as finding 3rd,4th case not feasible
            * 5. Hang, if PE didn't exit WFI (FAIL)
           */
 	  wakeup_clear_failsafe();
@@ -147,7 +147,8 @@ payload4()
               intid = val_wd_get_info(wd_num, WD_INFO_GSIV);
 	      val_gic_clear_interrupt(intid);
               val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
-    	      val_print(ACS_PRINT_DEBUG, "\n       PE wakeup by some other events/int or didn't enter WFI", 0);
+    	      val_print(ACS_PRINT_DEBUG,
+                        "\n       PE wakeup by some other events/int or didn't enter WFI", 0);
 	  }
 	  val_print(ACS_PRINT_DEBUG, "\n       delay loop remainig value %d", delay_loop);
       } else {
@@ -156,7 +157,7 @@ payload4()
       }
   }
 
-  if(!ns_wdg){
+  if (!ns_wdg) {
       val_print(ACS_PRINT_DEBUG, "       No non-secure watchdog implemented\n", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
       return;

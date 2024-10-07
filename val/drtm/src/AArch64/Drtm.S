@@ -29,7 +29,7 @@ ASM_PFX(val_drtm_simulate_dl):
      * frame and link registers, and stack pointer
      * into g_drtm_acs_dl_saved_state
      */
-    ldr x9,  =g_drtm_acs_dl_saved_state
+    ldr x9,  g_drtm_acs_dl_saved_state
     str x19, [x9]
     str x20, [x9, #8]
     str x21, [x9, #16]
@@ -44,6 +44,12 @@ ASM_PFX(val_drtm_simulate_dl):
     str x30, [x9, #88]
     mov x10, sp
     str x10, [x9, #96]
+    mrs x10, sp_el0
+    str x10, [x9, #104]
+    mrs x10, sctlr_el2
+    str x10, [x9, #112]
+    dsb sy
+    isb
 
     mov x1, x0
     ldr x0, =DRTM_FN_DYNAMIC_LAUNCH
@@ -52,5 +58,4 @@ ASM_PFX(val_drtm_simulate_dl):
     /*
      * The SMC call will return only in case of an error
      */
-
     ret

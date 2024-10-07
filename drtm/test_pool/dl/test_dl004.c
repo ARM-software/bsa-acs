@@ -74,7 +74,7 @@ payload(uint32_t num_pe)
   /* Part 1 : Check Close Locality for Locality 1, Should Result INVALID Parameters */
   status = val_drtm_close_locality(DRTM_LOC_1);
   if (status != DRTM_ACS_INVALID_PARAMETERS) {
-    val_print(ACS_PRINT_ERR, "\n       Unexpected Status for close locality - %d", status);
+    val_print(ACS_PRINT_ERR, "\n       Unexpected Status for close locality %d", status);
     val_print(ACS_PRINT_ERR, " Expected %d,", DRTM_ACS_INVALID_PARAMETERS);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 7));
     goto free_dlme_region;

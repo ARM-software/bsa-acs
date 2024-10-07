@@ -34,7 +34,7 @@
 #include "val/bsa/include/bsa_acs_memory.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 8)
-#define TEST_RULE  "PCI_IC_14, RE_ORD_4, IE_ORD_4"
+#define TEST_RULE  "PCI_IC_12, PCI_IC_14, RE_ORD_4, IE_ORD_4"
 #define TEST_DESC  "Check PCIe Software Coherency         "
 
 #define TEST_DATA_BLK_SIZE  (4*1024)

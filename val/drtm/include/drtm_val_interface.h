@@ -55,6 +55,10 @@ typedef struct __attribute__((packed)) {
     uint64_t x30;
     /* Stack pointer */
     uint64_t sp;
+    /* Stack Pointer when SPSel=0 */
+    uint64_t sp_el0;
+    /* SCTLR_EL2 */
+    uint64_t sctlr_el2;
 } DRTM_ACS_DL_SAVED_STATE;
 
 typedef struct __attribute__((packed)) {
@@ -62,8 +66,8 @@ typedef struct __attribute__((packed)) {
     uint64_t x1;
 } DRTM_ACS_DL_RESULT;
 
-extern DRTM_ACS_DL_RESULT      g_drtm_acs_dl_result;
-extern DRTM_ACS_DL_SAVED_STATE g_drtm_acs_dl_saved_state;
+extern DRTM_ACS_DL_RESULT      *g_drtm_acs_dl_result;
+extern DRTM_ACS_DL_SAVED_STATE *g_drtm_acs_dl_saved_state;
 
 int64_t val_drtm_features(uint64_t fid, uint64_t *feat1, uint64_t *feat2);
 uint32_t val_drtm_get_version(void);

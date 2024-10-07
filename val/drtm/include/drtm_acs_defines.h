@@ -61,7 +61,9 @@
 #define VAL_DRTM_RESERVED_BYTE_ZERO         0x0
 
 #define DRTM_SIZE_4K                        0x1000
+#define DRTM_SIZE_64K                       0x10000
 #define ROUND_UP_TO_4K(Size)                (((Size) + DRTM_SIZE_4K - 1) & ~(DRTM_SIZE_4K - 1))
+#define DRTM_IS_4KB_ALIGNED(addr)           (((addr) & 0xFFF) == 0)
 
 #define DRTM_LOC_1                          1
 #define DRTM_LOC_2                          2

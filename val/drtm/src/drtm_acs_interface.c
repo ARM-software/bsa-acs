@@ -30,8 +30,8 @@
 DRTM_ACS_FEATURES g_drtm_features;
 
 /* DL simulation */
-DRTM_ACS_DL_SAVED_STATE g_drtm_acs_dl_saved_state;
-DRTM_ACS_DL_RESULT      g_drtm_acs_dl_result;
+DRTM_ACS_DL_SAVED_STATE *g_drtm_acs_dl_saved_state;
+DRTM_ACS_DL_RESULT      *g_drtm_acs_dl_result;
 
 /* Assembly code coresponding to below opcode is added as part
  * of comments, last 4 32-Bytes are reserved to save the address
@@ -39,10 +39,14 @@ DRTM_ACS_DL_RESULT      g_drtm_acs_dl_result;
  * This will be used to store x0 & x1 in DLME Image
 */
 uint32_t                g_drtm_acs_dlme[] = {
-    0x58000289,  // ldr x9,  =g_drtm_acs_dl_result
+    0x58000389,  // ldr x9,  =g_drtm_acs_dl_result
     0xF9000120,  // str x0,  [x9]
     0xF9000521,  // str x1,  [x9, #8]
-    0x58000269,  // ldr x9,  =g_drtm_acs_dl_saved_state
+    0x58000369,  // ldr x9,  =g_drtm_acs_dl_saved_state
+    0xD53C1000,  // mrs x0, sctlr_el2
+    0xB2400000,  // orr x0, x0, 0x1
+    0xB2400000,  // orr x0, x0, 0x1
+    0xD51C1000,  // msr sctlr_el2, x0
     0xF9400133,  // ldr x19, [x9]
     0xF9400534,  // ldr x20, [x9, #8]
     0xF9400935,  // ldr x21, [x9, #16]
@@ -55,6 +59,10 @@ uint32_t                g_drtm_acs_dlme[] = {
     0xF940253C,  // ldr x28, [x9, #72]
     0xF940293D,  // ldr x29, [x9, #80]
     0xF9402D3E,  // ldr x30, [x9, #88]
+    0xF9403520,  // ldr x0,  [x9, #104]
+    0xD5184100,  // msr sp_el0,  x0
+    0xF9403920,  // ldr x0,  [x9, #112]
+    0xD51C1000,  // msr sctlr_el2,  x0
     0xF9403129,  // ldr x9,  [x9, #96]
     0x9100013F,  // mov sp,  x9
     0xAA1F03E0,  // mov x0,  xzr
@@ -293,6 +301,18 @@ int64_t val_drtm_init_drtm_params(DRTM_PARAMETERS *drtm_params)
     drtm_params->mem_prot_table_address  = 0;
     drtm_params->mem_prot_table_size     = 0;
 
+    /* We have free space at drtm_params->dlme_region_address of 4KB */
+    g_drtm_acs_dl_saved_state = (DRTM_ACS_DL_SAVED_STATE *)drtm_params->dlme_region_address;
+    g_drtm_acs_dl_result = (DRTM_ACS_DL_RESULT *)(drtm_params->dlme_region_address
+                            + sizeof(DRTM_ACS_DL_SAVED_STATE));
+
+    /* Update the DLME Image Last Location with address of g_drtm_acs_dl* structures */
+    uint32_t last_index = g_drtm_acs_dlme_size / sizeof(uint32_t) - 1;
+    g_drtm_acs_dlme[last_index - 3] = ((uint64_t) g_drtm_acs_dl_result) & 0xFFFFFFFF;
+    g_drtm_acs_dlme[last_index - 2] = ((uint64_t) g_drtm_acs_dl_result) >> 32;
+    g_drtm_acs_dlme[last_index - 1] = ((uint64_t) g_drtm_acs_dl_saved_state) & 0xFFFFFFFF;
+    g_drtm_acs_dlme[last_index]     = ((uint64_t) g_drtm_acs_dl_saved_state) >> 32;
+
     return status;
 }
 
@@ -307,17 +327,17 @@ int64_t val_drtm_check_dl_result(uint64_t dlme_base_addr, uint64_t dlme_data_off
     /* in the dlme x0 should have dlme_base_addr */
     /* in the dlme x1 should have dlme_data_offset */
     /* If both condition are met then PASS */
-    if (g_drtm_acs_dl_result.x0 != dlme_base_addr) {
+    if (g_drtm_acs_dl_result->x0 != dlme_base_addr) {
         val_print(ACS_PRINT_ERR, "\n    Invalid x0 after dynamic launch", 0);
         val_print(ACS_PRINT_ERR, "\n    Expected 0x%lx,", dlme_base_addr);
-        val_print(ACS_PRINT_ERR, " got 0x%lx", g_drtm_acs_dl_result.x0);
+        val_print(ACS_PRINT_ERR, " got 0x%lx", g_drtm_acs_dl_result->x0);
         status = ACS_STATUS_FAIL;
     }
 
-    if (g_drtm_acs_dl_result.x1 != dlme_data_offset) {
+    if (g_drtm_acs_dl_result->x1 != dlme_data_offset) {
         val_print(ACS_PRINT_ERR, "\n    Invalid x1 after dynamic launch", 0);
         val_print(ACS_PRINT_ERR, "\n    Expected 0x%lx,", dlme_data_offset);
-        val_print(ACS_PRINT_ERR, " got 0x%lx", g_drtm_acs_dl_result.x1);
+        val_print(ACS_PRINT_ERR, " got 0x%lx", g_drtm_acs_dl_result->x1);
         status = ACS_STATUS_FAIL;
     }
     return status;
@@ -325,7 +345,6 @@ int64_t val_drtm_check_dl_result(uint64_t dlme_base_addr, uint64_t dlme_data_off
 
 uint32_t val_drtm_create_info_table(void)
 {
-    uint32_t last_index;
     int64_t  status;
     uint32_t drtm_version;
     uint64_t feat1, feat2;
@@ -393,13 +412,6 @@ uint32_t val_drtm_create_info_table(void)
         val_drtm_features(DRTM_1_0_FN_DRTM_SET_TCB_HASH, &feat1, &feat2);
     g_drtm_features.lock_tcb_hashes  =
         val_drtm_features(DRTM_1_0_FN_DRTM_LOCK_TCB_HASH, &feat1, &feat2);
-
-    /* Update the DLME Image Last Location with address of g_drtm_acs_dl* structures */
-    last_index = g_drtm_acs_dlme_size / sizeof(uint32_t) - 1;
-    g_drtm_acs_dlme[last_index - 3] = ((uint64_t) &g_drtm_acs_dl_result) & 0xFFFFFFFF;
-    g_drtm_acs_dlme[last_index - 2] = ((uint64_t) &g_drtm_acs_dl_result) >> 32;
-    g_drtm_acs_dlme[last_index - 1] = ((uint64_t) &g_drtm_acs_dl_saved_state) & 0xFFFFFFFF;
-    g_drtm_acs_dlme[last_index]     = ((uint64_t) &g_drtm_acs_dl_saved_state) >> 32;
 
     return 0;
 }

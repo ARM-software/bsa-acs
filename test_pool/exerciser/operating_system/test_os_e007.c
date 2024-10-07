@@ -43,7 +43,7 @@
 #include "val/bsa/include/bsa_acs_memory.h"
 
 #define TEST_NUM   (ACS_EXERCISER_TEST_NUM_BASE + 7)
-#define TEST_RULE  "PCI_IC_11, PCI_IC_13, PCI_IC_16, PCI_IC_17, PCI_IC_18"
+#define TEST_RULE  "PCI_IC_11, PCI_IC_12, PCI_IC_13, PCI_IC_16, PCI_IC_17, PCI_IC_18"
 #define TEST_DESC  "Check PCIe I/O Coherency              "
 
 #define TEST_DATA_BLK_SIZE  (4*1024)
