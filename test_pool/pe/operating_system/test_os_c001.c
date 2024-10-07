@@ -226,7 +226,7 @@ void
 payload(uint32_t num_pe)
 {
   uint32_t my_index = val_pe_get_index_mpid(val_pe_get_mpid());
-  uint32_t i;
+  uint32_t i, j, t = 0;
   uint32_t timeout;
   uint64_t reg_read_data;
   uint64_t total_fail = 0;
@@ -290,15 +290,30 @@ payload(uint32_t num_pe)
       }
   }
 
-  val_print(ACS_PRINT_ERR, "\nPrimary PE Index : %d, ", my_index);
-  val_print(ACS_PRINT_ERR, "MIDR_EL1 : 0x%016llx", rd_data_array[1]);
+  val_print(ACS_PRINT_ERR, "\n       Primary PE Index : %d, ", my_index);
+  val_print(ACS_PRINT_ERR, "MIDR_EL1 : 0x%llx", rd_data_array[1]);
+  val_print(ACS_PRINT_TEST, "\n       Other Cores : ", 0);
 
   for (i = 0; i < num_pe; i++) {
+      uint32_t unique = 1;
       if (i != my_index) {
           pe_buffer = g_pe_reg_info + i;
-          val_print(ACS_PRINT_ERR, "\n        PE Index : %d, ", i);
-          val_print(ACS_PRINT_ERR, "MIDR_EL1 : 0x%016llx", pe_buffer->reg_data[1]);
+          for (j = 0; j < i; j++) {
+              pe_reg_info *pe_buffer_midr = g_pe_reg_info + j;
+              if (pe_buffer->reg_data[1] == pe_buffer_midr->reg_data[1]) {
+                  unique = 0;
+                  break;
+              }
+          }
+          if (unique == 1 && rd_data_array[1] != pe_buffer->reg_data[1]) {
+              val_print(ACS_PRINT_TEST, "0x%llx \n                     ", pe_buffer->reg_data[1]);
+              t = 1;
+           }
       }
+  }
+
+  if (t == 0) {
+      val_print(ACS_PRINT_TEST, " Identical \n", 0);
   }
 
   pe_buffer = NULL;
@@ -332,11 +347,9 @@ payload(uint32_t num_pe)
 
           for (int reg_index = 1; reg_index < NUM_OF_REGISTERS; reg_index++) {
              if (!(pe_buffer->reg_status[reg_index])) {
-                 if (reg_index != 1) {
-                     val_print(ACS_PRINT_INFO, "\n        PE Index: %d, ", i);
-                     val_print(ACS_PRINT_INFO, reg_list[reg_index].reg_desc, 0);
-                     val_print(ACS_PRINT_INFO, "  : 0x%016llx", pe_buffer->reg_data[reg_index]);
-                 }
+                 val_print(ACS_PRINT_INFO, "\n        PE Index: %d, ", i);
+                 val_print(ACS_PRINT_INFO, reg_list[reg_index].reg_desc, 0);
+                 val_print(ACS_PRINT_INFO, "  : 0x%016llx", pe_buffer->reg_data[reg_index]);
              } else  {
                  val_print(ACS_PRINT_ERR, "\n        PE Index: %d, ", i);
                  val_print(ACS_PRINT_ERR, reg_list[reg_index].reg_desc, 0);
