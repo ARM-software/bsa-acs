@@ -290,9 +290,8 @@ payload(uint32_t num_pe)
       }
   }
 
-  val_print(ACS_PRINT_ERR, "\n       Primary PE Index : %d, ", my_index);
-  val_print(ACS_PRINT_ERR, "MIDR_EL1 : 0x%llx", rd_data_array[1]);
-  val_print(ACS_PRINT_TEST, "\n       Other Cores : ", 0);
+  val_print(ACS_PRINT_TEST, "\n       Primary PE Index    : %d", my_index);
+  val_print(ACS_PRINT_TEST, "\n       Primary PE MIDR_EL1 : 0x%08llx", rd_data_array[1]);
 
   for (i = 0; i < num_pe; i++) {
       uint32_t unique = 1;
@@ -306,14 +305,20 @@ payload(uint32_t num_pe)
               }
           }
           if (unique == 1 && rd_data_array[1] != pe_buffer->reg_data[1]) {
-              val_print(ACS_PRINT_TEST, "0x%llx \n                     ", pe_buffer->reg_data[1]);
-              t = 1;
+              if (t == 0) {
+                  val_print(ACS_PRINT_TEST, "\n       Other Cores         : 0x%08llx      ",
+                                                                        pe_buffer->reg_data[1]);
+                  t = 1;
+              } else {
+                  val_print(ACS_PRINT_TEST, "\n                             0x%08llx      ",
+                                                                        pe_buffer->reg_data[1]);
+                }
            }
       }
   }
 
   if (t == 0) {
-      val_print(ACS_PRINT_TEST, " Identical \n", 0);
+      val_print(ACS_PRINT_TEST, "\n       Other Cores         : Identical       ", 0);
   }
 
   pe_buffer = NULL;
