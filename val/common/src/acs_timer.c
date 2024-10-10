@@ -232,7 +232,7 @@ val_timer_create_info_table(uint64_t *timer_info_table)
   uint64_t timer_num;
   uint64_t gt_entry;
   uint64_t timer_entry;
-  double   freq_mhz;
+  uint64_t freq_mhz;
 
   if (timer_info_table == NULL) {
       val_print(ACS_PRINT_ERR, "Input for Create Info table cannot be NULL\n", 0);
@@ -253,10 +253,15 @@ val_timer_create_info_table(uint64_t *timer_info_table)
   }
 
   freq_mhz = val_timer_get_info(TIMER_INFO_CNTFREQ, 0);
-  if (freq_mhz != 0)
-    freq_mhz = freq_mhz/1000000;
-
-  val_print(ACS_PRINT_TEST, " TIMER_INFO: System Counter frequency :    %.2f MHz\n", freq_mhz);
+  if (freq_mhz != 0) {
+    freq_mhz = freq_mhz/1000;
+    if (freq_mhz > 1000) {
+      freq_mhz = freq_mhz/1000;
+      val_print(ACS_PRINT_TEST, " TIMER_INFO: System Counter frequency :    %ld MHz\n", freq_mhz);
+    } else {
+      val_print(ACS_PRINT_TEST, " TIMER_INFO: System Counter frequency :    %ld KHz\n", freq_mhz);
+    }
+  }
 
   val_print(ACS_PRINT_TEST, " TIMER_INFO: Number of system timers  : %4d\n",
                                             g_timer_info_table->header.num_platform_timer);
