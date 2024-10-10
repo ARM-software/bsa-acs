@@ -308,7 +308,7 @@ val_gic_get_info(GIC_INFO_e type)
 
       case GIC_INFO_VERSION:
           if (g_gic_info_table->header.gic_version != 0) {
-             val_print(ACS_PRINT_INFO, "\n       gic version from info table = %d ",
+             val_print(ACS_PRINT_INFO, "\n       gic version from info table = %d\n",
                        g_gic_info_table->header.gic_version);
              return g_gic_info_table->header.gic_version;
           }
