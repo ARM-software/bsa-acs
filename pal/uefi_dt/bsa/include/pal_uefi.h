@@ -86,6 +86,7 @@ typedef struct {
 #define CONDUIT_HVC       1
 #define CONDUIT_UNKNOWN  -1
 #define CONDUIT_NONE     -2
+#define CONDUIT_NO_TABLE -3
 
 typedef struct {
   UINT32 num_of_pe;

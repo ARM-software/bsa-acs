@@ -86,6 +86,7 @@ typedef struct {
 #define CONDUIT_HVC       1
 #define CONDUIT_UNKNOWN  -1
 #define CONDUIT_NONE     -2
+#define CONDUIT_NO_TABLE -3
 
 typedef struct {
   UINT32 num_of_pe;
@@ -474,7 +475,7 @@ VOID    pal_mem_free_cacheable(UINT32 bdf, UINT32 size, VOID *va, VOID *pa);
 VOID    *pal_mem_virt_to_phys(VOID *va);
 VOID    *pal_mem_phys_to_virt(UINT64 pa);
 UINT64  pal_memory_get_unpopulated_addr(UINT64 *addr, UINT32 instance);
-
+UINT64 pal_get_xsdt_ptr();
 VOID    pal_mem_free(VOID *buffer);
 UINT32  pal_pe_get_num();
 
