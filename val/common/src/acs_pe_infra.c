@@ -52,6 +52,9 @@ uint32_t
 val_pe_create_info_table(uint64_t *pe_info_table)
 {
   gPsciConduit = pal_psci_get_conduit();
+  if (gPsciConduit == CONDUIT_NO_TABLE)
+      return ACS_STATUS_ERR;
+
   if (gPsciConduit == CONDUIT_UNKNOWN) {
       val_print(ACS_PRINT_WARN, " FADT not found, assuming SMC as PSCI conduit\n", 0);
       gPsciConduit = CONDUIT_SMC;

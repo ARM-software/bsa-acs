@@ -6,7 +6,7 @@ handles memory synchronization, caching, and reordering. By analyzing the outcom
 insights into the reliability of the memory model implementation and identify any subtle bugs or inconsistencies that
 might lead to unpredictable behavior in concurrent programs.
 
- - NOTE: Running and passing Memory Model consistenct tests are not required for SystemReady Certifications and they are not part of BSA Certification Image binary.
+ - NOTE: Running and passing Memory Model consistency tests are not required for SystemReady Certifications and they are not part of BSA Certification Image binary.
 
 ## Release details
  - Code quality: v1.0.0 EAC

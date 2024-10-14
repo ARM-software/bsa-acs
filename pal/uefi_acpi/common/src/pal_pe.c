@@ -67,7 +67,14 @@ pal_psci_get_conduit (
   VOID
   )
 {
+  EFI_ACPI_DESCRIPTION_HEADER   *Xsdt;
   EFI_ACPI_6_1_FIXED_ACPI_DESCRIPTION_TABLE  *Fadt;
+
+  Xsdt = (EFI_ACPI_DESCRIPTION_HEADER *) pal_get_xsdt_ptr();
+  if (Xsdt == NULL) {
+      acs_print(ACS_PRINT_ERR, L" XSDT not found\n");
+      return CONDUIT_NO_TABLE;
+  }
 
   Fadt = (EFI_ACPI_6_1_FIXED_ACPI_DESCRIPTION_TABLE *)pal_get_fadt_ptr ();
   if (!Fadt) {

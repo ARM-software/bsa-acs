@@ -99,7 +99,7 @@ pal_psci_get_conduit (
   dt_ptr = pal_get_dt_ptr();
   if (dt_ptr == 0) {
       acs_print(ACS_PRINT_ERR, L" dt_ptr is NULL\n");
-      return CONDUIT_NONE;
+      return CONDUIT_NO_TABLE;
   }
 
   /* Search for psci node*/

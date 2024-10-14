@@ -180,6 +180,7 @@
 #define CONDUIT_HVC       1
 #define CONDUIT_UNKNOWN  -1
 #define CONDUIT_NONE     -2
+#define CONDUIT_NO_TABLE -3
 int32_t pal_psci_get_conduit(void);
 
 /**

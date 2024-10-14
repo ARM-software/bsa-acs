@@ -587,16 +587,19 @@ ShellAppMain (
   val_print(ACS_PRINT_TEST, "\n Creating Platform Information Tables\n", 0);
 
 
-
-
-
   Status = createPeInfoTable();
-  if (Status)
-    return Status;
+  if (Status) {
+      if (g_acs_log_file_handle)
+        ShellCloseFile(&g_acs_log_file_handle);
+     return Status;
+  }
 
   Status = createGicInfoTable();
-  if (Status)
-    return Status;
+  if (Status) {
+      if (g_acs_log_file_handle)
+        ShellCloseFile(&g_acs_log_file_handle);
+      return Status;
+  }
 
   /* Initialise exception vector, so any unexpected exception gets handled by default
      BSA exception handler */
