@@ -321,5 +321,7 @@ void     val_memory_create_info_table(uint64_t *memory_info_table);
 void     val_memory_free_info_table(void);
 uint64_t val_memory_get_info(addr_t addr, uint64_t *attr);
 uint32_t val_memory_get_entry_index(uint32_t type, uint32_t instance);
+void val_pe_cache_clean_invalidate_range(uint64_t start_addr, uint64_t length);
+void val_pe_cache_invalidate_range(uint64_t start_addr, uint64_t length);
 
 #endif
