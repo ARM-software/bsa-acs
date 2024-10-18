@@ -624,7 +624,9 @@ pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable)
       else
         GtEntry->GtCntBase[GtEntry->timer_count] = fdt32_to_cpu(Preg[index]);
 
-      GtEntry->GtCntBase[GtEntry->timer_count] += GtEntry->block_cntl_base;
+      if (GtEntry->GtCntBase[GtEntry->timer_count] < GtEntry->block_cntl_base)
+        GtEntry->GtCntBase[GtEntry->timer_count] += GtEntry->block_cntl_base;
+
       GtEntry->frame_num[GtEntry->timer_count] = frame_number;
 
       index = 0;
