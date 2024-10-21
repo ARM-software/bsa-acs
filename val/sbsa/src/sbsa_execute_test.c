@@ -545,8 +545,8 @@ val_sbsa_exerciser_execute_tests(uint32_t level)
   num_instances = val_exerciser_get_info(EXERCISER_NUM_CARDS);
 
   if (num_instances == 0) {
-      val_print(ACS_PRINT_WARN, "\n     No Exerciser Devices Found, \
-                                        Skipping Exerciser tests...\n", 0);
+      val_print(ACS_PRINT_WARN,
+                "\n     No Exerciser Devices Found, Skipping Exerciser tests...\n", 0);
       return ACS_STATUS_SKIP;
   }
 
