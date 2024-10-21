@@ -474,6 +474,14 @@ val_mpam_memory_configure_mbwumon(uint32_t msc_index)
     data = BITFIELD_SET(MBWU_CTL_MATCH_PARTID, 1) | BITFIELD_SET(MBWU_CTL_MATCH_PMG, 1);
     val_mpam_mmr_write(msc_index, REG_MSMON_CFG_MBWU_CTL, data);
 
+    /* Check if MPAMF_MBWUMON_IDR supports RW bandwidth selection */
+    if (BITFIELD_READ(MBWUMON_IDR_HAS_RWBW, val_mpam_mmr_read64(msc_index, REG_MPAMF_MBWUMON_IDR)))
+    {
+        /* If true, configure monitor filter reg to count both read and write bandwidth */
+        data = BITFIELD_SET(MBWU_FLT_RWBW, MBWU_FLT_RWBW_RW);
+        val_mpam_mmr_write(msc_index, REG_MSMON_CFG_MBWU_FLT, data);
+    }
+
     /* configure monitor filter reg for default partid and default pmg */
     data = BITFIELD_SET(MBWU_FLT_PARTID, DEFAULT_PARTID) | BITFIELD_SET(MBWU_FLT_PMG, DEFAULT_PMG);
     val_mpam_mmr_write(msc_index, REG_MSMON_CFG_MBWU_FLT, data);
