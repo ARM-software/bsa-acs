@@ -20,7 +20,8 @@
 #include "val/common/include/acs_pcie.h"
 
 #define TEST_NUM   (ACS_PER_TEST_NUM_BASE + 6)
-#define TEST_RULE  "B_PER_05"
+#define TEST_RULE_BSA  "B_PER_05"
+#define TEST_RULE_SBSA  "S_L3PER_01"
 #define TEST_DESC  "16550 compatible UART                 "
 
 static
@@ -81,7 +82,10 @@ payload()
 
   if (count == 0) {
       val_print(ACS_PRINT_ERR, "\n       No UART defined by Platform      ", 0);
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+      if (g_build_sbsa)
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+      else
+          val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
 
@@ -217,7 +221,10 @@ os_d005_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
+  if (g_build_sbsa)
+      status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE_SBSA);
+  else
+      status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE_BSA);
 
   val_report_status(0, ACS_END(TEST_NUM), NULL);
 
