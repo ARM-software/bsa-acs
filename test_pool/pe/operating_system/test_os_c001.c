@@ -262,7 +262,12 @@ payload(uint32_t num_pe)
       rd_data_array[i] = return_reg_value(reg_list[i].reg_name, reg_list[i].dependency);
       val_print(ACS_PRINT_INFO, "\n       Primary PE Index: %d, ", my_index);
       val_print(ACS_PRINT_INFO, reg_list[i].reg_desc, 0);
-      val_print(ACS_PRINT_INFO, " : 0x%016llx ", rd_data_array[i]);
+
+      if (reg_list[i].dependency == AA32)
+          val_print(ACS_PRINT_INFO, " : 0x%08llx ", rd_data_array[i]);
+      else
+          val_print(ACS_PRINT_INFO, " : 0x%016llx ", rd_data_array[i]);
+
       val_data_cache_ops_by_va((addr_t)(rd_data_array + i), CLEAN_AND_INVALIDATE);
   }
 
@@ -354,16 +359,28 @@ payload(uint32_t num_pe)
              if (!(pe_buffer->reg_status[reg_index])) {
                  val_print(ACS_PRINT_INFO, "\n        PE Index: %d, ", i);
                  val_print(ACS_PRINT_INFO, reg_list[reg_index].reg_desc, 0);
-                 val_print(ACS_PRINT_INFO, "  : 0x%016llx", pe_buffer->reg_data[reg_index]);
+                 if (reg_list[reg_index].dependency == AA32)
+                     val_print(ACS_PRINT_INFO, "  : 0x%08llx", pe_buffer->reg_data[reg_index]);
+                 else
+                     val_print(ACS_PRINT_INFO, "  : 0x%016llx", pe_buffer->reg_data[reg_index]);
              } else  {
                  val_print(ACS_PRINT_ERR, "\n        PE Index: %d, ", i);
                  val_print(ACS_PRINT_ERR, reg_list[reg_index].reg_desc, 0);
-                 val_print(ACS_PRINT_ERR, "   : 0x%016llx    FAIL\n",
+                 if (reg_list[reg_index].dependency == AA32) {
+                     val_print(ACS_PRINT_ERR, "   : 0x%08llx    FAIL\n",
                                                         pe_buffer->reg_data[reg_index]);
-                 val_print(ACS_PRINT_ERR, "          Masked Primary PE Value : 0x%016llx \n",
+                     val_print(ACS_PRINT_ERR, "          Masked Primary PE Value : 0x%08llx \n",
                                               rd_data_array[reg_index] & (~reg_list[i].reg_mask));
-                 val_print(ACS_PRINT_ERR, "          Masked Current PE Value : 0x%016llx ",
+                     val_print(ACS_PRINT_ERR, "          Masked Current PE Value : 0x%08llx ",
                                          pe_buffer->reg_data[reg_index] & (~reg_list[i].reg_mask));
+                 } else {
+                     val_print(ACS_PRINT_ERR, "   : 0x%016llx    FAIL\n",
+                                                        pe_buffer->reg_data[reg_index]);
+                     val_print(ACS_PRINT_ERR, "          Masked Primary PE Value : 0x%016llx \n",
+                                              rd_data_array[reg_index] & (~reg_list[i].reg_mask));
+                     val_print(ACS_PRINT_ERR, "          Masked Current PE Value : 0x%016llx ",
+                                         pe_buffer->reg_data[reg_index] & (~reg_list[i].reg_mask));
+                   }
                  reg_fail = reg_fail + 1;
              }
           }

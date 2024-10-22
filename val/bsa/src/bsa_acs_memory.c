@@ -62,8 +62,8 @@ val_memory_get_addr(MEMORY_INFO_e mem_type, uint32_t instance, uint64_t *attr)
       return g_memory_info_table->info[i].phy_addr;
   }
 
-  val_print(ACS_PRINT_INFO, "Instance 0x%x not found ", instance);
-  val_print(ACS_PRINT_INFO, "for memory type 0x%x\n", mem_type);
+  val_print(ACS_PRINT_INFO, "\n       Instance 0x%x not found ", instance);
+  val_print(ACS_PRINT_INFO, "for memory type 0x%x", mem_type);
   return 0;
 }
 
