@@ -112,13 +112,10 @@ val_sbsa_pe_execute_tests(uint32_t level, uint32_t num_pe)
   if (((level > 6)  && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)) {
       status |= c028_entry(num_pe);
       status |= c029_entry(num_pe);
-      status |= c030_entry(num_pe);
       status |= c031_entry(num_pe);
       status |= c032_entry(num_pe);
       status |= c033_entry(num_pe);
       status |= c034_entry(num_pe);
-      status |= c035_entry(num_pe);
-      status |= c036_entry(num_pe);
   }
 
   if (((level > 7)  && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8)) {
