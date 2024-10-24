@@ -25,7 +25,8 @@
 #include "val/common/sys_arch_src/gic/v3/gic_v3.h"
 
 #define TEST_NUM   (ACS_PER_TEST_NUM_BASE + 3)
-#define TEST_RULE  "B_PER_05"
+#define TEST_RULE_BSA  "B_PER_05"
+#define TEST_RULE_SBSA "S_L3PER_01"
 #define TEST_DESC  "Check Arm BSA UART register offsets   "
 #define TEST_NUM1  (ACS_PER_TEST_NUM_BASE + 4)
 #define TEST_RULE1 "B_PER_06, B_PER_07"
@@ -145,10 +146,13 @@ payload()
   branch_to_test = &&exception_taken;
   if (count == 0) {
       val_print(ACS_PRINT_ERR, "\n       No UART defined by Platform      ", 0);
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+      if (g_build_sbsa)
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+      else
+          val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
       return;
   }
-  val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
+  val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
 
   while (count != 0) {
       interface_type = val_peripheral_get_info(UART_INTERFACE_TYPE, count - 1);
@@ -158,7 +162,7 @@ payload()
       {
           l_uart_base = val_peripheral_get_info(UART_BASE0, count - 1);
           if (l_uart_base == 0) {
-              val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
+              val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
               return;
           }
 
@@ -189,10 +193,10 @@ payload1()
 
   if (count == 0) {
       val_print(ACS_PRINT_ERR, "\n       No UART defined by Platform      ", 0);
-      val_set_status(index, RESULT_FAIL(TEST_NUM1, 1));
+      val_set_status(index, RESULT_SKIP(TEST_NUM1, 1));
       return;
   }
-  val_set_status(index, RESULT_SKIP(TEST_NUM1, 1));
+  val_set_status(index, RESULT_SKIP(TEST_NUM1, 2));
   while (count != 0) {
       timeout = TIMEOUT_MEDIUM;
       int_id    = val_peripheral_get_info(UART_GSIV, count - 1);
@@ -236,7 +240,7 @@ payload1()
                  test_fail++;
               }
           } else {
-              val_set_status(index, RESULT_SKIP(TEST_NUM1, 2));
+              val_set_status(index, RESULT_SKIP(TEST_NUM1, 3));
           }
       }
       count--;
@@ -268,7 +272,10 @@ os_d003_entry(uint32_t num_pe)
       val_run_test_payload(TEST_NUM, num_pe, payload, 0);
 
   /* get the result from all PE and check for failure */
-  status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);
+  if (g_build_sbsa)
+      status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE_SBSA);
+  else
+      status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE_BSA);
 
   val_report_status(0, ACS_END(TEST_NUM), NULL);
 
