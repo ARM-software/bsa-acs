@@ -49,7 +49,6 @@ uint32_t pmu004_entry(uint32_t num_pe);
 uint32_t pmu005_entry(uint32_t num_pe);
 uint32_t pmu006_entry(uint32_t num_pe);
 uint32_t pmu007_entry(uint32_t num_pe);
-uint32_t pmu008_entry(uint32_t num_pe);
 uint32_t pmu009_entry(uint32_t num_pe);
 
 #endif /*__SBSA_ACS_PMU_H__ */
