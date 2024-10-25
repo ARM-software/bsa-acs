@@ -41,6 +41,16 @@ payload(void)
   pcie_device_bdf_table *bdf_tbl_ptr;
 
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
+
+  /* Check If PCIe Hierarchy supports P2P */
+  if (val_pcie_p2p_support() == NOT_IMPLEMENTED) {
+    val_print(ACS_PRINT_DEBUG, "\n       The test is applicable only if the system supports", 0);
+    val_print(ACS_PRINT_DEBUG, "\n       P2P traffic. If the system supports P2P, pass the", 0);
+    val_print(ACS_PRINT_DEBUG, "\n       command line option '-p2p' while running the binary", 0);
+    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+    return;
+  }
+
   bdf_tbl_ptr = val_pcie_bdf_table_ptr();
 
   test_fails = 0;
@@ -90,7 +100,7 @@ payload(void)
   if (test_skip == 1) {
       val_print(ACS_PRINT_DEBUG,
            "\n       No RP type device found with P2P and ATS Support. Skipping test", 0);
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 1));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
   }
   else if (test_fails)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, test_fails));
