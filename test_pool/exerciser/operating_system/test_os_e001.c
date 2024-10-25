@@ -243,13 +243,6 @@ payload(void)
     return;
   }
 
-  if (val_pcie_p2p_support())
-  {
-    val_print(ACS_PRINT_DEBUG, "\n       PCIe hierarchy does not support P2P ", 0);
-    val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
-    return;
-  }
-
   /* Store ACS Control reg bits in an array for every Exerciser and reset them
      to default at the end. */
   val_pcie_read_acsctrl(acsctrl_default);
@@ -325,7 +318,7 @@ payload(void)
   val_pcie_write_acsctrl(acsctrl_default);
 
   if (test_skip == 1)
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 3));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
   else if (fail_cnt)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, fail_cnt));
   else

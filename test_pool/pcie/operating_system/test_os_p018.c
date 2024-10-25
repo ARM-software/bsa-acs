@@ -49,13 +49,6 @@ payload(void)
     return;
   }
 
-  if (val_pcie_p2p_support())
-  {
-      val_print(ACS_PRINT_DEBUG, "\n       PCIe hierarchy does not support P2P. Skipping test", 0);
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
-      return;
-  }
-
   bdf_tbl_ptr = val_pcie_bdf_table_ptr();
   test_fails = 0;
 
@@ -68,6 +61,10 @@ payload(void)
       /* Check entry is RP */
       if (dp_type == RP)
       {
+          /* Check If RP supports P2P with other RP's. */
+          if (val_pcie_dev_p2p_support(bdf))
+              continue;
+
           /* Test runs for atleast an endpoint */
           test_skip = 0;
           val_print(ACS_PRINT_DEBUG, "\n       BDF - 0x%x", bdf);
@@ -89,7 +86,7 @@ payload(void)
 
   if (test_skip == 1) {
       val_print(ACS_PRINT_DEBUG, "\n       No RP type device found. Skipping test", 0);
-      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 3));
+      val_set_status(pe_index, RESULT_SKIP(TEST_NUM, 2));
   }
   else if (test_fails)
       val_set_status(pe_index, RESULT_FAIL(TEST_NUM, test_fails));
