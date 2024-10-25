@@ -158,8 +158,6 @@ jobs:
     steps:
       - name: Checkout bsa-acs repository
         uses: actions/checkout@v4
-        with:
-          repository: ARM-software/bsa-acs
 
       - name: Remove build folder if present in BSA-ACS
         run: |
