@@ -31,18 +31,19 @@
     @return  0    device does not support MSI(X)
     @return  1    device supports MSI(X)
 **/
-static uint32_t check_msi_status(uint32_t dev_index)
+static uint32_t check_msi_status(uint32_t bdf)
 {
-  uint32_t data;
+  uint32_t msi_cap_offset;
 
-  data = val_peripheral_get_info (ANY_FLAGS, dev_index);
-
-  if ((data & PER_FLAG_MSI_ENABLED) &&
-      val_peripheral_get_info (ANY_GSIV, dev_index)) {
-    return 1;
+  /* Search for MSI/MSI-X Capability */
+  if ((val_pcie_find_capability(bdf, PCIE_CAP, CID_MSIX, &msi_cap_offset)) ||
+      (val_pcie_find_capability(bdf, PCIE_CAP, CID_MSIX, &msi_cap_offset)))
+  {
+      val_print(ACS_PRINT_DEBUG, "\n       No MSI/MSI-X Capability for bdf 0x%x", bdf);
+      return 0;
   }
 
-  return 0;
+  return 1;
 }
 
 /**
@@ -114,68 +115,109 @@ void
 payload (void)
 {
 
-  uint32_t count = val_peripheral_get_info (NUM_ALL, 0);
   uint32_t index = val_pe_get_index_mpid (val_pe_get_mpid());
   uint8_t status;
   PERIPHERAL_VECTOR_LIST *current_dev_mvec;
   PERIPHERAL_VECTOR_LIST *next_dev_mvec;
   uint64_t current_dev_bdf;
   uint64_t next_dev_bdf;
-  uint32_t count_next;
   uint32_t test_skip = 1;
-
-  if (!count) {
-     val_print(ACS_PRINT_DEBUG, "\n       No peripherals found. Skipping test", 0);
-     val_set_status (index, RESULT_SKIP(TEST_NUM, 3));
-     return;
-  }
-
+  pcie_device_bdf_table *bdf_tbl_ptr;
+  uint32_t tbl_index = 0;
+  uint32_t tbl_index_next = 0;
   status = 0;
-  current_dev_mvec = NULL;
-  next_dev_mvec = NULL;
+  uint32_t bdf, dp_type;
+  uint32_t class_code;
+  uint32_t base_cc;
 
-  /*
-    Pull each discovered PCI device and its list of MSI(X) vectors.
-    Compare this list with MSI(X) vector lists of other discovered
-    PCI devices and find duplicates exist.
-  */
-  while (count > 0 && !status) {
-    count_next = count - 1;
-    if (check_msi_status (count - 1)) {
-      /* Get BDF of a device */
-      current_dev_bdf = val_peripheral_get_info (ANY_BDF, count - 1);
-      if (current_dev_bdf) {
-        val_print (ACS_PRINT_DEBUG, "\n       Checking PCI device with BDF 0x%X", current_dev_bdf);
-        /* Read MSI(X) vectors */
-        if (val_get_msi_vectors (current_dev_bdf, &current_dev_mvec)) {
+  bdf_tbl_ptr = val_pcie_bdf_table_ptr();
 
-          /* Pull other PCI devices left in the devices list */
-          while (count_next > 0 && !status) {
-            if (check_msi_status (count_next - 1)) {
-              /* Get BDF of a device */
-              next_dev_bdf = val_peripheral_get_info (ANY_BDF, count_next - 1);
-              /* Read MSI(X) vectors */
-              if (val_get_msi_vectors (next_dev_bdf, &next_dev_mvec)) {
-                test_skip = 0;
-                /* Compare two lists of MSI(X) vectors */
-                if (check_list_duplicates (current_dev_mvec, next_dev_mvec)) {
-                  val_print (ACS_STATUS_ERR, "\n       Allocated MSIs are not unique", 0);
-                  val_set_status (index, RESULT_FAIL(TEST_NUM, 02));
-                  status = 1;
-                }
-                clean_msi_list (next_dev_mvec);
-              }
-            }
-            count_next--;
-          }
+  while (tbl_index < bdf_tbl_ptr->num_entries && !status) {
+      bdf = bdf_tbl_ptr->device[tbl_index].bdf;
+      tbl_index_next = tbl_index + 1;
 
-          clean_msi_list (current_dev_mvec);
+      val_pcie_read_cfg(bdf, TYPE01_RIDR, &class_code);
+      val_print(ACS_PRINT_DEBUG, "\n       Class code is 0x%x", class_code);
+
+      base_cc = class_code >> TYPE01_BCC_SHIFT;
+
+      /* Skip Network Controller devices as locking access to MSI
+       * descriptors is causing an exception and for the devices
+       * with base class codes greater than 13h as they
+       * are reserved */
+      if ((base_cc == CNTRL_CC) || (base_cc > RES_CC))
+      {
+        tbl_index++;
+        continue;
+      }
+
+      dp_type = val_pcie_device_port_type(bdf);
+      /* Check entry is EP. Else move to next BDF. */
+      if (dp_type == EP) {
+        current_dev_bdf = bdf;
+        if (!check_msi_status(current_dev_bdf))
+        {
+          tbl_index++;
+          continue;
         }
-      } else {
+
+        if (val_get_msi_vectors (current_dev_bdf, &current_dev_mvec)) {
+            tbl_index_next = tbl_index + 1;
+            while (tbl_index_next < bdf_tbl_ptr->num_entries && !status)
+            {
+                bdf = bdf_tbl_ptr->device[tbl_index_next].bdf;
+
+                val_pcie_read_cfg(bdf, TYPE01_RIDR, &class_code);
+                val_print(ACS_PRINT_DEBUG, "\n       Class code is 0x%x", class_code);
+
+                base_cc = class_code >> TYPE01_BCC_SHIFT;
+
+               /* Skip Network Controller devices as locking access to MSI
+                * descriptors is causing an exception and for the devices
+                * with base class codes greater than 13h as they
+                * are reserved */
+                if ((base_cc == CNTRL_CC) || (base_cc > RES_CC))
+                {
+                  tbl_index_next++;
+                  continue;
+                }
+
+                dp_type = val_pcie_device_port_type(bdf);
+                /* Check entry is EP. Else move to next BDF. */
+                if (dp_type == EP)
+                {
+                  next_dev_bdf = bdf;
+                  if (!check_msi_status(next_dev_bdf))
+                  {
+                    tbl_index_next++;
+                    continue;
+                  }
+
+                  /* Read MSI(X) vectors */
+                  if (val_get_msi_vectors (next_dev_bdf, &next_dev_mvec))
+                  {
+                    test_skip = 0;
+                    /* Compare two lists of MSI(X) vectors */
+                    if (check_list_duplicates (current_dev_mvec, next_dev_mvec))
+                    {
+                      val_print (ACS_STATUS_ERR, "\n       Allocated MSIs are not unique", 0);
+                      val_set_status (index, RESULT_FAIL(TEST_NUM, 01));
+                      status = 1;
+                    }
+
+                    clean_msi_list (next_dev_mvec);
+                  }
+                }
+
+                tbl_index_next++;
+            }
+            clean_msi_list (current_dev_mvec);
+        }
+      }
+      else {
         val_print (ACS_PRINT_DEBUG, "\n       Invalid BDF 0x%x", current_dev_bdf);
       }
-    }
-    count--;
+      tbl_index++;
   }
 
   if (test_skip) {

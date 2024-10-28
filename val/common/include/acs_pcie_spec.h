@@ -49,6 +49,7 @@
 #define MAS_CC       0x1
 #define CNTRL_CC     0x2
 #define DP_CNTRL_CC  0x3
+#define RES_CC       0x13
 
 /* Command register shifts */
 #define CR_MSE_SHIFT   1
