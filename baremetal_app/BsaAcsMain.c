@@ -17,10 +17,11 @@
 
 #include "val/common/include/pal_interface.h"
 #include "val/common/include/val_interface.h"
-#include "val/bsa/include/bsa_val_interface.h"
 #include "val/common/include/acs_pe.h"
 #include "val/common/include/acs_val.h"
 #include "val/common/include/acs_memory.h"
+#include "val/bsa/include/bsa_val_interface.h"
+#include "val/bsa/include/bsa_acs_dma.h"
 #include "BsaAcs.h"
 
 uint32_t  g_print_level;
@@ -146,6 +147,17 @@ createPeripheralInfoTable(
 }
 
 void
+createDmaInfoTable(
+)
+{
+  uint64_t  *DmaInfoTable;
+
+  DmaInfoTable = val_aligned_alloc(SIZE_4K, sizeof(DMA_INFO_TABLE)
+                 + (PLATFORM_OVERRIDE_DMA_CNT * sizeof(DMA_INFO_BLOCK)));
+  val_dma_create_info_table(DmaInfoTable);
+}
+
+void
 freeBsaAcsMem()
 {
 
@@ -156,6 +168,7 @@ freeBsaAcsMem()
   val_pcie_free_info_table();
   val_iovirt_free_info_table();
   val_peripheral_free_info_table();
+  val_dma_free_info_table();
   val_free_shared_mem();
 }
 
@@ -240,6 +253,7 @@ ShellAppMainbsa(
   createWatchdogInfoTable();
   createPcieVirtInfoTable();
   createPeripheralInfoTable();
+  createDmaInfoTable();
 
   val_allocate_shared_mem();
 

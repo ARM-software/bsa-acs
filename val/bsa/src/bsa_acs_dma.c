@@ -47,6 +47,12 @@ void
 val_dma_create_info_table(uint64_t *dma_info_ptr)
 {
 
+  if (dma_info_ptr == NULL) {
+      val_print(ACS_PRINT_ERR, "Input for Create Info table cannot be NULL\n", 0);
+      return;
+  }
+  val_print(ACS_PRINT_INFO, " Creating DMA INFO table\n", 0);
+
   g_dma_info_table = (DMA_INFO_TABLE *)dma_info_ptr;
 
   pal_dma_create_info_table(g_dma_info_table);
