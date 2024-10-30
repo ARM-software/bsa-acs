@@ -218,6 +218,14 @@ payload1()
                  return;
               }
 
+               val_peripheral_uart_setup();
+               /* If UART is used by other app (optee/TF) skip it */
+               if (((uart_reg_read(BSA_UARTIMSC, WIDTH_BIT32)) & 0x10))
+               {
+                    count--;
+                    continue;
+               }
+
               /* Install ISR */
               if (val_gic_install_isr(int_id, isr)) {
                  val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
@@ -225,7 +233,6 @@ payload1()
                  return;
               }
 
-              val_peripheral_uart_setup();
               uart_enable_txintr();
               val_print_raw(l_uart_base, g_print_level,
                             "\n       Test Message                          ", 0);
