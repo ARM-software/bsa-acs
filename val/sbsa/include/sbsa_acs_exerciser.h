@@ -45,6 +45,7 @@ uint32_t e009_entry(void);
 uint32_t e010_entry(void);
 uint32_t e011_entry(void);
 uint32_t e012_entry(void);
+uint32_t e013_entry(void);
 
 typedef enum {
     CORR_RCVR_ERR = 0x0,

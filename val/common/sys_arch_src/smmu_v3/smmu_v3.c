@@ -16,6 +16,7 @@
  **/
 #include "smmu_v3.h"
 #include "common/include/acs_smmu.h"
+#include "common/include/val_interface.h"
 
 smmu_dev_t *g_smmu;
 uint32_t    g_smmu_index;
@@ -1159,6 +1160,35 @@ uint64_t val_smmu_map(smmu_master_attributes_t master_attr, pgt_descriptor_t pgt
     smmu_tlbi_cfgi(smmu);
 
     return 0;
+}
+
+
+uint32_t val_smmu_config_ste_dcp(smmu_master_attributes_t master_attr, uint32_t value)
+{
+    smmu_master_t *master;
+    smmu_dev_t *smmu;
+    uint64_t *ste;
+    uint32_t dcp_value;
+
+    master = smmu_master_at(master_attr.streamid);
+    if (master == NULL)
+        return ACS_INVALID_INDEX;
+
+    smmu = &g_smmu[master_attr.smmu_index];
+    ste = smmu_strtab_get_ste_for_sid(smmu, master->sid);
+
+    if (value == 1)
+        ste[1] = ste[1] | BITFIELD_SET(STRTAB_STE_1_DCP, value);
+    else
+        ste[1] = ste[1] & BITFIELD_SET(STRTAB_STE_1_DCP, value);
+
+    val_print(ACS_PRINT_INFO, "\n       Dump STE values", 0);
+    dump_strtab(ste);
+
+    dcp_value = (ste[1] >> STRTAB_STE_1_DCP_SHIFT) & 0x1;
+
+    return dcp_value;
+
 }
 
 /**

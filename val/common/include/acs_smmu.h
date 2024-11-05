@@ -79,4 +79,6 @@ val_smmu_unmap(smmu_master_attributes_t master);
 void
 val_smmu_dump_eventq(void);
 
+uint32_t val_smmu_config_ste_dcp(smmu_master_attributes_t master, uint32_t value);
+
 #endif
