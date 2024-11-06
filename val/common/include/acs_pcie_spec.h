@@ -198,9 +198,13 @@
 #define ECID_ARICS     0x000E
 #define ECID_ATS       0x000F
 #define ECID_PRI       0x0013
+#define ECID_SPCIECS   0x0019
 #define ECID_PASID     0x001B
 #define ECID_DPC       0x001D
 #define ECID_DVSEC     0x0023
+#define ECID_DLFECS    0x0025
+#define ECID_PL16ECS   0x0026
+#define ECID_LMREC     0x0027
 
 /* PCI Express capability struct offsets */
 #define CIDR_OFFSET    0x0
@@ -351,6 +355,9 @@
 #define DCTL2R_AFE_MASK  0x1
 #define DCTL2R_AFE_NORMAL 0xFFDF
 
+#define LCAP2R_SLSV_MASK 0xFF
+#define LCAP2R_SLSV_SHIFT 1
+
 /* Device bitmask definitions */
 #define RCiEP    (1 << 0b1001)
 #define RCEC     (1 << 0b1010)
@@ -387,5 +394,8 @@
 #define ATS_CTRL                    0x4
 #define ATS_CACHING_EN              (1 << 31)
 #define ATS_CACHING_DIS             0x7FFFFFFF
+
+#define MPCAPR_DS_MASK              0x1
+#define MPCAPR_DS_SHIFT             0x0
 
 #endif
