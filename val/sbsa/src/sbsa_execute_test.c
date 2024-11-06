@@ -363,6 +363,11 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
   }
 #endif
 
+#if defined(TARGET_LINUX) || defined(TARGET_EMULATION)
+  if (((level > 7) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8))
+    status |= p066_entry(num_pe);
+#endif
+
   val_print_test_end(status, "PCIe");
 
   return status;

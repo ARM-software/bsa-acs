@@ -28,6 +28,7 @@ uint32_t pal_smmu_is_etr_behind_catu(char *etr_path);
 /* PCIe related PAL APIs */
 uint32_t pal_pcie_get_rp_transaction_frwd_support(uint32_t seg, uint32_t bus,
                                                             uint32_t dev, uint32_t fn);
+uint32_t pal_pcie_dsm_ste_tags(void);
 
 /* Exerciser related PAL APIs */
 void     pal_exerciser_disable_rp_pio_register(uint32_t bdf);

@@ -51,6 +51,7 @@ uint32_t val_smmu_is_etr_behind_catu(char *etr_path);
 /* PCIE VAL APIs */
 void val_pcie_enable_ordering(uint32_t bdf);
 void val_pcie_disable_ordering(uint32_t bdf);
+uint32_t val_pcie_dsm_ste_tags(void);
 
 /* NIST VAL APIs */
 uint32_t val_nist_generate_rng(uint32_t *rng_buffer);
