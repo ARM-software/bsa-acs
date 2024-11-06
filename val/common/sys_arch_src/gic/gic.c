@@ -27,7 +27,7 @@
   @return init success or failure
 **/
 void
-val_bsa_gic_init(void)
+val_gic_init(void)
 {
   uint32_t gic_version;
 
@@ -44,7 +44,7 @@ val_bsa_gic_init(void)
   @return none
 **/
 void
-val_bsa_gic_enableInterruptSource(uint32_t int_id)
+val_gic_enableInterruptSource(uint32_t int_id)
 {
   uint32_t gic_version;
 
@@ -61,7 +61,7 @@ val_bsa_gic_enableInterruptSource(uint32_t int_id)
   @return none
 **/
 void
-val_bsa_gic_disableInterruptSource(uint32_t int_id)
+val_gic_disableInterruptSource(uint32_t int_id)
 {
   uint32_t gic_version;
 
@@ -78,7 +78,7 @@ val_bsa_gic_disableInterruptSource(uint32_t int_id)
   @return none
 **/
 uint32_t
-val_bsa_gic_acknowledgeInterrupt(void)
+val_gic_acknowledgeInterrupt(void)
 {
   uint32_t gic_version;
 
@@ -95,7 +95,7 @@ val_bsa_gic_acknowledgeInterrupt(void)
   @return none
 **/
 void
-val_bsa_gic_endofInterrupt(uint32_t int_id)
+val_gic_endofInterrupt(uint32_t int_id)
 {
   uint32_t gic_version;
 
@@ -112,7 +112,7 @@ val_bsa_gic_endofInterrupt(uint32_t int_id)
   @return 0 if not supported, 1 supported
 **/
 uint32_t
-val_bsa_gic_espi_support(void)
+val_gic_espi_support(void)
 {
   uint32_t gic_version;
 
@@ -129,19 +129,25 @@ val_bsa_gic_espi_support(void)
   @return max espi value
 **/
 uint32_t
-val_bsa_gic_max_espi_val(void)
+val_gic_max_espi_val(void)
 {
   uint32_t gic_version;
   uint32_t espi_range;
+  uint32_t max_espi_val = 0;
 
   gic_version = val_gic_get_info(GIC_INFO_VERSION);
   if (gic_version >= 3) {
       espi_range = (v3_read_gicdTyper() >> GICD_TYPER_ESPI_RANGE_SHIFT) &
                                                                     GICD_TYPER_ESPI_RANGE_MASK;
-      return (32 * (espi_range + 1) + 4095);
+      max_espi_val = (32 * (espi_range + 1) + 4095);
+
+      val_print(ACS_PRINT_INFO, "\n    max ESPI value %d  ", max_espi_val);
+      return max_espi_val;
   }
-  else
+  else {
+      val_print(ACS_PRINT_INFO, "\n    max ESPI value %d  ", max_espi_val);
       return 0;
+  }
 }
 
 
@@ -151,9 +157,9 @@ val_bsa_gic_max_espi_val(void)
   @return 1: espi interrupt, 0: non-espi interrupt
 **/
 uint32_t
-val_bsa_gic_check_espi_interrupt(uint32_t int_id)
+val_gic_check_espi_interrupt(uint32_t int_id)
 {
-  if (val_bsa_gic_espi_support() && v3_is_extended_spi(int_id))
+  if (val_gic_espi_support() && v3_is_extended_spi(int_id))
     return 1;
   else
     return 0;
@@ -164,7 +170,7 @@ val_bsa_gic_check_espi_interrupt(uint32_t int_id)
   @param  interrupt
   @return none
 **/
-void val_bsa_gic_clear_espi_interrupt(uint32_t int_id)
+void val_gic_clear_espi_interrupt(uint32_t int_id)
 {
   v3_clear_extended_spi_interrupt(int_id);
 }
@@ -176,7 +182,7 @@ void val_bsa_gic_clear_espi_interrupt(uint32_t int_id)
   @return 0 if not supported, 1 supported
 **/
 uint32_t
-val_bsa_gic_eppi_support(void)
+val_gic_eppi_support(void)
 {
   uint32_t gic_version;
 
@@ -197,7 +203,7 @@ val_bsa_gic_eppi_support(void)
   @return max eppi value
 **/
 uint32_t
-val_bsa_gic_max_eppi_val(void)
+val_gic_max_eppi_val(void)
 {
   uint32_t gic_version;
   uint32_t ppi_range;
@@ -222,9 +228,9 @@ val_bsa_gic_max_eppi_val(void)
   @return 1: eppi interrupt
 **/
 uint32_t
-val_bsa_gic_check_eppi_interrupt(uint32_t int_id)
+val_gic_check_eppi_interrupt(uint32_t int_id)
 {
-  if (val_bsa_gic_eppi_support() && v3_is_extended_ppi(int_id))
+  if (val_gic_eppi_support() && v3_is_extended_ppi(int_id))
     return 1;
   else
     return 0;
@@ -236,9 +242,9 @@ val_bsa_gic_check_eppi_interrupt(uint32_t int_id)
   @return 1: ppi interrupt
 **/
 uint32_t
-val_bsa_gic_check_ppi(uint32_t int_id)
+val_gic_check_ppi(uint32_t int_id)
 {
-  if ((val_bsa_gic_eppi_support() && v3_is_extended_ppi(int_id)) || (int_id > 15 && int_id < 32))
+  if ((val_gic_eppi_support() && v3_is_extended_ppi(int_id)) || (int_id > 15 && int_id < 32))
     return 1;
   else
     return 0;

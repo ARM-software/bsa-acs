@@ -143,10 +143,10 @@ val_gic_install_isr(uint32_t int_id, void (*isr)(void))
 
 #ifndef SBSA
   if (pal_target_is_dt())
-      return val_gic_bsa_install_isr(int_id, isr);
+      return val_acs_install_isr(int_id, isr);
 #endif
   if (pal_target_is_bm())
-      return val_gic_bsa_install_isr(int_id, isr);
+      return val_acs_install_isr(int_id, isr);
   else {
       ret_val = pal_gic_install_isr(int_id, isr);
 #ifndef TARGET_LINUX
@@ -198,10 +198,10 @@ uint32_t val_gic_end_of_interrupt(uint32_t int_id)
 
 #ifndef SBSA
   if (pal_target_is_dt())
-      val_bsa_gic_endofInterrupt(int_id);
+      val_gic_endofInterrupt(int_id);
 #endif
   if (pal_target_is_bm())
-      val_bsa_gic_endofInterrupt(int_id);
+      val_gic_endofInterrupt(int_id);
   else
       pal_gic_end_of_interrupt(int_id);
 

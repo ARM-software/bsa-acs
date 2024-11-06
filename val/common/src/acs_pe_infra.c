@@ -302,10 +302,10 @@ val_pe_install_esr(uint32_t exception_type, void (*esr)(uint64_t, void *))
 #ifndef TARGET_LINUX
 #if !defined(SBSA) && !defined(DRTM)
   if (pal_target_is_dt())
-      return val_gic_bsa_install_esr(exception_type, esr);
+      return val_acs_install_esr(exception_type, esr);
 #endif
   if (pal_target_is_bm())
-      return val_gic_bsa_install_esr(exception_type, esr);
+      return val_acs_install_esr(exception_type, esr);
   else
       return pal_pe_install_esr(exception_type, esr);
 #endif

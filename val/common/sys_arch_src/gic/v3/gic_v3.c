@@ -298,7 +298,7 @@ v3_Init(void)
   uint64_t   cpuTarget;
   uint64_t   Mpidr;
 
-  if (val_bsa_gic_espi_support() || val_bsa_gic_eppi_support())
+  if (val_gic_espi_support() || val_gic_eppi_support())
     v3_extended_init();
 
   /* Get the distributor base */

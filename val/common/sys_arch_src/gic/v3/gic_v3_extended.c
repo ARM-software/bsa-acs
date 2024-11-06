@@ -45,7 +45,7 @@ void v3_clear_extended_spi_interrupt(uint32_t int_id)
 uint32_t
 v3_is_extended_spi(uint32_t int_id)
 {
-  if (int_id >= EXTENDED_SPI_START_INTID && int_id <= val_bsa_gic_max_espi_val())
+  if (int_id >= EXTENDED_SPI_START_INTID && int_id <= val_gic_max_espi_val())
       return 1;
   else
       return 0;
@@ -59,7 +59,7 @@ v3_is_extended_spi(uint32_t int_id)
 uint32_t
 v3_is_extended_ppi(uint32_t int_id)
 {
-  if (int_id >= EXTENDED_PPI_START_INTID && int_id <= val_bsa_gic_max_eppi_val())
+  if (int_id >= EXTENDED_PPI_START_INTID && int_id <= val_gic_max_eppi_val())
       return 1;
   else
       return 0;
@@ -195,8 +195,8 @@ v3_extended_init(void)
   uint32_t   index;
 
   /* Get the max interrupt */
-  max_num_espi_interrupts = val_bsa_gic_max_espi_val();
-  max_num_eppi_interrupts = val_bsa_gic_max_eppi_val();
+  max_num_espi_interrupts = val_gic_max_espi_val();
+  max_num_eppi_interrupts = val_gic_max_eppi_val();
 
   val_print(ACS_PRINT_DEBUG, "\n GIC_INIT: Extended SPI Interrupts %d\n", max_num_espi_interrupts);
   val_print(ACS_PRINT_DEBUG, "\n GIC_INIT: Extended PPI Interrupts %d\n", max_num_eppi_interrupts);
