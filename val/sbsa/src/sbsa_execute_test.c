@@ -749,8 +749,8 @@ val_sbsa_ras_execute_tests(uint32_t level, uint32_t num_pe)
   uint32_t skip_module;
   uint64_t num_ras_nodes = 0;
 
-  if (!(((level > 6) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)
-                     || (g_sbsa_only_level == 8)))
+  if (!(((level > 5) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 6)
+                     || (g_sbsa_only_level == 7) || (g_sbsa_only_level == 8)))
       return ACS_STATUS_SKIP;
 
   for (i = 0; i < g_num_skip; i++) {
@@ -782,13 +782,13 @@ val_sbsa_ras_execute_tests(uint32_t level, uint32_t num_pe)
     return ACS_STATUS_SKIP;
   }
 
-  /* set default status to ACS_STATUS_FAIL */
-  status = ACS_STATUS_FAIL;
-
   val_print_test_start("RAS");
 
+  if (((level > 5) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 6))
+      status |= ras014_entry(num_pe);
+
   if (((level > 6) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)) {
-      status = ras001_entry(num_pe);
+      status |= ras001_entry(num_pe);
       status |= ras002_entry(num_pe);
       status |= ras003_entry(num_pe);
       status |= ras004_entry(num_pe);
