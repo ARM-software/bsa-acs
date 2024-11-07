@@ -817,7 +817,7 @@ val_sbsa_ete_execute_tests(uint32_t level, uint32_t num_pe)
   uint32_t ete_status = ACS_STATUS_PASS;
   uint32_t trbe_status = ACS_STATUS_PASS;
 
-  if (!(((level > 7) && (g_sbsa_only_level == 8))))
+  if (!(((level > 7) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8)))
       return ACS_STATUS_SKIP;
 
   for (i = 0; i < g_num_skip; i++) {

@@ -50,6 +50,7 @@ pal_peripheral_create_info_table(PERIPHERAL_INFO_TABLE *peripheralInfoTable)
   uint32_t   StartBdf  = 0;
   uint32_t   bar_index = 0;
   uint32_t   i = 0;
+  uint64_t   uart;
   PERIPHERAL_INFO_BLOCK *per_info = NULL;
 
   if (peripheralInfoTable == NULL) {
@@ -127,7 +128,7 @@ UART_CONFIG:
   /* UART details
    * Assumption that UART bdf details is
    * known to platform owner */
-  uint64_t uart = platform_uart_cfg.Address;
+  uart = platform_uart_cfg.Address;
 
   if (uart) {
     per_info->base0 = platform_uart_cfg.BaseAddress.Address;

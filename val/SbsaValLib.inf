@@ -57,7 +57,7 @@
   common/sys_arch_src/gic/v2/gic_v2.c
   common/sys_arch_src/gic/its/acs_gic_its.c
   common/sys_arch_src/gic/its/acs_gic_redistributor.c
-  sbsa/src/AArch64/MpamSupport.s
+  sbsa/src/AArch64/MpamSupport.S
   sbsa/src/AArch64/RasSupport.S
   sbsa/src/sbsa_acs_pe.c
   sbsa/src/sbsa_acs_pe_infra.c
