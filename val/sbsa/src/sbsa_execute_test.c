@@ -234,6 +234,7 @@ uint32_t
 val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
 {
   uint32_t status = ACS_STATUS_PASS, i;
+  uint32_t ecam_status = ACS_STATUS_PASS;
 
 #ifdef TARGET_LINUX
   if (!(((level > 2) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 3)
@@ -283,17 +284,18 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
 
     if (((level > 3) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 4)) {
     /* Only the test p062 will be run at L4+ with the test number (ACS_PER_TEST_NUM_BASE + 1) */
-      status = p062_entry(num_pe);
+      status |= p062_entry(num_pe);
   }
   #endif
 
   if (((level > 5) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 6)) {
-    status = p001_entry(num_pe);
-    if (status == ACS_STATUS_FAIL) {
+    ecam_status = p001_entry(num_pe);
+    if (ecam_status == ACS_STATUS_FAIL) {
       val_print(ACS_PRINT_WARN, "\n     *** Skipping remaining PCIE tests ***\n", 0);
       return status;
     }
 
+    status |= ecam_status;
     #if defined(TARGET_LINUX) || defined(TARGET_EMULATION)
       status |= p005_entry(num_pe);
     #endif

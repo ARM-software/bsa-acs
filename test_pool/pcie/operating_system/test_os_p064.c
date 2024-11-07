@@ -37,7 +37,7 @@ static uint32_t check_msi_status(uint32_t bdf)
 
   /* Search for MSI/MSI-X Capability */
   if ((val_pcie_find_capability(bdf, PCIE_CAP, CID_MSIX, &msi_cap_offset)) ||
-      (val_pcie_find_capability(bdf, PCIE_CAP, CID_MSIX, &msi_cap_offset)))
+      (val_pcie_find_capability(bdf, PCIE_CAP, CID_MSI, &msi_cap_offset)))
   {
       val_print(ACS_PRINT_DEBUG, "\n       No MSI/MSI-X Capability for bdf 0x%x", bdf);
       return 0;
