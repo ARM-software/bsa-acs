@@ -25,6 +25,16 @@ extern GIC_ITS_INFO    *g_gic_its_info;
 static uint32_t        *g_cwriter_ptr;
 static uint32_t        g_its_setup_done;
 
+uint32_t GET_NUM_BITS(uint64_t value){
+  uint64_t bit_pos = 0;
+
+  while(!((value >> bit_pos) & 0x1)){
+    bit_pos++;
+  }
+
+  return bit_pos;
+}
+
 uint64_t val_its_get_curr_rdbase(uint64_t rd_base, uint32_t length)
 {
   uint64_t     Mpidr;
@@ -111,6 +121,7 @@ ArmGicSetItsCommandQueueBase(
   write_value = val_mmio_read64(ItsBase + ARM_GITS_CBASER) & (~ARM_GITS_CBASER_PA_MASK);
   write_value = write_value | (Address & ARM_GITS_CBASER_PA_MASK);
   write_value = write_value | ARM_GITS_CBASER_VALID | (NUM_PAGES_8 - 1);
+  write_value = write_value | ((7ULL << 59) | (7ULL << 53) | (2ULL << 10));
 
   val_mmio_write64(ItsBase + ARM_GITS_CBASER, write_value);
 
@@ -124,10 +135,14 @@ static uint32_t ArmGicSetItsTables(uint32_t its_index)
   uint32_t                TableSize, entry_size;
   uint64_t                its_baser, its_typer;
   uint8_t                 it, table_type;
-  uint64_t                write_value;
+  uint64_t                write_value,read_value;
   uint32_t                DevBits, CIDBits;
   uint64_t                Address;
   uint64_t                ItsBase;
+  uint64_t                indirect_supported = 0, max_page_size = 0,lvl2_entries,lvl2_bits,lvl1_bits;
+  uint64_t                baser_pgsz = 0x00,indirect_table;
+  uint64_t                *lvl1_ptr = NULL;
+  uint64_t                temp_val;
 
   ItsBase = g_gic_its_info->GicIts[its_index].Base;
 
@@ -142,6 +157,46 @@ static uint32_t ArmGicSetItsTables(uint32_t its_index)
     DevBits = ARM_GITS_TYPER_DevBits(its_typer);
     CIDBits = ARM_GITS_TYPER_CIDBits(its_typer);
 
+    /* check if design supports indirect tables */
+    write_value = its_baser;
+    write_value |= 1ULL << 62;
+    val_mmio_write64(ItsBase + ARM_GITS_BASER(it), write_value);
+    read_value = val_mmio_read64(ItsBase + ARM_GITS_BASER(it));
+    if((read_value >> 62) & 0x1) {
+      indirect_supported = 1;
+    }
+
+   /* reset the register to original value */
+    val_mmio_write64(ItsBase + ARM_GITS_BASER(it), its_baser);
+   
+   /* Check the max page size supported */
+    temp_val = 0x00;
+    while(temp_val < ARM_GITS_BASER_MAX_PAGESZ) { // <= 64KB
+      read_value = val_mmio_read64(ItsBase + ARM_GITS_BASER(it));
+      write_value = read_value & ~(ARM_GITS_BASER_PAGE_MASK);
+      write_value |= (temp_val << ARM_GITS_BASER_PAGE_SHIFT);
+      val_mmio_write64(ItsBase + ARM_GITS_BASER(it), write_value);
+      /* read back to check the actual value */ 
+      read_value = val_mmio_read64(ItsBase + ARM_GITS_BASER(it));
+      if(((read_value & ARM_GITS_BASER_PAGE_MASK)>> ARM_GITS_BASER_PAGE_SHIFT) == temp_val)
+      {
+        if(temp_val == ARM_GITS_BASER_PGSZ_4K) {
+           max_page_size = PAGE_SIZE_4K;
+           baser_pgsz = ARM_GITS_BASER_PGSZ_4K;
+        } else if(temp_val == ARM_GITS_BASER_PGSZ_16K) {
+           max_page_size = PAGE_SIZE_16K;
+           baser_pgsz = ARM_GITS_BASER_PGSZ_16K;
+        } else if(temp_val == ARM_GITS_BASER_PGSZ_64K) {
+           max_page_size = PAGE_SIZE_64K;
+           baser_pgsz = ARM_GITS_BASER_PGSZ_64K;
+        }
+      }
+      temp_val = temp_val + 1;
+    }
+    
+   /* reset the register to original value */
+    val_mmio_write64(ItsBase + ARM_GITS_BASER(it), its_baser);
+
     if (table_type == ARM_GITS_TBL_TYPE_DEVICE) {
       TableSize = (1 << (DevBits+1))*(entry_size+1); // Assuming Single Level Table
 
@@ -152,22 +207,69 @@ static uint32_t ArmGicSetItsTables(uint32_t its_index)
       continue;
     }
 
-    Pages = SIZE_TO_PAGES (TableSize);
+  lvl2_entries = 0;
+  lvl2_bits = 0;
+  indirect_table = 0;
+  lvl1_bits = 0;
 
-  Address = (uint64_t)val_aligned_alloc(SIZE_64KB, PAGES_TO_SIZE(Pages));
+  if(TableSize > max_page_size*ARM_GITS_BASER_MAX_PAGES) {
+    if(indirect_supported == 1) {
+      indirect_table = 1;
+      lvl2_entries = max_page_size/(entry_size+1);
+      lvl2_bits = GET_NUM_BITS(lvl2_entries);
+      if (table_type == ARM_GITS_TBL_TYPE_DEVICE) {
+        lvl1_bits =  (DevBits+1)-lvl2_bits;
+      } else if (table_type == ARM_GITS_TBL_TYPE_CLCN) {
+        lvl1_bits =  (CIDBits+1)-lvl2_bits;
+      }
+      TableSize = (1 << (lvl1_bits))*ARM_GITS_BASER_INDIRECT_LVL1_ENTRY_SIZE; // level 1 needs 64 bits i.e 8 bytes
+      if(TableSize > max_page_size*ARM_GITS_BASER_MAX_PAGES){
+        val_print(ACS_PRINT_WARN,  "ITS : Level 1 table size exceeded limit : ... max did size will not be supported..\n", 0);
+        TableSize = max_page_size*ARM_GITS_BASER_MAX_PAGES;
+      }
+    } else {
+      val_print(ACS_PRINT_WARN,  "ITS : Multilevel table not supported and single level table size exceeded limit settings support only upto 24 bit (if entry_size is 8 bytes)", 0);
+      TableSize = max_page_size*ARM_GITS_BASER_MAX_PAGES;
+    }
+  }
+
+  Pages = TableSize/max_page_size;
+  if(TableSize%max_page_size)
+  {
+    Pages = Pages+1;
+  }
+
+  TableSize = Pages*max_page_size;
+
+  Address = (uint64_t)val_aligned_alloc(max_page_size, TableSize);
 
   if (!Address) {
       val_print(ACS_PRINT_ERR,  "ITS : Could Not Allocate Memory DT/CT. Test may not pass.\n", 0);
       return 1;
   }
 
-  val_memory_set((void *)Address,  PAGES_TO_SIZE(Pages), 0);
+  val_memory_set((void *)Address,  TableSize, 0);
+
+  if(indirect_table == 1) {
+    lvl1_ptr = (uint64_t *)(Address);
+    for(int i = 0; i < (1 << lvl1_bits); i++) {
+      temp_val = (uint64_t)val_aligned_alloc(max_page_size, max_page_size); 
+      val_memory_set((void *)temp_val,  max_page_size, 0);    
+      temp_val =  temp_val | ARM_GITS_BASER_VALID;
+      lvl1_ptr[i] = temp_val;
+    }
+  }
 
   write_value = val_mmio_read64(ItsBase + ARM_GITS_BASER(it));
   write_value = write_value & (~ARM_GITS_BASER_PA_MASK);
+  if(indirect_table ==  1) {
+    write_value = write_value | ARM_GITS_BASER_INDIRECT;
+  }
   write_value = write_value | (Address & ARM_GITS_BASER_PA_MASK);
   write_value = write_value | ARM_GITS_BASER_VALID;
+  write_value = write_value | (baser_pgsz << ARM_GITS_BASER_PAGE_SHIFT);
   write_value = write_value | (Pages-1);
+  write_value = write_value | ((7ULL << 59) | (7ULL << 53) | (2ULL << 10));
   val_mmio_write64(ItsBase + ARM_GITS_BASER(it), write_value);
 
   }
@@ -235,7 +337,7 @@ WriteCmdQMAPC(
 }
 
 static void
-WriteCmdQMAPI(
+WriteCmdQMAPTI(
    uint32_t     its_index,
    uint64_t     *CMDQ_BASE,
    uint64_t     device_id,
@@ -244,10 +346,10 @@ WriteCmdQMAPI(
   )
 {
     val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index]),
-                     (uint64_t)((device_id << ITS_CMD_SHIFT_DEVID) | ARM_ITS_CMD_MAPI));
-    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 1), (uint64_t)(int_id));
+                     (uint64_t)((device_id << ITS_CMD_SHIFT_DEVID) | ARM_ITS_CMD_MAPTI));
+    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 1), ((uint64_t)(int_id-ARM_LPI_MINID) | ((uint64_t)int_id << 32)));
     val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 2), (uint64_t)(Clctn_ID));
-    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 3), (uint64_t)(0x0));
+    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 3), (uint64_t)(0));
     g_cwriter_ptr[its_index] = g_cwriter_ptr[its_index] + ITS_NEXT_CMD_PTR;
 }
 
@@ -261,7 +363,7 @@ WriteCmdQINV(
 {
     val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index]),
                      (uint64_t)((device_id << ITS_CMD_SHIFT_DEVID) | ARM_ITS_CMD_INV));
-    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 1), (uint64_t)(int_id));
+    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 1), (uint64_t)(int_id-ARM_LPI_MINID));
     val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 2), (uint64_t)(0x0));
     val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 3), (uint64_t)(0x0));
     g_cwriter_ptr[its_index] = g_cwriter_ptr[its_index] + ITS_NEXT_CMD_PTR;
@@ -277,7 +379,7 @@ WriteCmdQDISCARD(
 {
     val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index]),
                      (uint64_t)((device_id << ITS_CMD_SHIFT_DEVID) | ARM_ITS_CMD_DISCARD));
-    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 1), (uint64_t)(int_id));
+    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 1), (uint64_t)(int_id-ARM_LPI_MINID));
     val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 2), (uint64_t)(0x0));
     val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 3), (uint64_t)(0x0));
     g_cwriter_ptr[its_index] = g_cwriter_ptr[its_index] + ITS_NEXT_CMD_PTR;
@@ -433,7 +535,7 @@ void val_its_create_lpi_map(uint32_t its_index, uint32_t device_id,
   WriteCmdQMAPC(its_index, (uint64_t *)(ItsCommandBase),
                 0x1 /*Clctn_ID*/, RDBase, 0x1 /*Valid*/);
   /* Map Interrupt using MAPI */
-  WriteCmdQMAPI(its_index, (uint64_t *)(ItsCommandBase), device_id, int_id, 0x1 /*Clctn_ID*/);
+  WriteCmdQMAPTI(its_index, (uint64_t *)(ItsCommandBase), device_id, int_id, 0x1 /*Clctn_ID*/);
   /* Invalid Entry */
   WriteCmdQINV(its_index, (uint64_t *)(ItsCommandBase), device_id, int_id);
   /* ITS SYNC Command */
@@ -466,9 +568,9 @@ uint32_t val_its_get_max_lpi(void)
   /* Return The Minimum IDBits supported in ITS */
   for (index = 0; index < g_gic_its_info->GicNumIts; index++)
   {
-    min_idbits = (min_idbits < g_gic_its_info->GicIts[index].IDBits) ?
+    min_idbits = (min_idbits < (g_gic_its_info->GicIts[index].IDBits + 14)) ?
                  (min_idbits) :
-                 (g_gic_its_info->GicIts[index].IDBits);
+                 (g_gic_its_info->GicIts[index].IDBits + 14);
   }
   return ((1 << (min_idbits+1)) - 1);
 }
@@ -497,13 +599,13 @@ SetInitialConfiguration(
   gits_typer_bits = ARM_GITS_TYPER_IDbits(val_mmio_read64(ItsBase + ARM_GITS_TYPER));
 
   /* Check least bits implemented is 14 if LPIs are supported. */
-  if (GET_MIN(gicd_typer_idbits, gits_typer_bits) < ARM_LPI_MIN_IDBITS) {
+  if (gicd_typer_idbits < ARM_LPI_MIN_IDBITS) {
     return 1;
   }
 
   write_value = val_mmio_read64(g_gic_its_info->GicRdBase + ARM_GICR_PROPBASER);
-  write_value |= GET_MIN(gicd_typer_idbits, gits_typer_bits);
-  g_gic_its_info->GicIts[its_index].IDBits = GET_MIN(gicd_typer_idbits, gits_typer_bits);
+  write_value |= gicd_typer_idbits;
+  g_gic_its_info->GicIts[its_index].IDBits = gits_typer_bits;
 
   val_mmio_write64((g_gic_its_info->GicRdBase + ARM_GICR_PROPBASER), write_value);
 
