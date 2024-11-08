@@ -19,9 +19,9 @@
 #define __ACS_GIC_ITS_H
 
 
-#include "common/include/val_interface.h"
-#include "common/include/acs_common.h"
-#include "common/include/acs_memory.h"
+#include "../../../include/val_interface.h"
+#include "../../../include/acs_common.h"
+#include "../../../include/acs_memory.h"
 
 #define SIZE_4KB    0x00001000
 #define SIZE_64KB   0x00010000

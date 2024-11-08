@@ -337,23 +337,6 @@ WriteCmdQMAPC(
 }
 
 static void
-WriteCmdQMAPI(
-   uint32_t     its_index,
-   uint64_t     *CMDQ_BASE,
-   uint64_t     device_id,
-   uint32_t     int_id,
-   uint32_t     Clctn_ID
-  )
-{
-    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index]),
-                     (uint64_t)((device_id << ITS_CMD_SHIFT_DEVID) | ARM_ITS_CMD_MAPI));
-    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 1), (uint64_t)(int_id));
-    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 2), (uint64_t)(Clctn_ID));
-    val_mmio_write64((uint64_t)(CMDQ_BASE + g_cwriter_ptr[its_index] + 3), (uint64_t)(0x0));
-    g_cwriter_ptr[its_index] = g_cwriter_ptr[its_index] + ITS_NEXT_CMD_PTR;
-}
-
-static void
 WriteCmdQMAPTI(
    uint32_t     its_index,
    uint64_t     *CMDQ_BASE,
