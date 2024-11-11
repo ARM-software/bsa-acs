@@ -389,7 +389,7 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
 uint32_t
 val_sbsa_smmu_execute_tests(uint32_t level, uint32_t num_pe)
 {
-  uint32_t status = ACS_STATUS_PASS, i, num_smmu;
+  uint32_t status = ACS_STATUS_PASS, i;
 
   if (!(((level > 3) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level >= 4)))
       return ACS_STATUS_SKIP;
@@ -408,18 +408,19 @@ val_sbsa_smmu_execute_tests(uint32_t level, uint32_t num_pe)
       return ACS_STATUS_SKIP;
   }
 
-  num_smmu = val_iovirt_get_smmu_info(SMMU_NUM_CTRL, 0);
-  if (num_smmu == 0) {
-    val_print(ACS_PRINT_WARN, "\n     No SMMU Controller Found, Skipping SMMU tests...\n", 0);
-    return ACS_STATUS_SKIP;
-  }
-
   val_print_test_start("SMMU");
   g_curr_module = 1 << SMMU_MODULE;
 
 #ifndef TARGET_LINUX
   if (((level > 3) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 4)) {
-      status = i001_entry(num_pe) ;
+      status = i001_entry(num_pe);
+
+      if (status != ACS_STATUS_PASS) {
+         val_print(ACS_PRINT_WARN, "\n     SMMU Compatibility Check Failed, ", 0);
+         val_print(ACS_PRINT_WARN, "Skipping SMMU tests...\n", 0);
+         return ACS_STATUS_FAIL;
+      }
+
       status |= i013_entry(num_pe);
   }
 
