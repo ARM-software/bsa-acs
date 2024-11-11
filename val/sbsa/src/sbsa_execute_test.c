@@ -351,6 +351,7 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
       status |= p059_entry(num_pe);
       status |= p060_entry(num_pe);
       status |= p063_entry(num_pe); /* iEP/RP only */
+      status |= p067_entry(num_pe); /* iEP/RP only */
 #endif
   }
 
@@ -368,10 +369,6 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
 #if defined(TARGET_LINUX) || defined(TARGET_EMULATION)
   if (((level > 7) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8))
     status |= p066_entry(num_pe);
-#endif
-
-#ifndef TARGET_LINUX
-  status |= p067_entry(num_pe); /* iEP/RP only */
 #endif
 
   val_print_test_end(status, "PCIe");
