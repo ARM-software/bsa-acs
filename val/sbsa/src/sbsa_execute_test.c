@@ -278,6 +278,14 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
       status |= p009_entry(num_pe);  /* This covers GIC rule */
   #endif
 
+  ecam_status = p001_entry(num_pe);
+  if (ecam_status == ACS_STATUS_FAIL) {
+    val_print(ACS_PRINT_WARN, "\n     *** Skipping remaining PCIE tests ***\n", 0);
+    return status;
+  }
+
+  status |= ecam_status;
+
   #ifndef TARGET_LINUX
     if (((level > 2) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 3))
       status |= p040_entry(num_pe);
@@ -289,13 +297,6 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
   #endif
 
   if (((level > 5) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 6)) {
-    ecam_status = p001_entry(num_pe);
-    if (ecam_status == ACS_STATUS_FAIL) {
-      val_print(ACS_PRINT_WARN, "\n     *** Skipping remaining PCIE tests ***\n", 0);
-      return status;
-    }
-
-    status |= ecam_status;
     #if defined(TARGET_LINUX) || defined(TARGET_EMULATION)
       status |= p005_entry(num_pe);
     #endif
