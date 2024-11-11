@@ -72,11 +72,13 @@ pal_exerciser_get_ras_status(uint32_t ras_node, uint32_t bdf, uint32_t rp_bdf)
   (void) ras_node;
   uint64_t EcamBAR0;
   uint64_t status_reg;
+  uint32_t data;
 
   EcamBAR0 = pal_exerciser_get_ecsr_base(rp_bdf, 0);
   EcamBAR0 = EcamBAR0 & BAR64_MASK;
   status_reg = EcamBAR0 + RAS_OFFSET + STATUS_OFFSET;
-  return status_reg;
+  data = pal_mmio_read(status_reg);
+  return data;
 }
 
 /**

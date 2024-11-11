@@ -72,6 +72,7 @@ uint32_t pal_exerciser_set_param(EXERCISER_PARAM_TYPE Type, uint64_t Value1, uin
   uint32_t CapabilityOffset = 0;
   uint64_t Base;
   uint64_t Ecam;
+  uint32_t bdf;
 
   Base = pal_exerciser_get_ecsr_base(Bdf,0);
   Ecam = pal_exerciser_get_ecam(Bdf);
@@ -156,6 +157,31 @@ uint32_t pal_exerciser_set_param(EXERCISER_PARAM_TYPE Type, uint64_t Value1, uin
                 return 2;
         else
                 return 3;
+
+      case ENABLE_POISON_MODE:
+        pal_exerciser_find_pcie_capability(DVSEC, Bdf, PCIE, &CapabilityOffset);
+        Data = pal_mmio_read(Ecam + CapabilityOffset +
+                             pal_exerciser_get_pcie_config_offset(Bdf) + DVSEC_CTRL);
+        Data = Data | (1 << 18);
+        pal_mmio_write(Ecam + CapabilityOffset + DVSEC_CTRL +
+                             pal_exerciser_get_pcie_config_offset(Bdf), Data);
+        return 0;
+
+      case ENABLE_RAS_CTRL:
+        bdf = (uint32_t)Value2;
+        Base = pal_exerciser_get_ecsr_base(bdf, 0);
+        Base = Base & BAR64_MASK;
+        pal_mmio_write((Base + RAS_OFFSET + CTRL_OFFSET), 0x1);
+        return 0;
+
+      case DISABLE_POISON_MODE:
+        pal_exerciser_find_pcie_capability(DVSEC, Bdf, PCIE, &CapabilityOffset);
+        Data = pal_mmio_read(Ecam + CapabilityOffset +
+                             pal_exerciser_get_pcie_config_offset(Bdf) + DVSEC_CTRL);
+        Data = Data & (0 << 18);
+        pal_mmio_write(Ecam + CapabilityOffset + DVSEC_CTRL +
+                             pal_exerciser_get_pcie_config_offset(Bdf), Data);
+        return 0;
 
       default:
           return 1;
@@ -487,7 +513,7 @@ uint32_t pal_exerciser_get_data(EXERCISER_DATA_TYPE Type, exerciser_data_t *Data
           Data->bar_space.base_addr = 0;
           while (Index < TYPE0_MAX_BARS)
           {
-              EcamBAR = pal_exerciser_get_ecsr_base(Bdf, Index * 4);
+              EcamBAR = pal_exerciser_get_ecsr_base(Bdf, Index);
 
               /* Check if the BAR is Memory Mapped IO type */
               if (((EcamBAR >> BAR_MIT_SHIFT) & BAR_MIT_MASK) == MMIO)
