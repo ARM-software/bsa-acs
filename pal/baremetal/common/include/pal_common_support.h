@@ -155,6 +155,11 @@ void *mem_alloc(size_t alignment, size_t size);
 #define DCAP2R_OFFSET  0x24
 #define DCTL2R_OFFSET  0x28
 
+/* RAS related Offset, shift and mask */
+#define RAS_OFFSET     0x10000
+#define CTRL_OFFSET    0x08
+#define STATUS_OFFSET  0x10
+
 /* PCIe capabilities reg shifts and masks */
 #define PCIECR_DPT_SHIFT 4
 #define PCIECR_DPT_MASK  0xf
