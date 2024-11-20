@@ -93,7 +93,7 @@ payload(void)
   uint32_t pe_index;
   uint32_t ecam_index;
   uint32_t num_ecam;
-  uint32_t end_bus_max=255;
+  uint32_t end_bus_max = 255;
   uint32_t end_bus;
   uint32_t sub_bus;
   uint32_t cfg_addr;

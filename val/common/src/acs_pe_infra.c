@@ -438,7 +438,7 @@ val_pe_cache_clean_invalidate_range(uint64_t start_addr, uint64_t length)
   aligned_addr = start_addr - (start_addr & (line_length-1));
   end_addr = start_addr + length;
 
-  while(aligned_addr < end_addr){
+  while (aligned_addr < end_addr) {
       val_data_cache_ops_by_va(aligned_addr, CLEAN_AND_INVALIDATE);
       aligned_addr += line_length;
   }
@@ -463,7 +463,7 @@ val_pe_cache_invalidate_range(uint64_t start_addr, uint64_t length)
   aligned_addr = start_addr - (start_addr & (line_length-1));
   end_addr = start_addr + length;
 
-  while(aligned_addr < end_addr){
+  while (aligned_addr < end_addr) {
       val_data_cache_ops_by_va(aligned_addr, INVALIDATE);
       aligned_addr += line_length;
   }
