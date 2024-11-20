@@ -92,8 +92,11 @@ uint32_t pal_pcie_get_bdf(uint32_t class_code, uint32_t start_busdev);
 
 uint64_t pal_pcie_get_base(uint32_t bdf, uint32_t bar_index);
 
-uint32_t pal_pci_cfg_read(uint32_t bus, uint32_t dev, uint32_t func, uint32_t offset, uint32_t *value);
+uint32_t pal_pci_cfg_read(uint32_t seg, uint32_t bus, uint32_t dev, uint32_t func,
+                          uint32_t offset, uint32_t *value);
 
 uint32_t pal_pcie_read_cfg(uint32_t seg, uint32_t bus, uint32_t dev, uint32_t func, uint32_t offset, uint32_t *value);
+
+uint64_t pal_pcie_ecam_base(uint32_t seg, uint32_t bus, uint32_t dev, uint32_t func);
 
 #endif
