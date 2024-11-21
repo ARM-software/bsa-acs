@@ -16,8 +16,9 @@ might lead to unpredictable behavior in concurrent programs.
 
 ## Steps to build litmus tests into bsa-acs
 1. Setup edk2 build directory
->          git clone --branch  edk2-stable202402 https://github.com/tianocore/edk2.git
+>          git clone https://github.com/tianocore/edk2.git
 >          cd edk2
+>          git checkout 836942fbadb629050b866a8052e6af755bcdf623
 >          git clone https://github.com/tianocore/edk2-libc.git
 >          git submodule update --init --recursive
 
