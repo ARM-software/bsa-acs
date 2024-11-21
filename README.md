@@ -5,21 +5,21 @@
 ## Base System Architecture
 **Base System Architecture** (BSA) specification describes a hardware system architecture based on the Arm 64-bit architecture. System software such as operating systems, hypervisors, and firmware rely on this. It addresses PE features and key aspects of system architecture.
 
-For more information, download the [BSA specification](https://developer.arm.com/documentation/den0094/c/?lang=en)
+For more information, download the [BSA specification](https://developer.arm.com/documentation/den0094/d/?lang=en)
 
 
 ## BSA - Architecture Compliance Suite
 
 BSA **Architecture Compliance Suite** (ACS) is a collection of self-checking, portable C-based tests.
-This suite includes a set of examples of the invariant behaviors that are provided by the [BSA](https://developer.arm.com/documentation/den0094/c/?lang=en) specification, so that you can verify if these behaviour have been interpreted correctly.
+This suite includes a set of examples of the invariant behaviors that are provided by the [BSA](https://developer.arm.com/documentation/den0094/d/?lang=en) specification, so that you can verify if these behaviour have been interpreted correctly.
 
 Most of the tests are executed from UEFI (Unified Extensible Firmware Interface) Shell by executing the BSA UEFI shell application.
 A few tests are executed by running the BSA ACS Linux application which in turn depends on the BSA ACS Linux kernel module.
 The tests can also be executed in a Bare-metal environment. The initialization of the Bare-metal environment is specific to the environment and is out of scope of this document.
 
 ## Release details
- - Code quality: v1.0.8
- - The tests are written for version 1.0 (c) of the BSA specification.
+ - Code quality: v1.0.9
+ - The tests are written for version 1.1 of the BSA specification.
  - The tests can be run at both the Pre-Silicon and Silicon level.
  - For complete coverage of the BSA rules, availability of an Exerciser is required for Exerciser tests to be run during verficiation at Pre-Silicon level.
  - The compliance suite is not a substitute for design verification.
@@ -55,7 +55,7 @@ Prebuilt images for each release are available in the prebuilt_images folder of 
     Before you start the ACS build, ensure that the following requirements are met.
 
 - Any mainstream Linux-based OS distribution running on a x86 or AArch64 machine.
-- git clone the [EDK2 tree](https://github.com/tianocore/edk2). Recommended edk2 tag is edk2-stable202402
+- git clone the [EDK2 tree](https://github.com/tianocore/edk2). Recommended edk2 commit is 836942fbadb629050b866a8052e6af755bcdf623
 - git clone the [EDK2 port of libc](https://github.com/tianocore/edk2-libc) to local <edk2_path>.
 - Install GCC-ARM 13.2 [toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads).
 - Install the build prerequisite packages to build EDK2.<br />
@@ -263,6 +263,7 @@ The Arm SystemReady ACS test suite may run at a higher privilege level. An attac
 --------------------------------------------------------------------------------------------
 |    BSA Spec Version   |   BSA ACS Version   |      BSA Tag ID     |    Pre-Si Support    |
 |-----------------------|:-------------------:|:-------------------:|:--------------------:|
+|       BSA v1.1        |        v1.0.9       |   v24.11_REL1.0.9   |       Yes            |
 |       BSA v1.0(c)     |        v1.0.8       |   v24.03_REL1.0.8   |       Yes            |
 |       BSA v1.0(c)     |        v1.0.7       |   v23.12_REL1.0.7   |       Yes            |
 |       BSA v1.0(c)     |        v1.0.6       |v23.11_BootFramework |       Yes            |

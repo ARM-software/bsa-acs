@@ -53,9 +53,30 @@ To run the BSA exerciser tests make the following change in ${rdn2_path}/model-s
 + -C pcie_group_0.pciex16.hierarchy_file_name="example_pcie_hierarchy_0.json" \
 ```
 
+### Minimum requirement of PCIe Hierarchy
+
+The diagram below illustrates the minimal PCIe hierarchy structure necessary for comprehensive testing of an exerciser test case.
+
+```
+               ________________________________
+              |            Root Bridge         |
+              |________________________________|
+                   |           |            |
+                   |           |            |
+                ___|__     ____|____    ____|____
+               | RCiEP|   | RootPort|  | RootPort|
+               |______|   |_________|  |_________|
+                               |            |
+                               |            |
+                           ____|_____   ____|_____
+                          | Exerciser| | Exerciser|
+                          | EndPoint | | EndPoint |
+                          |__________| |__________|
+```
+
 ## Useful links
 
 - For information on configuring the [PCIe Hierarchy](PCIeConfigurableHierarchy.md)
 - For more information on PCIe capabilities that exerciser supports, refer [Exerciser.md](Exerciser.md)
 
-*Copyright (c) 2023 Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2023-2024 Arm Limited and Contributors. All rights reserved.*
