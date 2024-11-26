@@ -1413,8 +1413,10 @@ val_pcie_register_bitfields_check(uint64_t *bf_info_table, uint32_t num_bitfield
   /* Return register check status */
   if (num_pass > 0 || num_fails > 0)
       return num_fails;
-  else
+  else {
+      val_print(ACS_PRINT_ERR, "\n       No PCIe device of type %d present", dp_type);
       return ACS_STATUS_SKIP;
+  }
 }
 
 /**
