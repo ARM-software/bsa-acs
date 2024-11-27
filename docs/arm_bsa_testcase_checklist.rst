@@ -1,7 +1,7 @@
 ###########################
 BSA ACS Testcase checklist
 ###########################
- 
+
 The below table provides the following details
 
 #. BSA rules covered by a test.
