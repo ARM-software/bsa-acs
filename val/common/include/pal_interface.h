@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -524,8 +524,15 @@ typedef struct {
 }IOVIRT_BLOCK;
 
 #define IOVIRT_NEXT_BLOCK(b) (IOVIRT_BLOCK *)((uint8_t*)(&b->data_map[0]) + b->num_data_map * sizeof(NODE_DATA_MAP))
-#define ALIGN_MEMORY(b, bound) (IOVIRT_BLOCK *) (((uint64_t)b + bound - 1) & (~(bound - 1)))
 #define IOVIRT_CCA_MASK ~((uint32_t)0)
+#ifdef TARGET_BM_BOOT
+  // Align memory access to nearest 8 byte boundary
+  #define BOUND 0x08
+  #define ALIGN_MEMORY_ACCESS(b) \
+            (IOVIRT_BLOCK *) (((uint64_t)b + BOUND - 1) & (~((uint64_t)BOUND - 1)))
+#else
+  #define ALIGN_MEMORY_ACCESS(b) (IOVIRT_BLOCK *) (b)
+#endif
 
 typedef struct {
   uint32_t num_blocks;

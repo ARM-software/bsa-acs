@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,13 +22,6 @@
 
 IOVIRT_INFO_TABLE *g_iovirt_info_table;
 uint32_t g_num_smmus;
-
-#ifdef TARGET_BM_BOOT
-    // Align the memory access by 8 bytes in case of baremetal boot.
-    uint64_t bound = 0x08;
-#else
-    uint64_t bound = 0x01;
-#endif
 
 /**
   @brief   This API is a single point of entry to retrieve
@@ -59,7 +52,7 @@ val_iovirt_get_smmu_info(SMMU_INFO_e type, uint32_t index)
   block = &g_iovirt_info_table->blocks[0];
   for(i = 0; i < g_iovirt_info_table->num_blocks; i++, block=IOVIRT_NEXT_BLOCK(block))
   {
-      block = ALIGN_MEMORY(block, bound);
+      block = ALIGN_MEMORY_ACCESS(block);
       if(block->type == IOVIRT_NODE_SMMU || block->type == IOVIRT_NODE_SMMU_V3)
       {
           if(j == index)
@@ -118,7 +111,7 @@ val_iovirt_get_pcie_rc_info(PCIE_RC_INFO_e type, uint32_t index)
   block = &g_iovirt_info_table->blocks[0];
   for(i = 0; i < g_iovirt_info_table->num_blocks; i++, block=IOVIRT_NEXT_BLOCK(block))
   {
-      block = ALIGN_MEMORY(block, bound);
+      block = ALIGN_MEMORY_ACCESS(block);
       if(block->type == IOVIRT_NODE_PCI_ROOT_COMPLEX)
       {
           if(j == index)
@@ -189,7 +182,7 @@ val_iovirt_get_device_info(uint32_t rid, uint32_t segment, uint32_t *device_id,
   mapping_found = 0;
   for (i = 0; i < g_iovirt_info_table->num_blocks; i++, block = IOVIRT_NEXT_BLOCK(block))
   {
-      block = ALIGN_MEMORY(block, bound);
+      block = ALIGN_MEMORY_ACCESS(block);
       if (block->type == IOVIRT_NODE_PCI_ROOT_COMPLEX
           && block->data.rc.segment == segment)
       {
