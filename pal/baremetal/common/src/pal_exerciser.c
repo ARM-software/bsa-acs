@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,12 +40,14 @@ pal_exerciser_get_ecam(uint32_t bdf)
 {
 
   uint32_t i = 0;
+  uint32_t seg = PCIE_EXTRACT_BDF_SEG(bdf);
   uint32_t bus = PCIE_EXTRACT_BDF_BUS(bdf);
 
   while (i < g_pcie_info_table->num_entries)
   {
     if ((bus >= g_pcie_info_table->block[i].start_bus_num) &&
-         (bus <= g_pcie_info_table->block[i].end_bus_num))
+        (bus <= g_pcie_info_table->block[i].end_bus_num) &&
+        (seg == g_pcie_info_table->block[i].segment_num))
     {
       return g_pcie_info_table->block[i].ecam_base;
     }
