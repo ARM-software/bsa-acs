@@ -617,7 +617,7 @@ val_sbsa_pmu_execute_tests(uint32_t level, uint32_t num_pe)
 
   uint32_t status = ACS_STATUS_FAIL;
   uint32_t skip_module;
-  uint32_t i, pmu_node_count;
+  uint32_t i;
 
   if (!(((level > 6) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)))
       return ACS_STATUS_SKIP;
@@ -651,17 +651,9 @@ val_sbsa_pmu_execute_tests(uint32_t level, uint32_t num_pe)
       status  = pmu001_entry(num_pe);
       status |= pmu002_entry(num_pe);
       status |= pmu003_entry(num_pe);
-      status |= pmu006_entry(num_pe);
-
-      pmu_node_count = val_pmu_get_info(PMU_NODE_COUNT, 0);
-      if (pmu_node_count == 0) {
-          val_print(ACS_PRINT_TEST,
-                "\n       PMU nodes not found. Skipping remaining PMU tests\n", 0);
-          return ACS_STATUS_SKIP;
-      }
-
       status |= pmu004_entry(num_pe);
       status |= pmu005_entry(num_pe);
+      status |= pmu006_entry(num_pe);
       status |= pmu007_entry(num_pe);
       status |= pmu009_entry(num_pe);
   }
