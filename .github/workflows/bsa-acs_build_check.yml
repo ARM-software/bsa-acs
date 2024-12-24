@@ -12,7 +12,7 @@ on:
 jobs:
   build_bsa_acpi:
     name: BSA-ACS UEFI build for ACPI target
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Install dependencies
@@ -60,7 +60,7 @@ jobs:
 
   build_drtm_acpi:
     name: DRTM-ACS UEFI build for ACPI target
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Install dependencies
@@ -108,7 +108,7 @@ jobs:
 
   build_sbsa_acpi:
     name: SBSA-ACS UEFI build for ACPI target
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Install dependencies
@@ -162,7 +162,7 @@ jobs:
 
   build_dt:
     name: BSA-ACS UEFI build for DT target
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Install dependencies
@@ -210,7 +210,7 @@ jobs:
 
   bsa_baremetal-compilation:
     name: BSA-ACS Baremetal CMake compilation check 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout bsa-acs repository
@@ -244,7 +244,7 @@ jobs:
           
   sbsa_baremetal-compilation:
     name: SBSA-ACS Baremetal CMake compilation 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
 
@@ -289,7 +289,7 @@ jobs:
 
   linux-compilation:
     name: BSA and SBSA linux compilation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout bsa-acs repository

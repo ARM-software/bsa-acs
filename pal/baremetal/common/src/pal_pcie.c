@@ -25,11 +25,12 @@ extern PCIE_READ_TABLE platform_pcie_device_hierarchy;
 extern PERIPHERAL_INFO_TABLE  *g_peripheral_info_table;
 
 uint64_t
-pal_pcie_get_mcfg_ecam()
+pal_pcie_get_mcfg_ecam(uint32_t bdf)
 {
 
+  (void) bdf;
   /* Not Applicable for Baremetal as no MCFG table */
-  return (platform_pcie_cfg.block[0].ecam_base);
+  return 0;
 }
 
 

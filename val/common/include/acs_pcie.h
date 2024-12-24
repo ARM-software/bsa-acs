@@ -165,7 +165,6 @@ uint32_t val_pcie_bar_mem_write(uint32_t bdf, uint64_t address, uint32_t data);
 typedef enum {
   PCIE_INFO_NUM_ECAM = 1,
   PCIE_INFO_ECAM,
-  PCIE_INFO_MCFG_ECAM,
   PCIE_INFO_START_BUS,
   PCIE_INFO_END_BUS,
   PCIE_INFO_SEGMENT
