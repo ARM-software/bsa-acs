@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,14 +23,6 @@ extern PLATFORM_OVERRIDE_NODE_DATA platform_node_type;
 extern PLATFORM_OVERRIDE_PMCG_NODE_DATA platform_pmcg_node_data;
 extern PLATFORM_OVERRIDE_NAMED_NODE_DATA platform_named_node_data;
 
-#ifdef TARGET_BM_BOOT
-    // Align the memory access by 8 bytes in case of baremetal boot.
-    static uint64_t bound = 0x08;
-#else
-    static uint64_t bound = 0x01;
-#endif
-
-
 uint64_t
 pal_iovirt_get_rc_smmu_base (
   IOVIRT_INFO_TABLE *Iovirt,
@@ -50,7 +42,7 @@ pal_iovirt_get_rc_smmu_base (
   mapping_found = 0;
   for (i = 0; i < Iovirt->num_blocks; i++, block = IOVIRT_NEXT_BLOCK(block))
   {
-      block = ALIGN_MEMORY(block, bound);
+      block = ALIGN_MEMORY_ACCESS(block);
       if (block->type == IOVIRT_NODE_PCI_ROOT_COMPLEX
           && block->data.rc.segment == RcSegmentNum)
       {
@@ -198,7 +190,7 @@ pal_iovirt_create_info_table(IOVIRT_INFO_TABLE *IoVirtTable)
   block = &(IoVirtTable->blocks[0]);
   for (i = 0; i < platform_iovirt_cfg.node_count; i++, block=IOVIRT_NEXT_BLOCK(block))
   {
-     block = ALIGN_MEMORY(block, bound);
+     block = ALIGN_MEMORY_ACCESS(block);
      block->type = platform_iovirt_cfg.type[i];
      block->flags = 0;
      switch(platform_iovirt_cfg.type[i]){
@@ -298,7 +290,7 @@ pal_iovirt_create_info_table(IOVIRT_INFO_TABLE *IoVirtTable)
   print(ACS_PRINT_DEBUG, " Number of IOVIRT blocks = %d\n", IoVirtTable->num_blocks);
   for(i = 0; i < IoVirtTable->num_blocks; i++, block = IOVIRT_NEXT_BLOCK(block))
   {
-    block = ALIGN_MEMORY(block, bound);
+    block = ALIGN_MEMORY_ACCESS(block);
     dump_block(block);
   }
 
