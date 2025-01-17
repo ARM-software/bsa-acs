@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024, 2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -247,6 +247,10 @@ payload(uint32_t num_pe)
   event_log_size = event_log_size - event_head_size;
   /* Loop untill Event Log size is grater than zero and print event data */
   while (event_log_size > 0) {
+    /* Check for zeroed which indicates end of log */
+    if ((event->pcr_index == 0) && (event->event_type == 0) && (event->digests.count == 0)) {
+      break;
+    }
     val_print(ACS_PRINT_DEBUG, "\n       EVENT2 : ", 0);
     val_print(ACS_PRINT_DEBUG, "\n         PCR Index       : %d",    event->pcr_index);
     val_print(ACS_PRINT_DEBUG, "\n         Event Type      : 0x%x",  event->event_type);
