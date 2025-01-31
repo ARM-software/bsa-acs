@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,6 +43,8 @@
 #define TYPE01_ILR_SHIFT    0
 #define TYPE01_ILR_MASK     0xFF
 #define TYPE01_BCC_SHIFT    24
+#define VIDR_RRS_MASK       0x0001
+#define DIDR_RRS_MASK       0xFFFF
 
 #define TYPE0_HEADER 0
 #define TYPE1_HEADER 1
