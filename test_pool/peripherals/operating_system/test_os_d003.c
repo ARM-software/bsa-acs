@@ -1,6 +1,6 @@
 
 /** @file
- * Copyright (c) 2016-2018, 2021, 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -188,7 +188,7 @@ payload1()
 {
   uint32_t count = val_peripheral_get_info(NUM_UART, 0);
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
-  uint32_t timeout = TIMEOUT_LARGE;
+  uint32_t timeout;
   uint32_t interface_type;
 
   if (count == 0) {
@@ -198,7 +198,7 @@ payload1()
   }
   val_set_status(index, RESULT_SKIP(TEST_NUM1, 2));
   while (count != 0) {
-      timeout = TIMEOUT_MEDIUM;
+      timeout = TIMEOUT_LARGE;
       int_id    = val_peripheral_get_info(UART_GSIV, count - 1);
       interface_type = val_peripheral_get_info(UART_INTERFACE_TYPE, count - 1);
       l_uart_base = val_peripheral_get_info(UART_BASE0, count - 1);
