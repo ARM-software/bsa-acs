@@ -520,7 +520,7 @@ typedef union {
   ID_MAP map;
 }NODE_DATA_MAP;
 
-#define MAX_NAMED_COMP_LENGTH 256
+#define MAX_NAMED_COMP_LENGTH 150
 
 typedef struct {
   uint64_t smmu_base;                  /* SMMU base to which component is attached, else NULL */
@@ -720,6 +720,10 @@ typedef struct {
   void            *port;
   void            *host;     // It will be used only by PAL. hence void.
   uint32_t        flags;
+#ifdef TARGET_LINUX
+  uint64_t        dma_sg_address;
+  uint64_t        dma_sg_length;
+#endif
 }DMA_INFO_BLOCK;
 
 typedef struct {

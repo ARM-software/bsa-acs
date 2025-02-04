@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018,2021,2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018,2021,2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -182,12 +182,13 @@ val_dma_mem_free(void *buffer, dma_addr_t mem_dma, uint32_t size, uint32_t dev_i
 **/
 
 void
-val_dma_device_get_dma_addr(uint32_t ctrl_index, void *dma_addr, uint32_t *cpu_len)
+val_dma_device_get_dma_addr(uint32_t ctrl_index, uint64_t *dma_addr, uint32_t *cpu_len)
 {
-  void *ap = NULL;
 
-  ap = (void *)val_dma_get_info(DMA_PORT_INFO, ctrl_index);
-  pal_dma_scsi_get_dma_addr(ap, dma_addr, cpu_len);
+#ifdef TARGET_LINUX
+  *dma_addr = g_dma_info_table->info[ctrl_index].dma_sg_address;
+  *cpu_len =  g_dma_info_table->info[ctrl_index].dma_sg_length;
+#endif
 
 }
 

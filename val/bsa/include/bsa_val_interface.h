@@ -78,7 +78,7 @@ void val_pcie_clear_sig_target_abort(uint32_t bdf);
 /* IO-VIRT APIs */
 uint32_t val_bsa_smmu_execute_tests(uint32_t num_pe, uint32_t *g_sw_view);
 
-void     val_dma_device_get_dma_addr(uint32_t ctrl_index, void *dma_addr, uint32_t *cpu_len);
+void     val_dma_device_get_dma_addr(uint32_t ctrl_index, uint64_t *dma_addr, uint32_t *cpu_len);
 int      val_dma_mem_get_attrs(void *buf, uint32_t *attr, uint32_t *sh);
 
 /* POWER and WAKEUP APIs */
