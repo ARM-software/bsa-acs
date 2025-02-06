@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -374,4 +374,17 @@ uint32_t val_memory_region_has_52bit_addr(void)
   }
 
   return 0;
+}
+
+/**
+  @brief   This API issues a DSB Memory barrier instruction
+  @param   None
+  @return  None
+**/
+void
+val_mem_issue_dsb(void)
+{
+#ifndef TARGET_LINUX
+    AA64IssueDSB();
+#endif
 }
