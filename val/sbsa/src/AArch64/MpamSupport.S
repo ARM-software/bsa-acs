@@ -1,5 +1,5 @@
 #/** @file
-# Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,8 +44,6 @@ GCC_ASM_EXPORT(AA64WriteMpam1)
 GCC_ASM_EXPORT(AA64ReadMpam2)
 GCC_ASM_EXPORT(AA64WriteMpam2)
 GCC_ASM_EXPORT(AA64ReadMpamidr)
-GCC_ASM_EXPORT(AA64IssueDSB)
-
 
 ASM_PFX(AA64ReadMpam1):
   mrs  x0, mpam1_el1
@@ -65,10 +63,6 @@ ASM_PFX(AA64WriteMpam2):
 
 ASM_PFX(AA64ReadMpamidr):
   mrs  x0, mpamidr_el1
-  ret
-
-ASM_PFX(AA64IssueDSB):
-  dsb sy
   ret
 
 #ifndef TARGET_EMULATION

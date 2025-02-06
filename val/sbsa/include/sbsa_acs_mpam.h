@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -63,7 +63,6 @@ uint64_t val_mpam_reg_read(MPAM_SYS_REGS reg_id);
 uint64_t AA64ReadMpamidr(void);
 uint64_t AA64ReadMpam1(void);
 uint64_t AA64ReadMpam2(void);
-void AA64IssueDSB(void);
 void AA64WriteMpam1(uint64_t write_data);
 void AA64WriteMpam2(uint64_t write_data);
 
@@ -93,7 +92,6 @@ uint32_t val_mpam_msc_get_version(uint32_t msc_index);
 uint32_t val_mpam_get_max_pmg(uint32_t msc_index);
 void val_mpam_configure_cpor(uint32_t msc_index, uint16_t partid, uint32_t cpbm_percentage);
 uint32_t val_mpam_get_cpbm_width(uint32_t msc_index);
-void val_mem_issue_dsb(void);
 void val_mpam_configure_csu_mon(uint32_t msc_index, uint16_t partid, uint8_t pmg, uint16_t mon_sel);
 void val_mpam_csumon_enable(uint32_t msc_index);
 void val_mpam_csumon_disable(uint32_t msc_index);

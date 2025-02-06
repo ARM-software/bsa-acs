@@ -18,7 +18,7 @@
 #include "common/include/acs_val.h"
 #include "common/include/acs_common.h"
 #include "common/include/acs_pcie_enumeration.h"
-
+#include "common/include/acs_memory.h"
 #include "common/include/val_interface.h"
 #include "common/include/acs_pcie.h"
 #include "common/sys_arch_src/pcie/pcie.h"
@@ -161,6 +161,7 @@ val_pcie_write_cfg(uint32_t bdf, uint32_t offset, uint32_t data)
                (dev * PCIE_MAX_FUNC * 4096) + (func * 4096);
 
   pal_mmio_write(ecam_base + cfg_addr + offset, data);
+  val_mem_issue_dsb();
 }
 
 /**
@@ -177,7 +178,10 @@ val_pcie_write_cfg(uint32_t bdf, uint32_t offset, uint32_t data)
 void
 val_pcie_io_write_cfg(uint32_t bdf, uint32_t offset, uint32_t data)
 {
-    return pal_pcie_io_write_cfg(bdf, offset, data);
+
+    pal_pcie_io_write_cfg(bdf, offset, data);
+    val_mem_issue_dsb();
+    return;
 }
 
 /**
@@ -192,7 +196,11 @@ val_pcie_io_write_cfg(uint32_t bdf, uint32_t offset, uint32_t data)
 uint32_t
 val_pcie_bar_mem_write(uint32_t bdf, uint64_t offset, uint32_t data)
 {
-    return pal_pcie_bar_mem_write(bdf, offset, data);
+    uint32_t status;
+
+    status = pal_pcie_bar_mem_write(bdf, offset, data);
+    val_mem_issue_dsb();
+    return status;
 }
 
 /**

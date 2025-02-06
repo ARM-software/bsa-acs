@@ -15,9 +15,10 @@
  * limitations under the License.
  **/
 
-#include "sbsa/include/sbsa_val_interface.h"
 #include "common/include/acs_val.h"
 #include "common/include/acs_common.h"
+#include "common/include/acs_memory.h"
+#include "sbsa/include/sbsa_val_interface.h"
 #include "sbsa/include/sbsa_acs_mpam.h"
 #include "sbsa/include/sbsa_acs_mpam_reg.h"
 
@@ -850,17 +851,6 @@ val_mpam_get_cpbm_width(uint32_t msc_index)
         return BITFIELD_READ(CPOR_IDR_CPBM_WD, val_mpam_mmr_read(msc_index, REG_MPAMF_CPOR_IDR));
     else
         return 0;
-}
-
-/**
-  @brief   This API issues a DSB Memory barrier instruction
-  @param   None
-  @return  None
-**/
-void
-val_mem_issue_dsb(void)
-{
-    AA64IssueDSB();
 }
 
 /**
