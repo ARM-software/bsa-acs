@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -429,9 +429,6 @@ val_bsa_pcie_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       status |= os_p038_entry(num_pe);
       status |= os_p039_entry(num_pe);
       status |= os_p042_entry(num_pe);
-if (g_build_sbsa) {
-      status |= os_p043_entry(num_pe);
-}
 
 #endif
 
