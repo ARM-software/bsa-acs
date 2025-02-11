@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,9 +21,6 @@
 
 #ifndef __ACS_COMMON_H__
 #define __ACS_COMMON_H__
-
-#define TEST_NAME_HELPER(x,y) c##x##y
-#define TEST_NAME(x,y) TEST_NAME_HELPER(x,y)
 
 #define G_SW_OS    0
 #define G_SW_HYP   1
