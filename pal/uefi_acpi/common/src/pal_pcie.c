@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,9 +47,11 @@ pal_get_mcfg_ptr();
   @return  None
 **/
 UINT64
-pal_pcie_get_mcfg_ecam()
+pal_pcie_get_mcfg_ecam(UINT32 bdf)
 {
   EFI_ACPI_MEMORY_MAPPED_ENHANCED_CONFIGURATION_SPACE_BASE_ADDRESS_ALLOCATION_STRUCTURE  *Entry;
+  UINT32 length = sizeof(EFI_ACPI_MEMORY_MAPPED_CONFIGURATION_BASE_ADDRESS_TABLE_HEADER);
+  UINT32 seg, bus;
 
   gMcfgHdr = (EFI_ACPI_MEMORY_MAPPED_CONFIGURATION_BASE_ADDRESS_TABLE_HEADER *) pal_get_mcfg_ptr();
 
@@ -58,9 +60,26 @@ pal_pcie_get_mcfg_ecam()
       return 0x0;
   }
 
-  Entry = (EFI_ACPI_MEMORY_MAPPED_ENHANCED_CONFIGURATION_SPACE_BASE_ADDRESS_ALLOCATION_STRUCTURE *) (gMcfgHdr + 1);
+  Entry = (EFI_ACPI_MEMORY_MAPPED_ENHANCED_CONFIGURATION_SPACE_BASE_ADDRESS_ALLOCATION_STRUCTURE *)
+          (gMcfgHdr + 1);
 
-  return (Entry->BaseAddress);
+  seg = PCIE_EXTRACT_BDF_SEG(bdf);
+  bus = PCIE_EXTRACT_BDF_BUS(bdf);
+  while ((length < gMcfgHdr->Header.Length) && (Entry))
+  {
+      if ((bus >= Entry->StartBusNumber) && (bus <= Entry->EndBusNumber) &&
+          (seg == Entry->PciSegmentGroupNumber)) {
+          acs_print(ACS_PRINT_INFO, L" ECAM base address is %llx\n", Entry->BaseAddress);
+          return Entry->BaseAddress;
+      }
+
+      Entry++;
+      length +=
+      sizeof(EFI_ACPI_MEMORY_MAPPED_ENHANCED_CONFIGURATION_SPACE_BASE_ADDRESS_ALLOCATION_STRUCTURE);
+  }
+
+  acs_print(ACS_PRINT_ERR, L" ECAM base address for bdf 0x%x is 0\n", bdf);
+  return 0;
 }
 
 

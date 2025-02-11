@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -746,8 +746,6 @@ val_pcie_get_info(PCIE_INFO_e type, uint32_t index)
   switch (type) {
       case PCIE_INFO_NUM_ECAM:
           return g_pcie_info_table->num_entries;
-      case PCIE_INFO_MCFG_ECAM:
-          return pal_pcie_get_mcfg_ecam();
       case PCIE_INFO_ECAM:
           return g_pcie_info_table->block[index].ecam_base;
       case PCIE_INFO_START_BUS:

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018-2020,2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2018-2020,2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +38,7 @@ VOID
 pal_mmio_write(UINT64 addr, UINT32 data);
 
 UINT64
-pal_pcie_get_mcfg_ecam();
+pal_pcie_get_mcfg_ecam(UINT32 bdf);
 
 
 /**
@@ -122,7 +122,7 @@ pal_is_bdf_exerciser(UINT32 bdf)
 {
   UINT64 Ecam;
   UINT32 vendor_dev_id;
-  Ecam = pal_pcie_get_mcfg_ecam();
+  Ecam = pal_pcie_get_mcfg_ecam(bdf);
 
   vendor_dev_id = pal_mmio_read(Ecam + pal_exerciser_get_pcie_config_offset(bdf));
   if (vendor_dev_id == EXERCISER_ID)
@@ -189,7 +189,7 @@ pal_exerciser_find_pcie_capability (
   UINT32 PtrMask;
   UINT32 PtrOffset;
 
-  Ecam = pal_pcie_get_mcfg_ecam();
+  Ecam = pal_pcie_get_mcfg_ecam(Bdf);
   NxtPtr = PCIE_CAP_OFFSET;
 
   if (Value == 1) {
@@ -415,7 +415,7 @@ pal_exerciser_ops (
   UINT32 data;
 
   Base = pal_exerciser_get_ecsr_base(Bdf,0);
-  Ecam = pal_pcie_get_mcfg_ecam(); // Getting the ECAM address
+  Ecam = pal_pcie_get_mcfg_ecam(Bdf); // Getting the ECAM address
   switch(Ops){
 
     case START_DMA:
