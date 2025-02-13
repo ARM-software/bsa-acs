@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,7 @@
 
 
 extern PE_INFO_TABLE platform_pe_cfg;
+extern PE_SMBIOS_PROCESSOR_INFO_TABLE platform_smbios_cfg;
 extern PE_INFO_TABLE *g_pe_info_table;
 extern int32_t gPsciConduit;
 
@@ -70,6 +71,38 @@ PalGetMaxMpidr()
 {
 
   return gMpidrMax;
+}
+
+/**
+  @brief  This API fills in the SMBIOS Info Table with information about the processor info
+          in the system. This is achieved by parsing the SMBIOS table.
+
+  @param  SmbiosTable  - Address where the processor information needs to be filled.
+
+  @return  None
+**/
+void
+pal_smbios_create_info_table(PE_SMBIOS_PROCESSOR_INFO_TABLE *SmbiosTable)
+{
+  uint32_t count = 0;
+
+  if (SmbiosTable == NULL) {
+    return;
+  }
+
+  SmbiosTable->slot_count = platform_smbios_cfg.slot_count;
+  if (SmbiosTable->slot_count == 0) {
+    print(ACS_PRINT_ERR, "SMBIOS Table Not Found\n", 0);
+    return;
+  }
+
+  while (count < SmbiosTable->slot_count) {
+    SmbiosTable->type4_info[count].processor_family =
+                platform_smbios_cfg.type4_info[count].processor_family;
+    SmbiosTable->type4_info[count].core_count = platform_smbios_cfg.type4_info[count].core_count;
+    count++;
+  }
+
 }
 
 /**

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021, 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +23,8 @@
 #include <Include/libfdt.h>
 #include <Protocol/AcpiTable.h>
 #include <Protocol/Cpu.h>
+#include "Include/IndustryStandard/SmBios.h"
+#include <Protocol/Smbios.h>
 
 #include "bsa/include/pal_uefi.h"
 #include "bsa/include/pal_dt.h"
@@ -64,6 +66,7 @@ static char psci_dt_arr[][PSCI_COMPATIBLE_STR_LEN] = {
 };
 
 
+#define MAX_NUM_OF_SMBIOS_SLOTS_SUPPORTED  16
 #define SIZE_STACK_SECONDARY_PE  0x100                //256 bytes per core
 #define UPDATE_AFF_MAX(src,dest,mask)  ((dest & mask) > (src & mask) ? (dest & mask) : (src & mask))
 
@@ -75,6 +78,80 @@ ArmCallSmc (
   IN OUT ARM_SMC_ARGS *Args,
   IN     INT32        Conduit
   );
+
+/**
+  @brief  This API fills in the SMBIOS Info Table with information about the processor info
+          in the system. This is achieved by parsing the SMBIOS table.
+
+  @param  SmbiosTable  - Address where the processor information needs to be filled.
+
+  @return  None
+**/
+
+VOID
+pal_smbios_create_info_table(PE_SMBIOS_PROCESSOR_INFO_TABLE *SmbiosTable)
+{
+  EFI_STATUS Status;
+  EFI_SMBIOS_PROTOCOL *SmbiosProtocol = NULL;
+  EFI_SMBIOS_HANDLE SmbiosHandle = SMBIOS_HANDLE_PI_RESERVED;
+  EFI_SMBIOS_TABLE_HEADER *Record;
+  SMBIOS_TABLE_TYPE4 *Type4Record;
+  PE_SMBIOS_TYPE4_INFO *Type4Entry = NULL;
+
+  if (SmbiosTable == NULL) {
+    acs_print(ACS_PRINT_ERR, L" Input SMBIOS Table Pointer is NULL. Cannot create SMBIOS INFO\n");
+    return;
+  }
+
+  Type4Entry = SmbiosTable->type4_info;
+
+  /* Get SMBIOS Protocol Handler */
+  Status = gBS->LocateProtocol(&gEfiSmbiosProtocolGuid, NULL, (VOID **)&SmbiosProtocol);
+  if (EFI_ERROR(Status)) {
+    return;
+  }
+
+  while (!EFI_ERROR(Status)) {
+    /* Get all records from SMBIOS Table */
+    Status = SmbiosProtocol->GetNext(SmbiosProtocol, &SmbiosHandle, NULL, &Record, NULL);
+    if (EFI_ERROR(Status)) {
+      return;
+    }
+
+    acs_print(ACS_PRINT_DEBUG, L" Smbios type %d\n", Record->Type);
+    /* Check of record if of type 4 */
+    if (Record->Type == SMBIOS_TYPE_PROCESSOR_INFORMATION) {
+      Type4Record = (SMBIOS_TABLE_TYPE4 *)Record;
+
+      /* Save Processor family type */
+      if (Type4Record->ProcessorFamily == 0xFE)
+        Type4Entry->processor_family = Type4Record->ProcessorFamily2;
+      else
+        Type4Entry->processor_family = Type4Record->ProcessorFamily;
+
+      acs_print(ACS_PRINT_DEBUG, L"  Processor Family 0x%x\n", Type4Entry->processor_family);
+
+      /* Save Processor core count */
+      if (Type4Record->CoreCount == 0xFF)
+        Type4Entry->core_count = Type4Record->CoreCount2;
+      else
+        Type4Entry->core_count = Type4Record->CoreCount;
+
+      acs_print(ACS_PRINT_DEBUG, L"  Processor Count 0x%x\n", Type4Entry->core_count);
+
+      Type4Entry++;
+      SmbiosTable->slot_count++;
+
+      if (SmbiosTable->slot_count >= MAX_NUM_OF_SMBIOS_SLOTS_SUPPORTED) {
+        acs_print(ACS_PRINT_WARN, L" Total Slots/Sockets 0x%x\n", SmbiosTable->slot_count);
+        acs_print(ACS_PRINT_WARN, L"\n Number of SMBIOS Slots greater than %d",
+                        MAX_NUM_OF_SMBIOS_SLOTS_SUPPORTED);
+        return;
+      }
+    }
+  }
+  acs_print(ACS_PRINT_DEBUG, L" Total Slots/Sockets 0x%x\n", SmbiosTable->slot_count);
+}
 
 /**
   @brief   Queries the DT PSCI node to check whether PSCI is implemented and,

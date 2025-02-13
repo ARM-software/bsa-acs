@@ -166,6 +166,17 @@ createPeripheralInfoTable(
 }
 
 VOID
+createSmbiosInfoTable(
+)
+{
+  UINT64 *SmbiosInfoTable;
+
+  SmbiosInfoTable = val_aligned_alloc(SIZE_4K, SMBIOS_INFO_TBL_SZ);
+
+  val_smbios_create_info_table(SmbiosInfoTable);
+}
+
+VOID
 freeBsaAcsMem()
 {
   val_pe_free_info_table();
@@ -175,6 +186,7 @@ freeBsaAcsMem()
   val_pcie_free_info_table();
   val_iovirt_free_info_table();
   val_peripheral_free_info_table();
+  val_smbios_free_info_table();
   val_free_shared_mem();
 }
 
@@ -529,6 +541,7 @@ ShellAppMain (
   createWatchdogInfoTable();
   createPcieVirtInfoTable();
   createPeripheralInfoTable();
+  createSmbiosInfoTable();
 
   val_allocate_shared_mem();
 

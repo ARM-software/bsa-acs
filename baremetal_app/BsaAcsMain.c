@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,6 +49,18 @@ extern uint32_t g_test_array[];
 extern uint32_t g_num_tests;
 extern uint32_t g_module_array[];
 extern uint32_t g_num_modules;
+
+void
+createSmbiosInfoTable(
+)
+{
+  uint64_t *SmbiosInfoTable;
+
+  SmbiosInfoTable = val_aligned_alloc(SIZE_4K, sizeof(PE_SMBIOS_PROCESSOR_INFO_TABLE) +
+                           (PLATFORM_OVERRIDE_SMBIOS_SLOT_COUNT * sizeof(PE_SMBIOS_TYPE4_INFO)));
+
+  val_smbios_create_info_table(SmbiosInfoTable);
+}
 
 uint32_t
 createPeInfoTable(
@@ -170,6 +182,7 @@ freeBsaAcsMem()
   val_pcie_free_info_table();
   val_iovirt_free_info_table();
   val_peripheral_free_info_table();
+  val_smbios_free_info_table();
   val_dma_free_info_table();
   val_free_shared_mem();
 }
@@ -256,7 +269,7 @@ ShellAppMainbsa(
   createPcieVirtInfoTable();
   createPeripheralInfoTable();
   createDmaInfoTable();
-
+  createSmbiosInfoTable();
   val_allocate_shared_mem();
 
   /* Initialise exception vector, so any unexpected exception gets handled

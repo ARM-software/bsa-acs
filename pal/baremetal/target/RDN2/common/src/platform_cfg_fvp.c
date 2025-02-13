@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2020-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2020-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,6 +56,13 @@ uint32_t  g_el1physkip       = FALSE;
    g_crypto_support to FALSE (Default value is TRUE)
 */
 uint32_t g_crypto_support    = TRUE;
+
+PE_SMBIOS_PROCESSOR_INFO_TABLE platform_smbios_cfg = {
+    .slot_count = PLATFORM_OVERRIDE_SMBIOS_SLOT_COUNT,
+
+    .type4_info[0].processor_family = PLATFROM_OVERRIDE_SMBIOS_SLOT0_FAMILY,
+    .type4_info[0].core_count = PLATFROM_OVERRIDE_SMBIOS_SLOT0_CORE_COUNT,
+};
 
 PE_INFO_TABLE platform_pe_cfg = {
 

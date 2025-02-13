@@ -23,6 +23,7 @@
 #include "common/include/val_interface.h"
 #include "bsa/include/bsa_pal_interface.h"
 
+PE_SMBIOS_PROCESSOR_INFO_TABLE *g_smbios_info_table;
 int32_t gPsciConduit;
 
 /* Global variable to store mpidr of primary cpu */
@@ -489,6 +490,79 @@ uint32_t
 val_pe_get_primary_index(void)
 {
   return g_primary_pe_index;
+}
+
+#ifndef TARGET_LINUX
+void
+val_smbios_create_info_table(uint64_t *smbios_info_table)
+{
+  val_print(ACS_PRINT_INFO, " Creating SMBIOS INFO table\n", 0);
+
+  if (smbios_info_table == NULL) {
+    val_print(ACS_PRINT_ERR, "Input memory for SMBIOS Info table cannot be NULL\n", 0);
+    return;
+  }
+
+  g_smbios_info_table = (PE_SMBIOS_PROCESSOR_INFO_TABLE *)smbios_info_table;
+
+  pal_smbios_create_info_table(g_smbios_info_table);
+  val_print(ACS_PRINT_TEST, " SMBIOS: Num of slots :    %d\n", g_smbios_info_table->slot_count);
+}
+
+/**
+  @brief   This API returns the number of Slots in smbios from the g_smbios_info_table.
+           1. Caller       -  Application layer, test Suite.
+           2. Prerequisite -  val_smbios_create_info_table.
+  @param   none
+  @return  the number of pe discovered
+**/
+uint32_t
+val_get_num_smbios_slots()
+{
+  if (g_smbios_info_table == NULL) {
+      return 0;
+  }
+  return g_smbios_info_table->slot_count;
+}
+
+/**
+  @brief  Free the memory allocated for the smbios_info_table
+
+  @param  None
+
+  @return None
+**/
+void
+val_smbios_free_info_table()
+{
+  pal_mem_free_aligned((void *)g_smbios_info_table);
+}
+#endif
+
+uint32_t
+val_get_pe_architecture(uint32_t index)
+{
+  PE_SMBIOS_TYPE4_INFO *type4_entry;
+  uint32_t cur_pe_count = 0;
+  uint32_t num_slots = g_smbios_info_table->slot_count;
+
+  if (num_slots == 0) {
+    return ACS_STATUS_ERR;
+  }
+
+  type4_entry = g_smbios_info_table->type4_info;
+
+  while (num_slots > 0) {
+    num_slots--;
+    cur_pe_count += type4_entry->core_count;
+    if (index > cur_pe_count) {
+      type4_entry++;
+      continue;
+    }
+
+    return type4_entry->processor_family;
+  }
+  return ACS_STATUS_ERR;
 }
 
 #ifdef TARGET_BM_BOOT

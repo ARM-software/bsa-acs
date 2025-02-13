@@ -91,6 +91,8 @@ val_bsa_pe_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
       status |= os_c013_entry(num_pe);
 if (!g_build_sbsa) { /* B_PE_15 is only in BSA checklist */
       status |= os_c014_entry(num_pe);
+
+      status |= os_c016_entry(num_pe);
 }
   }
 
