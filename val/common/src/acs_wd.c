@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -93,5 +93,5 @@ val_wd_create_info_table(uint64_t *wd_info_table)
 void
 val_wd_free_info_table()
 {
-  pal_mem_free((void *)g_wd_info_table);
+  pal_mem_free_aligned((void *)g_wd_info_table);
 }

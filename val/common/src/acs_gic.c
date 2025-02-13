@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -91,7 +91,7 @@ val_gic_create_info_table(uint64_t *gic_info_table)
 void
 val_gic_free_info_table(void)
 {
-  pal_mem_free((void *)g_gic_info_table);
+  pal_mem_free_aligned((void *)g_gic_info_table);
 }
 
 /**

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -97,7 +97,7 @@ return;
 void
 val_ras2_free_info_table()
 {
-  pal_mem_free((void *)g_ras2_info_table);
+  pal_mem_free_aligned((void *)g_ras2_info_table);
 }
 
 /**

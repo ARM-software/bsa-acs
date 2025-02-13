@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,7 +71,7 @@ val_cache_create_info_table(uint64_t *cache_info_table)
 void
 val_cache_free_info_table(void)
 {
-  pal_mem_free((void *)g_cache_info_table);
+  pal_mem_free_aligned((void *)g_cache_info_table);
 }
 
 /**
