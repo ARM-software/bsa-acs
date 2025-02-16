@@ -218,6 +218,7 @@ val_pe_get_index_mpid(uint64_t mpid)
   @param   None
   @return  None
 **/
+
 void
 val_test_entry(void)
 {
@@ -268,8 +269,14 @@ val_execute_on_pe(uint32_t index, void (*payload)(void), uint64_t test_input)
 
   } while (g_smc_args.Arg0 == (uint64_t)ARM_SMC_PSCI_RET_ALREADY_ON && timeout--);
 
-  if (g_smc_args.Arg0 == (uint64_t)ARM_SMC_PSCI_RET_ALREADY_ON)
+  if (g_smc_args.Arg0 == (uint64_t)ARM_SMC_PSCI_RET_ALREADY_ON) {
       val_print(ACS_PRINT_ERR, "\n       PSCI_CPU_ON: cpu already on", 0);
+      val_print(ACS_PRINT_WARN, "\n       WARNING: Skipping test for PE index %d "
+                              "since it is already on\n", index);
+
+      val_set_status(index, RESULT_SKIP(0, 0x120 - (int)g_smc_args.Arg0));
+      return;
+  }
   else {
       if(g_smc_args.Arg0 == 0) {
           val_print(ACS_PRINT_INFO, "\n       PSCI_CPU_ON: success", 0);

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,6 @@
 #include "sbsa/include/sbsa_acs_iovirt.h"
 
 extern IOVIRT_INFO_TABLE *g_iovirt_info_table;
-extern uint32_t bound;
 
 #if defined(TARGET_LINUX) || defined(TARGET_EMULATION)
 /**
@@ -98,7 +97,7 @@ val_iovirt_get_named_comp_info(NAMED_COMP_INFO_e type, uint32_t index)
   block = &g_iovirt_info_table->blocks[0];
   for (i = 0; i < g_iovirt_info_table->num_blocks; i++, block = IOVIRT_NEXT_BLOCK(block))
   {
-      block = ALIGN_MEMORY(block, bound);
+      block = ALIGN_MEMORY_ACCESS(block);
       if (block->type == IOVIRT_NODE_NAMED_COMPONENT)
       {
           if (j == index)
@@ -155,7 +154,7 @@ val_iovirt_get_pmcg_info(PMCG_INFO_e type, uint32_t index)
   block = &g_iovirt_info_table->blocks[0];
   for (i = 0; i < g_iovirt_info_table->num_blocks; i++, block = IOVIRT_NEXT_BLOCK(block))
   {
-      block = ALIGN_MEMORY(block, bound);
+      block = ALIGN_MEMORY_ACCESS(block);
       if (block->type == IOVIRT_NODE_PMCG)
       {
           if (j == index)
@@ -203,7 +202,7 @@ val_iovirt_get_rc_index(uint32_t rc_seg_num)
   block = &g_iovirt_info_table->blocks[0];
   for (i = 0; i < g_iovirt_info_table->num_blocks; i++, block = IOVIRT_NEXT_BLOCK(block))
   {
-      block = ALIGN_MEMORY(block, bound);
+      block = ALIGN_MEMORY_ACCESS(block);
       if (block->type == IOVIRT_NODE_PCI_ROOT_COMPLEX)
       {
           if (block->data.rc.segment == rc_seg_num)

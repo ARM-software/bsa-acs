@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024, 2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -72,14 +72,14 @@ payload(uint32_t num_pe)
   drtm_params = (DRTM_PARAMETERS *)((uint64_t)val_aligned_alloc(DRTM_SIZE_4K, drtm_params_size));
   if (!drtm_params) {
     val_print(ACS_PRINT_ERR, "\n    Failed to allocate memory for DRTM Params", 0);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
     return;
   }
 
   status = val_drtm_init_drtm_params(drtm_params);
   if (status != ACS_STATUS_PASS) {
     val_print(ACS_PRINT_ERR, "\n       DRTM Init Params failed err=%d", status);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
     goto free_drtm_params;
   }
 
@@ -99,7 +99,7 @@ payload(uint32_t num_pe)
     val_print(ACS_PRINT_ERR, "\n       DRTM Dynamic Launch failed, Expected = %d",
                             DRTM_ACS_SECONDARY_PE_NOT_OFF);
     val_print(ACS_PRINT_ERR, " Found = %d", status);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
     goto free_dlme_region;
   }
 

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021, 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -370,16 +370,16 @@ payload(uint32_t num_pe)
                      val_print(ACS_PRINT_ERR, "   : 0x%08llx    FAIL\n",
                                                         pe_buffer->reg_data[reg_index]);
                      val_print(ACS_PRINT_ERR, "          Masked Primary PE Value : 0x%08llx \n",
-                                              rd_data_array[reg_index] & (~reg_list[i].reg_mask));
+                                       rd_data_array[reg_index] & (~reg_list[reg_index].reg_mask));
                      val_print(ACS_PRINT_ERR, "          Masked Current PE Value : 0x%08llx ",
-                                         pe_buffer->reg_data[reg_index] & (~reg_list[i].reg_mask));
+                                 pe_buffer->reg_data[reg_index] & (~reg_list[reg_index].reg_mask));
                  } else {
                      val_print(ACS_PRINT_ERR, "   : 0x%016llx    FAIL\n",
                                                         pe_buffer->reg_data[reg_index]);
                      val_print(ACS_PRINT_ERR, "          Masked Primary PE Value : 0x%016llx \n",
-                                              rd_data_array[reg_index] & (~reg_list[i].reg_mask));
+                                       rd_data_array[reg_index] & (~reg_list[reg_index].reg_mask));
                      val_print(ACS_PRINT_ERR, "          Masked Current PE Value : 0x%016llx ",
-                                         pe_buffer->reg_data[reg_index] & (~reg_list[i].reg_mask));
+                                 pe_buffer->reg_data[reg_index] & (~reg_list[reg_index].reg_mask));
                    }
                  reg_fail = reg_fail + 1;
              }
