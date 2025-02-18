@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -686,7 +686,7 @@ val_mpam_create_info_table(uint64_t *mpam_info_table)
 void
 val_mpam_free_info_table(void)
 {
-  pal_mem_free((void *)g_mpam_info_table);
+  pal_mem_free_aligned((void *)g_mpam_info_table);
 }
 
 /**
@@ -724,7 +724,7 @@ val_hmat_create_info_table(uint64_t *hmat_info_table)
 void
 val_hmat_free_info_table(void)
 {
-    pal_mem_free((void *)g_hmat_info_table);
+    pal_mem_free_aligned((void *)g_hmat_info_table);
 }
 
 /**
@@ -762,7 +762,7 @@ val_srat_create_info_table(uint64_t *srat_info_table)
 void
 val_srat_free_info_table(void)
 {
-    pal_mem_free((void *)g_srat_info_table);
+    pal_mem_free_aligned((void *)g_srat_info_table);
 }
 
 /**

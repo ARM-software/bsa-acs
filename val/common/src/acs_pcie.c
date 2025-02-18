@@ -715,7 +715,7 @@ val_pcie_bdf_table_ptr()
 void
 val_pcie_free_info_table()
 {
-  pal_mem_free((void *)g_pcie_info_table);
+  pal_mem_free_aligned((void *)g_pcie_info_table);
 }
 
 

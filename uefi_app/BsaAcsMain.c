@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,20 +20,18 @@
 #include  <Library/ShellCEntryLib.h>
 #include  <Library/ShellLib.h>
 #include  <Library/UefiBootServicesTableLib.h>
-#include  <Library/CacheMaintenanceLib.h>
-#include  <Protocol/LoadedImage.h>
 
 #include "val/common/include/val_interface.h"
 #include "val/bsa/include/bsa_val_interface.h"
 #include "val/bsa/include/bsa_acs_pe.h"
 #include "val/common/include/acs_pe.h"
 #include "val/common/include/acs_val.h"
+#include "val/common/include/acs_memory.h"
 
 #include "BsaAcs.h"
 
-UINT32 g_pcie_p2p;
-UINT32 g_pcie_cache_present;
-
+UINT32  g_pcie_p2p;
+UINT32  g_pcie_cache_present;
 UINT32  g_print_level;
 UINT32  g_sw_view[3] = {1, 1, 1}; //Operating System, Hypervisor, Platform Security
 UINT32  *g_skip_test_num;
@@ -84,172 +82,103 @@ STATIC VOID FlushImage (VOID)
 
 }
 
-EFI_STATUS
+UINT32
 createPeInfoTable (
 )
 {
+  UINT32 Status;
+  UINT64 *PeInfoTable;
 
-  EFI_STATUS Status;
-
-  UINT64   *PeInfoTable;
-
-/* allowing room for growth, at present each entry is 16 bytes, so we can support upto 511 PEs with 8192 bytes*/
-  Status = gBS->AllocatePool ( EfiBootServicesData,
-                               PE_INFO_TBL_SZ,
-                               (VOID **) &PeInfoTable );
-
-  if (EFI_ERROR(Status))
-  {
-    Print(L"Allocate Pool failed %x\n", Status);
-    return Status;
-  }
+  PeInfoTable = val_aligned_alloc(SIZE_4K, PE_INFO_TBL_SZ);
 
   Status = val_pe_create_info_table(PeInfoTable);
 
   return Status;
-
 }
 
-EFI_STATUS
+UINT32
 createGicInfoTable (
 )
 {
-  EFI_STATUS Status;
-  UINT64     *GicInfoTable;
+  UINT32 Status;
+  UINT64 *GicInfoTable;
 
-  Status = gBS->AllocatePool (EfiBootServicesData,
-                               GIC_INFO_TBL_SZ,
-                               (VOID **) &GicInfoTable);
-
-  if (EFI_ERROR(Status))
-  {
-    Print(L"Allocate Pool failed %x\n", Status);
-    return Status;
-  }
+  GicInfoTable = val_aligned_alloc(SIZE_4K, GIC_INFO_TBL_SZ);
 
   Status = val_gic_create_info_table(GicInfoTable);
-
-  return Status;
-
-}
-
-EFI_STATUS
-createTimerInfoTable(
-)
-{
-  UINT64   *TimerInfoTable;
-  EFI_STATUS Status;
-
-  Status = gBS->AllocatePool (EfiBootServicesData,
-                              TIMER_INFO_TBL_SZ,
-                              (VOID **) &TimerInfoTable);
-
-  if (EFI_ERROR(Status))
-  {
-    Print(L"Allocate Pool failed %x\n", Status);
-    return Status;
-  }
-  val_timer_create_info_table(TimerInfoTable);
-
-  return Status;
-}
-
-EFI_STATUS
-createWatchdogInfoTable(
-)
-{
-  UINT64   *WdInfoTable;
-  EFI_STATUS Status;
-
-  Status = gBS->AllocatePool (EfiBootServicesData,
-                              WD_INFO_TBL_SZ,
-                              (VOID **) &WdInfoTable);
-
-  if (EFI_ERROR(Status))
-  {
-    Print(L"Allocate Pool failed %x\n", Status);
-    return Status;
-  }
-  val_wd_create_info_table(WdInfoTable);
-
-  return Status;
-
-}
-
-
-EFI_STATUS
-createPcieVirtInfoTable(
-)
-{
-  UINT64   *PcieInfoTable;
-  UINT64   *IoVirtInfoTable;
-
-  EFI_STATUS Status;
-
-  Status = gBS->AllocatePool (EfiBootServicesData,
-                              PCIE_INFO_TBL_SZ,
-                              (VOID **) &PcieInfoTable);
-
-  if (EFI_ERROR(Status))
-  {
-    Print(L"Allocate Pool failed %x\n", Status);
-    return Status;
-  }
-  val_pcie_create_info_table(PcieInfoTable);
-
-  Status = gBS->AllocatePool (EfiBootServicesData,
-                              IOVIRT_INFO_TBL_SZ,
-                              (VOID **) &IoVirtInfoTable);
-
-  if (EFI_ERROR(Status))
-  {
-    Print(L"Allocate Pool failed %x\n", Status);
-    return Status;
-  }
-  val_iovirt_create_info_table(IoVirtInfoTable);
-
-  return Status;
-}
-
-EFI_STATUS
-createPeripheralInfoTable(
-)
-{
-  UINT64   *PeripheralInfoTable;
-  UINT64   *MemoryInfoTable;
-
-  EFI_STATUS Status;
-
-  Status = gBS->AllocatePool (EfiBootServicesData,
-                              PERIPHERAL_INFO_TBL_SZ,
-                              (VOID **) &PeripheralInfoTable);
-
-  if (EFI_ERROR(Status))
-  {
-    Print(L"Allocate Pool failed %x\n", Status);
-    return Status;
-  }
-  val_peripheral_create_info_table(PeripheralInfoTable);
-
-  Status = gBS->AllocatePool (EfiBootServicesData,
-                              MEM_INFO_TBL_SZ,
-                              (VOID **) &MemoryInfoTable);
-
-  if (EFI_ERROR(Status))
-  {
-    Print(L"Allocate Pool failed %x\n", Status);
-    return Status;
-  }
-
-  val_memory_create_info_table(MemoryInfoTable);
 
   return Status;
 }
 
 VOID
+createTimerInfoTable(
+)
+{
+  UINT64 *TimerInfoTable;
+
+  TimerInfoTable = val_aligned_alloc(SIZE_4K, TIMER_INFO_TBL_SZ);
+
+  val_timer_create_info_table(TimerInfoTable);
+}
+
+VOID
+createWatchdogInfoTable(
+)
+{
+  UINT64 *WdInfoTable;
+
+  WdInfoTable = val_aligned_alloc(SIZE_4K, WD_INFO_TBL_SZ);
+
+  val_wd_create_info_table(WdInfoTable);
+}
+
+
+VOID
+createPcieVirtInfoTable(
+)
+{
+  UINT64 *PcieInfoTable;
+  UINT64 *IoVirtInfoTable;
+
+  PcieInfoTable   = val_aligned_alloc(SIZE_4K, PCIE_INFO_TBL_SZ);
+
+  val_pcie_create_info_table(PcieInfoTable);
+
+  IoVirtInfoTable = val_aligned_alloc(SIZE_4K, IOVIRT_INFO_TBL_SZ);
+
+  val_iovirt_create_info_table(IoVirtInfoTable);
+}
+
+VOID
+createPeripheralInfoTable(
+)
+{
+  UINT64 *PeripheralInfoTable;
+  UINT64 *MemoryInfoTable;
+
+  PeripheralInfoTable = val_aligned_alloc(SIZE_4K, PERIPHERAL_INFO_TBL_SZ);
+
+  val_peripheral_create_info_table(PeripheralInfoTable);
+
+  MemoryInfoTable = val_aligned_alloc(SIZE_4K, MEM_INFO_TBL_SZ);
+
+  val_memory_create_info_table(MemoryInfoTable);
+}
+
+VOID
+createSmbiosInfoTable(
+)
+{
+  UINT64 *SmbiosInfoTable;
+
+  SmbiosInfoTable = val_aligned_alloc(SIZE_4K, SMBIOS_INFO_TBL_SZ);
+
+  val_smbios_create_info_table(SmbiosInfoTable);
+}
+
+VOID
 freeBsaAcsMem()
 {
-
   val_pe_free_info_table();
   val_gic_free_info_table();
   val_timer_free_info_table();
@@ -257,6 +186,7 @@ freeBsaAcsMem()
   val_pcie_free_info_table();
   val_iovirt_free_info_table();
   val_peripheral_free_info_table();
+  val_smbios_free_info_table();
   val_free_shared_mem();
 }
 
@@ -611,6 +541,7 @@ ShellAppMain (
   createWatchdogInfoTable();
   createPcieVirtInfoTable();
   createPeripheralInfoTable();
+  createSmbiosInfoTable();
 
   val_allocate_shared_mem();
 

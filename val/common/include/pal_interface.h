@@ -239,6 +239,24 @@ typedef struct {
   uint64_t  Arg7;
 } ARM_SMC_ARGS;
 
+/**
+  @brief  Instance of smbios type 4 processor info
+**/
+typedef struct {
+  uint16_t processor_family;
+  uint16_t core_count;
+} PE_SMBIOS_TYPE4_INFO;
+
+/**
+  @brief  Instance of smbios info
+**/
+typedef struct {
+  uint32_t slot_count;
+  PE_SMBIOS_TYPE4_INFO type4_info[];
+} PE_SMBIOS_PROCESSOR_INFO_TABLE;
+
+void pal_smbios_create_info_table(PE_SMBIOS_PROCESSOR_INFO_TABLE *SmbiosTable);
+
 void pal_pe_call_smc(ARM_SMC_ARGS *args, int32_t conduit);
 void pal_pe_execute_payload(ARM_SMC_ARGS *args);
 uint32_t pal_pe_install_esr(uint32_t exception_type, void (*esr)(uint64_t, void *));

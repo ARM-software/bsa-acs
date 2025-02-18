@@ -1,5 +1,5 @@
 ## @file
-#  Copyright (c) 2023-2025 Arm Limited or its affiliates. All rights reserved.
+#  Copyright (c) 2023-2025, Arm Limited or its affiliates. All rights reserved.
 #  SPDX-License-Identifier : Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,6 +44,7 @@
   ../test_pool/pe/operating_system/test_os_c012.c
   ../test_pool/pe/operating_system/test_os_c013.c
   ../test_pool/pe/operating_system/test_os_c014.c
+  ../test_pool/pe/operating_system/test_os_c016.c
   ../test_pool/pe/hypervisor/test_hyp_c001.c
   ../test_pool/pe/hypervisor/test_hyp_c002.c
   ../test_pool/pe/hypervisor/test_hyp_c003.c
@@ -172,6 +173,7 @@
   gEfiCpuArchProtocolGuid                       ## CONSUMES
   gEfiPciIoProtocolGuid                         ## CONSUMES
   gEfiLoadedImageProtocolGuid                   ## CONSUMES
+  gEfiSmbiosProtocolGuid                        ## CONSUMES
 
 [Guids]
   gEfiAcpi20TableGuid

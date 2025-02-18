@@ -307,7 +307,7 @@ val_iovirt_create_info_table(uint64_t *iovirt_info_table)
 void
 val_iovirt_free_info_table()
 {
-  pal_mem_free((void *)g_iovirt_info_table);
+  pal_mem_free_aligned((void *)g_iovirt_info_table);
 }
 
 /**
