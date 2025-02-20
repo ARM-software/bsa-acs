@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@
 #include "val/common/include/acs_gic_support.h"
 
 #define TEST_NUM   (ACS_GIC_HYP_TEST_NUM_BASE + 3)
-#define TEST_RULE  "B_PPI_02"
+#define TEST_RULE  "B_PPI_00"
 #define TEST_DESC  "Check GIC Maintenance PPI Assignment  "
 
 static uint32_t intid;
@@ -70,15 +70,7 @@ payload()
     val_set_status(index, RESULT_PENDING(TEST_NUM));
     /*Get GIC maintenance interrupt ID*/
     intid = val_pe_get_gmain_gsiv(index);
-    /*Recommended GIC maintenance interrupt ID is 25 as per SBSA*/
-    if (g_build_sbsa) {
-        if (intid != 25) {
-           val_print(ACS_PRINT_ERR,
-                     "\n       GIC Maintenance interrupt not mapped to PPI ID 25, id %d", intid);
-           val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
-           return;
-        }
-    }
+
     /*Check if interrupt is in PPI INTID range*/
     if ((intid < 16 || intid > 31) && (!val_gic_is_valid_eppi(intid))) {
         val_print(ACS_PRINT_DEBUG,
