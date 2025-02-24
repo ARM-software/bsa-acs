@@ -1,7 +1,7 @@
 /** @file
  * DRTM API
  *
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024, 2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -286,6 +286,8 @@ int64_t val_drtm_init_drtm_params(DRTM_PARAMETERS *drtm_params)
         val_print(ACS_PRINT_ERR, "\n    Failed to allocate memory for DLME region", 0);
         return ACS_STATUS_FAIL;
     }
+
+    val_memory_set((void *)dlme_base_addr, dlme_region_size, 0);
 
     drtm_params->revision                = 1;
     drtm_params->reserved                = 0;
