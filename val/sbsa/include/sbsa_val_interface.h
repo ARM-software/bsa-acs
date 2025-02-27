@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -167,6 +167,7 @@ uint32_t val_sbsa_pe_execute_tests(uint32_t level, uint32_t num_pe);
 uint32_t val_sbsa_gic_execute_tests(uint32_t level, uint32_t num_pe);
 uint32_t val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe);
 uint32_t val_sbsa_wd_execute_tests(uint32_t level, uint32_t num_pe);
+uint32_t val_sbsa_timer_execute_tests(uint32_t level, uint32_t num_pe);
 uint32_t val_sbsa_memory_execute_tests(uint32_t level, uint32_t num_pe);
 uint32_t val_sbsa_smmu_execute_tests(uint32_t level, uint32_t num_pe);
 uint32_t val_sbsa_exerciser_execute_tests(uint32_t level);
