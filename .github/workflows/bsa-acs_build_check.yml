@@ -34,7 +34,7 @@ jobs:
       - name: Apply edk2 BSA patch for ACPI target
         run: |
           cd edk2
-          git apply ShellPkg/Application/bsa-acs/patches/edk2-bsa-acpi.patch
+          git apply ShellPkg/Application/bsa-acs/patches/edk2_bsa_acpi.patch
 
       - name: Download Arm GCC cross-compiler
         run: |
@@ -135,7 +135,7 @@ jobs:
       - name: Apply edk2 sbsa patch
         run: |
           cd edk2
-          git apply ShellPkg/Application/sbsa-acs/patches/edk2-sbsa.patch
+          git apply ShellPkg/Application/sbsa-acs/patches/edk2_sbsa.patch
 
       - name: Download Arm GCC cross-compiler
         run: |
@@ -184,7 +184,7 @@ jobs:
       - name: Apply edk2 BSA patch for DT target
         run: |
           cd edk2
-          git apply ShellPkg/Application/bsa-acs/patches/edk2-bsa-dt.patch
+          git apply ShellPkg/Application/bsa-acs/patches/edk2_bsa_dt.patch
 
       - name: Download Arm GCC cross-compiler
         run: |
