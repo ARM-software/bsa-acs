@@ -1,5 +1,5 @@
 diff --git a/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c b/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
-index f0a8b9fe62..e41e0de3e0 100644
+index f0a8b9f..e41e0de 100644
 --- a/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
 +++ b/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
 @@ -90,8 +90,8 @@ UefiHiiServicesLibConstructor (
@@ -14,24 +14,24 @@ index f0a8b9fe62..e41e0de3e0 100644
    //
    // Retrieve the pointer to the optional UEFI HII Font Protocol
 diff --git a/ShellPkg/ShellPkg.dsc b/ShellPkg/ShellPkg.dsc
-index 38fde3dc71..559c2217d3 100644
+index 7e985f8..6ea22f8 100644
 --- a/ShellPkg/ShellPkg.dsc
 +++ b/ShellPkg/ShellPkg.dsc
-@@ -22,6 +22,9 @@
- !include MdePkg/MdeLibs.dsc.inc
+@@ -66,6 +66,9 @@
+   ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
  
- [LibraryClasses.common]
+   SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
 +  FdtLib|EmbeddedPkg/Library/FdtLib/FdtLib.inf
 +  BsaValLib|ShellPkg/Application/bsa-acs/val/BsaValLib.inf
 +  BsaPalLib|ShellPkg/Application/bsa-acs/pal/uefi_dt/BsaPalLib.inf
-   UefiApplicationEntryPoint|MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
-   UefiDriverEntryPoint|MdePkg/Library/UefiDriverEntryPoint/UefiDriverEntryPoint.inf
-   UefiBootServicesTableLib|MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
-@@ -87,6 +90,7 @@
-   # Build all the libraries when building this package.
-   # This helps developers test changes and how they affect the package.
-   #
+ 
+ [PcdsFixedAtBuild]
+   gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0xFF
+@@ -93,6 +96,7 @@
+   ShellPkg/Library/UefiShellDebug1CommandsLib/UefiShellDebug1CommandsLib.inf
+   ShellPkg/Library/UefiShellNetwork1CommandsLib/UefiShellNetwork1CommandsLib.inf
+   ShellPkg/Library/UefiShellNetwork2CommandsLib/UefiShellNetwork2CommandsLib.inf
 +  ShellPkg/Application/bsa-acs/uefi_app/BsaAcs.inf
-   ShellPkg/Library/UefiShellLib/UefiShellLib.inf
-   ShellPkg/Library/UefiShellAcpiViewCommandLib/UefiShellAcpiViewCommandLib.inf
-   ShellPkg/Library/UefiShellCommandLib/UefiShellCommandLib.inf
+ 
+   ShellPkg/Application/Shell/Shell.inf {
+     <PcdsFixedAtBuild>
