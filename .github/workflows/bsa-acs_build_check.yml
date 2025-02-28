@@ -118,7 +118,7 @@ jobs:
         run: |
           git clone --recursive https://github.com/tianocore/edk2
           cd edk2
-          git checkout stable202411
+          git checkout edk2-stable202411
           cd ..
           git clone https://github.com/tianocore/edk2-libc edk2/edk2-libc
 
