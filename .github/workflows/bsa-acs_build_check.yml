@@ -82,7 +82,7 @@ jobs:
       - name: Apply edk2 DRTM patch for ACPI target
         run: |
           cd edk2
-          git apply ShellPkg/Application/bsa-acs/patches/edk2-drtm.patch
+          git apply ShellPkg/Application/bsa-acs/patches/edk2_drtm.patch
 
       - name: Download Arm GCC cross-compiler
         run: |
