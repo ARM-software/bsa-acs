@@ -19,6 +19,7 @@
 #define __SBSA_ACS_GIC_H__
 
 #include "common/include/acs_gic.h"
+#include "common/sys_arch_src/gic/gic.h"
 
 uint32_t
 g001_entry(uint32_t num_pe);
@@ -26,6 +27,7 @@ uint32_t
 g002_entry(uint32_t num_pe);
 uint32_t
 g003_entry(uint32_t num_pe);
-
+uint32_t
+g004_entry(uint32_t num_pe);
 
 #endif

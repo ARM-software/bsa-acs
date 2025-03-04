@@ -97,7 +97,8 @@ typedef enum {
   GIC_INFO_RDIST_BASE,
   GIC_INFO_NUM_ITS,
   GIC_INFO_ITS_BASE,
-  GIC_INFO_NUM_MSI_FRAME
+  GIC_INFO_NUM_MSI_FRAME,
+  GIC_INFO_NUM_GICR_GICRD
 }GIC_INFO_e;
 
 uint32_t val_gic_get_info(GIC_INFO_e type);
