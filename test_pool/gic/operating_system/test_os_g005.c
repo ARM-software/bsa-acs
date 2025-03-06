@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021, 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021, 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -70,11 +70,13 @@ payload()
             val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
             return;
         }
-        /* Read out the bottom 8 bits of GICR_ISENABLER0 */
-        data = val_mmio_read(pe_rdbase + RD_FRAME_SIZE + GICR_ISENABLER) | 0xFFFF;
+        /* Read the current value of GICR_ISENABLER0 and set the lower 8 bits to 1 */
+        data = val_mmio_read(pe_rdbase + RD_FRAME_SIZE + GICR_ISENABLER) | 0xFF;
 
+        /*  writing to the bottom 8 bits of GICR_ISENABLER0 with 0xFF
+            This enables interrupts for the first 8 SGI lines in the GIC Redistributor */
         val_mmio_write(pe_rdbase + RD_FRAME_SIZE + GICR_ISENABLER, data);
-        data = val_mmio_read(pe_rdbase + RD_FRAME_SIZE + GICR_ISENABLER) | 0xFFFF;
+        data = val_mmio_read(pe_rdbase + RD_FRAME_SIZE + GICR_ISENABLER) & 0xFF;
         val_print(ACS_PRINT_DEBUG, "  data 0x%x", data);
         data = VAL_EXTRACT_BITS(data, 0, 7);
         if (data == 0xFF) {
