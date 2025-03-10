@@ -161,6 +161,7 @@ typedef enum {
   PMU_NODE_SEC_INST,   /* Secondary instance          */
   PMU_NODE_COUNT,      /* PMU Node count              */
   PMU_NODE_DP_EXTN,    /* Dual page extension support */
+  PMU_NODE_CS_COM,     /* Node is Coresight arch complaint */
 } PMU_INFO_e;
 
 uint32_t val_sbsa_pe_execute_tests(uint32_t level, uint32_t num_pe);

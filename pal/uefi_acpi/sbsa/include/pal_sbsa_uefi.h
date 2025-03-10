@@ -38,6 +38,7 @@ typedef struct {
     UINT64 base0;               /* Base address of Page 0 of the PMU*/
     UINT64 base1;               /* Base address of Page 1 of the PMU,
                                    valid only if dual_page_extension is 1*/
+    UINT32 coresight_compliant; /* node is CS arch complaint or not */
 } PMU_INFO_BLOCK;
 
 typedef struct {
