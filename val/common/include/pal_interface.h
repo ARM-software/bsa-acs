@@ -794,6 +794,7 @@ void    *pal_mem_alloc_pages(uint32_t num_pages);
 void     pal_mem_free_pages(void *page_base, uint32_t num_pages);
 void    *pal_aligned_alloc(uint32_t alignment, uint32_t size);
 void     pal_mem_free_aligned(void *buffer);
+uint32_t pal_mem_set_wb_executable(void *addr, uint32_t size);
 
 uint32_t pal_mmio_read(uint64_t addr);
 uint64_t pal_mmio_read64(uint64_t addr);
