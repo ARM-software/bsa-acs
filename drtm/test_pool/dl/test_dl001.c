@@ -76,6 +76,7 @@ payload(uint32_t num_pe)
   if (status != DRTM_ACS_INVALID_PARAMETERS) {
     val_print(ACS_PRINT_ERR, "\n       Incorrect Status. Expected = -2 Found = %d", status);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
+    drtm_params->dlme_region_address = drtm_params->dlme_region_address - 0x4;
     goto free_dlme_region;
   }
   drtm_params->dlme_region_address = drtm_params->dlme_region_address - 0x4;
@@ -87,6 +88,7 @@ payload(uint32_t num_pe)
   if (status != DRTM_ACS_INVALID_PARAMETERS) {
     val_print(ACS_PRINT_ERR, "\n       Incorrect Status. Expected = -2 Found = %d", status);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 5));
+    drtm_params->dlme_image_start = drtm_params->dlme_image_start - 0x4;
     goto free_dlme_region;
   }
   drtm_params->dlme_image_start = drtm_params->dlme_image_start - 0x4;
@@ -98,6 +100,7 @@ payload(uint32_t num_pe)
   if (status != DRTM_ACS_INVALID_PARAMETERS) {
     val_print(ACS_PRINT_ERR, "\n       Incorrect Status. Expected = -2 Found = %d", status);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 6));
+    drtm_params->dlme_data_offset = drtm_params->dlme_data_offset - 0x4;
     goto free_dlme_region;
   }
   drtm_params->dlme_data_offset = drtm_params->dlme_data_offset - 0x4;
@@ -113,6 +116,9 @@ payload(uint32_t num_pe)
   if (status != DRTM_ACS_INVALID_PARAMETERS) {
     val_print(ACS_PRINT_ERR, "\n       Incorrect Status. Expected = -2 Found = %d", status);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 7));
+    temp = drtm_params->dlme_image_start;
+    drtm_params->dlme_image_start = drtm_params->dlme_data_offset;
+    drtm_params->dlme_data_offset = temp;
     goto free_dlme_region;
   }
 
