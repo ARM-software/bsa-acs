@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2019, 2021-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2019, 2021-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@
 
 #define TEST_NUM   (ACS_PER_TEST_NUM_BASE + 6)
 #define TEST_RULE_BSA  "B_PER_05"
-#define TEST_RULE_SBSA  "S_L3PER_01"
+#define TEST_RULE_SBSA  "S_L3PR_01"
 #define TEST_DESC  "16550 compatible UART                 "
 
 static
