@@ -357,6 +357,22 @@ val_memory_free_aligned(void *addr)
 }
 
 /**
+  @brief  Sets memory page with WB executable.
+
+  @param  addr   Specifies the base address.
+  @param  Size   Requested size.
+
+  @return Pointer to the allocated memory with requested alignment.
+**/
+uint32_t
+val_memory_set_wb_executable(void *addr, uint32_t size)
+{
+
+  return pal_mem_set_wb_executable(addr, size);
+
+}
+
+/**
  * @brief Checks if uefi memory map has 52 bit addr
  * @param void
  * @return 1 52 bit addr present, else 0

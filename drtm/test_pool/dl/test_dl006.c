@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, 2025, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -157,7 +157,6 @@ payload(uint32_t num_pe)
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
   int64_t  status;
   uint64_t drtm_params_size = DRTM_SIZE_4K;
-  uint64_t dlme_image_addr;
   int32_t  event_log_size;
   int32_t  event_head_size;
   int32_t  event2_size = 0;
@@ -187,10 +186,6 @@ payload(uint32_t num_pe)
     val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
     goto free_drtm_params;
   }
-
-  /* DLME Image address is sum of region start and DLME image offset */
-  dlme_image_addr = drtm_params->dlme_region_address + drtm_params->dlme_image_start;
-  val_memcpy((void *)dlme_image_addr, (void *)g_drtm_acs_dlme, g_drtm_acs_dlme_size);
 
  /* Invoke DRTM Dynamic Launch, This will return only in case of error */
   status = val_drtm_dynamic_launch(drtm_params);
