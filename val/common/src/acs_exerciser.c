@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,7 @@
 #include "common/include/acs_pcie.h"
 #include "common/include/acs_smmu.h"
 #include "common/include/acs_iovirt.h"
+#include "common/include/acs_memory.h"
 
 EXERCISER_INFO_TABLE g_exerciser_info_table;
 
@@ -103,8 +104,12 @@ uint32_t val_exerciser_get_info(EXERCISER_INFO_TYPE type)
 uint32_t val_exerciser_set_param(EXERCISER_PARAM_TYPE type, uint64_t value1, uint64_t value2,
                                  uint32_t instance)
 {
-    return pal_exerciser_set_param(type, value1, value2,
+    uint32_t status;
+
+    status = pal_exerciser_set_param(type, value1, value2,
                                    g_exerciser_info_table.e_info[instance].bdf);
+    val_mem_issue_dsb();
+    return status;
 }
 
 /**
@@ -190,7 +195,11 @@ uint32_t val_exerciser_init(uint32_t instance)
 **/
 uint32_t val_exerciser_ops(EXERCISER_OPS ops, uint64_t param, uint32_t instance)
 {
-    return pal_exerciser_ops(ops, param, g_exerciser_info_table.e_info[instance].bdf);
+    uint32_t status;
+
+    status = pal_exerciser_ops(ops, param, g_exerciser_info_table.e_info[instance].bdf);
+    val_mem_issue_dsb();
+    return status;
 }
 
 /**
