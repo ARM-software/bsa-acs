@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2020, 2022-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -619,4 +619,38 @@ pal_mem_free_pages(
   )
 {
   gBS->FreePages((EFI_PHYSICAL_ADDRESS)(UINTN)PageBase, NumPages);
+}
+
+/**
+ * @brief  Changes memory attributes of memory region to executable
+ *         and returns Success/Failure.
+ *
+ * @param  addr         Address of the buffer
+ * @param  Size         size in bytes
+ * @retval if FAILURE   1
+ */
+UINT32
+pal_mem_set_wb_executable (
+  VOID * addr,
+  UINT32 Size
+  )
+{
+  EFI_CPU_ARCH_PROTOCOL     *Cpu;
+  EFI_STATUS                Status;
+
+  /* Step 1: Locate CPU Architectural Protocol */
+  Status = gBS->LocateProtocol(&gEfiCpuArchProtocolGuid, NULL, (VOID **)&Cpu);
+  if (EFI_ERROR(Status)) {
+      acs_print(ACS_PRINT_ERR, L"Could not get CPU Arch Protocol: %x\n", Status);
+      return 1;
+  }
+
+  /* Step 2: Set Memory Attributes to Ensure Execution */
+  Status = Cpu->SetMemoryAttributes(Cpu, (EFI_PHYSICAL_ADDRESS) addr, Size, EFI_MEMORY_WB);
+  if (EFI_ERROR(Status)) {
+      acs_print(ACS_PRINT_ERR, L"Could not set memory attributes: %x\n", Status);
+      return 1;
+  }
+
+  return 0;
 }

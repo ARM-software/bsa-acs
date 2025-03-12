@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -667,4 +667,19 @@ void
 pal_dump_dtb()
 {
   print(ACS_PRINT_ERR, " DTB dump not available for platform initialized with ACPI table\n", 0);
+}
+
+/**
+ * @brief  Changes requested buffer memory attributes to executable region
+ *         and returns Success/Failure.
+ *
+ * @param  addr         Address of the buffer
+ * @param  Size         size in bytes
+ * @retval if FAILURE   1
+ */
+uint32_t pal_mem_set_wb_executable(void *addr, uint32_t size)
+{
+  (void) addr;
+  (void) size;
+  return 0;
 }
