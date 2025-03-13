@@ -56,8 +56,10 @@ val_pmu_create_info_table(uint64_t *pmu_info_table)
       /* 0x23B is value for Arm Limited */
       if (reg_value == 0x23B)
           val_pmu_set_node_coresight_complaint(0x1, node_index);
-      else
-          val_pmu_set_node_coresight_complaint(0x0, node_index); 
+      else {
+          val_pmu_set_node_coresight_complaint(0x0, node_index);
+          val_print(ACS_PRINT_ERR, "\n   PMU node index %d is not CS complaint", node_index);
+      }
   }
 
   return;
