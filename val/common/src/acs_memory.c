@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -357,6 +357,22 @@ val_memory_free_aligned(void *addr)
 }
 
 /**
+  @brief  Sets memory page with WB executable.
+
+  @param  addr   Specifies the base address.
+  @param  Size   Requested size.
+
+  @return Pointer to the allocated memory with requested alignment.
+**/
+uint32_t
+val_memory_set_wb_executable(void *addr, uint32_t size)
+{
+
+  return pal_mem_set_wb_executable(addr, size);
+
+}
+
+/**
  * @brief Checks if uefi memory map has 52 bit addr
  * @param void
  * @return 1 52 bit addr present, else 0
@@ -374,4 +390,17 @@ uint32_t val_memory_region_has_52bit_addr(void)
   }
 
   return 0;
+}
+
+/**
+  @brief   This API issues a DSB Memory barrier instruction
+  @param   None
+  @return  None
+**/
+void
+val_mem_issue_dsb(void)
+{
+#ifndef TARGET_LINUX
+    AA64IssueDSB();
+#endif
 }

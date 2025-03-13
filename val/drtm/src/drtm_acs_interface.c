@@ -1,7 +1,7 @@
 /** @file
  * DRTM API
  *
- * Copyright (c) 2024, 2025, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,11 +17,13 @@
  * limitations under the License.
  **/
 
-#include "../../common/include/val_interface.h"
-#include "../../common/include/acs_common.h"
-#include "../../common/include/pal_interface.h"
-#include "../../common/include/acs_std_smc.h"
-#include "val/common/include/acs_memory.h"
+#include "common/include/val_interface.h"
+#include "common/include/acs_common.h"
+#include "common/include/acs_val.h"
+#include "common/include/acs_pe.h"
+#include "common/include/pal_interface.h"
+#include "common/include/acs_std_smc.h"
+#include "common/include/acs_memory.h"
 
 #include "../include/drtm_val_interface.h"
 #include "../include/drtm_pal_interface.h"
@@ -39,14 +41,55 @@ DRTM_ACS_DL_RESULT      *g_drtm_acs_dl_result;
  * This will be used to store x0 & x1 in DLME Image
 */
 uint32_t                g_drtm_acs_dlme[] = {
-    0x58000389,  // ldr x9,  =g_drtm_acs_dl_result
+    0x58000489,  // ldr x9,  =g_drtm_acs_dl_result
     0xF9000120,  // str x0,  [x9]
     0xF9000521,  // str x1,  [x9, #8]
-    0x58000369,  // ldr x9,  =g_drtm_acs_dl_saved_state
+    0x58000469,  // ldr x9,  =g_drtm_acs_dl_saved_state
+    0xD50C871F,  // tlbi alle2
+    0xD5033B9F,  // dsb ish
+    0xD5033FDF,  // isb
     0xD53C1000,  // mrs x0, sctlr_el2
     0xB2400000,  // orr x0, x0, 0x1
-    0xB2400000,  // orr x0, x0, 0x1
+    0xB27E0000,  // orr x0, x0, 0x4
+    0xB2740000,  // orr x0, x0, 0x1000
     0xD51C1000,  // msr sctlr_el2, x0
+    0xD5033FDF,  // isb
+    0xF9400133,  // ldr x19, [x9]
+    0xF9400534,  // ldr x20, [x9, #8]
+    0xF9400935,  // ldr x21, [x9, #16]
+    0xF9400D36,  // ldr x22, [x9, #24]
+    0xF9401137,  // ldr x23, [x9, #32]
+    0xF9401538,  // ldr x24, [x9, #40]
+    0xF9401939,  // ldr x25, [x9, #48]
+    0xF9401D3A,  // ldr x26, [x9, #56]
+    0xF940213B,  // ldr x27, [x9, #64]
+    0xF940253C,  // ldr x28, [x9, #72]
+    0xF940293D,  // ldr x29, [x9, #80]
+    0xF9402D3E,  // ldr x30, [x9, #88]
+    0xF9403520,  // ldr x0,  [x9, #104]
+    0xD5184100,  // msr sp_el0,  x0
+    0xF9403920,  // ldr x0,  [x9, #112]
+    0xD51C1000,  // msr sctlr_el2,  x0
+    0xD5033F9F,  // dsb sy
+    0xD5033FDF,  // isb
+    0xF9403129,  // ldr x9,  [x9, #96]
+    0x9100013F,  // mov sp,  x9
+    0xAA1F03E0,  // mov x0,  xzr
+    0xD5033F9F,  // dsb sy
+    0xD65F03C0,  // ret
+    0xFFFFFFFF,  // lower 32 bits of &g_drtm_acs_dl_result
+    0xFFFFFFFF,  // upper 32 bits of &g_drtm_acs_dl_result
+    0xFFFFFFFF,  // lower 32 bits of &g_drtm_acs_dl_saved_state
+    0xFFFFFFFF   // upper 32 bits of &g_drtm_acs_dl_saved_state
+};
+uint64_t g_drtm_acs_dlme_size = sizeof(g_drtm_acs_dlme);
+
+//MMU Off
+uint32_t                g_drtm_acs_dlme_mmu_off[] = {
+    0x58000349,  // ldr x9,  =g_drtm_acs_dl_result
+    0xF9000120,  // str x0,  [x9]
+    0xF9000521,  // str x1,  [x9, #8]
+    0x58000329,  // ldr x9,  =g_drtm_acs_dl_saved_state
     0xF9400133,  // ldr x19, [x9]
     0xF9400534,  // ldr x20, [x9, #8]
     0xF9400935,  // ldr x21, [x9, #16]
@@ -66,13 +109,16 @@ uint32_t                g_drtm_acs_dlme[] = {
     0xF9403129,  // ldr x9,  [x9, #96]
     0x9100013F,  // mov sp,  x9
     0xAA1F03E0,  // mov x0,  xzr
+    0xD5033F9F,  // dsb sy
+    0xD5033FDF,  // isb
     0xD65F03C0,  // ret
     0xFFFFFFFF,  // lower 32 bits of &g_drtm_acs_dl_result
     0xFFFFFFFF,  // upper 32 bits of &g_drtm_acs_dl_result
     0xFFFFFFFF,  // lower 32 bits of &g_drtm_acs_dl_saved_state
     0xFFFFFFFF   // upper 32 bits of &g_drtm_acs_dl_saved_state
 };
-uint64_t g_drtm_acs_dlme_size = sizeof(g_drtm_acs_dlme);
+
+uint64_t g_drtm_acs_dlme_mmu_off_size = sizeof(g_drtm_acs_dlme_mmu_off);
 
 int64_t val_invoke_drtm_fn(unsigned long function_id, unsigned long arg1,
               unsigned long arg2, unsigned long arg3,
@@ -263,14 +309,21 @@ int64_t val_drtm_init_drtm_params(DRTM_PARAMETERS *drtm_params)
     int64_t  status = ACS_STATUS_PASS;
     uint64_t dlme_data_region_size;
     uint64_t dlme_region_size;
-    uint64_t dlme_image_size = ROUND_UP_TO_4K(g_drtm_acs_dlme_size);
+    uint64_t dlme_image_size;
     uint64_t free_space_1_size = DRTM_SIZE_4K;
     uint64_t free_space_2_size = DRTM_SIZE_4K;
     uint64_t dlme_base_addr;
+    uint64_t dlme_image_addr;
+    uint64_t mmu_on = (val_pe_reg_read(SCTLR_EL2) & 0x1);
+    uint32_t last_index;
 
     /*Status grater than zero indicates availability of feature bits in return value*/
     dlme_data_region_size =
         DRTM_SIZE_4K * VAL_EXTRACT_BITS(g_drtm_features.min_memory_req.value, 0, 31);
+
+    /* Assign size based on MMU on/off */
+    dlme_image_size = (mmu_on) ? ROUND_UP_TO_4K(g_drtm_acs_dlme_size)
+                               : ROUND_UP_TO_4K(g_drtm_acs_dlme_mmu_off_size);
 
     /* Compile DRTM_PARAMETERS for Dynamic Launch */
 
@@ -284,6 +337,13 @@ int64_t val_drtm_init_drtm_params(DRTM_PARAMETERS *drtm_params)
     dlme_base_addr = (uint64_t)val_aligned_alloc(DRTM_SIZE_4K, dlme_region_size);
     if (!dlme_base_addr) {
         val_print(ACS_PRINT_ERR, "\n    Failed to allocate memory for DLME region", 0);
+        return ACS_STATUS_FAIL;
+    }
+
+    status = val_memory_set_wb_executable((void *)(dlme_base_addr + free_space_1_size),
+                                          dlme_image_size);
+    if (status) {
+        val_print(ACS_PRINT_ERR, "\n    Failed to Set executable memory for DLME Image", 0);
         return ACS_STATUS_FAIL;
     }
 
@@ -309,11 +369,34 @@ int64_t val_drtm_init_drtm_params(DRTM_PARAMETERS *drtm_params)
                             + sizeof(DRTM_ACS_DL_SAVED_STATE));
 
     /* Update the DLME Image Last Location with address of g_drtm_acs_dl* structures */
-    uint32_t last_index = g_drtm_acs_dlme_size / sizeof(uint32_t) - 1;
-    g_drtm_acs_dlme[last_index - 3] = ((uint64_t) g_drtm_acs_dl_result) & 0xFFFFFFFF;
-    g_drtm_acs_dlme[last_index - 2] = ((uint64_t) g_drtm_acs_dl_result) >> 32;
-    g_drtm_acs_dlme[last_index - 1] = ((uint64_t) g_drtm_acs_dl_saved_state) & 0xFFFFFFFF;
-    g_drtm_acs_dlme[last_index]     = ((uint64_t) g_drtm_acs_dl_saved_state) >> 32;
+    if (mmu_on) {
+      last_index = g_drtm_acs_dlme_size / sizeof(uint32_t) - 1;
+      g_drtm_acs_dlme[last_index - 3] = ((uint64_t) g_drtm_acs_dl_result) & 0xFFFFFFFF;
+      g_drtm_acs_dlme[last_index - 2] = ((uint64_t) g_drtm_acs_dl_result) >> 32;
+      g_drtm_acs_dlme[last_index - 1] = ((uint64_t) g_drtm_acs_dl_saved_state) & 0xFFFFFFFF;
+      g_drtm_acs_dlme[last_index]     = ((uint64_t) g_drtm_acs_dl_saved_state) >> 32;
+    } else {
+      last_index = g_drtm_acs_dlme_mmu_off_size / sizeof(uint32_t) - 1;
+      g_drtm_acs_dlme_mmu_off[last_index - 3] = ((uint64_t) g_drtm_acs_dl_result) & 0xFFFFFFFF;
+      g_drtm_acs_dlme_mmu_off[last_index - 2] = ((uint64_t) g_drtm_acs_dl_result) >> 32;
+      g_drtm_acs_dlme_mmu_off[last_index - 1] = ((uint64_t) g_drtm_acs_dl_saved_state) & 0xFFFFFFFF;
+      g_drtm_acs_dlme_mmu_off[last_index]     = ((uint64_t) g_drtm_acs_dl_saved_state) >> 32;
+    }
+
+    val_pe_cache_clean_invalidate_range((uint64_t)drtm_params, sizeof(DRTM_PARAMETERS));
+
+    /* DLME Image address is sum of region start and DLME image offset */
+    dlme_image_addr = drtm_params->dlme_region_address + drtm_params->dlme_image_start;
+    if (mmu_on) {
+      val_memcpy((void *)dlme_image_addr, (void *)g_drtm_acs_dlme, g_drtm_acs_dlme_size);
+      val_pe_cache_clean_invalidate_range((uint64_t)dlme_image_addr,
+                                          (uint64_t)g_drtm_acs_dlme_size);
+    } else {
+      val_memcpy((void *)dlme_image_addr, (void *)g_drtm_acs_dlme_mmu_off,
+                                          g_drtm_acs_dlme_mmu_off_size);
+      val_pe_cache_clean_invalidate_range((uint64_t)dlme_image_addr,
+                                          (uint64_t)g_drtm_acs_dlme_mmu_off_size);
+    }
 
     return status;
 }
