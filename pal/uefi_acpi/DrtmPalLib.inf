@@ -33,6 +33,7 @@
   common/src/AArch64/ArmSmc.S
   common/src/AArch64/ModuleEntryPoint.S
   common/src/AArch64/AcsTestInfra.S
+  bsa/src/pal_bsa_acpi.c
 
 [Packages]
   MdePkg/MdePkg.dec

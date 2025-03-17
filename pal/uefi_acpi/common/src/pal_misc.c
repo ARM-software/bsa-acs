@@ -622,7 +622,7 @@ pal_mem_free_pages(
 }
 
 /**
- * @brief  Changes memory attributes of memory region to executable
+ * @brief  Changes requested buffer memory attributes to executable region
  *         and returns Success/Failure.
  *
  * @param  addr         Address of the buffer

@@ -255,6 +255,7 @@ uint32_t val_gic_its_configure()
           g_gic_its_info->GicRdBase = val_its_get_curr_rdbase(g_gic_entry->base, 0);
       }
     } else if (g_gic_entry->type == ENTRY_TYPE_GICITS) {
+      g_gic_its_info->GicIts[g_gic_its_info->GicNumIts].its_index = g_gic_its_info->GicNumIts;
       g_gic_its_info->GicIts[g_gic_its_info->GicNumIts].Base = g_gic_entry->base;
       g_gic_its_info->GicIts[g_gic_its_info->GicNumIts++].ID = g_gic_entry->entry_id;
     }
@@ -312,7 +313,7 @@ uint32_t get_its_index(uint32_t its_id)
 
   for (index = 0; index < g_gic_its_info->GicNumIts; index++)
   {
-    if (its_id == g_gic_its_info->GicIts[index].ID)
+    if (its_id == g_gic_its_info->GicIts[index].its_index)
       return index;
   }
   return ACS_INVALID_INDEX;

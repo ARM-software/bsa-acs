@@ -54,6 +54,9 @@ val_drtm_execute_interface_tests(uint32_t num_pe)
       return ACS_STATUS_SKIP;
   }
 
+  val_print(ACS_PRINT_INFO, "  Initializing ITS\n", 0);
+  val_gic_its_configure();
+
   status = ACS_STATUS_PASS;
 
   val_print_test_start("INTERFACE");

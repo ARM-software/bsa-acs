@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,6 +44,8 @@ payload(uint32_t num_pe)
     return;
   }
 
+  gicr_ctrl_value = val_mmio_read(pe_rdbase + ARM_GICR_CTLR);
+  val_mmio_write(pe_rdbase + ARM_GICR_CTLR, gicr_ctrl_value & 0x0);
   gicr_ctrl_value = val_mmio_read(pe_rdbase + ARM_GICR_CTLR);
 
   /* Check that LPI Support is disabled*/

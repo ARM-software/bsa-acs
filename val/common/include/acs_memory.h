@@ -37,8 +37,9 @@ void val_memory_free_pages(void *page_base, uint32_t num_pages);
 void *val_aligned_alloc(uint32_t alignment, uint32_t size);
 void val_memory_free_aligned(void *addr);
 uint32_t val_memory_region_has_52bit_addr(void);
-uint32_t val_memory_set_wb_executable(void *addr, uint32_t size);
 
 void AA64IssueDSB(void);
 void val_mem_issue_dsb(void);
+uint32_t val_memory_set_wb_executable(void *addr, uint32_t size);
+
 #endif // __ACS_PERIPHERAL_H__

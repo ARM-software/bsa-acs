@@ -322,6 +322,7 @@ typedef struct {
 }GIC_INFO_TABLE;
 
 typedef struct {
+ uint32_t     its_index;
  uint32_t     ID;
  uint64_t     Base;
  uint64_t     CommandQBase;
