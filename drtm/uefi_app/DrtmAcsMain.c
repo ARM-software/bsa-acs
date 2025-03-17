@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -103,7 +103,7 @@ HelpMsg (
   VOID
   )
 {
-  Print (L"\nUsage: Bsa.efi [-v <n>] | [-f <filename>] | [-skip <n>] | [-t <n>] | [-m <n>]\n"
+  Print (L"\nUsage: Drtm.efi [-v <n>] | [-f <filename>] | [-skip <n>] | [-t <n>] | [-m <n>]\n"
          "Options:\n"
          "-v      Verbosity of the prints\n"
          "        1 prints all, 5 prints only the errors\n"
