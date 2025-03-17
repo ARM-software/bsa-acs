@@ -58,6 +58,7 @@
   ../test_pool/dl/test_dl009.c
   ../test_pool/dl/test_dl010.c
   ../test_pool/dl/test_dl011.c
+  ../test_pool/dl/test_dl012.c
 
 [Packages]
   StdLib/StdLib.dec

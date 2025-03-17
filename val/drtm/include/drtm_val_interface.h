@@ -117,5 +117,6 @@ uint32_t dl008_entry(uint32_t num_pe);
 uint32_t dl009_entry(uint32_t num_pe);
 uint32_t dl010_entry(uint32_t num_pe);
 uint32_t dl011_entry(uint32_t num_pe);
+uint32_t dl012_entry(uint32_t num_pe);
 
 #endif /* __DRTM_VAL_INTERFACE_H */
