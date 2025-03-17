@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,6 +61,7 @@
 #define SMCCC_VERSION_GET_MAJOR(version)    ((version >> 16) & 0x7fffU)
 
 #define VAL_DRTM_RESERVED_BYTE_ZERO         0x0
+#define VAL_DRTM_PARAMETERS_REVISION        2
 
 #define DRTM_SIZE_4K                        0x1000
 #define DRTM_SIZE_64K                       0x10000
@@ -70,6 +71,33 @@
 #define DRTM_LOC_1                          1
 #define DRTM_LOC_2                          2
 #define DRTM_LOC_3                          3
+
+#define DRTM_DRTM_FEATURES_DLME_IMG_AUTH          0x0
+#define DRTM_DRTM_FEATURES_DMA_PROTECTION         0x1
+#define DRTM_DRTM_FEATURES_PCR_SCHEMA             0x2
+#define DRTM_DRTM_FEATURES_TPM_BASED_HASHING      0x3
+
+#define DRTM_DLME_IMAGE_AUTH_SUPPORT              0x1
+#define DRTM_MEMORY_PROTECTION_ALL_SUPPORT        0x0
+#define DRTM_MEMORY_PROTECTION_REGION_SUPPORT     0x10
+#define DRTM_PCR_SCHEMA_DEFAULT_SUPPORT           0x0
+#define DRTM_PCR_SCHEMA_DLME_AUTHORITIES_SUPPORT  0x10
+#define DRTM_TPM_BASED_HASHING_SUPPORT            0x1
+
+#define DRTM_LAUNCH_FEATURES_MASK_MEM_PROTECTION  0x3
+#define DRTM_LAUNCH_FEATURES_MASK_PCR_SCHEMA      0x1
+#define DRTM_LAUNCH_FEATURES_MASK_DLME_IMAGE_AUTH 0x1
+
+#define DRTM_GET_FEATURES_MASK_DLME_IMAGE_AUTH    0x1
+#define DRTM_GET_FEATURES_MASK_DMA_PROTECTION     0x7
+#define DRTM_GET_FEATURES_MASK_PCR_SCHEMA         0xF
+#define DRTM_GET_FEATURES_MASK_TPM_BASED_HASHING  0x1
+
+#define DRTM_GET_FEATURES_SHIFT_PCR_SCHEMA        33
+#define DRTM_GET_FEATURES_SHIFT_TPM_BASED_HASHING 32
+
+#define REQUEST_DLME_IMAGE_AUTH   1 << DRTM_LAUNCH_FEATURES_MASK_DLME_IMAGE_AUTH
+#define REQUEST_TPM_BASED_HASHING 1
 
 /* Event Log Defines*/
 #define EVENT_SPEC_ID_STR_LEN  15

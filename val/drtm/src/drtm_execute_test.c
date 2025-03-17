@@ -1,7 +1,7 @@
 /** @file
  * DRTM API
  *
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024, 2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -140,6 +140,7 @@ val_drtm_execute_dl_tests(uint32_t num_pe)
   status |= dl005_entry(num_pe);
   status |= dl006_entry(num_pe);
   status |= dl007_entry(num_pe);
+  status |= dl008_entry(num_pe);
 
   val_print_test_end(status, "Dynamic Launch");
 

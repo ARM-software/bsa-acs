@@ -349,7 +349,7 @@ int64_t val_drtm_init_drtm_params(DRTM_PARAMETERS *drtm_params)
 
     val_memory_set((void *)dlme_base_addr, dlme_region_size, 0);
 
-    drtm_params->revision                = 1;
+    drtm_params->revision                = VAL_DRTM_PARAMETERS_REVISION;
     drtm_params->reserved                = 0;
     drtm_params->launch_features         = 0;
     drtm_params->dlme_region_address     = (uint64_t) dlme_base_addr;
@@ -506,4 +506,36 @@ uint32_t val_drtm_create_info_table(void)
         val_drtm_features(DRTM_1_0_FN_DRTM_LOCK_TCB_HASH, &feat1, &feat2);
 
     return 0;
+}
+
+/**
+  @brief  This API is used to get DRTM features
+  @return status
+ **/
+uint64_t val_drtm_get_feature(uint64_t feature_type)
+{
+    uint64_t feature;
+
+    switch (feature_type) {
+    case DRTM_DRTM_FEATURES_DLME_IMG_AUTH:
+        feature = (g_drtm_features.dlme_image_authentication.value &
+                            DRTM_GET_FEATURES_MASK_DLME_IMAGE_AUTH);
+    break;
+    case DRTM_DRTM_FEATURES_DMA_PROTECTION:
+        feature = (g_drtm_features.dma_prot_features.value & DRTM_GET_FEATURES_MASK_DMA_PROTECTION);
+    break;
+    case DRTM_DRTM_FEATURES_PCR_SCHEMA:
+        feature = ((g_drtm_features.tpm_features.value >> DRTM_GET_FEATURES_SHIFT_PCR_SCHEMA) &
+                            DRTM_GET_FEATURES_MASK_PCR_SCHEMA);
+    break;
+    case DRTM_DRTM_FEATURES_TPM_BASED_HASHING:
+        feature = ((g_drtm_features.tpm_features.value >>
+            DRTM_GET_FEATURES_SHIFT_TPM_BASED_HASHING) & DRTM_GET_FEATURES_MASK_TPM_BASED_HASHING);
+    break;
+    default:
+        feature = ACS_STATUS_ERR;
+    break;
+    }
+
+    return feature;
 }
