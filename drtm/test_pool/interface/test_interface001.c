@@ -27,7 +27,7 @@ void
 payload(uint32_t num_pe)
 {
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
-  uint32_t major;
+  uint32_t major, minor;
   uint32_t status = g_drtm_features.version.status;
 
   if (status >> 31) {
@@ -38,8 +38,15 @@ payload(uint32_t num_pe)
 
   major = DRTM_VERSION_GET_MAJOR(g_drtm_features.version.value);
   if (major != 1) {
-    val_print(ACS_PRINT_ERR, "\n       Version not as expected, Current version =%d", major);
+    val_print(ACS_PRINT_ERR, "\n       Major Version not as expected, Current version =%d", major);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+    return;
+  }
+
+  minor = DRTM_VERSION_GET_MINOR(g_drtm_features.version.value);
+  if (minor != 1) {
+    val_print(ACS_PRINT_ERR, "\n       Minor Version not as expected, Current version =%d", minor);
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
     return;
   }
 

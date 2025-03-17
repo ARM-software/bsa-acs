@@ -55,6 +55,7 @@
 #define DRTM_1_0_DRTM_FEATURES_TCB_HASHES   DRTM_1_0_FEAT_ID(5u)
 
 #define DRTM_VERSION_GET_MAJOR(version)     ((version >> 16) & 0x7fffU)
+#define DRTM_VERSION_GET_MINOR(version)     ((version) & 0x7fffU)
 #define PSCI_VERSION_GET_MAJOR(version)     ((version >> 16) & 0x7fffU)
 #define SMCCC_VERSION_GET_MAJOR(version)    ((version >> 16) & 0x7fffU)
 
