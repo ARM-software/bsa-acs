@@ -56,14 +56,14 @@ payload(uint32_t num_pe)
   /* Invoke DRTM Dynamic Launch, This will return only in case of error */
   status = val_drtm_dynamic_launch(drtm_params);
   /* This will return only in fail*/
-  if (status < 0) {
+  if (status < DRTM_ACS_SUCCESS) {
     val_print(ACS_PRINT_ERR, "\n       DRTM Dynamic Launch failed", 0);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
     goto free_dlme_region;
   }
 
   status = val_drtm_unprotect_memory();
-  if (status < 0) {
+  if (status < DRTM_ACS_SUCCESS) {
     val_print(ACS_PRINT_ERR, "\n       DRTM Unprotect Memory failed err=%d", status);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
     goto free_dlme_region;

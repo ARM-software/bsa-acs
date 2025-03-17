@@ -62,13 +62,20 @@ payload(uint32_t num_pe)
   /* R312090 : Request DLME Authorities Schema without requesting
    * DLME image authentication */
   drtm_params->launch_features = drtm_params->launch_features |
-            (DRTM_PCR_SCHEMA_DLME_AUTHORITIES_SUPPORT << DRTM_LAUNCH_FEATURES_MASK_PCR_SCHEMA);
+            (DRTM_LAUNCH_FEAT_DLME_AUTH_SUPP << DRTM_LAUNCH_FEATURES_MASK_PCR_SCHEMA);
 
   status = val_drtm_dynamic_launch(drtm_params);
   /* This will return invalid parameter */
   if (status != DRTM_ACS_INVALID_PARAMETERS) {
     val_print(ACS_PRINT_ERR, "\n       Incorrect Status. Expected = -2 Found = %d", status);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
+    if (status == DRTM_ACS_SUCCESS) {
+      status = val_drtm_unprotect_memory();
+      if (status < DRTM_ACS_SUCCESS) {
+        val_print(ACS_PRINT_ERR, "\n       DRTM Unprotect Memory failed err=%d", status);
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
+      }
+    }
     goto free_dlme_region;
   }
 

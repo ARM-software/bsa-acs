@@ -66,19 +66,26 @@ payload(uint32_t num_pe)
    * otherwise  vise versa */
   drtm_feature = val_drtm_get_feature(DRTM_DRTM_FEATURES_DMA_PROTECTION);
 
-  if (drtm_feature == DRTM_MEMORY_PROTECTION_ALL_SUPPORT) {
+  if (drtm_feature == DRTM_DMA_FEATURES_DMA_PROTECTION_ALL) {
     drtm_params->launch_features = drtm_params->launch_features |
-            (DRTM_MEMORY_PROTECTION_REGION_SUPPORT << DRTM_LAUNCH_FEATURES_MASK_MEM_PROTECTION);
+            (DRTM_LAUNCH_FEAT_MEM_PROT_REGION_SUPP << DRTM_LAUNCH_FEATURES_MASK_MEM_PROTECTION);
   } else {
     drtm_params->launch_features = drtm_params->launch_features |
-            (DRTM_MEMORY_PROTECTION_ALL_SUPPORT << DRTM_LAUNCH_FEATURES_MASK_MEM_PROTECTION);
+            (DRTM_LAUNCH_FEAT_MEM_PROT_ALL_SUPP << DRTM_LAUNCH_FEATURES_MASK_MEM_PROTECTION);
   }
 
   status = val_drtm_dynamic_launch(drtm_params);
   /* This will return invalid parameter */
   if (status != DRTM_ACS_INVALID_PARAMETERS) {
     val_print(ACS_PRINT_ERR, "\n       Incorrect Status. Expected = -2 Found = %d", status);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 8));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
+    if (status == DRTM_ACS_SUCCESS) {
+      status = val_drtm_unprotect_memory();
+      if (status < DRTM_ACS_SUCCESS) {
+        val_print(ACS_PRINT_ERR, "\n       DRTM Unprotect Memory failed err=%d", status);
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
+      }
+    }
     goto free_dlme_region;
   }
 
@@ -90,19 +97,26 @@ payload(uint32_t num_pe)
    * otherwise  vise versa */
   drtm_feature = val_drtm_get_feature(DRTM_DRTM_FEATURES_PCR_SCHEMA);
 
-  if (drtm_feature == DRTM_PCR_SCHEMA_DEFAULT_SUPPORT) {
+  if (drtm_feature == DRTM_TPM_FEAT_PCR_SCHEMA_DEF_SUPP) {
     drtm_params->launch_features = drtm_params->launch_features |
-            (DRTM_PCR_SCHEMA_DLME_AUTHORITIES_SUPPORT << DRTM_LAUNCH_FEATURES_MASK_PCR_SCHEMA);
+            (DRTM_LAUNCH_FEAT_DLME_AUTH_SUPP << DRTM_LAUNCH_FEATURES_MASK_PCR_SCHEMA);
   } else {
     drtm_params->launch_features = drtm_params->launch_features |
-            (DRTM_PCR_SCHEMA_DEFAULT_SUPPORT << DRTM_LAUNCH_FEATURES_MASK_PCR_SCHEMA);
+            (DRTM_LAUNCH_FEAT_PCR_SCHEMA_DEF_SUPP << DRTM_LAUNCH_FEATURES_MASK_PCR_SCHEMA);
   }
 
   status = val_drtm_dynamic_launch(drtm_params);
   /* This will return invalid parameter */
   if (status != DRTM_ACS_INVALID_PARAMETERS) {
     val_print(ACS_PRINT_ERR, "\n       Incorrect Status. Expected = -2 Found = %d", status);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 9));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 5));
+    if (status == DRTM_ACS_SUCCESS) {
+      status = val_drtm_unprotect_memory();
+      if (status < DRTM_ACS_SUCCESS) {
+        val_print(ACS_PRINT_ERR, "\n       DRTM Unprotect Memory failed err=%d", status);
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 6));
+      }
+    }
     goto free_dlme_region;
   }
 
@@ -112,14 +126,21 @@ payload(uint32_t num_pe)
    * not supported by DRTM implementation */
   drtm_feature = val_drtm_get_feature(DRTM_DRTM_FEATURES_DLME_IMG_AUTH);
 
-  if (drtm_feature != DRTM_DLME_IMAGE_AUTH_SUPPORT) {
+  if (drtm_feature != DRTM_DLME_IMG_FEAT_DLME_IMG_AUTH_SUPP) {
     drtm_params->launch_features = REQUEST_DLME_IMAGE_AUTH;
 
     status = val_drtm_dynamic_launch(drtm_params);
     /* This will return invalid parameter */
     if (status != DRTM_ACS_INVALID_PARAMETERS) {
       val_print(ACS_PRINT_ERR, "\n       Incorrect Status. Expected = -2 Found = %d", status);
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 10));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 7));
+      if (status == DRTM_ACS_SUCCESS) {
+        status = val_drtm_unprotect_memory();
+        if (status < DRTM_ACS_SUCCESS) {
+          val_print(ACS_PRINT_ERR, "\n       DRTM Unprotect Memory failed err=%d", status);
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 8));
+        }
+      }
       goto free_dlme_region;
     }
 
@@ -141,7 +162,14 @@ payload(uint32_t num_pe)
     /* This will return invalid parameter */
     if (status != DRTM_ACS_INVALID_PARAMETERS) {
       val_print(ACS_PRINT_ERR, "\n       Incorrect Status. Expected = -2 Found = %d", status);
-      val_set_status(index, RESULT_FAIL(TEST_NUM, 11));
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 9));
+      if (status == DRTM_ACS_SUCCESS) {
+        status = val_drtm_unprotect_memory();
+        if (status < DRTM_ACS_SUCCESS) {
+          val_print(ACS_PRINT_ERR, "\n       DRTM Unprotect Memory failed err=%d", status);
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 10));
+        }
+      }
       goto free_dlme_region;
     }
 

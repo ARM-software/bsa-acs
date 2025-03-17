@@ -95,6 +95,13 @@ payload(uint32_t num_pe)
                             DRTM_ACS_SECONDARY_PE_NOT_OFF);
     val_print(ACS_PRINT_ERR, " Found = %d", status);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
+    if (status == DRTM_ACS_SUCCESS) {
+      status = val_drtm_unprotect_memory();
+      if (status < DRTM_ACS_SUCCESS) {
+        val_print(ACS_PRINT_ERR, "\n       DRTM Unprotect Memory failed err=%d", status);
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
+      }
+    }
     goto free_dlme_region;
   }
 
