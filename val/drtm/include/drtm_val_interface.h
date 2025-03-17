@@ -103,6 +103,7 @@ uint32_t interface011_entry(uint32_t num_pe);
 uint32_t interface012_entry(uint32_t num_pe);
 uint32_t interface013_entry(uint32_t num_pe);
 uint32_t interface014_entry(uint32_t num_pe);
+uint32_t interface015_entry(uint32_t num_pe);
 
 uint32_t dl001_entry(uint32_t num_pe);
 uint32_t dl002_entry(uint32_t num_pe);

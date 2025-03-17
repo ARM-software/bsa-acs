@@ -46,6 +46,7 @@
   ../test_pool/interface/test_interface012.c
   ../test_pool/interface/test_interface013.c
   ../test_pool/interface/test_interface014.c
+  ../test_pool/interface/test_interface015.c
   ../test_pool/dl/test_dl001.c
   ../test_pool/dl/test_dl002.c
   ../test_pool/dl/test_dl003.c

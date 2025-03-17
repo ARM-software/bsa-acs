@@ -59,7 +59,7 @@ val_drtm_execute_interface_tests(uint32_t num_pe)
   val_print_test_start("INTERFACE");
   g_curr_module = 1 << INTERFACE_MODULE;
 
-  status = interface001_entry(num_pe);
+  status  = interface001_entry(num_pe);
   status |= interface002_entry(num_pe);
   status |= interface003_entry(num_pe);
   status |= interface004_entry(num_pe);
@@ -73,6 +73,7 @@ val_drtm_execute_interface_tests(uint32_t num_pe)
   status |= interface012_entry(num_pe);
   status |= interface013_entry(num_pe);
   status |= interface014_entry(num_pe);
+  status |= interface015_entry(num_pe);
 
   val_print_test_end(status, "INTERFACE");
 

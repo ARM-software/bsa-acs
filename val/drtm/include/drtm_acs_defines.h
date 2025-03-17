@@ -48,11 +48,12 @@
 #define DRTM_1_0_FEAT_ID_BIT                ((uint64_t)0x1 << 63)
 #define DRTM_1_0_FEAT_ID(n)                 (DRTM_1_0_FEAT_ID_BIT | (n))
 
-#define DRTM_1_0_DRTM_FEATURES_TPM          DRTM_1_0_FEAT_ID(1u)
-#define DRTM_1_0_DRTM_FEATURES_MEM_REQ      DRTM_1_0_FEAT_ID(2u)
-#define DRTM_1_0_DRTM_FEATURES_DMA_PROT     DRTM_1_0_FEAT_ID(3u)
-#define DRTM_1_0_DRTM_FEATURES_BOOT_PE_ID   DRTM_1_0_FEAT_ID(4u)
-#define DRTM_1_0_DRTM_FEATURES_TCB_HASHES   DRTM_1_0_FEAT_ID(5u)
+#define DRTM_1_0_DRTM_FEATURES_TPM           DRTM_1_0_FEAT_ID(1u)
+#define DRTM_1_0_DRTM_FEATURES_MEM_REQ       DRTM_1_0_FEAT_ID(2u)
+#define DRTM_1_0_DRTM_FEATURES_DMA_PROT      DRTM_1_0_FEAT_ID(3u)
+#define DRTM_1_0_DRTM_FEATURES_BOOT_PE_ID    DRTM_1_0_FEAT_ID(4u)
+#define DRTM_1_0_DRTM_FEATURES_TCB_HASHES    DRTM_1_0_FEAT_ID(5u)
+#define DRTM_1_0_DRTM_FEATURES_DLME_IMG_AUTH DRTM_1_0_FEAT_ID(6u)
 
 #define DRTM_VERSION_GET_MAJOR(version)     ((version >> 16) & 0x7fffU)
 #define DRTM_VERSION_GET_MINOR(version)     ((version) & 0x7fffU)
@@ -102,6 +103,7 @@ typedef struct {
     DRTM_ACS_FEAT_VALUE64 dma_prot_features;
     DRTM_ACS_FEAT_VALUE64 boot_pe_aff;
     DRTM_ACS_FEAT_VALUE64 tcb_hash_features;
+    DRTM_ACS_FEAT_VALUE64 dlme_image_authentication;
     /* DRTM supported functions */
     int64_t               dynamic_launch;
     int64_t               unprotect_memory;

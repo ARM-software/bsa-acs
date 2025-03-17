@@ -482,6 +482,13 @@ uint32_t val_drtm_create_info_table(void)
         g_drtm_features.tcb_hash_features.value = feat1;
     }
 
+    /* Save DLME image authentication features */
+    status = val_drtm_features(DRTM_1_0_DRTM_FEATURES_DLME_IMG_AUTH, &feat1, &feat2);
+    g_drtm_features.dlme_image_authentication.status = status;
+    if (status >= DRTM_ACS_SUCCESS) {
+        g_drtm_features.dlme_image_authentication.value = feat1;
+    }
+
     /* Save whether DRTM functions are implemented */
     g_drtm_features.dynamic_launch   =
         val_drtm_features(DRTM_1_0_FN_DRTM_DYNAMIC_LAUNCH, &feat1, &feat2);
