@@ -55,7 +55,6 @@ payload(uint32_t num_pe)
 
   DRTM_PARAMETERS *drtm_params;
   uint64_t drtm_params_size = DRTM_SIZE_4K;
-  uint64_t dlme_image_addr;
   uint32_t num_of_pe;
 
   num_of_pe = val_pe_get_num();
@@ -88,10 +87,6 @@ payload(uint32_t num_pe)
     val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
     goto free_drtm_params;
   }
-
-  /* DLME Image address is sum of region start and DLME image offset */
-  dlme_image_addr = drtm_params->dlme_region_address + drtm_params->dlme_image_start;
-  val_memcpy((void *)dlme_image_addr, (void *)g_drtm_acs_dlme, g_drtm_acs_dlme_size);
 
   /* Invoke DRTM Dynamic Launch, This will return only in case of error */
 

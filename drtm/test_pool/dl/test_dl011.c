@@ -39,7 +39,6 @@ payload(uint32_t num_pe)
 
   DRTM_PARAMETERS *drtm_params;
   uint64_t drtm_params_size = DRTM_SIZE_4K;
-  uint64_t dlme_image_addr;
   uint32_t dma_protection_support, max_mem_regions;
   DRTM_MEMORY_REGION_DESCRIPTOR_TABLE *mem_desc_table;
   DRTM_MEMORY_REGION *mem_region1, *mem_region2, *region_address;
@@ -78,10 +77,6 @@ payload(uint32_t num_pe)
     val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
     goto free_drtm_params;
   }
-
-  /* DLME Image address is sum of region start and DLME image offset */
-  dlme_image_addr = drtm_params->dlme_region_address + drtm_params->dlme_image_start;
-  val_memcpy((void *)dlme_image_addr, (void *)g_drtm_acs_dlme, g_drtm_acs_dlme_size);
 
   /* Size of MEM Descriptor Header + Size for two Memeory Regions */
   mem_desc_table_size = sizeof (DRTM_MEMORY_REGION_HDR) + (2 * sizeof (DRTM_MEMORY_REGION));
