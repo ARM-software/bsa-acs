@@ -343,6 +343,7 @@ void pal_gic_end_of_interrupt(uint32_t int_id);
 uint32_t pal_gic_request_irq(unsigned int irq_num, unsigned int mapped_irq_num, void *isr);
 void pal_gic_free_irq(unsigned int irq_num, unsigned int mapped_irq_num);
 uint32_t pal_target_is_bm(void);
+uint32_t pal_get_num_nongic_ctrl(void);
 
 /** Timer tests related definitions **/
 

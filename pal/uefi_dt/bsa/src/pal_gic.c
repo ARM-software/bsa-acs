@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021, 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021, 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -689,3 +689,16 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
   /* Mark end of table */
   GicEntry->type = 0xFF;
 }
+
+/**
+  @brief   This API returns the count of Non Gic Interrupt Controller
+           1. Caller       -  Val Suite
+           2. Prerequisite -  pal_gic_create_info_table
+  @return  Count of Non Gic Interrupt Controller
+**/
+UINT32 pal_get_num_nongic_ctrl(VOID)
+{
+    /* Not Implemented For BSA */
+    return 0;
+}
+

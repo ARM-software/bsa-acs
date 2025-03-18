@@ -126,6 +126,18 @@ val_get_gicd_base(void)
 }
 
 /**
+  @brief   This API returns the count of Non Gic Interrupt Controller
+           1. Caller       -  Test Suite
+           2. Prerequisite -  val_gic_create_info_table
+  @return  Count of Non Gic Interrupt Controller
+**/
+uint32_t val_get_num_nongic_ctrl(void)
+{
+    return pal_get_num_nongic_ctrl();
+}
+
+
+/**
   @brief   This API returns the base address of the GIC Redistributor for a PE
            1. Caller       -  Test Suite
            2. Prerequisite -  val_gic_create_info_table

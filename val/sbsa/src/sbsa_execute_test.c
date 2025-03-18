@@ -174,8 +174,10 @@ val_sbsa_gic_execute_tests(uint32_t level, uint32_t num_pe)
       status |= g003_entry(num_pe);
   }
 
-  if (((level > 4) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 5))
+  if (((level > 4) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 5)) {
       status |= g002_entry(num_pe);
+      status |= g005_entry(num_pe);
+  }
 
   if (((level > 7) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8))
       status |= g004_entry(num_pe);
