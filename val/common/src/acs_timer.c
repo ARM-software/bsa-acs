@@ -112,7 +112,7 @@ val_platform_timer_get_entry_index(uint64_t instance, uint32_t *block, uint32_t 
 
   *block = 0;
   *index = instance;
-  while (instance > g_timer_info_table->gt_info[*block].timer_count){
+  while (instance >= g_timer_info_table->gt_info[*block].timer_count) {
       instance = instance - g_timer_info_table->gt_info[*block].timer_count;
       *index   = instance;
       *block   = *block + 1;
