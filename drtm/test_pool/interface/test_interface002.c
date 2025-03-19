@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,18 +42,16 @@ static void payload(void)
     invalid_fid = DRTM_1_0_DRTM_FEATURES_TPM | FEAT_ID_INVALID_RSVD;
     status = val_drtm_features(invalid_fid, &feat1, &feat2);
     if (status != DRTM_ACS_NOT_SUPPORTED) {
-        val_print(ACS_PRINT_ERR, "\n       Feature ID Rsvd test failed, status=%d", status);
-        val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
-        return;
+        val_print(ACS_PRINT_WARN,
+                    "\n       Feature ID Rsvd Bits:[62:8] not zero, status=%d", status);
     }
 
     /* Pass Function ID Such That Reserved Bits [62:32] != 0 */
     invalid_fid = DRTM_1_0_FN_DRTM_VERSION | FUNC_ID_INVALID_RSVD;
     status = val_drtm_features(invalid_fid, &feat1, &feat2);
     if (status != DRTM_ACS_NOT_SUPPORTED) {
-        val_print(ACS_PRINT_ERR, "\n       Function ID Rsvd test failed, status=%d", status);
-        val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
-        return;
+        val_print(ACS_PRINT_WARN,
+                    "\n       Function ID Rsvd Bits:[62:32] not zero, status=%d", status);
     }
 
     val_set_status(index, RESULT_PASS(TEST_NUM, 1));

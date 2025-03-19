@@ -43,6 +43,8 @@
   common/src/AArch64/PeRegSysSupport.S
   common/src/AArch64/PeTestSupport.S
   common/src/AArch64/GicSupport.S
+  common/sys_arch_src/gic/its/acs_gic_its.c
+  common/sys_arch_src/gic/its/acs_gic_redistributor.c
   drtm/src/drtm_execute_test.c
   drtm/src/drtm_acs_interface.c
   drtm/src/AArch64/Drtm.S

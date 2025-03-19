@@ -18,43 +18,44 @@
 #include "val/common/include/acs_val.h"
 #include "val/drtm/include/drtm_val_interface.h"
 
-#define TEST_NUM   (ACS_DRTM_INTERFACE_TEST_NUM_BASE  +  1)
+#define TEST_NUM   (ACS_DRTM_INTERFACE_TEST_NUM_BASE  +  15)
 #define TEST_RULE  ""
-#define TEST_DESC  "Check DRTM Version                    "
+#define TEST_DESC  "DLME Img Auth invalid res bit check   "
 
 static
 void
 payload(uint32_t num_pe)
 {
-  uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
-  uint32_t major, minor;
-  uint32_t status = g_drtm_features.version.status;
+  uint32_t index  = val_pe_get_index_mpid(val_pe_get_mpid());
+  int64_t  status = g_drtm_features.dlme_image_authentication.status;
+  uint64_t features_dlme_img_auth = g_drtm_features.dlme_image_authentication.value;
 
-  if (status >> 31) {
-    val_print(ACS_PRINT_ERR, "\n       DRTM get version failed err=%d", status);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+  /*Status value less than zero are error case*/
+  if (status < DRTM_ACS_SUCCESS) {
+    val_print(ACS_PRINT_DEBUG,
+            "\n       DRTM query DLME Image Authentication feature not supported err=%d", status);
+    val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
     return;
   }
 
-  major = DRTM_VERSION_GET_MAJOR(g_drtm_features.version.value);
-  if (major != 1) {
-    val_print(ACS_PRINT_ERR, "\n       Major Version not as expected, Current version =%d", major);
+  /*Status greater than zero indicates availability of feature bits in return value*/
+  if (status > DRTM_ACS_SUCCESS) {
+    if (val_drtm_reserved_bits_check_is_zero(
+                      VAL_EXTRACT_BITS(features_dlme_img_auth, 1, 63)) != ACS_STATUS_PASS) {
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
+      return;
+    }
+  } else {
+    val_print(ACS_PRINT_ERR,
+        "\n       DLME Image Authentication feature value not available in return value", 0);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
-    return;
-  }
-
-  minor = DRTM_VERSION_GET_MINOR(g_drtm_features.version.value);
-  if (minor != 1) {
-    val_print(ACS_PRINT_ERR, "\n       Minor Version not as expected, Current version =%d", minor);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
-    return;
   }
 
   val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 }
 
 uint32_t
-interface001_entry(uint32_t num_pe)
+interface015_entry(uint32_t num_pe)
 {
 
   uint32_t status = ACS_STATUS_FAIL;

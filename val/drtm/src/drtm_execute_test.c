@@ -1,7 +1,7 @@
 /** @file
  * DRTM API
  *
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024, 2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,12 +54,15 @@ val_drtm_execute_interface_tests(uint32_t num_pe)
       return ACS_STATUS_SKIP;
   }
 
+  val_print(ACS_PRINT_INFO, "  Initializing ITS\n", 0);
+  val_gic_its_configure();
+
   status = ACS_STATUS_PASS;
 
   val_print_test_start("INTERFACE");
   g_curr_module = 1 << INTERFACE_MODULE;
 
-  status = interface001_entry(num_pe);
+  status  = interface001_entry(num_pe);
   status |= interface002_entry(num_pe);
   status |= interface003_entry(num_pe);
   status |= interface004_entry(num_pe);
@@ -73,6 +76,7 @@ val_drtm_execute_interface_tests(uint32_t num_pe)
   status |= interface012_entry(num_pe);
   status |= interface013_entry(num_pe);
   status |= interface014_entry(num_pe);
+  status |= interface015_entry(num_pe);
 
   val_print_test_end(status, "INTERFACE");
 
@@ -139,6 +143,11 @@ val_drtm_execute_dl_tests(uint32_t num_pe)
   status |= dl005_entry(num_pe);
   status |= dl006_entry(num_pe);
   status |= dl007_entry(num_pe);
+  status |= dl008_entry(num_pe);
+  status |= dl009_entry(num_pe);
+  status |= dl010_entry(num_pe);
+  status |= dl011_entry(num_pe);
+  status |= dl012_entry(num_pe);
 
   val_print_test_end(status, "Dynamic Launch");
 

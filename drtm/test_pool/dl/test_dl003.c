@@ -57,7 +57,7 @@ payload(uint32_t num_pe)
   /* Invoke DRTM Dynamic Launch, This will return only in case of error */
   status = val_drtm_dynamic_launch(drtm_params);
   /* This will return only in fail*/
-  if (status < 0) {
+  if (status < DRTM_ACS_SUCCESS) {
     val_print(ACS_PRINT_ERR, "\n       Dynamic Launch failed err=%d", status);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
     goto free_dlme_region;
@@ -87,6 +87,13 @@ payload(uint32_t num_pe)
     val_print(ACS_PRINT_ERR, "\n       Error Code Mismatch, Expected = %d", DRTM_ACS_DENIED);
     val_print(ACS_PRINT_ERR, ", Found = %d", status);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 6));
+    if (status == DRTM_ACS_SUCCESS) {
+      status = val_drtm_unprotect_memory();
+      if (status < DRTM_ACS_SUCCESS) {
+        val_print(ACS_PRINT_ERR, "\n       DRTM Unprotect Memory failed err=%d", status);
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 7));
+      }
+    }
     goto free_dlme_region;
   }
 
@@ -94,7 +101,7 @@ payload(uint32_t num_pe)
   status = val_drtm_unprotect_memory();
   if (status < DRTM_ACS_SUCCESS) {
     val_print(ACS_PRINT_ERR, "\n       Unprotect Memory failed err=%d", status);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 7));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 8));
     goto free_dlme_region;
   }
 
@@ -103,7 +110,7 @@ payload(uint32_t num_pe)
   /* This will return only in fail*/
   if (status < DRTM_ACS_SUCCESS) {
     val_print(ACS_PRINT_ERR, "\n       Dynamic Launch failed err=%d", status);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 8));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 9));
     goto free_dlme_region;
   }
 
@@ -111,7 +118,7 @@ payload(uint32_t num_pe)
   status = val_drtm_unprotect_memory();
   if (status < DRTM_ACS_SUCCESS) {
     val_print(ACS_PRINT_ERR, "\n       Unprotect Memory failed err=%d", status);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 9));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 10));
     goto free_dlme_region;
   }
 
@@ -120,7 +127,7 @@ payload(uint32_t num_pe)
                                     drtm_params->dlme_data_offset);
   if (status != ACS_STATUS_PASS) {
     val_print(ACS_PRINT_ERR, "\n       DRTM check DL result failed", 0);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 10));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 11));
     goto free_dlme_region;
   }
 

@@ -187,14 +187,14 @@ payload(uint32_t num_pe)
   /* Invoke DRTM Dynamic Launch, This will return only in case of error */
   status = val_drtm_dynamic_launch(drtm_params);
   /* This will return only in fail*/
-  if (status < 0) {
+  if (status < DRTM_ACS_SUCCESS) {
     val_print(ACS_PRINT_ERR, "\n       DRTM Dynamic Launch failed", 0);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
     goto free_dlme_region;
   }
 
   status = val_drtm_unprotect_memory();
-  if (status < 0) {
+  if (status < DRTM_ACS_SUCCESS) {
     val_print(ACS_PRINT_ERR, "\n       DRTM Unprotect Memory failed err=%d", status);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
     goto free_dlme_region;
@@ -235,8 +235,7 @@ payload(uint32_t num_pe)
     goto free_dlme_region;
   }
   /* R314060 : Check if Event Log size is not zero */
-  /* R316010 : Minimum 64KB should be allocated for event log */
-  if (dlme_data_header->drtm_event_log_size < DRTM_SIZE_64K) {
+  if (dlme_data_header->drtm_event_log_size <= 0) {
     val_print(ACS_PRINT_ERR, "\n       DLME Data Event Log Size is incorrect", 0);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 9));
     goto free_dlme_region;

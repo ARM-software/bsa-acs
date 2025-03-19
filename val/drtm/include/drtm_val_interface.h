@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -85,6 +85,7 @@ uint32_t val_drtm_get_smccc_ver(void);
 uint32_t val_drtm_create_info_table(void);
 int64_t val_drtm_check_dl_result(uint64_t dlme_base_addr, uint64_t dlme_data_offset);
 int64_t val_drtm_init_drtm_params(DRTM_PARAMETERS *drtm_params);
+uint64_t val_drtm_get_feature(uint64_t feature_type);
 
 uint32_t val_drtm_execute_interface_tests(uint32_t num_pe);
 uint32_t val_drtm_execute_dl_tests(uint32_t num_pe);
@@ -103,6 +104,7 @@ uint32_t interface011_entry(uint32_t num_pe);
 uint32_t interface012_entry(uint32_t num_pe);
 uint32_t interface013_entry(uint32_t num_pe);
 uint32_t interface014_entry(uint32_t num_pe);
+uint32_t interface015_entry(uint32_t num_pe);
 
 uint32_t dl001_entry(uint32_t num_pe);
 uint32_t dl002_entry(uint32_t num_pe);
@@ -111,5 +113,10 @@ uint32_t dl004_entry(uint32_t num_pe);
 uint32_t dl005_entry(uint32_t num_pe);
 uint32_t dl006_entry(uint32_t num_pe);
 uint32_t dl007_entry(uint32_t num_pe);
+uint32_t dl008_entry(uint32_t num_pe);
+uint32_t dl009_entry(uint32_t num_pe);
+uint32_t dl010_entry(uint32_t num_pe);
+uint32_t dl011_entry(uint32_t num_pe);
+uint32_t dl012_entry(uint32_t num_pe);
 
 #endif /* __DRTM_VAL_INTERFACE_H */

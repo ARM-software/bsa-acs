@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,16 +19,18 @@
 #include "val/common/include/acs_memory.h"
 #include "val/drtm/include/drtm_val_interface.h"
 
-#define TEST_NUM   (ACS_DRTM_DL_TEST_NUM_BASE  +  4)
-#define TEST_RULE  ""
-#define TEST_DESC  "Check DRTM Close Locality             "
+#define TEST_NUM   (ACS_DRTM_DL_TEST_NUM_BASE  +  9)
+#define TEST_RULE  "R312090"
+#define TEST_DESC  "Request DLME Schema without Image Auth"
 
 static
 void
 payload(uint32_t num_pe)
 {
 
-  /* This test will verify the DRTM Close Locality */
+  /* This test will verify the DRTM Dynamic Launch
+   * Input parameter will be 64 bit address of DRTM Parameters
+   * */
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
   int64_t  status;
 
@@ -50,51 +52,29 @@ payload(uint32_t num_pe)
     goto free_drtm_params;
   }
 
- /* Invoke DRTM Dynamic Launch, This will return only in case of error */
+  /* Invoke DRTM Dynamic Launch, This will return only in case of error */
+
+  /* R312090 : Request DLME Authorities Schema without requesting
+   * DLME image authentication */
+  drtm_params->launch_features = drtm_params->launch_features |
+            (DRTM_LAUNCH_FEAT_DLME_AUTH_SUPP << DRTM_LAUNCH_FEATURES_MASK_PCR_SCHEMA);
+
   status = val_drtm_dynamic_launch(drtm_params);
-  /* This will return only in fail*/
-  if (status < DRTM_ACS_SUCCESS) {
-    val_print(ACS_PRINT_ERR, "\n       DRTM Dynamic Launch failed err=%d", status);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
-    goto free_dlme_region;
-  }
-
-  status = val_drtm_unprotect_memory();
-  if (status < DRTM_ACS_SUCCESS) {
-    val_print(ACS_PRINT_ERR, "\n       DRTM Unprotect Memory failed err=%d", status);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
-    goto free_dlme_region;
-  }
-
-  /* Part 1 : Check Close Locality for Locality 1, Should Result INVALID Parameters */
-  status = val_drtm_close_locality(DRTM_LOC_1);
+  /* This will return invalid parameter */
   if (status != DRTM_ACS_INVALID_PARAMETERS) {
-    val_print(ACS_PRINT_ERR, "\n       Unexpected Status for close locality %d", status);
-    val_print(ACS_PRINT_ERR, " Expected %d,", DRTM_ACS_INVALID_PARAMETERS);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 5));
+    val_print(ACS_PRINT_ERR, "\n       Incorrect Status. Expected = -2 Found = %d", status);
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
+    if (status == DRTM_ACS_SUCCESS) {
+      status = val_drtm_unprotect_memory();
+      if (status < DRTM_ACS_SUCCESS) {
+        val_print(ACS_PRINT_ERR, "\n       DRTM Unprotect Memory failed err=%d", status);
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
+      }
+    }
     goto free_dlme_region;
   }
 
-  /* Part 2 : Check Close Locality for Locality 2, Should Result Success
-   * As, Locality 2 is used by the DLME to make any needed measurements.
-   * After the DLME has completed its measurements. */
-  status = val_drtm_close_locality(DRTM_LOC_2);
-  if (status != DRTM_ACS_SUCCESS) {
-    val_print(ACS_PRINT_ERR, "\n       DRTM Close Locality 2 failed err=%d", status);
-    val_print(ACS_PRINT_ERR, " Expected %d,", DRTM_ACS_SUCCESS);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 6));
-    goto free_dlme_region;
-  }
-
-  /* Part 3 : Check Close Locality for Locality 2 Again, Should Result
-   * Already closed, as it is already closed. */
-  status = val_drtm_close_locality(DRTM_LOC_2);
-  if (status != DRTM_ACS_ALREADY_CLOSED) {
-    val_print(ACS_PRINT_ERR, "\n       DRTM Close Locality 2 failed err=%d", status);
-    val_print(ACS_PRINT_ERR, " Expected %d,", DRTM_ACS_ALREADY_CLOSED);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 7));
-    goto free_dlme_region;
-  }
+  drtm_params->launch_features = 0;
 
   val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 
@@ -106,7 +86,7 @@ free_drtm_params:
   return;
 }
 
-uint32_t dl004_entry(uint32_t num_pe)
+uint32_t dl009_entry(uint32_t num_pe)
 {
 
   uint32_t status = ACS_STATUS_FAIL;

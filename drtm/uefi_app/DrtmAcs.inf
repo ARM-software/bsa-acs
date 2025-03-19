@@ -1,5 +1,5 @@
 ## @file
-#  Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+#  Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
 #  SPDX-License-Identifier : Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,6 +46,7 @@
   ../test_pool/interface/test_interface012.c
   ../test_pool/interface/test_interface013.c
   ../test_pool/interface/test_interface014.c
+  ../test_pool/interface/test_interface015.c
   ../test_pool/dl/test_dl001.c
   ../test_pool/dl/test_dl002.c
   ../test_pool/dl/test_dl003.c
@@ -53,6 +54,11 @@
   ../test_pool/dl/test_dl005.c
   ../test_pool/dl/test_dl006.c
   ../test_pool/dl/test_dl007.c
+  ../test_pool/dl/test_dl008.c
+  ../test_pool/dl/test_dl009.c
+  ../test_pool/dl/test_dl010.c
+  ../test_pool/dl/test_dl011.c
+  ../test_pool/dl/test_dl012.c
 
 [Packages]
   StdLib/StdLib.dec

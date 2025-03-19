@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,19 +19,25 @@
 #include "val/common/include/acs_memory.h"
 #include "val/drtm/include/drtm_val_interface.h"
 
-#define TEST_NUM   (ACS_DRTM_DL_TEST_NUM_BASE  +  7)
-#define TEST_RULE  ""
-#define TEST_DESC  "Check Dynamic Launch Sec PE on        "
+#define TEST_NUM   (ACS_DRTM_DL_TEST_NUM_BASE  + 10)
+#define TEST_RULE  "R44030"
+#define TEST_DESC  "Check DL on PE other than BOOT PE     "
 
-/* This will be used to inform secondary PE that dynamic launch command is issued */
-volatile uint32_t dl_done = 0;
+volatile int64_t dl_status = ACS_STATUS_FAIL;
 
 /* Payload to run on secondary PE */
-void payload_secondary(void)
+void secondary_pe_payload(void)
 {
-  /* Wait until DL is called on Primary PE */
-  uint32_t timeout = TIMEOUT_MEDIUM;
-  while (timeout-- && (dl_done == 0));
+  uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
+  DRTM_PARAMETERS *drtm_params_buffer;
+  uint64_t buffer_ptr, addr;
+
+  val_get_test_data(index, &addr, &buffer_ptr);
+  drtm_params_buffer = (DRTM_PARAMETERS *)buffer_ptr;
+
+  dl_status = val_drtm_dynamic_launch(drtm_params_buffer);
+  val_data_cache_ops_by_va((addr_t)&dl_status, CLEAN_AND_INVALIDATE);
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
 }
 
 static
@@ -44,8 +50,8 @@ payload(uint32_t num_pe)
    * */
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
   int64_t  status;
+  uint32_t timeout;
   uint32_t sec_pe_index;
-  uint32_t timeout = TIMEOUT_MEDIUM;
 
   DRTM_PARAMETERS *drtm_params;
   uint64_t drtm_params_size = DRTM_SIZE_4K;
@@ -60,11 +66,11 @@ payload(uint32_t num_pe)
   }
 
   for (uint8_t i = 0; i < num_of_pe; i++) {
-      if (i == index)
-        continue;
+    if (i == index)
+      continue;
 
-      sec_pe_index = i;
-      break;
+    sec_pe_index = i;
+    break;
   }
 
   /* Allocate Memory For DRTM Parameters 4KB Aligned */
@@ -82,24 +88,35 @@ payload(uint32_t num_pe)
     goto free_drtm_params;
   }
 
-  /* Switch on secondary PE */
-  val_execute_on_pe(sec_pe_index, payload_secondary, 0);
-
   /* Invoke DRTM Dynamic Launch, This will return only in case of error */
-  status = val_drtm_dynamic_launch(drtm_params);
 
-  dl_done = 1;
-  /* This should return Fail as secondary pe is on */
-  if (status != DRTM_ACS_SECONDARY_PE_NOT_OFF) {
-    val_print(ACS_PRINT_ERR, "\n       DRTM Dynamic Launch failed, Expected = %d",
-                            DRTM_ACS_SECONDARY_PE_NOT_OFF);
-    val_print(ACS_PRINT_ERR, " Found = %d", status);
+  timeout = TIMEOUT_LARGE;
+
+  val_set_status(sec_pe_index, RESULT_PENDING(TEST_NUM));
+  val_execute_on_pe(sec_pe_index, secondary_pe_payload, (uint64_t)drtm_params);
+
+  while ((--timeout) && (IS_RESULT_PENDING(val_get_status(sec_pe_index))));
+
+  val_data_cache_ops_by_va((addr_t)&dl_status, CLEAN_AND_INVALIDATE);
+
+  if (timeout == 0) {
+    val_print(ACS_PRINT_ERR, "\n       **Timed out** for PE index = %d", sec_pe_index);
+    val_print(ACS_PRINT_ERR, " Found = %d", dl_status);
     val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
+    goto free_dlme_region;
+  }
+
+  /* This will return invalid parameter */
+  if (dl_status != DRTM_ACS_DENIED) {
+    val_print(ACS_PRINT_ERR, "\n       DRTM Dynamic Launch failed, Expected = %d",
+                            DRTM_ACS_DENIED);
+    val_print(ACS_PRINT_ERR, " Found = %d", dl_status);
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
     if (status == DRTM_ACS_SUCCESS) {
       status = val_drtm_unprotect_memory();
       if (status < DRTM_ACS_SUCCESS) {
         val_print(ACS_PRINT_ERR, "\n       DRTM Unprotect Memory failed err=%d", status);
-        val_set_status(index, RESULT_FAIL(TEST_NUM, 4));
+        val_set_status(index, RESULT_FAIL(TEST_NUM, 5));
       }
     }
     goto free_dlme_region;
@@ -112,13 +129,10 @@ free_dlme_region:
 free_drtm_params:
   val_memory_free_aligned((void *)drtm_params);
 
-  /* Wait for some time to make sure PE switched off */
-  while (timeout--);
-
   return;
 }
 
-uint32_t dl007_entry(uint32_t num_pe)
+uint32_t dl010_entry(uint32_t num_pe)
 {
 
   uint32_t status = ACS_STATUS_FAIL;
@@ -126,8 +140,8 @@ uint32_t dl007_entry(uint32_t num_pe)
   status = val_initialize_test(TEST_NUM, TEST_DESC, num_pe);
 
   if (status != ACS_STATUS_SKIP)
-  /* execute payload, which will execute relevant functions on current and other PEs */
-      payload(num_pe);
+    /* execute payload, which will execute relevant functions on current and other PEs */
+    payload(num_pe);
 
   /* get the result from all PE and check for failure */
   status = val_check_for_error(TEST_NUM, num_pe, TEST_RULE);

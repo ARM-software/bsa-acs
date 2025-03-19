@@ -670,7 +670,7 @@ uint32_t val_its_init(void)
   val_print(ACS_PRINT_INFO, "  ITS : Info Block\n", 0);
   for (index = 0; index < g_gic_its_info->GicNumIts; index++)
   {
-      val_print(ACS_PRINT_INFO, "  GIC ITS Index: %x", index);
+      val_print(ACS_PRINT_INFO, "  GIC ITS Index: %x", g_gic_its_info->GicIts[index].its_index);
       val_print(ACS_PRINT_INFO, " ID: %x", g_gic_its_info->GicIts[index].ID);
       val_print(ACS_PRINT_INFO, " Base: %x\n", g_gic_its_info->GicIts[index].Base);
   }

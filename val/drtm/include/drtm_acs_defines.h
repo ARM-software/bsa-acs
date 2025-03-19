@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,26 +48,68 @@
 #define DRTM_1_0_FEAT_ID_BIT                ((uint64_t)0x1 << 63)
 #define DRTM_1_0_FEAT_ID(n)                 (DRTM_1_0_FEAT_ID_BIT | (n))
 
-#define DRTM_1_0_DRTM_FEATURES_TPM          DRTM_1_0_FEAT_ID(1u)
-#define DRTM_1_0_DRTM_FEATURES_MEM_REQ      DRTM_1_0_FEAT_ID(2u)
-#define DRTM_1_0_DRTM_FEATURES_DMA_PROT     DRTM_1_0_FEAT_ID(3u)
-#define DRTM_1_0_DRTM_FEATURES_BOOT_PE_ID   DRTM_1_0_FEAT_ID(4u)
-#define DRTM_1_0_DRTM_FEATURES_TCB_HASHES   DRTM_1_0_FEAT_ID(5u)
+#define DRTM_1_0_DRTM_FEATURES_TPM           DRTM_1_0_FEAT_ID(1u)
+#define DRTM_1_0_DRTM_FEATURES_MEM_REQ       DRTM_1_0_FEAT_ID(2u)
+#define DRTM_1_0_DRTM_FEATURES_DMA_PROT      DRTM_1_0_FEAT_ID(3u)
+#define DRTM_1_0_DRTM_FEATURES_BOOT_PE_ID    DRTM_1_0_FEAT_ID(4u)
+#define DRTM_1_0_DRTM_FEATURES_TCB_HASHES    DRTM_1_0_FEAT_ID(5u)
+#define DRTM_1_0_DRTM_FEATURES_DLME_IMG_AUTH DRTM_1_0_FEAT_ID(6u)
 
 #define DRTM_VERSION_GET_MAJOR(version)     ((version >> 16) & 0x7fffU)
+#define DRTM_VERSION_GET_MINOR(version)     ((version) & 0x7fffU)
 #define PSCI_VERSION_GET_MAJOR(version)     ((version >> 16) & 0x7fffU)
 #define SMCCC_VERSION_GET_MAJOR(version)    ((version >> 16) & 0x7fffU)
 
 #define VAL_DRTM_RESERVED_BYTE_ZERO         0x0
+#define VAL_DRTM_PARAMETERS_REVISION        2
 
 #define DRTM_SIZE_4K                        0x1000
-#define DRTM_SIZE_64K                       0x10000
 #define ROUND_UP_TO_4K(Size)                (((Size) + DRTM_SIZE_4K - 1) & ~(DRTM_SIZE_4K - 1))
 #define DRTM_IS_4KB_ALIGNED(addr)           (((addr) & 0xFFF) == 0)
 
 #define DRTM_LOC_1                          1
 #define DRTM_LOC_2                          2
 #define DRTM_LOC_3                          3
+
+#define DRTM_DRTM_FEATURES_DLME_IMG_AUTH          0x0
+#define DRTM_DRTM_FEATURES_DMA_PROTECTION         0x1
+#define DRTM_DRTM_FEATURES_PCR_SCHEMA             0x2
+#define DRTM_DRTM_FEATURES_TPM_BASED_HASHING      0x3
+
+#define DRTM_DMA_FEATURES_DMA_PROTECTION_ALL      0x1
+#define DRTM_DLME_IMG_FEAT_DLME_IMG_AUTH_SUPP     0x1
+#define DRTM_LAUNCH_FEAT_MEM_PROT_ALL_SUPP        0x0
+#define DRTM_LAUNCH_FEAT_MEM_PROT_REGION_SUPP     0x1
+#define DRTM_LAUNCH_FEAT_REQ_DLME_IMG_AUTH        0x1
+#define DRTM_TPM_FEAT_PCR_SCHEMA_DEF_SUPP         0x1
+#define DRTM_LAUNCH_FEAT_PCR_SCHEMA_DEF_SUPP      0x0
+#define DRTM_LAUNCH_FEAT_DLME_AUTH_SUPP           0x1
+#define DRTM_TPM_BASED_HASHING_SUPPORT            0x1
+
+#define DRTM_LAUNCH_FEATURES_MASK_MEM_PROTECTION  0x3
+#define DRTM_LAUNCH_FEATURES_MASK_PCR_SCHEMA      0x1
+#define DRTM_LAUNCH_FEATURES_MASK_DLME_IMAGE_AUTH 0x1
+
+#define DRTM_GET_FEATURES_MASK_DLME_IMAGE_AUTH    0x1
+#define DRTM_GET_FEATURES_MASK_DMA_PROTECTION     0x7
+#define DRTM_GET_FEATURES_MASK_PCR_SCHEMA         0xF
+#define DRTM_GET_FEATURES_MASK_TPM_BASED_HASHING  0x1
+
+#define DRTM_GET_FEATURES_SHIFT_PCR_SCHEMA        33
+#define DRTM_GET_FEATURES_SHIFT_TPM_BASED_HASHING 32
+#define DRTM_LAUNCH_FEAT_SHIFT_DLME_IMG_AUTH      6
+
+#define DRTM_PROTECTION_REGION_BASED_DMA          0x10UL
+#define DRTM_CACHEABILITY_WRITE_BACK              0xFFUL
+#define DRTM_REGION_TYPE_NORMAL_CACHEABLE         0x1UL
+#define DRTM_MEM_PROT_SHIFT_CACHEABILITY_ATTR     55
+#define DRTM_MEM_PROT_SHIFT_REGION_TYPE           52
+#define DRTM_MEM_PROT_SHIFT_NUMBER_4KB_PAGES      0
+
+#define DRTM_EVTYPE_ARM_DLME                      0x9004
+
+#define REQUEST_DLME_IMAGE_AUTH   1 << DRTM_LAUNCH_FEATURES_MASK_DLME_IMAGE_AUTH
+#define REQUEST_TPM_BASED_HASHING 1
 
 /* Event Log Defines*/
 #define EVENT_SPEC_ID_STR_LEN  15
@@ -101,6 +143,7 @@ typedef struct {
     DRTM_ACS_FEAT_VALUE64 dma_prot_features;
     DRTM_ACS_FEAT_VALUE64 boot_pe_aff;
     DRTM_ACS_FEAT_VALUE64 tcb_hash_features;
+    DRTM_ACS_FEAT_VALUE64 dlme_image_authentication;
     /* DRTM supported functions */
     int64_t               dynamic_launch;
     int64_t               unprotect_memory;
