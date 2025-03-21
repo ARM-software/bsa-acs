@@ -24,8 +24,8 @@
 #define SIZE_4K 0x100
 
 #define BSA_ACS_MAJOR_VER      1
-#define BSA_ACS_MINOR_VER      0
-#define BSA_ACS_SUBMINOR_VER   9
+#define BSA_ACS_MINOR_VER      1
+#define BSA_ACS_SUBMINOR_VER   0
 
 #define INVALID_MPIDR     0xffffffff
 

@@ -19,8 +19,8 @@
 #define __BSA_ACS_LEVEL_H__
 
 #define BSA_ACS_MAJOR_VER       1
-#define BSA_ACS_MINOR_VER       0
-#define BSA_ACS_SUBMINOR_VER    9
+#define BSA_ACS_MINOR_VER       1
+#define BSA_ACS_SUBMINOR_VER    0
 
 #define G_PRINT_LEVEL ACS_PRINT_TEST
 
