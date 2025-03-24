@@ -32,6 +32,8 @@
 
 UINT32  g_pcie_p2p;
 UINT32  g_pcie_cache_present;
+UINT32  g_bsa_level;
+UINT32  g_bsa_only_level = 0;
 UINT32  g_print_level;
 UINT32  g_sw_view[3] = {1, 1, 1}; //Operating System, Hypervisor, Platform Security
 UINT32  *g_skip_test_num;
@@ -195,7 +197,8 @@ HelpMsg (
   VOID
   )
 {
-  Print (L"\nUsage: Bsa.efi [-v <n>] | [-f <filename>] | [-skip <n>] | [-t <n>] | [-m <n>]\n"
+  Print (L"\nUsage: Bsa.efi [-v <n>] | [-l <n>] | [-only] | [-fr] | [-f <filename>] | "
+         "[-skip <n>] | [-t <n>] | [-m <n>]\n"
          "Options:\n"
          "-v      Verbosity of the prints\n"
          "        1 prints all, 5 prints only the errors\n"
@@ -205,6 +208,11 @@ HelpMsg (
          "              PERIPHERAL 6, Watchdog 7, PCIe 8, Exerciser 9   ...\n"
          "              E.g., To enable mmio prints for PE and TIMER pass -v 104\n"
          "-mmio   Pass this flag to enable pal_mmio_read/write prints, use with -v 1\n"
+         "-l      Level of compliance to be tested for\n"
+         "        As per BSA specification, Valid level is 1\n"
+         "-only   To only run tests belonging to a specific level of compliance\n"
+         "        -l (level) or -fr option needs to be specified for using this flag\n"
+         "-fr     Should be passed without level option to run future requirement tests\n"
          "-f      Name of the log file to record the test results in\n"
          "-skip   Test(s) to be skipped\n"
          "        Refer to section 4 of BSA ACS User Guide\n"
@@ -228,6 +236,9 @@ HelpMsg (
 
 STATIC CONST SHELL_PARAM_ITEM ParamList[] = {
   {L"-v", TypeValue},    // -v    # Verbosity of the Prints. 1 shows all prints, 5 shows Errors
+  {L"-l", TypeValue},    // -l    # Level of compliance to be tested for.
+  {L"-only", TypeValue},    // -only # To only run tests for a Specific level of compliance.
+  {L"-fr", TypeValue},    // -fr   # To run BSA ACS till BSA Future Requirement tests
   {L"-f", TypeValue},    // -f    # Name of the log file to record the test results in.
   {L"-skip", TypeValue}, // -skip # test(s) to skip execution
   {L"-t", TypeValue},    // -t    # Test to be run
@@ -347,6 +358,43 @@ ShellAppMain (
   } else {
     g_print_mmio = FALSE;
   }
+
+
+
+  // Options with Values
+  CmdLineArg  = ShellCommandLineGetValue (ParamPackage, L"-l");
+  if (CmdLineArg == NULL) {
+    g_bsa_level = G_BSA_LEVEL;
+
+    if ((ShellCommandLineGetFlag (ParamPackage, L"-only")) &&
+         !(ShellCommandLineGetFlag (ParamPackage, L"-fr"))) {
+         Print(L" Only option(-only) have to be passed along with Level option (-l)\n", 0);
+         HelpMsg();
+         return SHELL_INVALID_PARAMETER;
+    }
+
+    if (ShellCommandLineGetFlag (ParamPackage, L"-fr")) {
+      g_bsa_level = BSA_MAX_LEVEL_SUPPORTED + 1;
+      if (ShellCommandLineGetFlag (ParamPackage, L"-only"))
+        g_bsa_only_level = g_bsa_level;
+    }
+  } else {
+    g_bsa_level = StrDecimalToUintn(CmdLineArg);
+    if (g_bsa_level > BSA_MAX_LEVEL_SUPPORTED) {
+      Print(L"BSA Level %d is not supported.\n", g_bsa_level);
+      HelpMsg();
+      return SHELL_INVALID_PARAMETER;
+    }
+    if (g_bsa_level < BSA_MIN_LEVEL_SUPPORTED) {
+      Print(L"BSA Level %d is not supported.\n", g_bsa_level);
+      HelpMsg();
+      return SHELL_INVALID_PARAMETER;
+    }
+    if (ShellCommandLineGetFlag (ParamPackage, L"-only")) {
+        g_bsa_only_level = g_bsa_level;
+    }
+  }
+
 
   // Options with Flags
    if (ShellCommandLineGetFlag (ParamPackage, L"-os")
@@ -512,6 +560,13 @@ ShellAppMain (
   val_print(ACS_PRINT_TEST, "\n          Version %d.", BSA_ACS_MAJOR_VER);
   val_print(ACS_PRINT_TEST, "%d.", BSA_ACS_MINOR_VER);
   val_print(ACS_PRINT_TEST, "%d\n", BSA_ACS_SUBMINOR_VER);
+
+  if (g_bsa_only_level) {
+    val_print(ACS_PRINT_TEST, "\n Starting tests for only level %2d", g_bsa_level);
+    g_bsa_level = 0;
+  }
+  else
+    val_print(ACS_PRINT_TEST, "\n Starting tests for level %2d", g_bsa_level);
 
   val_print(ACS_PRINT_TEST, "\n Starting tests with print level : %2d\n\n", g_print_level);
   val_print(ACS_PRINT_TEST, "\n Creating Platform Information Tables\n", 0);

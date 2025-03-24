@@ -18,6 +18,7 @@
 #include "pal_common_support.h"
 #include "platform_override_struct.h"
 
+
 /*
     To run a specific modules:
       - Give the module base numbers in the g_module_array.
@@ -56,6 +57,11 @@ uint32_t  g_el1physkip       = FALSE;
    g_crypto_support to FALSE (Default value is TRUE)
 */
 uint32_t g_crypto_support    = TRUE;
+
+/*  To only run tests for a Specific level of compliance  */
+uint32_t g_bsa_run_only      = FALSE;
+/*  If set, ACS also includes BSA Future Requirement tests. */
+uint32_t g_bsa_run_fr        = FALSE;
 
 PE_SMBIOS_PROCESSOR_INFO_TABLE platform_smbios_cfg = {
     .slot_count = PLATFORM_OVERRIDE_SMBIOS_SLOT_COUNT,

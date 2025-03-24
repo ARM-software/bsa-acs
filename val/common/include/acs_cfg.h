@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2022-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2022-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +25,8 @@ extern uint32_t g_num_skip;
 extern uint32_t g_acs_tests_total;
 extern uint32_t g_acs_tests_pass;
 extern uint32_t g_acs_tests_fail;
+extern uint32_t g_bsa_level;
+extern uint32_t g_bsa_only_level;
 extern uint32_t g_sbsa_level;
 extern uint32_t g_sbsa_only_level;
 extern uint64_t g_stack_pointer;

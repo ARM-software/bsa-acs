@@ -28,6 +28,10 @@
 #define G_SW_HYP                1
 #define G_SW_PS                 2
 
+#define G_BSA_LEVEL             1
+#define BSA_MIN_LEVEL_SUPPORTED 1
+#define BSA_MAX_LEVEL_SUPPORTED 1
+
 #define SIZE_4K                 0x1000
 
 /* Note : Total Size Required for Info tables ~ 550 KB

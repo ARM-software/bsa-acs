@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +22,7 @@
 
 /*VAL APIs */
 void val_dump_dtb(void);
+void view_print_info(uint32_t view);
 
 /* VAL PE APIs */
 uint32_t val_bsa_pe_execute_tests(uint32_t num_pe, uint32_t *g_sw_view);
