@@ -28,6 +28,7 @@
 #include "sbsa/include/sbsa_acs_memory.h"
 #include "sbsa/include/sbsa_acs_gic.h"
 #include "sbsa/include/sbsa_acs_wd.h"
+#include "sbsa/include/sbsa_acs_timer.h"
 #include "sbsa/include/sbsa_acs_exerciser.h"
 #include "sbsa/include/sbsa_acs_mpam.h"
 #include "sbsa/include/sbsa_acs_pmu.h"
@@ -223,6 +224,49 @@ val_sbsa_wd_execute_tests(uint32_t level, uint32_t num_pe)
 
   return status;
 }
+
+/**
+  @brief   This API executes all the timer tests sequentially
+           1. Caller       -  Application layer.
+           2. Prerequisite -  val_timer_create_info_table
+  @param   level  - level of compliance being tested for.
+  @param   num_pe - the number of PE to run these tests on.
+  @return  Consolidated status of all the tests run.
+**/
+uint32_t
+val_sbsa_timer_execute_tests(uint32_t level, uint32_t num_pe)
+{
+  uint32_t status = ACS_STATUS_PASS, i;
+
+  if (!(((level > 7) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8)))
+      return ACS_STATUS_SKIP;
+
+  for (i = 0; i < g_num_skip; i++) {
+      if (g_skip_test_num[i] == ACS_TIMER_TEST_NUM_BASE) {
+          val_print(ACS_PRINT_INFO, "      USER Override - Skipping all Timer tests\n", 0);
+          return ACS_STATUS_SKIP;
+      }
+  }
+
+  /* Check if there are any tests to be executed in current module with user override options*/
+  status = val_check_skip_module(ACS_TIMER_TEST_NUM_BASE);
+  if (status) {
+      val_print(ACS_PRINT_INFO, "\n USER Override - Skipping all Timer tests\n", 0);
+      return ACS_STATUS_SKIP;
+  }
+
+  val_print_test_start("Timer");
+  g_curr_module = 1 << TIMER_MODULE;
+
+  if (((level > 7) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8))
+      status |= t001_entry(num_pe);
+
+  val_print_test_end(status, "Timer");
+
+  return status;
+}
+
+
 #endif
 /**
   @brief   This API executes all the PCIe tests sequentially
