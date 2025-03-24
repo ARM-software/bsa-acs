@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021, 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021, 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@
 #include "val/common/include/acs_pe.h"
 
 #define TEST_NUM   (ACS_GIC_TEST_NUM_BASE + 6)
-#define TEST_RULE  "B_PPI_01"
+#define TEST_RULE  "B_PPI_00"
 #define TEST_DESC  "Check EL1-Phy timer PPI assignment    "
 
 
@@ -46,22 +46,19 @@ payload()
   uint32_t timer_expire_val = 100;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
-
+  val_set_status(0, RESULT_PENDING(TEST_NUM));
   intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
-  if (g_build_sbsa) {
-      if (intid != 30) {
-          val_print(ACS_PRINT_ERR,
-              "\n       EL0-Phy timer not mapped to PPI ID 30, INTID: %d   ", intid);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
-          return;
-      }
-  }
 
   if ((intid < 16 || intid > 31) && (!val_gic_is_valid_eppi(intid)))
       val_print(ACS_PRINT_WARN,
           "\n       EL0-Phy timer not mapped to PPI recommended range, INTID: %d   ", intid);
 
-  val_gic_install_isr(intid, isr_phy);
+  if (val_gic_install_isr(intid, isr_phy)) {
+      val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+      return;
+  }
+
   val_timer_set_phy_el1(timer_expire_val);
 
   while ((--timeout > 0) && (IS_RESULT_PENDING(val_get_status(index)))) {
@@ -71,7 +68,7 @@ payload()
   if (timeout == 0) {
     val_print(ACS_PRINT_ERR,
         "\n       EL0-Phy timer interrupt not received on INTID: %d   ", intid);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
     return;
   }
 

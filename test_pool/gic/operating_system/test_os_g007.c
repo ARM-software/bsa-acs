@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@
 #include "val/common/include/acs_pe.h"
 
 #define TEST_NUM   (ACS_GIC_TEST_NUM_BASE + 7)
-#define TEST_RULE  "B_PPI_01"
+#define TEST_RULE  "B_PPI_00"
 #define TEST_DESC  "Check EL1-Virt timer PPI assignment   "
 
 static uint32_t intid;
@@ -52,20 +52,17 @@ payload()
   /* Check non-secure virtual timer Private Peripheral Interrupt (PPI) assignment */
   val_set_status(0, RESULT_PENDING(TEST_NUM));
   intid = val_timer_get_info(TIMER_INFO_VIR_EL1_INTID, 0);
-  if (g_build_sbsa) {
-      if (intid != 27) {
-          val_print(ACS_PRINT_ERR,
-              "\n       EL0-Virtual timer not mapped to PPI ID 27, INTID: %d   ", intid);
-          val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
-          return;
-      }
-  }
 
   if ((intid < 16 || intid > 31) && (!val_gic_is_valid_eppi(intid)))
       val_print(ACS_PRINT_WARN,
           "\n       EL0-Virtual timer not mapped to PPI recommended range, INTID: %d   ", intid);
 
-  val_gic_install_isr(intid, isr_vir);
+  if (val_gic_install_isr(intid, isr_vir)) {
+      val_print(ACS_PRINT_ERR, "\n       GIC Install Handler Failed...", 0);
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+      return;
+  }
+
   val_timer_set_vir_el1(timer_expire_val);
 
   while ((--timeout > 0) && (IS_RESULT_PENDING(val_get_status(index)))) {
@@ -75,7 +72,7 @@ payload()
   if (timeout == 0) {
     val_print(ACS_PRINT_ERR,
         "\n       EL0-Virtual timer interrupt not received on INTID: %d   ", intid);
-    val_set_status(index, RESULT_FAIL(TEST_NUM, 2));
+    val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
     return;
   }
 

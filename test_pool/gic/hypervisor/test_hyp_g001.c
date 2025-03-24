@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021, 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021, 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@
 #include "val/common/include/acs_gic_support.h"
 
 #define TEST_NUM   (ACS_GIC_HYP_TEST_NUM_BASE + 1)
-#define TEST_RULE  "B_PPI_02"
+#define TEST_RULE  "B_PPI_00"
 #define TEST_DESC  "Check NS EL2-Virt timer PPI Assignment"
 
 static uint32_t intid;
@@ -76,15 +76,7 @@ payload()
 
     /*Get EL2 virtual timer interrupt ID*/
     intid = val_timer_get_info(TIMER_INFO_VIR_EL2_INTID, 0);
-    /*Recommended EL2 virtual timer interrupt ID is 28 as per SBSA*/
-    if (g_build_sbsa) {
-        if (intid != 28) {
-           val_print(ACS_PRINT_ERR, "\n       NS EL2 virtual timer not mapped to PPI ID 28, id %d",
-                                                                    intid);
-           val_set_status(index, RESULT_FAIL(TEST_NUM, 1));
-           return;
-        }
-    }
+
     /*Check if interrupt is in PPI INTID range*/
     if ((intid < 16 || intid > 31) && (!val_gic_is_valid_eppi(intid))) {
         val_print(ACS_PRINT_DEBUG,
