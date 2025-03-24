@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,6 +44,9 @@
 #elif (PLATFORM_PAGE_SIZE == PAGE_SIZE_64K)
  #define PAGE_SIZE           PAGE_SIZE_64K
 #endif
+
+#define BSA_MIN_LEVEL_SUPPORTED 1
+#define BSA_MAX_LEVEL_SUPPORTED 1
 
 /*******************************************************************************
  * Used to align variables on the biggest cache line size in the platform.

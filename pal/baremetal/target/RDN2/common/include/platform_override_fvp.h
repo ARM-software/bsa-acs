@@ -19,6 +19,7 @@
 
 /* Settings */
 #define PLATFORM_OVERRIDE_PRINT_LEVEL  0x3     //The permissible levels are 1,2,3,4 and 5
+#define PLATFORM_OVERRIDE_BSA_LEVEL    0x1    // The permissible levels are only 1
 
 /*SMBIOS config parameters*/
 #define PLATFORM_OVERRIDE_SMBIOS_SLOT_COUNT       0x1

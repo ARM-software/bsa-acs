@@ -24,7 +24,9 @@
 #include "val/bsa/include/bsa_acs_dma.h"
 #include "BsaAcs.h"
 
+uint32_t  g_bsa_level;
 uint32_t  g_print_level;
+uint32_t  g_bsa_only_level = 0;
 uint32_t  g_execute_nist;
 uint32_t  g_print_mmio;
 uint32_t  g_curr_module;
@@ -49,6 +51,13 @@ extern uint32_t g_test_array[];
 extern uint32_t g_num_tests;
 extern uint32_t g_module_array[];
 extern uint32_t g_num_modules;
+extern uint32_t g_bsa_run_fr;
+extern uint32_t g_bsa_run_only;
+
+#define BSA_LEVEL_PRINT_FORMAT(level, only) ((level > BSA_MAX_LEVEL_SUPPORTED) ? \
+    ((only) != 0 ? "\n Starting tests for only level FR " : "\n Starting tests for level FR ") : \
+    ((only) != 0 ? "\n Starting tests for only level %2d " : "\n Starting tests for level %2d "))
+
 
 void
 createSmbiosInfoTable(
@@ -226,6 +235,25 @@ ShellAppMainbsa(
       return ACS_STATUS_FAIL;
 #endif
 
+  g_bsa_level = PLATFORM_OVERRIDE_BSA_LEVEL;
+
+  if (g_bsa_level < BSA_MIN_LEVEL_SUPPORTED)
+  {
+      val_print(g_print_level, "BSA Level %d is not supported.\n", g_bsa_level);
+      val_print(g_print_level, "Setting BSA level to %d\n", BSA_MIN_LEVEL_SUPPORTED);
+      g_bsa_level = BSA_MIN_LEVEL_SUPPORTED;
+  } else if (g_bsa_level > BSA_MAX_LEVEL_SUPPORTED) {
+      val_print(g_print_level, "BSA Level %d is not supported.\n", g_bsa_level);
+      val_print(g_print_level, "Setting BSA level to %d\n", BSA_MAX_LEVEL_SUPPORTED);
+      g_bsa_level = BSA_MAX_LEVEL_SUPPORTED;
+  }
+
+  if (g_bsa_run_fr)
+      g_bsa_level = BSA_MAX_LEVEL_SUPPORTED + 1;
+
+  if (g_bsa_run_only)
+      g_bsa_only_level = g_bsa_level;
+
   g_print_mmio = FALSE;
   g_wakeup_timeout = 1;
 
@@ -241,7 +269,14 @@ ShellAppMainbsa(
   val_print(ACS_PRINT_TEST, "%d.", BSA_ACS_MINOR_VER);
   val_print(ACS_PRINT_TEST, "%d\n", BSA_ACS_SUBMINOR_VER);
 
-  val_print(ACS_PRINT_TEST, " Starting tests with print level : %2d\n\n", ACS_PRINT_TEST);
+
+  val_print(ACS_PRINT_TEST, BSA_LEVEL_PRINT_FORMAT(g_bsa_level, g_bsa_only_level),
+                                   (g_bsa_level > BSA_MAX_LEVEL_SUPPORTED) ? 0 : g_bsa_level);
+
+  val_print(ACS_PRINT_TEST, "(Print level is %2d)\n\n", g_print_level);
+
+  if (g_bsa_only_level)
+      g_bsa_level = 0;
 
   g_skip_test_num = &g_skip_array[0];
 
