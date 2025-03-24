@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +27,10 @@
 #define G_SW_OS            0
 #define G_SW_HYP           1
 #define G_SW_PS            2
+
+#define BSA_MIN_LEVEL_SUPPORTED 1
+#define BSA_MAX_LEVEL_SUPPORTED 1
+
 
 #include "bsa_drv_intf.h"
 

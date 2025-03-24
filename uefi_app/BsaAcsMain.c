@@ -70,6 +70,10 @@ typedef unsigned long efi_status_t;
 efi_status_t  mem_model_execute_tests(EFI_HANDLE myImageHandle, EFI_SYSTEM_TABLE *mySystemTable);
 #endif
 
+#define BSA_LEVEL_PRINT_FORMAT(level, only) ((level > BSA_MAX_LEVEL_SUPPORTED) ? \
+    ((only) != 0 ? "\n Starting tests for only level FR " : "\n Starting tests for level FR ") : \
+    ((only) != 0 ? "\n Starting tests for only level %2d " : "\n Starting tests for level %2d "))
+
 STATIC VOID FlushImage (VOID)
 {
   EFI_LOADED_IMAGE_PROTOCOL   *ImageInfo;
@@ -561,14 +565,14 @@ ShellAppMain (
   val_print(ACS_PRINT_TEST, "%d.", BSA_ACS_MINOR_VER);
   val_print(ACS_PRINT_TEST, "%d\n", BSA_ACS_SUBMINOR_VER);
 
-  if (g_bsa_only_level) {
-    val_print(ACS_PRINT_TEST, "\n Starting tests for only level %2d", g_bsa_level);
-    g_bsa_level = 0;
-  }
-  else
-    val_print(ACS_PRINT_TEST, "\n Starting tests for level %2d", g_bsa_level);
 
-  val_print(ACS_PRINT_TEST, "\n Starting tests with print level : %2d\n\n", g_print_level);
+  val_print(ACS_PRINT_TEST, BSA_LEVEL_PRINT_FORMAT(g_bsa_level, g_bsa_only_level),
+                                   (g_bsa_level > BSA_MAX_LEVEL_SUPPORTED) ? 0 : g_bsa_level);
+
+  if (g_bsa_only_level)
+    g_bsa_level = 0;
+
+  val_print(ACS_PRINT_TEST, "(Print level is %2d)\n\n", g_print_level);
   val_print(ACS_PRINT_TEST, "\n Creating Platform Information Tables\n", 0);
 
 
