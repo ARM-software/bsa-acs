@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2021, 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2021, 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +29,8 @@
 #include "common/include/bsa_pcie_enum.h"
 
 static EFI_ACPI_6_1_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER *gMadtHdr;
+
+static UINT32 g_non_gic_interrupt_count;
 
 EFI_HARDWARE_INTERRUPT_PROTOCOL *gInterrupt = NULL;
 
@@ -96,6 +98,11 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
   Length = sizeof (EFI_ACPI_6_1_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER);
 
   do {
+
+    /* As Per Latest UEFI Spec 6.5
+     * The Value 0x0b - 0x0f Represents GIC Structure */
+    if (Entry->Type <= 0x17 && (Entry->Type <= 0xA || Entry->Type >= 0x10))
+        g_non_gic_interrupt_count++;
 
     if (Entry->Type == EFI_ACPI_6_1_GIC) {
       if (Entry->PhysicalBaseAddress != 0) {
@@ -277,3 +284,18 @@ pal_gic_free_irq(
 {
 
 }
+
+
+
+
+/**
+  @brief   This API returns the count of Non Gic Interrupt Controller
+           1. Caller       -  Val Suite
+           2. Prerequisite -  pal_gic_create_info_table
+  @return  Count of Non Gic Interrupt Controller
+**/
+UINT32 pal_get_num_nongic_ctrl(VOID)
+{
+    return g_non_gic_interrupt_count;
+}
+

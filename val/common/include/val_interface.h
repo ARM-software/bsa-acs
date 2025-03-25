@@ -115,6 +115,7 @@ uint32_t val_gic_request_msi(uint32_t bdf, uint32_t device_id, uint32_t its_id,
                              uint32_t int_id, uint32_t msi_index);
 void val_gic_free_msi(uint32_t bdf, uint32_t device_id, uint32_t its_id,
                       uint32_t int_id, uint32_t msi_index);
+uint32_t val_get_num_nongic_ctrl(void);
 
 /*TIMER VAL APIs */
 typedef enum {
