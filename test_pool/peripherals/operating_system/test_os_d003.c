@@ -26,7 +26,7 @@
 
 #define TEST_NUM   (ACS_PER_TEST_NUM_BASE + 3)
 #define TEST_RULE_BSA  "B_PER_05"
-#define TEST_RULE_SBSA "S_L3PER_01"
+#define TEST_RULE_SBSA "S_L3PR_01"
 #define TEST_DESC  "Check Arm BSA UART register offsets   "
 #define TEST_NUM1  (ACS_PER_TEST_NUM_BASE + 4)
 #define TEST_RULE1 "B_PER_06, B_PER_07"

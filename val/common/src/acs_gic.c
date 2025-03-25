@@ -341,6 +341,9 @@ val_gic_get_info(GIC_INFO_e type)
       case GIC_INFO_NUM_MSI_FRAME:
           return g_gic_info_table->header.num_msi_frame;
 
+      case GIC_INFO_NUM_GICR_GICRD:
+          return g_gic_info_table->header.num_gicr_rd;
+
       default:
           val_print(ACS_PRINT_ERR, "\n    GIC Info - TYPE not recognized %d  ", type);
           break;

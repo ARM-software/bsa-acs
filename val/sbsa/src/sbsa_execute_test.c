@@ -149,7 +149,7 @@ val_sbsa_gic_execute_tests(uint32_t level, uint32_t num_pe)
   uint32_t status = 0, i, module_skip;
 
   if (!(((level > 2) && (g_sbsa_only_level == 0)) ||
-                  (g_sbsa_only_level == 3) || (g_sbsa_only_level == 5)))
+            (g_sbsa_only_level == 3) || (g_sbsa_only_level == 5) || (g_sbsa_only_level == 8)))
       return ACS_STATUS_SKIP;
 
   for (i = 0; i < g_num_skip; i++) {
@@ -158,7 +158,6 @@ val_sbsa_gic_execute_tests(uint32_t level, uint32_t num_pe)
           return ACS_STATUS_SKIP;
       }
   }
-
 
   /* Check if there are any tests to be executed in current module with user override options*/
   module_skip = val_check_skip_module(ACS_GIC_TEST_NUM_BASE);
@@ -171,12 +170,15 @@ val_sbsa_gic_execute_tests(uint32_t level, uint32_t num_pe)
   g_curr_module = 1 << GIC_MODULE;
 
   if (((level > 2) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 3)) {
-      status = g001_entry(num_pe);
-      status = g003_entry(num_pe);
+      status |= g001_entry(num_pe);
+      status |= g003_entry(num_pe);
   }
 
   if (((level > 4) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 5))
-      status = g002_entry(num_pe);
+      status |= g002_entry(num_pe);
+
+  if (((level > 7) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8))
+      status |= g004_entry(num_pe);
 
   val_print_test_end(status, "GIC");
 
