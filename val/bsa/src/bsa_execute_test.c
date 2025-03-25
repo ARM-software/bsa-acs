@@ -97,7 +97,7 @@ val_bsa_pe_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
 {
   uint32_t status, i;
 
-  if (!(g_bsa_level >= 1 || g_bsa_only_level == 1 || g_bsa_only_level == 1))
+  if (!(g_bsa_level >= 1 || g_bsa_only_level == 1 || g_bsa_only_level == 2))
       return ACS_STATUS_SKIP;
 
   for (i = 0; i < g_num_skip; i++) {
@@ -142,6 +142,10 @@ val_bsa_pe_execute_tests(uint32_t num_pe, uint32_t *g_sw_view)
           status |= os_c016_entry(num_pe);
       }
 
+      if (g_bsa_level > 1 || g_bsa_only_level == 2) {
+          view_print_info(OPERATING_SYSTEM);
+          status |= os_c015_entry(num_pe);
+      }
   }
 
   if (g_sw_view[G_SW_HYP]) {
