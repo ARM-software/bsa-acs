@@ -92,8 +92,6 @@ val_sbsa_pe_execute_tests(uint32_t level, uint32_t num_pe)
       status |= c012_entry(num_pe);
       status |= c013_entry(num_pe);
       status |= c014_entry(num_pe);
-      status |= c015_entry(num_pe);
-      status |= c016_entry(num_pe);
   }
 
   if (((level > 5)  && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 6)) {
@@ -773,9 +771,9 @@ val_sbsa_mpam_execute_tests(uint32_t level, uint32_t num_pe)
 
       status |= mpam002_entry(num_pe);
       status |= mpam003_entry(num_pe);
-      status |= mpam004_entry(num_pe);
       status |= mpam005_entry(num_pe);
       status |= mpam006_entry(num_pe);
+      status |= mpam007_entry(num_pe);
   }
   val_print_test_end(status, "MPAM");
 

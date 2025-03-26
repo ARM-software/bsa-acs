@@ -108,8 +108,8 @@ void     val_mpam_pcc_write(uint32_t msc_index, uint32_t reg_offset, uint32_t da
 uint32_t mpam001_entry(uint32_t num_pe);
 uint32_t mpam002_entry(uint32_t num_pe);
 uint32_t mpam003_entry(uint32_t num_pe);
-uint32_t mpam004_entry(uint32_t num_pe);
 uint32_t mpam005_entry(uint32_t num_pe);
 uint32_t mpam006_entry(uint32_t num_pe);
+uint32_t mpam007_entry(uint32_t num_pe);
 
 #endif /*__SBSA_ACS_MPAM_H__ */
