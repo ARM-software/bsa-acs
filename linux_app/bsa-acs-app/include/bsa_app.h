@@ -21,8 +21,8 @@
 
 
 #define BSA_APP_VERSION_MAJOR     1
-#define BSA_APP_VERSION_MINOR     0
-#define BSA_APP_VERSION_SUBMINOR  9
+#define BSA_APP_VERSION_MINOR     1
+#define BSA_APP_VERSION_SUBMINOR  0
 
 #define G_SW_OS            0
 #define G_SW_HYP           1
