@@ -34,6 +34,7 @@ uint64_t val_pmu_read_count(uint32_t node_index, uint32_t mon_inst);
 uint32_t val_pmu_get_node_index(uint64_t prox_domain);
 uint32_t val_pmu_implements_pmscr(uint32_t node_index);
 uint32_t val_pmu_is_secure(uint32_t node_index);
+void     val_pmu_set_node_coresight_complaint(uint32_t flag, uint32_t node_index);
 uint32_t val_pmu_get_multi_traffic_support_interface(uint64_t *interface_acpiid,
                                                        uint32_t *num_traffic_type_support);
 uint32_t val_pmu_get_index_acpiid(uint64_t interface_acpiid);
