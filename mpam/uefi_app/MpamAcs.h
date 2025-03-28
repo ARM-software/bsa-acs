@@ -19,10 +19,10 @@
 #define __MPAM_ACS_LEVEL_H__
 
 
-#define MPAM_ACS_MAJOR_VER  0
-#define MPAM_ACS_MINOR_VER  5
+#define MPAM_ACS_MAJOR_VER      0
+#define MPAM_ACS_MINOR_VER      5
+#define MPAM_ACS_SUBMINOR_VER   0
 
-#define G_MPAM_LEVEL        3
 #define G_PRINT_LEVEL       ACS_PRINT_TEST
 
 #define PE_INFO_TBL_SZ         16384  /*Supports maximum 400 PEs*/

@@ -373,8 +373,12 @@ ShellAppMain (
     g_acs_tests_pass  = 0;
     g_acs_tests_fail  = 0;
 
+    branch_label = &&print_test_status;
+    val_pe_context_save(AA64ReadSp(), (uint64_t)branch_label);
+
     Print(L"\n\n MPAM System Architecture Compliance Suite \n");
-    Print(L"    Version %d.%d  \n", MPAM_ACS_MAJOR_VER, MPAM_ACS_MINOR_VER);
+    Print(L"    Version %d.%d.", MPAM_ACS_MAJOR_VER, MPAM_ACS_MINOR_VER);
+    Print(L"%d  \n", MPAM_ACS_SUBMINOR_VER);
 
     Print(L"\n Starting tests for Print level %2d\n\n", g_print_level);
 
@@ -418,8 +422,6 @@ ShellAppMain (
      * Initialise exception vector, so any unexpected exception gets handled
      * by default MPAM exception handler
      */
-    branch_label = &&print_test_status;
-    val_pe_context_save(AA64ReadSp(), (uint64_t)branch_label);
     val_pe_initialize_default_exception_handler(val_pe_default_esr);
     FlushImage();
 
@@ -431,14 +433,14 @@ ShellAppMain (
 
     Status |= val_mpam_execute_membw_tests(val_pe_get_num());
 
+    FreeMpamAcsMem();
+
 print_test_status:
     val_print(ACS_PRINT_TEST, "\n     ------------------------------------------------------- \n", 0);
     val_print(ACS_PRINT_TEST, "     Total Tests run  = %4d;", g_acs_tests_total);
     val_print(ACS_PRINT_TEST, "  Tests Passed  = %4d", g_acs_tests_pass);
     val_print(ACS_PRINT_TEST, "  Tests Failed = %4d\n", g_acs_tests_fail);
     val_print(ACS_PRINT_TEST, "     --------------------------------------------------------- \n", 0);
-
-    FreeMpamAcsMem();
 
     if (g_acs_log_file_handle) {
         ShellCloseFile(&g_acs_log_file_handle);
