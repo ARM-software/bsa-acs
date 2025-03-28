@@ -37,7 +37,6 @@ isr_failsafe()
 {
   uint32_t intid;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
-
   val_timer_set_phy_el1(0);
   val_print(ACS_PRINT_ERR, "       Received Failsafe interrupt\n", 0);
   g_failsafe_int_received = 1;
@@ -51,12 +50,9 @@ void
 isr4()
 {
   uint32_t intid;
-  uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
-
   val_wd_set_ws0(wd_num, 0);
   val_print(ACS_PRINT_INFO, "       Received WS0 interrupt\n", 0);
   g_wd_int_received = 1;
-  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
   intid = val_wd_get_info(wd_num, WD_INFO_GSIV);
   val_gic_end_of_interrupt(intid);
 }
@@ -66,7 +62,7 @@ void
 wakeup_set_failsafe()
 {
   uint32_t intid;
-  uint64_t timer_expire_val = val_get_counter_frequency() * (g_wakeup_timeout + 1);
+  uint64_t timer_expire_val = (val_get_counter_frequency() * 3 * g_wakeup_timeout) / 2;
 
   intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
   val_gic_install_isr(intid, isr_failsafe);
@@ -93,6 +89,9 @@ payload4()
 
   wd_num = val_wd_get_info(0, WD_INFO_COUNT);
 
+  // Assume a test passes until something causes a failure.
+  val_set_status(index, RESULT_PASS(TEST_NUM, 1));
+
   if (!wd_num) {
       val_print(ACS_PRINT_DEBUG, "\n       No watchdog implemented      ", 0);
       val_set_status(index, RESULT_SKIP(TEST_NUM, 1));
@@ -106,7 +105,6 @@ payload4()
       ns_wdg++;
       intid = val_wd_get_info(wd_num, WD_INFO_GSIV);
       status = val_gic_install_isr(intid, isr4);
-
       if (status == 0) {
 
           /* Set Interrupt Type Edge/Level Trigger */
@@ -155,6 +153,9 @@ payload4()
           val_print(ACS_PRINT_WARN, "\n       GIC Install Handler Failed...", 0);
           val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
       }
+
+      /* Disable watchdog so it doesn't trigger after this test. */
+      val_wd_set_ws0(wd_num, 0);
   }
 
   if (!ns_wdg) {
