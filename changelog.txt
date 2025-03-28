@@ -98,3 +98,9 @@ v24.06_DRTM_0.5_ALP1
 * Interface and dynamic launch tests
 * Build scripts for DRTM Image
 * Documentation changes
+
+25.03_REL1.1.0
+* BSA Errata Updates
+* PCIe bug fixes and enhancements
+* Partner Issue Enhancements and Fixes
+* Document updates
