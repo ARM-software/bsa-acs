@@ -69,7 +69,7 @@ val_pmu_create_info_table(uint64_t *pmu_info_table)
   @brief  Set if PMU node coresight architecture complaint or not
 **/
 void
-val_pmu_set_node_coresight_complaint(uint32_t flag, uint32_t node_index);
+val_pmu_set_node_coresight_complaint(uint32_t flag, uint32_t node_index)
 {
   PMU_INFO_BLOCK *entry;
 
