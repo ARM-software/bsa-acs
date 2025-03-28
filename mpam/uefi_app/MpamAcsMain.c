@@ -374,7 +374,8 @@ ShellAppMain (
     g_acs_tests_fail  = 0;
 
     Print(L"\n\n MPAM System Architecture Compliance Suite \n");
-    Print(L"    Version %d.%d  \n", MPAM_ACS_MAJOR_VER, MPAM_ACS_MINOR_VER);
+    Print(L"    Version %d.%d.", MPAM_ACS_MAJOR_VER, MPAM_ACS_MINOR_VER);
+    Print(L"%d  \n", MPAM_ACS_SUBMINOR_VER);
 
     Print(L"\n Starting tests for Print level %2d\n\n", g_print_level);
 
