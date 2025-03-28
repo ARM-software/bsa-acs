@@ -34,6 +34,10 @@ PMU_INFO_TABLE  *g_pmu_info_table;
 void
 val_pmu_create_info_table(uint64_t *pmu_info_table)
 {
+  uint32_t node_index;
+  addr_t base;
+  uint32_t reg_value;
+
   if (pmu_info_table == NULL) {
     val_print(ACS_PRINT_ERR, "\nInput for Create PMU Info table cannot be NULL", 0);
     return;
@@ -46,7 +50,41 @@ val_pmu_create_info_table(uint64_t *pmu_info_table)
   val_print(ACS_PRINT_TEST, " PMU_INFO: Number of PMU units        : %4d\n",
             g_pmu_info_table->pmu_count);
 
+  for (node_index = 0; node_index < g_pmu_info_table->pmu_count; node_index++) {
+      base = val_pmu_get_info(PMU_NODE_BASE0, node_index);
+      reg_value = BITFIELD_READ(PMDEVARCH_ARCHITECT, val_mmio_read(base + REG_PMDEVARCH));
+      /* 0x23B is value for Arm Limited */
+      if (reg_value == 0x23B)
+          val_pmu_set_node_coresight_complaint(0x1, node_index);
+      else {
+          val_pmu_set_node_coresight_complaint(0x0, node_index);
+          val_print(ACS_PRINT_ERR, "\n   PMU node index %d is not CS complaint", node_index);
+      }
+  }
+
   return;
+}
+
+/**
+  @brief  Set if PMU node coresight architecture complaint or not
+**/
+void
+val_pmu_set_node_coresight_complaint(uint32_t flag, uint32_t node_index)
+{
+  PMU_INFO_BLOCK *entry;
+
+  if (g_pmu_info_table == NULL) {
+      val_print(ACS_PRINT_WARN, "\n   APMT info table not found", 0);
+      return;
+  }
+
+  if (node_index > g_pmu_info_table->pmu_count) {
+      val_print(ACS_PRINT_WARN, "\n   Invalid Node index ", 0);
+      return;
+  }
+
+  entry = &g_pmu_info_table->info[node_index];
+  entry->coresight_compliant = flag;
 }
 
 /**
@@ -100,6 +138,8 @@ val_pmu_get_info(PMU_INFO_e type, uint32_t node_index)
       return g_pmu_info_table->pmu_count;
   case PMU_NODE_DP_EXTN:
       return entry->dual_page_extension;
+  case PMU_NODE_CS_COM:
+      return entry->coresight_compliant;
   default:
         val_print(ACS_PRINT_ERR, "\n   This PMU info option is not supported : %d ", type);
         return 0;
