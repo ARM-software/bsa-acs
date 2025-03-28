@@ -58,7 +58,7 @@ val_pmu_create_info_table(uint64_t *pmu_info_table)
           val_pmu_set_node_coresight_complaint(0x1, node_index);
       else {
           val_pmu_set_node_coresight_complaint(0x0, node_index);
-          val_print(ACS_PRINT_ERR, "\n   PMU node index %d is not CS complaint", node_index);
+          val_print(ACS_PRINT_DEBUG, "\n   PMU node index %d is not CS complaint\n", node_index);
       }
   }
 
