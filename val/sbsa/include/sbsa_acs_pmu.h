@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,6 +41,7 @@ uint32_t val_generate_traffic(uint64_t interface_acpiid, uint32_t pmu_node_index
                                      uint32_t mon_index, uint32_t eventid);
 uint32_t val_pmu_check_monitor_count_value(uint64_t interface_acpiid, uint32_t count_value,
                                                                           uint32_t eventid);
+void     val_pmu_set_node_coresight_complaint(uint32_t flag, uint32_t node_index);
 
 uint32_t pmu001_entry(uint32_t num_pe);
 uint32_t pmu002_entry(uint32_t num_pe);

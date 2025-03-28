@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,6 +53,7 @@ typedef struct {
     uint64_t base0;               /* Base address of Page 0 of the PMU*/
     uint64_t base1;               /* Base address of Page 1 of the PMU,
                                    valid only if dual_page_extension is 1*/
+    uint32_t coresight_compliant; /* node is CS complaint or not */
 } PMU_INFO_BLOCK;
 
 typedef struct {

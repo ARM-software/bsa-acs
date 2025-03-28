@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -126,5 +126,8 @@ BITFIELD_DECL(uint32_t, PMSCR_NSMSI, 2, 2)
 BITFIELD_DECL(uint32_t, PMSCR_MSI_MPAM_NS, 3, 3)
 BITFIELD_DECL(uint32_t, PMSCR_NAO, 4, 4)
 BITFIELD_DECL(uint32_t, PMSCR_IMPL, 31, 31)
+
+/* PMDEVARCH bit configuration */
+BITFIELD_DECL(uint32_t, PMDEVARCH_ARCHITECT, 31, 21)
 
 #endif /*__PMU_REG_H__ */
