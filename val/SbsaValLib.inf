@@ -1,5 +1,5 @@
 ## @file
-#  Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+#  Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
 #  SPDX-License-Identifier : Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +28,7 @@
   common/src/AArch64/PeTestSupport.S
   common/src/AArch64/ArchTimerSupport.S
   common/src/AArch64/GicSupport.S
+  common/src/AArch64/MpamSupport.S
   common/src/acs_iovirt.c
   common/src/acs_status.c
   common/src/acs_pe.c
@@ -46,6 +47,8 @@
   common/src/acs_exerciser.c
   common/src/acs_pgt.c
   common/src/acs_mmu.c
+  common/src/acs_mpam.c
+  common/src/acs_pcc.c
   common/sys_arch_src/smmu_v3/smmu_v3.c
   common/sys_arch_src/gic/gic.c
   common/sys_arch_src/pcie/pcie.c
@@ -57,9 +60,7 @@
   common/sys_arch_src/gic/v2/gic_v2.c
   common/sys_arch_src/gic/its/acs_gic_its.c
   common/sys_arch_src/gic/its/acs_gic_redistributor.c
-  sbsa/src/AArch64/MpamSupport.S
   sbsa/src/AArch64/RasSupport.S
-  sbsa/src/sbsa_acs_pe.c
   sbsa/src/sbsa_acs_pe_infra.c
   sbsa/src/sbsa_acs_pcie.c
   sbsa/src/sbsa_acs_iovirt.c
@@ -68,9 +69,7 @@
   sbsa/src/sbsa_acs_ras.c
   sbsa/src/sbsa_execute_test.c
   sbsa/src/sbsa_acs_pmu.c
-  sbsa/src/sbsa_acs_mpam.c
   sbsa/src/sbsa_acs_ete.c
-  sbsa/src/sbsa_acs_pcc.c
 
 [Packages]
   MdePkg/MdePkg.dec

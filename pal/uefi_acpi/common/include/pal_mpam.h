@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +15,8 @@
  * limitations under the License.
 **/
 
-#ifndef __PAL_SBSA_MPAM_H__
-#define __PAL_SBSA_MPAM_H__
+#ifndef __PAL_MPAM_H__
+#define __PAL_MPAM_H__
 
 /* Not defined in EDK2: Remove once EDK2 supports MPAM*/
 #define MEMORY_RESOURCE_PARTITIONING_AND_MONITORING_TABLE_SIGNATURE SIGNATURE_32('M', 'P', 'A', 'M')

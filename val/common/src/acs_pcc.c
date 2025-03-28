@@ -15,11 +15,10 @@
  * limitations under the License.
  **/
 
-/* This file contains APIs used by other SBSA modules/components */
+/* This file contains APIs used by other modules/components */
 
 #include "common/include/acs_val.h"
 #include "common/include/acs_common.h"
-#include "sbsa/include/sbsa_val_interface.h"
 
 static PCC_INFO_TABLE *g_pcc_info_table;
 

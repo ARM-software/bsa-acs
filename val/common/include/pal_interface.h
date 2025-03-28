@@ -798,6 +798,9 @@ void    *pal_aligned_alloc(uint32_t alignment, uint32_t size);
 void     pal_mem_free_aligned(void *buffer);
 uint32_t pal_mem_set_wb_executable(void *addr, uint32_t size);
 
+void    *pal_mem_alloc_at_address(uint64_t mem_base, uint64_t size);
+void     pal_mem_free_at_address(uint64_t mem_base, uint64_t size);
+
 uint32_t pal_mmio_read(uint64_t addr);
 uint64_t pal_mmio_read64(uint64_t addr);
 void     pal_mmio_write8(uint64_t addr, uint8_t data);
@@ -955,6 +958,232 @@ uint32_t pal_exerciser_get_state(EXERCISER_STATE *state, uint32_t bdf);
 uint32_t pal_exerciser_ops(EXERCISER_OPS ops, uint64_t param, uint32_t instance);
 uint32_t pal_exerciser_get_data(EXERCISER_DATA_TYPE type, exerciser_data_t *data, uint32_t bdf,
                                                                                   uint64_t ecam);
+
+/**
+  @brief  SRAT node type
+**/
+
+typedef enum {
+  SRAT_NODE_MEM_AFF  = 0x01,
+  SRAT_NODE_GICC_AFF = 0x03
+} SRAT_NODE_TYPE_e;
+
+/**
+  @brief  SRAT GICC Affinity Structure
+**/
+
+typedef struct {
+  uint32_t   prox_domain;      /* Proximity domain*/
+  uint32_t   proc_uid;         /* ACPI Processor UID */
+  uint32_t   flags;            /* Flags*/
+  uint32_t   clk_domain;       /* Clock Domain*/
+} SRAT_GICC_AFF_ENTRY;
+
+/**
+  @brief  SRAT Memory Affinity Structure
+**/
+
+typedef struct {
+  uint32_t   prox_domain;     /* Proximity domain */
+  uint32_t   flags;           /* flags */
+  uint64_t   addr_base;       /* mem range address base */
+  uint64_t   addr_len;        /* mem range address len */
+} SRAT_MEM_AFF_ENTRY;
+
+typedef union {
+  SRAT_MEM_AFF_ENTRY mem_aff;
+  SRAT_GICC_AFF_ENTRY gicc_aff;
+} SRAT_NODE_INFO;
+
+typedef struct {
+  uint32_t node_type;         /* Node type*/
+  SRAT_NODE_INFO node_data;
+} SRAT_INFO_ENTRY;
+
+typedef struct {
+  uint32_t num_of_srat_entries;
+  uint32_t num_of_mem_ranges;
+  SRAT_INFO_ENTRY  srat_info[];
+} SRAT_INFO_TABLE;
+
+/*
+ * @brief MPAM Resource Node
+ */
+
+#define MPAM_NEXT_MSC(msc_entry) \
+        (MPAM_MSC_NODE *)((uint8_t *)(&msc_entry->rsrc_node[0]) \
+        + msc_entry->rsrc_count * sizeof(MPAM_RESOURCE_NODE))
+
+#define MPAM_INTERFACE_TYPE_MMIO 0x00
+#define MPAM_INTERFACE_TYPE_PCC  0x0A
+
+typedef struct {
+    uint8_t    ris_index;
+    uint8_t    locator_type;  /* Identifies location of this resource */
+    uint64_t   descriptor1;   /* Primary acpi description of location */
+    uint32_t   descriptor2;   /* Secondary acpi description of location */
+} MPAM_RESOURCE_NODE;
+
+/*
+ * @brief MPAM MSC Node
+ */
+typedef struct {
+    uint8_t            intrf_type;    /* type of interface to this MPAM MSC */
+    uint32_t           identifier;     /* unique id to reference the node */
+    uint64_t           msc_base_addr; /* base addr of mem-mapped reg space or PCC
+                                         subspace ID based on interface type. */
+    uint32_t           msc_addr_len;  /* MSC mem map size */
+    uint32_t           of_intr;       /* Overflow interrupt GSIV in case of wired interrupts. */
+    uint32_t           of_intr_flags; /* Overflow interrupt flags */
+    uint32_t           err_intr;      /* Error interrupt GSIV in case of wired interrupts. */
+    uint32_t           err_intr_flags;/* Error interrupt flags */
+    uint32_t           max_nrdy;      /* max time in microseconds that MSC not ready
+                                         after config change */
+    uint32_t           rsrc_count;    /* number of resource nodes */
+    MPAM_RESOURCE_NODE rsrc_node[];   /* Details of resource node */
+} MPAM_MSC_NODE;
+
+/*
+ * @brief Mpam info table
+ */
+typedef struct {
+    uint32_t          msc_count;  /* Number of MSC node */
+    MPAM_MSC_NODE     msc_node[]; /* Details of MSC node */
+} MPAM_INFO_TABLE;
+
+void pal_mpam_create_info_table(MPAM_INFO_TABLE *MpamTable);
+
+typedef struct {
+  uint32_t mem_prox_domain;             /* Proximity domain of the memory region*/
+  uint64_t write_bw;                    /* Maximum write bandwidth */
+  uint64_t read_bw;                     /* Maximum read bandwidth */
+} HMAT_BW_ENTRY;
+
+typedef struct {
+  uint32_t num_of_mem_prox_domain;      /* Number of Memory Proximity Domains */
+  HMAT_BW_ENTRY bw_info[];            /* Array of bandwidth info based on proximity domain */
+} HMAT_INFO_TABLE;
+
+void pal_hmat_create_info_table(HMAT_INFO_TABLE *HmatTable);
+void pal_srat_create_info_table(SRAT_INFO_TABLE *SratTable);
+
+typedef struct {
+  uint32_t reserved : 4;        /* Bits [31:28] Reserved must be zero */
+  uint32_t token : 10;          /* Bits [27:18] Token Caller-defined value */
+  uint32_t protocol_id : 8;     /* Bits [17:10] Protocol ID */
+  uint32_t message_type : 2;    /* Bits [09:08] Message Type */
+  uint32_t message_id : 8;      /* Bits [07:00] Message ID */
+} SCMI_PROTOCOL_MESSAGE_HEADER;
+
+typedef struct {
+  uint32_t msc_id;            /* Identifier of the MSC */
+  uint32_t flags;             /* Reserved, must be zero */
+  uint32_t offset;            /* MPAM register offset to read from */
+} PCC_MPAM_MSC_READ_CMD_PARA;
+
+typedef struct {
+  int32_t  status;             /* command response status code */
+  uint32_t val;                /* value read from the register */
+} PCC_MPAM_MSC_READ_RESP_PARA;
+
+typedef struct {
+  uint32_t msc_id;            /* Identifier of the MSC */
+  uint32_t flags;             /* Reserved, must be zero */
+  uint32_t val;               /* value to be written to the register */
+  uint32_t offset;            /* MPAM register offset to write */
+} PCC_MPAM_MSC_WRITE_CMD_PARA;
+
+typedef struct {
+  int32_t  status;             /* command response status code */
+} PCC_MPAM_MSC_WRITE_RESP_PARA;
+
+#define MPAM_FB_PROTOCOL_ID    0x1A
+#define MPAM_MSG_TYPE_CMD      0x0
+#define MPAM_MSC_READ_CMD_ID   0x4
+#define MPAM_MSC_WRITE_CMD_ID  0x5
+#define MPAM_PCC_CMD_SUCCESS   0x0
+#define MPAM_PCC_SAFE_RETURN   0x0
+#define RETURN_FAILURE         0xFFFFFFFF
+
+/* Platform Communication Channel (PCC) info table */
+typedef struct {
+  uint8_t   addr_space_id;
+  uint8_t   reg_bit_width;
+  uint8_t   reg_bit_offset;
+  uint8_t   access_size;
+  uint64_t  addr;
+} ACPI_GENERIC_ADDRESS_STRUCTURE;
+
+typedef struct {
+  uint64_t                         base_addr;               /* base addr of shared mem-region */
+  ACPI_GENERIC_ADDRESS_STRUCTURE   doorbell_reg;            /* doorbell register */
+  uint64_t                         doorbell_preserve;       /* doorbell register preserve mask */
+  uint64_t                         doorbell_write;          /* doorbell register set mask */
+  uint32_t                         min_req_turnaround_usec; /* minimum request turnaround time */
+  ACPI_GENERIC_ADDRESS_STRUCTURE   cmd_complete_chk_reg;    /* command complete check register */
+  uint64_t                         cmd_complete_chk_mask;   /* command complete check mask */
+  ACPI_GENERIC_ADDRESS_STRUCTURE   cmd_complete_update_reg; /* command complete update register */
+  uint64_t                         cmd_complete_update_preserve;
+                                                            /* command complete update preserve */
+  uint64_t                         cmd_complete_update_set; /* command complete update set mask */
+} PCC_SUBSPACE_TYPE_3;
+
+typedef union {
+  PCC_SUBSPACE_TYPE_3 pcc_ss_type_3;
+} PCC_TYPE_SPECIFIC_INFO;
+
+typedef struct {
+  uint32_t                 subspace_idx;    /* PCC subspace index in PCCT ACPI table */
+  uint32_t                 subspace_type;   /* type of PCC subspace */
+  PCC_TYPE_SPECIFIC_INFO   type_spec_info;  /* PCC subspace type specific info */
+} PCC_INFO;
+
+typedef struct {
+  uint32_t  subspace_cnt; /* number of PCC subspace info stored */
+  PCC_INFO  pcc_info[];   /* array of PCC info blocks */
+} PCC_INFO_TABLE;
+
+#define PCC_TY3_CMD_OFFSET     12
+#define PCC_TY3_COMM_SPACE     16
+
+void pal_pcc_create_info_table(PCC_INFO_TABLE *PccInfoTable);
+void pal_pcc_store_info(uint32_t subspace_idx);
+
+/* Cache info table structures and APIs */
+
+#define CACHE_TYPE_SHARED  0x0
+#define CACHE_TYPE_PRIVATE 0x1
+#define CACHE_INVALID_NEXT_LVL_IDX 0xFFFFFFFF
+#define CACHE_INVALID_IDX 0xFFFFFFFF
+
+/*only the fields and flags required by ACS are parsed from ACPI PPTT table*/
+/*Cache flags indicate validity of cache info provided by PPTT Table*/
+typedef struct {
+  uint32_t size_property_valid;
+  uint32_t cache_type_valid;
+  uint32_t cache_id_valid;
+} CACHE_FLAGS;
+
+/* Since most of platform doesn't support cache id field (ACPI 6.4+), ACS uses PPTT offset as key
+   to uniquely identify a cache, In future once platforms align with ACPI 6.4+ my_offset member
+   might be removed from cache entry*/
+typedef struct {
+  CACHE_FLAGS flags;          /* Cache flags */
+  uint32_t my_offset;         /* Cache PPTT structure offset */
+  uint32_t next_level_index;  /* Index of next level cache entry in CACHE_INFO_TABLE */
+  uint32_t size;              /* Size of the cache in bytes */
+  uint32_t cache_id;          /* Unique, non-zero identifier for this cache */
+  uint32_t is_private;        /* Field indicate whether cache is private */
+  uint8_t  cache_type;        /* Cache type */
+} CACHE_INFO_ENTRY;
+
+typedef struct {
+  uint32_t num_of_cache;            /* Total of number of cache info entries */
+  CACHE_INFO_ENTRY cache_info[];    /* Array of cache info entries */
+} CACHE_INFO_TABLE;
+
+void pal_cache_create_info_table(CACHE_INFO_TABLE *CacheTable, PE_INFO_TABLE *PeTable);
+void pal_cache_dump_info_table(CACHE_INFO_TABLE *CacheTable, PE_INFO_TABLE *PeTable);
 
 #endif
 

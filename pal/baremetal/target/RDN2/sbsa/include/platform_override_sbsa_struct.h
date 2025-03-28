@@ -184,6 +184,10 @@ typedef struct {
     uint32_t    identifier;    /* unique id to reference the node */
     uint64_t    msc_base_addr; /* base addr of mem-map MSC reg */
     uint32_t    msc_addr_len;  /*  MSC mem map size */
+    uint32_t    of_intr;       /* Overflow interrupt GSIV in case of wired interrupts. */
+    uint32_t    of_intr_flags; /* Overflow interrupt flags */
+    uint32_t    err_intr;      /* Error interrupt GSIV in case of wired interrupts. */
+    uint32_t    err_intr_flags;/* Error interrupt flags */
     uint32_t    max_nrdy;      /* max time in microseconds that MSC not ready
                                 after config change */
     uint32_t    rsrc_count;    /* number of resource nodes */
