@@ -30,7 +30,6 @@ int      val_suspend_pe(uint64_t entry, uint32_t context_id);
 
 /* GIC VAL APIs */
 uint32_t val_bsa_gic_execute_tests(uint32_t num_pe, uint32_t *g_sw_view);
-uint32_t val_gic_route_interrupt_to_pe(uint32_t int_id, uint64_t mpidr);
 uint32_t val_gic_get_interrupt_state(uint32_t int_id);
 void val_gic_clear_interrupt(uint32_t int_id);
 void val_gic_set_intr_trigger(uint32_t int_id, INTR_TRIGGER_INFO_TYPE_e trigger_type);

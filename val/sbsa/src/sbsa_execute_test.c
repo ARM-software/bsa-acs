@@ -19,6 +19,7 @@
 #include "common/include/acs_smmu.h"
 #include "common/include/acs_pcie.h"
 #include "common/include/acs_common.h"
+#include "common/include/acs_mpam.h"
 
 // SBSA Specific Headers
 #include "sbsa/include/sbsa_val_interface.h"

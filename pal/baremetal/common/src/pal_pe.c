@@ -280,3 +280,19 @@ pal_pe_get_num()
   }
   return g_pe_info_table->header.num_of_pe;
 }
+
+#ifdef BSA
+/**
+  @brief API defined to maintain linking compatibility.
+  Do not modify.
+
+  @return  void
+**/
+void
+pal_cache_create_info_table(void *CacheTable, void *PeTable)
+{
+  (void) CacheTable;
+  (void) PeTable;
+  return;
+}
+#endif

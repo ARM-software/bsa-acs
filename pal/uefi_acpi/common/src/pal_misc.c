@@ -654,3 +654,52 @@ pal_mem_set_wb_executable (
 
   return 0;
 }
+/*
+  @brief  Allocates requested buffer size in bytes in a contiguous cacheable
+          memory and returns the base address of the range.
+
+  @param  Bdf          Bus, Device, and Function of the requesting PCIe device
+  @param  Size         allocation size in bytes
+  @param  Pa           Pointer to Physical Addr
+
+  @return if SUCCESS   Pointer to Virtual Addr ; if FAILURE   NULL
+**/
+VOID *
+pal_mem_alloc_at_address (
+  UINT64 mem_base,
+  UINT64 Size
+  )
+{
+  EFI_STATUS Status;
+  EFI_PHYSICAL_ADDRESS PageBase;
+
+  PageBase = mem_base;
+  Status = gBS->AllocatePages (AllocateAddress,
+                               EfiBootServicesData,
+                               EFI_SIZE_TO_PAGES(Size),
+                               &PageBase);
+  if (EFI_ERROR(Status))
+  {
+    acs_print(ACS_PRINT_ERR, L" Allocate Pages failed %x\n", Status);
+    return NULL;
+  }
+
+  return (VOID *)(UINTN)PageBase;
+}
+
+/**
+  @brief Free number of pages in the memory as requested.
+
+  @param PageBase Address from where we need to free
+  @param NumPages Number of memory pages needed
+
+  @return None
+**/
+VOID
+pal_mem_free_at_address(
+  UINT64 mem_base,
+  UINT64 Size
+  )
+{
+  gBS->FreePages(mem_base, EFI_SIZE_TO_PAGES(Size));
+}

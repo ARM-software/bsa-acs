@@ -472,3 +472,26 @@ val_gic_is_valid_ppi(uint32_t int_id)
   return val_gic_check_ppi(int_id);
 }
 
+/**
+  @brief   This function routes interrupt to specific PE.
+           1. Caller       -  Test Suite
+           2. Prerequisite -  val_gic_create_info_table
+  @param   int_id Interrupt ID to be routed
+  @param   mpidr MPIDR_EL1 reg value of the PE to which the interrupt should be routed
+  @return  status
+**/
+uint32_t val_gic_route_interrupt_to_pe(uint32_t int_id, uint64_t mpidr)
+{
+  uint64_t cpuaffinity;
+
+  if (int_id > 31) {
+      cpuaffinity = mpidr & (PE_AFF0 | PE_AFF1 | PE_AFF2 | PE_AFF3);
+      val_mmio_write64(val_get_gicd_base() + GICD_IROUTER + (8 * int_id), cpuaffinity);
+  }
+  else{
+      val_print(ACS_PRINT_ERR, "\n    Only SPIs can be routed, ", 0);
+      val_print(ACS_PRINT_ERR, "interrupt with INTID = %d cannot be routed", int_id);
+  }
+
+  return 0;
+}
