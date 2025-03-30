@@ -104,3 +104,11 @@ v24.06_DRTM_0.5_ALP1
 * PCIe bug fixes and enhancements
 * Partner Issue Enhancements and Fixes
 * Document updates
+
+v25.03_MPAM_0.5.0_ALP
+* Sys-MPAM Alpha Release Updates
+* MPAM ACS Base Infrastructure
+* VAL APIs and Pal Support
+* Added MPAM Uefi Application, Build Script for Mpam.efi Application
+* Documentation and README Changes
+* Tests for Cache Partitioning, Errors, Memory Partitioning, Registers
