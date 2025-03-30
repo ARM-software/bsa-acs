@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,11 +21,10 @@
 #include <Library/BaseMemoryLib.h>
 
 #include "common/include/pal_uefi.h"
-#include "sbsa/include/pal_sbsa_uefi.h"
 
-#define ADD_PTR(t, p, l) ((t*)((UINT8*)p + l))
+#define ADD_PTR(t, p, l) ((t *)((UINT8 *)p + l))
 
-UINT64 pal_get_hmat_ptr();
+UINT64 pal_get_hmat_ptr(VOID);
 
 /**
   @brief  This function checks whether an entry already present for
@@ -155,13 +154,13 @@ EFI_ACPI_6_4_HMAT_STRUCTURE_SYSTEM_LOCALITY_LATENCY_AND_BANDWIDTH_INFO *curr_bw_
          greater than previously seen bandwidth. HMAT allows table developer
          to capture bandwidth for different scenarios */
       if (curr_bw_struct->DataType == HMAT_DATA_TYPE_ACCESS_BW ||
-      curr_bw_struct->DataType == HMAT_DATA_TYPE_WRITE_BW ) {
+          curr_bw_struct->DataType == HMAT_DATA_TYPE_WRITE_BW) {
           if (curr_max_bw > curr_info_entry->write_bw)
               curr_info_entry->write_bw = curr_max_bw;
       }
 
       if (curr_bw_struct->DataType == HMAT_DATA_TYPE_ACCESS_BW ||
-      curr_bw_struct->DataType == HMAT_DATA_TYPE_READ_BW ) {
+          curr_bw_struct->DataType == HMAT_DATA_TYPE_READ_BW) {
           if (curr_max_bw > curr_info_entry->read_bw)
               curr_info_entry->read_bw = curr_max_bw;
       }
@@ -188,7 +187,8 @@ VOID pal_hmat_dump_info_table(HMAT_INFO_TABLE *HmatTable)
   curr_entry = HmatTable->bw_info;
   acs_print(ACS_PRINT_INFO, L"\n*** HMAT info table entries ***\n");
   for (i = 0 ; i < HmatTable->num_of_mem_prox_domain ; i++) {
-      acs_print(ACS_PRINT_INFO, L"\nMemory Proximity domain  :   0x%llx", curr_entry->mem_prox_domain);
+      acs_print(ACS_PRINT_INFO, L"\nMemory Proximity domain  :   0x%llx",
+                                curr_entry->mem_prox_domain);
       acs_print(ACS_PRINT_INFO, L"\n  Write bandwidth        :   0x%llx", curr_entry->write_bw);
       acs_print(ACS_PRINT_INFO, L"\n  Read  bandwidth        :   0x%llx\n", curr_entry->read_bw);
       curr_entry++;

@@ -1,5 +1,5 @@
 ## @file
-#  Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
+#  Copyright (c) 2023-2025, Arm Limited or its affiliates. All rights reserved.
 #  SPDX-License-Identifier : Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,6 +35,11 @@ fi
 
 if [ "$1" == "ENABLE_DRTM" ]; then
     build -a AARCH64 -t GCC49 -p ShellPkg/ShellPkg.dsc -m ShellPkg/Application/bsa-acs/drtm/uefi_app/DrtmAcs.inf
+    return 0;
+fi
+
+if [ "$1" == "ENABLE_MPAM" ]; then
+    build -a AARCH64 -t GCC49 -p ShellPkg/ShellPkg.dsc -m ShellPkg/Application/bsa-acs/mpam/uefi_app/MpamAcs.inf
     return 0;
 fi
 

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,10 +24,9 @@
 #include <Protocol/Cpu.h>
 
 #include "common/include/pal_uefi.h"
-#include "sbsa/include/pal_sbsa_uefi.h"
 
 UINT64 pal_get_pptt_ptr(void);
-#define ADD_PTR(t, p, l) ((t*)((UINT8*)p + l))
+#define ADD_PTR(t, p, l) ((t *)((UINT8 *)p + l))
 #define PPTT_PE_PRIV_RES_OFFSET 0x14
 #define PPTT_STRUCT_OFFSET 0x24
 
@@ -123,7 +122,7 @@ pal_cache_find(CACHE_INFO_TABLE *CacheTable, UINT32 offset, UINT32 *found_index)
   curr_entry = CacheTable->cache_info;
   for (i = 0 ; i < CacheTable->num_of_cache ; i++) {
     /* match cache offset of the entry with input offset*/
-    if(curr_entry->my_offset == offset) {
+    if (curr_entry->my_offset == offset) {
       *found_index = i;
       return 1;
     }
@@ -153,6 +152,7 @@ pal_cache_store_pe_res(PE_INFO_TABLE *PeTable, UINT32 acpi_uid,
     for (i = 0 ; i < PeTable->header.num_of_pe; i++) {
       if (entry->acpi_proc_uid == acpi_uid) {
         entry->level_1_res[res_index] = cache_index;
+        pal_pe_data_cache_ops_by_va((UINT64)entry, CLEAN_AND_INVALIDATE);
       }
       entry++;
     }
@@ -178,7 +178,7 @@ pal_cache_create_info_table(CACHE_INFO_TABLE *CacheTable, PE_INFO_TABLE *PeTable
   EFI_ACPI_6_4_PPTT_STRUCTURE_HEADER *pptt_struct, *pptt_end ;
   EFI_ACPI_6_4_PPTT_STRUCTURE_PROCESSOR *pe_type_struct, *temp_pe_struct;
   EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE *cache_type_struct;
-  UINT32 i, j, status=0;
+  UINT32 i, j, status = 0;
   UINT32 offset;
   UINT32 index;
   UINT32 next_index;
@@ -221,7 +221,7 @@ pal_cache_create_info_table(CACHE_INFO_TABLE *CacheTable, PE_INFO_TABLE *PeTable
           index = pal_cache_store_info(CacheTable, cache_type_struct, offset, CACHE_TYPE_PRIVATE);
           pal_cache_store_pe_res(PeTable, pe_type_struct->AcpiProcessorId, index, i);
           /* parse next level(s) of current private PE cache  */
-          while(cache_type_struct->NextLevelOfCache != 0) {
+          while (cache_type_struct->NextLevelOfCache != 0) {
             offset = cache_type_struct->NextLevelOfCache;
             cache_type_struct =  ADD_PTR(EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE, PpttHdr, offset);
             /* check if cache PPTT struct is already parsed*/
@@ -245,17 +245,17 @@ pal_cache_create_info_table(CACHE_INFO_TABLE *CacheTable, PE_INFO_TABLE *PeTable
           temp_pe_struct = pe_type_struct;
 
           /* Keep on parsing PPTT PE group structures until root */
-          while (temp_pe_struct->Parent != 0 ) {
+          while (temp_pe_struct->Parent != 0) {
             temp_pe_struct = ADD_PTR(EFI_ACPI_6_4_PPTT_STRUCTURE_PROCESSOR, PpttHdr,
                                      temp_pe_struct->Parent);
             /* If a group has cache resources parse it */
-            for (j = 0 ; j < temp_pe_struct->NumberOfPrivateResources;j++) {
+            for (j = 0; j < temp_pe_struct->NumberOfPrivateResources; j++) {
               offset = *(ADD_PTR(UINT32, temp_pe_struct, PPTT_PE_PRIV_RES_OFFSET + j*4));
               cache_type_struct =  ADD_PTR(EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE, PpttHdr, offset);
               /* Next level cache type should unified type(0x2 or 0x3) or same as previous type*/
               if (cache_type_struct->Attributes.CacheType > 0x1 ||
                   cache_type_struct->Attributes.CacheType ==
-                  CacheTable->cache_info[index].cache_type ) {
+                  CacheTable->cache_info[index].cache_type) {
                 status = pal_cache_find(CacheTable, offset, &next_index);
                 /* if cache structure is already parsed update the previous cache info with index
                    of found cache entry in cache_info_table, else parse the cache structure */
@@ -273,7 +273,8 @@ pal_cache_create_info_table(CACHE_INFO_TABLE *CacheTable, PE_INFO_TABLE *PeTable
             /* If cache entry already found in info table, then it means next level cache(s)
                for that cache is already parsed in past iteration, else parse parent PE group
                of current group */
-            if(status) break;
+            if (status)
+              break;
           }
         }
       }

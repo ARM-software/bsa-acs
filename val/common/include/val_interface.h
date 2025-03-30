@@ -62,6 +62,13 @@ void    *val_memcpy(void *dest_buffer, void *src_buffer, uint32_t len);
 uint64_t val_time_delay_ms(uint64_t time_ms);
 
 /* VAL PE APIs */
+
+typedef enum {
+  PE_FEAT_MPAM,
+  PE_FEAT_PMU,
+  PE_FEAT_RAS
+} PE_FEAT_NAME;
+
 uint32_t val_pe_create_info_table(uint64_t *pe_info_table);
 void     val_pe_free_info_table(void);
 uint32_t val_pe_get_num(void);
@@ -80,9 +87,11 @@ void     val_smbios_free_info_table(void);
 uint32_t val_get_num_smbios_slots(void);
 
 void     val_execute_on_pe(uint32_t index, void (*payload)(void), uint64_t args);
+uint32_t val_pe_feat_check(PE_FEAT_NAME pe_feature);
 
 /* GIC VAL APIs */
 uint32_t    val_gic_create_info_table(uint64_t *gic_info_table);
+uint32_t    val_gic_route_interrupt_to_pe(uint32_t int_id, uint64_t mpidr);
 
 typedef enum {
   GIC_INFO_VERSION=1,
@@ -329,5 +338,89 @@ uint64_t val_memory_get_info(addr_t addr, uint64_t *attr);
 uint32_t val_memory_get_entry_index(uint32_t type, uint32_t instance);
 void val_pe_cache_clean_invalidate_range(uint64_t start_addr, uint64_t length);
 void val_pe_cache_invalidate_range(uint64_t start_addr, uint64_t length);
+
+/* MPAM tests APIs */
+#define MPAM_INVALID_INFO 0xFFFFFFFF
+#define SRAT_INVALID_INFO 0xFFFFFFFF
+#define HMAT_INVALID_INFO 0xFFFFFFFF
+
+void val_mpam_create_info_table(uint64_t *mpam_info_table);
+void val_mpam_free_info_table(void);
+
+typedef enum {
+  MPAM_RSRC_TYPE_PE_CACHE,
+  MPAM_RSRC_TYPE_MEMORY,
+  MPAM_RSRC_TYPE_SMMU,
+  MPAM_RSRC_TYPE_MEM_SIDE_CACHE,
+  MPAM_RSRC_TYPE_ACPI_DEVICE,
+  MPAM_RSRC_TYPE_UNKNOWN = 0xFF  /* 0x05-0xFE Reserved for future use */
+} MPAM_RSRC_LOCATOR_TYPE;
+
+/* MPAM info request types*/
+typedef enum {
+  MPAM_MSC_RSRC_COUNT,
+  MPAM_MSC_RSRC_RIS,
+  MPAM_MSC_RSRC_TYPE,
+  MPAM_MSC_BASE_ADDR,
+  MPAM_MSC_ADDR_LEN,
+  MPAM_MSC_RSRC_DESC1,
+  MPAM_MSC_RSRC_DESC2,
+  MPAM_MSC_OF_INTR,
+  MPAM_MSC_OF_INTR_FLAGS,
+  MPAM_MSC_ERR_INTR,
+  MPAM_MSC_ERR_INTR_FLAGS,
+  MPAM_MSC_NRDY,
+  MPAM_MSC_ID,
+  MPAM_MSC_INTERFACE_TYPE
+} MPAM_INFO_e;
+
+/* SRAT */
+typedef enum {
+  SRAT_MEM_NUM_MEM_RANGE,
+  SRAT_MEM_BASE_ADDR,
+  SRAT_MEM_ADDR_LEN,
+  SRAT_GICC_PROX_DOMAIN,
+  SRAT_GICC_PROC_UID,
+  SRAT_GICC_REMOTE_PROX_DOMAIN
+} SRAT_INFO_e;
+
+/* HMAT APIs */
+void val_hmat_create_info_table(uint64_t *hmat_info_table);
+void val_hmat_free_info_table(void);
+
+/* SRAT APIs */
+void val_srat_create_info_table(uint64_t *srat_info_table);
+void val_srat_free_info_table(void);
+uint64_t val_srat_get_info(SRAT_INFO_e type, uint64_t prox_domain);
+
+/* PCC related APIs */
+void val_pcc_create_info_table(uint64_t *pcc_info_table);
+void *val_pcc_cmd_response(uint32_t subspace_id, uint32_t command, void *data, uint32_t data_size);
+uint32_t val_pcc_get_ss_info_idx(uint32_t subspace_id);
+void val_pcc_free_info_table(void);
+
+/*Cache related info APIs*/
+#define INVALID_CACHE_INFO 0xFFFFFFFFFFFFFFFF
+#define CACHE_TABLE_EMPTY 0xFFFFFFFF
+#define DEFAULT_CACHE_IDX 0xFFFFFFFF
+
+typedef enum {
+  CACHE_TYPE,
+  CACHE_SIZE,
+  CACHE_ID,
+  CACHE_NEXT_LEVEL_IDX,
+  CACHE_PRIVATE_FLAG
+} CACHE_INFO_e;
+
+void val_cache_create_info_table(uint64_t *cache_info_table);
+void val_cache_free_info_table(void);
+uint64_t val_cache_get_info(CACHE_INFO_e type, uint32_t cache_index);
+uint32_t val_cache_get_llc_index(void);
+uint32_t val_cache_get_pe_l1_cache_res(uint32_t res_index);
+
+uint64_t val_pmu_reg_read(uint32_t reg_id);
+void val_pmu_reg_write(uint32_t reg_id, uint64_t write_data);
+void val_pmu_cycle_counter_start(void);
+void val_pmu_cycle_counter_stop(void);
 
 #endif

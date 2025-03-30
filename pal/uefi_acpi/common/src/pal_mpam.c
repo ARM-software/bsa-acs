@@ -21,16 +21,15 @@
 #include <Library/BaseMemoryLib.h>
 
 #include "common/include/pal_uefi.h"
-#include "sbsa/include/pal_sbsa_uefi.h"
 #include "../include/platform_override.h"
-#include "sbsa/include/pal_sbsa_mpam.h"
+#include "common/include/pal_mpam.h"
 
 
-#define ADD_PTR(t, p, l) ((t*)((UINT8*)p + l))
+#define ADD_PTR(t, p, l) ((t *)((UINT8 *)p + l))
 
-UINT64 pal_get_mpam_ptr();
+UINT64 pal_get_mpam_ptr(VOID);
 
-UINT64 pal_get_srat_ptr();
+UINT64 pal_get_srat_ptr(VOID);
 
 /**
   @brief  Display MPAM info table details
@@ -53,10 +52,14 @@ pal_mpam_dump_table(MPAM_INFO_TABLE *MpamTable)
   curr_entry = &(MpamTable->msc_node[0]);
 
   for (i = 0; i < MpamTable->msc_count; i++) {
-      acs_print(ACS_PRINT_INFO, L"\nMSC node Index      :%d ", i);
-      acs_print(ACS_PRINT_INFO, L"\nMSC base addr       :%llx ",
+      acs_print(ACS_PRINT_INFO, L"\nMSC node Index         :%d ", i);
+      acs_print(ACS_PRINT_INFO, L"\nMSC base addr          :%llx ",
                                         curr_entry->msc_base_addr);
-      acs_print(ACS_PRINT_INFO, L"\nMSC resource count  :%lx ",
+      acs_print(ACS_PRINT_INFO, L"\nMSC Overflow interrupt :%llx ",
+                                        curr_entry->of_intr);
+      acs_print(ACS_PRINT_INFO, L"\nMSC Error interrupt    :%llx ",
+                                        curr_entry->err_intr);
+      acs_print(ACS_PRINT_INFO, L"\nMSC resource count     :%lx ",
                                         curr_entry->rsrc_count);
 
       for (j = 0; j < curr_entry->rsrc_count; j++) {
@@ -93,7 +96,7 @@ pal_srat_dump_table(SRAT_INFO_TABLE *SratTable)
 
   for (i = 0; i < SratTable->num_of_srat_entries; i++) {
       curr_entry = &(SratTable->srat_info[i]);
-      if ( curr_entry->node_type == SRAT_NODE_MEM_AFF) {
+      if (curr_entry->node_type == SRAT_NODE_MEM_AFF) {
           acs_print(ACS_PRINT_INFO, L"\n       SRAT mem prox domain :%x ",
                                                    curr_entry->node_data.mem_aff.prox_domain);
           acs_print(ACS_PRINT_INFO, L"\n       SRAT mem addr_base :%llx ",
@@ -101,7 +104,7 @@ pal_srat_dump_table(SRAT_INFO_TABLE *SratTable)
           acs_print(ACS_PRINT_INFO, L"\n       SRAT mem addr_len :%llx ",
                                                       curr_entry->node_data.mem_aff.addr_len);
       }
-      else if ( curr_entry->node_type == SRAT_NODE_GICC_AFF) {
+      else if (curr_entry->node_type == SRAT_NODE_GICC_AFF) {
           acs_print(ACS_PRINT_INFO, L"\n       SRAT Gicc prox domain :%x ",
                                                    curr_entry->node_data.gicc_aff.prox_domain);
           acs_print(ACS_PRINT_INFO, L"\n       SRAT Gicc processor uid :%x ",
@@ -154,6 +157,10 @@ pal_mpam_create_info_table(MPAM_INFO_TABLE *MpamTable)
   while (msc_node < msc_end) {
       curr_entry->msc_base_addr =  msc_node->base_address;
       curr_entry->msc_addr_len  =  msc_node->mmio_size;
+      curr_entry->of_intr       = msc_node->overflow_interrupt;
+      curr_entry->of_intr_flags  = msc_node->overflow_int_flags;
+      curr_entry->err_intr       = msc_node->error_interrupt;
+      curr_entry->err_intr_flags = msc_node->error_int_flags;
       curr_entry->max_nrdy = msc_node->max_nrdy_usec;
       curr_entry->rsrc_count = msc_node->num_resource_nodes;
       curr_entry->intrf_type = msc_node->InterfaceType;
@@ -269,7 +276,7 @@ pal_srat_create_info_table(SRAT_INFO_TABLE *SratTable)
     Length += Entry->Length;
     Entry = (EFI_ACPI_6_4_SRAT_STRUCTURE_HEADER *) ((UINT8 *)Entry +
                                                               (Entry->Length));
-  } while(Length < TableLength);
+  } while (Length < TableLength);
 
   pal_srat_dump_table(SratTable);
 }
