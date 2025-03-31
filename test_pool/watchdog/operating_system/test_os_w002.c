@@ -30,18 +30,54 @@
 
 static uint32_t int_id;
 static uint64_t wd_num;
+static volatile uint32_t g_failsafe_int_received;
+static volatile uint32_t g_wd_int_received;
+
+extern uint32_t g_wakeup_timeout;
 
 static
 void
 isr()
 {
-    uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
     val_wd_set_ws0(wd_num, 0);
+    g_wd_int_received = 1;
     val_print(ACS_PRINT_DEBUG, "\n       Received WS0 interrupt                ", 0);
-    val_set_status(index, RESULT_PASS(TEST_NUM, 1));
     val_gic_end_of_interrupt(int_id);
 }
 
+static
+void
+isr_failsafe()
+{
+  uint32_t intid;
+  uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
+
+  val_timer_set_phy_el1(0);
+  val_print(ACS_PRINT_ERR, "       Received Failsafe interrupt\n", 0);
+  g_failsafe_int_received = 1;
+  val_set_status(index, RESULT_FAIL(TEST_NUM, 7));
+  intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
+  val_gic_end_of_interrupt(intid);
+}
+
+static
+void
+wakeup_set_failsafe()
+{
+  uint32_t intid;
+  uint64_t timer_expire_val = (val_get_counter_frequency() * 3 * g_wakeup_timeout) / 2;
+
+  intid = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
+  val_gic_install_isr(intid, isr_failsafe);
+  val_timer_set_phy_el1(timer_expire_val);
+}
+
+static
+void
+wakeup_clear_failsafe()
+{
+  val_timer_set_phy_el1(0);
+}
 
 static
 void
@@ -49,7 +85,7 @@ payload()
 {
 
     uint32_t status, timeout, ns_wdg = 0;
-    uint64_t timer_expire_ticks = 1;
+    uint64_t timer_expire_ticks = 1 * g_wakeup_timeout;
     uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
     wd_num = val_wd_get_info(0, WD_INFO_COUNT);
 
@@ -62,6 +98,9 @@ payload()
         return;
     }
 
+    /* Assume pass until proven otherwise. */
+    val_set_status(index, RESULT_PASS(TEST_NUM, 1));
+
     do {
         wd_num--; /*array index starts from 0, so subtract 1 from count*/
 
@@ -70,8 +109,6 @@ payload()
 
         ns_wdg++;
         timeout = val_get_counter_frequency() * 2;
-        val_set_status(index, RESULT_PENDING(TEST_NUM));     /* Set the initial result to pending*/
-
         int_id       = val_wd_get_info(wd_num, WD_INFO_GSIV);
         val_print(ACS_PRINT_DEBUG, "\n       WS0 Interrupt id  %d        ", int_id);
 
@@ -95,6 +132,8 @@ payload()
         else
             val_gic_set_intr_trigger(int_id, INTR_TRIGGER_INFO_LEVEL_HIGH);
 
+        wakeup_set_failsafe();
+        g_wd_int_received = 0;
         status = val_wd_set_ws0(wd_num, timer_expire_ticks);
         if (status) {
             val_print(ACS_PRINT_ERR, "\n       Setting watchdog timeout failed", 0);
@@ -102,7 +141,18 @@ payload()
             return;
         }
 
-        while ((--timeout > 0) && (IS_RESULT_PENDING(val_get_status(index))));
+        timeout = val_get_counter_frequency() * 2;
+        while (timeout && (g_wd_int_received == 0) && (g_failsafe_int_received == 0)) {
+          timeout--;
+        }
+        wakeup_clear_failsafe();
+
+        val_wd_set_ws0(wd_num, 0);
+
+        if (g_failsafe_int_received) {
+          val_set_status(index, RESULT_FAIL(TEST_NUM, 7));
+          return;
+        }
 
         if (timeout == 0) {
             val_print(ACS_PRINT_ERR, "\n       WS0 Interrupt not received on %d   ", int_id);
