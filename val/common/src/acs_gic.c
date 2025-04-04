@@ -149,12 +149,19 @@ val_gic_get_pe_rdbase(uint64_t mpidr)
 {
   uint32_t     gicrd_baselen;
   uint32_t     gicr_rdindex = 0;
+  uint32_t     gic_version;
   uint64_t     affinity, pe_affinity;
   uint64_t     gicrd_granularity;
   uint64_t     gicrd_base, pe_gicrd_base;
 
   pe_affinity = (mpidr & (PE_AFF0 | PE_AFF1 | PE_AFF2)) | ((mpidr & PE_AFF3) >> 8);
+  gic_version = val_gic_get_info(GIC_INFO_VERSION);
+
   gicrd_granularity = GICR_CTLR_FRAME_SIZE + GICR_SGI_PPI_FRAME_SIZE;
+
+  /* Redistributors in GICv4 define 2 additional 64KB frames - One each for VLPI and Reserved */
+  if (gic_version > 3)
+    gicrd_granularity += GICR_VLPI_FRAME_SIZE + GICR_RES_FRAME_SIZE;
 
   gicr_rdindex = 0;
 

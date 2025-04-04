@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021,2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021,2024-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,6 +38,8 @@
 #define GIC_DEFAULT_PRIORITY     0x80
 #define GICR_CTLR_FRAME_SIZE     0x00010000
 #define GICR_SGI_PPI_FRAME_SIZE  0x00010000
+#define GICR_VLPI_FRAME_SIZE     0x00010000
+#define GICR_RES_FRAME_SIZE      0x00010000
 #define GICR_TYPER_AFF           (0xFFFFFFFFULL << 32)
 
 #define GIC_ICDIPTR         0x800
