@@ -137,7 +137,8 @@ payload (void)
       tbl_index_next = tbl_index + 1;
 
       val_pcie_read_cfg(bdf, TYPE01_RIDR, &class_code);
-      val_print(ACS_PRINT_DEBUG, "\n       Class code is 0x%x", class_code);
+      val_print(ACS_PRINT_DEBUG, "\n     Primary  BDF is 0x%x", bdf);
+      val_print(ACS_PRINT_DEBUG, "\n         Class code is 0x%x", class_code);
 
       base_cc = class_code >> TYPE01_BCC_SHIFT;
 
@@ -148,12 +149,15 @@ payload (void)
       if ((base_cc == CNTRL_CC) || (base_cc > RES_CC))
       {
         tbl_index++;
+        val_print(ACS_PRINT_DEBUG, "\n        Skipping ..N/W ctrl device", 0);
         continue;
       }
 
       dp_type = val_pcie_device_port_type(bdf);
       /* Check entry is EP. Else move to next BDF. */
       if (dp_type == EP) {
+
+        val_print(ACS_PRINT_DEBUG, "\n        Continuing...device is EP", 0);
         current_dev_bdf = bdf;
         if (!check_msi_status(current_dev_bdf))
         {
@@ -168,6 +172,7 @@ payload (void)
                 bdf = bdf_tbl_ptr->device[tbl_index_next].bdf;
 
                 val_pcie_read_cfg(bdf, TYPE01_RIDR, &class_code);
+                val_print(ACS_PRINT_DEBUG, "\n     Secondary  BDF is 0x%x", bdf);
                 val_print(ACS_PRINT_DEBUG, "\n       Class code is 0x%x", class_code);
 
                 base_cc = class_code >> TYPE01_BCC_SHIFT;
@@ -179,6 +184,7 @@ payload (void)
                 if ((base_cc == CNTRL_CC) || (base_cc > RES_CC))
                 {
                   tbl_index_next++;
+                  val_print(ACS_PRINT_DEBUG, "\n        Skipping ..N/W ctrl device", 0);
                   continue;
                 }
 
@@ -186,6 +192,7 @@ payload (void)
                 /* Check entry is EP. Else move to next BDF. */
                 if (dp_type == EP)
                 {
+                  val_print(ACS_PRINT_DEBUG, "\n        Continuing...device is EP", 0);
                   next_dev_bdf = bdf;
                   if (!check_msi_status(next_dev_bdf))
                   {
@@ -204,18 +211,16 @@ payload (void)
                       val_set_status (index, RESULT_FAIL(TEST_NUM, 01));
                       status = 1;
                     }
-
                     clean_msi_list (next_dev_mvec);
                   }
                 }
-
                 tbl_index_next++;
             }
             clean_msi_list (current_dev_mvec);
         }
       }
       else {
-        val_print (ACS_PRINT_DEBUG, "\n       Invalid BDF 0x%x", current_dev_bdf);
+        val_print (ACS_PRINT_DEBUG, "\n       BDF is not EP 0x%x", bdf);
       }
       tbl_index++;
   }
