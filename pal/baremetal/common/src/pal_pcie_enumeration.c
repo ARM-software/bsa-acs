@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -793,5 +793,19 @@ pal_bsa_pcie_enumerate()
   return 0; /* uefi takes care of it */
 }
 
+/**
+  @brief  This API is used as placeholder to check if the bus
+          is to be skipped for PCIe table creation
 
-
+  @param  bus_index
+  @return 1 if bus to be skipped else 0
+**/
+uint32_t
+pal_pcie_check_bus_valid(uint32_t bus_index)
+{
+  /* Add Bus index to this function if PCIe table
+     creation need to be ignored for a bus
+  */
+  (void) bus_index;
+  return 0;
+}
