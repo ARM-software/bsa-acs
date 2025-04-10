@@ -293,8 +293,17 @@ val_timer_create_info_table(uint64_t *timer_info_table)
 
   @return None
 **/
+
 void
-val_timer_free_info_table()
+val_timer_free_info_table(void)
 {
-  pal_mem_free_aligned((void *)g_timer_info_table);
+    if (g_timer_info_table != NULL) {
+        pal_mem_free_aligned((void *)g_timer_info_table);
+        g_timer_info_table = NULL;
+    }
+    else {
+      val_print(ACS_PRINT_ERR,
+                  "\n WARNING: g_timer_info_table pointer is already NULL",
+        0);
+    }
 }

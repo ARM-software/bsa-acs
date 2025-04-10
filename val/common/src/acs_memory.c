@@ -72,10 +72,19 @@ uint32_t val_mmu_get_mapping_count(void)
 
   @return None
 **/
+
 void
-val_memory_free_info_table()
+val_memory_free_info_table(void)
 {
-  pal_mem_free((void *)g_memory_info_table);
+    if (g_memory_info_table != NULL) {
+        pal_mem_free((void *)g_memory_info_table);
+        g_memory_info_table = NULL;
+    }
+    else {
+      val_print(ACS_PRINT_ERR,
+                  "\n WARNING: g_memory_info_table pointer is already NULL",
+        0);
+    }
 }
 
 /**
