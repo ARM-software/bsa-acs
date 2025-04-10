@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2021, 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -76,6 +76,16 @@ payload()
       return;
   }
 
+  /* Start Sys timer*/
+  cnt_base_n = val_timer_get_info(TIMER_INFO_SYS_CNT_BASE_N, timer_num);
+  if (cnt_base_n == 0) {
+      val_print(ACS_PRINT_WARN, "\n       CNT_BASE_N is zero                 ", 0);
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
+      return;
+  }
+
+  val_timer_set_system_timer((addr_t)cnt_base_n, sys_timer_ticks);
+
   irq_received = 0;
 
   intid = val_timer_get_info(TIMER_INFO_SYS_INTID, timer_num);
@@ -83,10 +93,6 @@ payload()
 
   intid_phy = val_timer_get_info(TIMER_INFO_PHY_EL1_INTID, 0);
   val_gic_install_isr(intid_phy, isr_phy_el1);
-
-  /* Start Sys timer*/
-  cnt_base_n = val_timer_get_info(TIMER_INFO_SYS_CNT_BASE_N, timer_num);
-  val_timer_set_system_timer((addr_t)cnt_base_n, sys_timer_ticks);
 
   /* Start EL1 PHY timer */
   val_timer_set_phy_el1(pe_timer_ticks);
@@ -98,7 +104,7 @@ payload()
       val_timer_disable_system_timer((addr_t)cnt_base_n);
       val_gic_clear_interrupt(intid);
       val_timer_set_phy_el1(0);
-      val_set_status(index, RESULT_SKIP(TEST_NUM, 2));
+      val_set_status(index, RESULT_SKIP(TEST_NUM, 3));
       return;
   }
 
