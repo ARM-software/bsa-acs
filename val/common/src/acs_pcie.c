@@ -720,12 +720,20 @@ val_pcie_bdf_table_ptr()
 
   @return None
 **/
-void
-val_pcie_free_info_table()
-{
-  pal_mem_free_aligned((void *)g_pcie_info_table);
-}
 
+void
+val_pcie_free_info_table(void)
+{
+    if (g_pcie_info_table != NULL) {
+        pal_mem_free_aligned((void *)g_pcie_info_table);
+        g_pcie_info_table = NULL;
+    }
+    else {
+      val_print(ACS_PRINT_ERR,
+                  "\n WARNING: The pointer is already NULL", 
+        0);
+    }
+}
 
 /**
   @brief   This API is the single entry point to return all PCIe related information
