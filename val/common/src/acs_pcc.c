@@ -181,7 +181,7 @@ void
 
   @return None
 **/
-void 
+void
 val_pcc_free_info_table(void)
 {
     if (g_pcc_info_table != NULL) {
