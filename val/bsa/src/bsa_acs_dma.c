@@ -30,10 +30,19 @@ DMA_INFO_TABLE  *g_dma_info_table;
 
   @result None
 **/
+
 void
 val_dma_free_info_table(void)
 {
-  pal_mem_free((void *)g_dma_info_table);
+    if (g_dma_info_table != NULL) {
+        pal_mem_free_aligned((void *)g_dma_info_table);
+        g_dma_info_table = NULL;
+    }
+    else {
+      val_print(ACS_PRINT_ERR,
+                  "\n WARNING: The pointer is already NULL", 
+        0);
+    }
 }
 
 /**
