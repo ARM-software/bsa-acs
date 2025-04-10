@@ -69,10 +69,19 @@ val_cache_create_info_table(uint64_t *cache_info_table)
   @param   None
   @return  None
 **/
+
 void
 val_cache_free_info_table(void)
 {
-  pal_mem_free_aligned((void *)g_cache_info_table);
+    if (g_cache_info_table != NULL) {
+        pal_mem_free_aligned((void *)g_cache_info_table);
+        g_cache_info_table = NULL;
+    }
+    else {
+      val_print(ACS_PRINT_ERR,
+                  "\n WARNING: g_cache_info_table pointer is already NULL",
+        0);
+    }
 }
 
 /**

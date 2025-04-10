@@ -55,10 +55,19 @@ val_ras_create_info_table(uint64_t *ras_info_table)
 /**
   @brief  Free the memory allocated for the RAS information table
 **/
+
 void
-val_ras_free_info_table()
+val_ras_free_info_table(void)
 {
-  pal_mem_free((void *)g_ras_info_table);
+    if (g_ras_info_table != NULL) {
+        pal_mem_free((void *)g_ras_info_table);
+        g_ras_info_table = NULL;
+    }
+    else {
+      val_print(ACS_PRINT_ERR,
+                  "\n WARNING: g_ras_info_table pointer is already NULL",
+        0);
+    }
 }
 
 /**

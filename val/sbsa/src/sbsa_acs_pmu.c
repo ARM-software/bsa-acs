@@ -90,11 +90,19 @@ val_pmu_set_node_coresight_complaint(uint32_t flag, uint32_t node_index)
 /**
   @brief  Free the memory allocated for the PMU information table
 **/
+
 void
-val_pmu_free_info_table()
+val_pmu_free_info_table(void)
 {
-  pal_mem_free_aligned((void *)g_pmu_info_table);
-  g_pmu_info_table = NULL;
+    if (g_pmu_info_table != NULL) {
+        pal_mem_free_aligned((void *)g_pmu_info_table);
+        g_pmu_info_table = NULL;
+    }
+    else {
+      val_print(ACS_PRINT_ERR,
+                  "\n WARNING: g_pmu_info_table pointer is already NULL", 
+        0);
+    }
 }
 
 /**

@@ -181,8 +181,17 @@ void
 
   @return None
 **/
+
 void
 val_pcc_free_info_table(void)
 {
-  pal_mem_free_aligned((void *)g_pcc_info_table);
+    if (g_pcc_info_table != NULL) {
+        pal_mem_free_aligned((void *)g_pcc_info_table);
+        g_pcc_info_table = NULL;
+    }
+    else {
+      val_print(ACS_PRINT_ERR,
+                  "\n WARNING: g_pcc_info_table pointer is already NULL",
+        0);
+    }
 }

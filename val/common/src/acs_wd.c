@@ -90,8 +90,17 @@ val_wd_create_info_table(uint64_t *wd_info_table)
 
   @return None
 **/
+
 void
-val_wd_free_info_table()
+val_wd_free_info_table(void)
 {
-  pal_mem_free_aligned((void *)g_wd_info_table);
+    if (g_wd_info_table != NULL) {
+        pal_mem_free_aligned((void *)g_wd_info_table);
+        g_wd_info_table = NULL;
+    }
+    else {
+      val_print(ACS_PRINT_ERR,
+                  "\n WARNING: g_wd_info_table pointer is already NULL",
+        0);
+    }
 }
