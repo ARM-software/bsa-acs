@@ -35,7 +35,7 @@ void
 val_dma_free_info_table(void)
 {
     if (g_dma_info_table != NULL) {
-        pal_mem_free_aligned((void *)g_dma_info_table);
+        pal_mem_free((void *)g_dma_info_table);
         g_dma_info_table = NULL;
     }
     else {
