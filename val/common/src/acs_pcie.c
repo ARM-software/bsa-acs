@@ -571,6 +571,12 @@ val_pcie_create_device_bdf_table()
           {
               for (func_index = 0; func_index < PCIE_MAX_FUNC; func_index++)
               {
+                  if (pal_pcie_check_bus_valid(bus_index)) {
+                      val_print(ACS_PRINT_DEBUG,
+                       "       Bus 0x%x marked as invalid in Platform API...Skipping\n", bus_index);
+                      continue;
+                  }
+
                   /* Form bdf using seg, bus, device, function numbers */
                   bdf = PCIE_CREATE_BDF(seg_num, bus_index, dev_index, func_index);
 

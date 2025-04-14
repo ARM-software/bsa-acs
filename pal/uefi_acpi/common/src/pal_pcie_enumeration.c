@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2019, 2022-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2019, 2022-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -276,3 +276,19 @@ pal_pcie_check_device_valid(UINT32 bdf)
   return 0;
 }
 
+/**
+  @brief  This API is used as placeholder to check if the bus
+          is to be skipped for PCIe table creation
+
+  @param  bus_index
+  @return 1 if bus to be skipped else 0
+**/
+UINT32
+pal_pcie_check_bus_valid(UINT32 bus_index)
+{
+  /* Add Bus index to this function if PCIe table
+     creation need to be ignored for a bus
+  */
+
+  return 0;
+}
