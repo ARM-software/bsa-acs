@@ -344,12 +344,27 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
       status |= p062_entry(num_pe);
     }
 
+    if (((level > 5) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 6)) {
+      status |= p003_entry(num_pe);
+    }
+
+    if (((level > 6) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)) {
+      status |= p061_entry(num_pe);
+    }
+
     if (((level > 7) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8)) {
+      status |= p064_entry(num_pe);
+      status |= p065_entry(num_pe);
       /* This test is for swtiches, Hence run before the other tests */
       status |= p068_entry(num_pe);
     }
 
   #endif
+
+#if defined(TARGET_LINUX) || defined(TARGET_EMULATION)
+  if (((level > 7) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8))
+    status |= p066_entry(num_pe);
+#endif
 
   if (((level > 5) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 6)) {
     #if defined(TARGET_LINUX) || defined(TARGET_EMULATION)
@@ -363,7 +378,6 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
     }
 
 #ifndef TARGET_LINUX
-      status |= p003_entry(num_pe);
       status |= p016_entry(num_pe);
       status |= p020_entry(num_pe);
       status |= p021_entry(num_pe);
@@ -410,22 +424,6 @@ val_sbsa_pcie_execute_tests(uint32_t level, uint32_t num_pe)
       status |= p067_entry(num_pe); /* iEP/RP only */
 #endif
   }
-
-#ifndef TARGET_LINUX
-  if (((level > 6) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 7)) {
-    status |= p061_entry(num_pe);
-  }
-
-  if (((level > 7) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8)) {
-    status |= p064_entry(num_pe);
-    status |= p065_entry(num_pe);
-  }
-#endif
-
-#if defined(TARGET_LINUX) || defined(TARGET_EMULATION)
-  if (((level > 7) && (g_sbsa_only_level == 0)) || (g_sbsa_only_level == 8))
-    status |= p066_entry(num_pe);
-#endif
 
   val_print_test_end(status, "PCIe");
 
