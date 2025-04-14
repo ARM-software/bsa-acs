@@ -16,6 +16,7 @@
  **/
 
 #include "sbsa/include/sbsa_val_interface.h"
+#include "common/include/acs_mmu.h"
 #include "common/include/acs_val.h"
 #include "common/include/acs_common.h"
 #include "sbsa/include/sbsa_acs_pmu.h"
