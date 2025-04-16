@@ -229,6 +229,12 @@ val_peripheral_dump_info(void)
 
       for (bus = start_bus; bus <= end_bus; bus++)
       {
+          if (pal_pcie_check_bus_valid(bus)) {
+              val_print(ACS_PRINT_DEBUG,
+               "       Bus 0x%x marked as invalid in Platform API...Skipping\n", bus);
+              continue;
+          }
+
           for (dev = 0; dev < PCIE_MAX_DEV; dev++)
           {
               for (func = 0; func < PCIE_MAX_FUNC; func++)
