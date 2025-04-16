@@ -637,11 +637,11 @@ ShellAppMain (
   Status |= val_bsa_exerciser_execute_tests(g_sw_view);
 
 print_test_status:
-  val_print(ACS_PRINT_TEST, "\n     -------------------------------------------------------\n", 0);
-  val_print(ACS_PRINT_TEST, "     Total Tests run  = %4d", g_acs_tests_total);
-  val_print(ACS_PRINT_TEST, "  Tests Passed  = %4d", g_acs_tests_pass);
-  val_print(ACS_PRINT_TEST, "  Tests Failed = %4d\n", g_acs_tests_fail);
-  val_print(ACS_PRINT_TEST, "     -------------------------------------------------------\n", 0);
+  val_print(ACS_PRINT_ERR, "\n     -------------------------------------------------------\n", 0);
+  val_print(ACS_PRINT_ERR, "     Total Tests run  = %4d", g_acs_tests_total);
+  val_print(ACS_PRINT_ERR, "  Tests Passed  = %4d", g_acs_tests_pass);
+  val_print(ACS_PRINT_ERR, "  Tests Failed = %4d\n", g_acs_tests_fail);
+  val_print(ACS_PRINT_ERR, "     -------------------------------------------------------\n", 0);
 
   freeBsaAcsMem();
 
@@ -649,7 +649,7 @@ print_test_status:
     ShellCloseFile(&g_dtb_log_file_handle);
   }
 
-  val_print(ACS_PRINT_TEST, "\n      *** BSA tests complete. Reset the system. ***\n\n", 0);
+  val_print(ACS_PRINT_ERR, "\n      *** BSA tests complete. Reset the system. ***\n\n", 0);
 
 #ifdef ENABLE_MEMTEST
   /***  Starting memory model consistency tests ***/
