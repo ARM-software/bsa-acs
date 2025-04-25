@@ -101,6 +101,8 @@ payload(void)
   }
   if (!status)
       val_set_status(index, RESULT_PASS(TEST_NUM, 0));
+  else
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
 }
 
 
