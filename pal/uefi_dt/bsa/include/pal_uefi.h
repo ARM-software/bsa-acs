@@ -55,6 +55,10 @@ extern UINT32 g_pcie_cache_present;
 #define BAR_MT_SHIFT    3
 #define BAR_BASE_SHIFT  4
 
+/* smbios defines */
+#define SMBIOS_OBTAIN_PROCESSOR_FAMILY2 0xFE
+#define SMBIOS_OBTAIN_CORE_COUNT2       0xFF
+
 typedef enum {
   MMIO = 0,
   IO = 1

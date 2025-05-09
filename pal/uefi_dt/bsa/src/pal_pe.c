@@ -104,6 +104,7 @@ pal_smbios_create_info_table(PE_SMBIOS_PROCESSOR_INFO_TABLE *SmbiosTable)
   }
 
   Type4Entry = SmbiosTable->type4_info;
+  SmbiosTable->slot_count = 0;
 
   /* Get SMBIOS Protocol Handler */
   Status = gBS->LocateProtocol(&gEfiSmbiosProtocolGuid, NULL, (VOID **)&SmbiosProtocol);
@@ -118,13 +119,14 @@ pal_smbios_create_info_table(PE_SMBIOS_PROCESSOR_INFO_TABLE *SmbiosTable)
       return;
     }
 
-    acs_print(ACS_PRINT_DEBUG, L" Smbios type %d\n", Record->Type);
     /* Check of record if of type 4 */
     if (Record->Type == SMBIOS_TYPE_PROCESSOR_INFORMATION) {
+      acs_print(ACS_PRINT_DEBUG, L" Smbios type %d found\n", Record->Type);
+
       Type4Record = (SMBIOS_TABLE_TYPE4 *)Record;
 
       /* Save Processor family type */
-      if (Type4Record->ProcessorFamily == 0xFE)
+      if (Type4Record->ProcessorFamily == SMBIOS_OBTAIN_PROCESSOR_FAMILY2)
         Type4Entry->processor_family = Type4Record->ProcessorFamily2;
       else
         Type4Entry->processor_family = Type4Record->ProcessorFamily;
@@ -132,7 +134,7 @@ pal_smbios_create_info_table(PE_SMBIOS_PROCESSOR_INFO_TABLE *SmbiosTable)
       acs_print(ACS_PRINT_DEBUG, L"  Processor Family 0x%x\n", Type4Entry->processor_family);
 
       /* Save Processor core count */
-      if (Type4Record->CoreCount == 0xFF)
+      if (Type4Record->CoreCount == SMBIOS_OBTAIN_CORE_COUNT2)
         Type4Entry->core_count = Type4Record->CoreCount2;
       else
         Type4Entry->core_count = Type4Record->CoreCount;
@@ -144,8 +146,9 @@ pal_smbios_create_info_table(PE_SMBIOS_PROCESSOR_INFO_TABLE *SmbiosTable)
 
       if (SmbiosTable->slot_count >= MAX_NUM_OF_SMBIOS_SLOTS_SUPPORTED) {
         acs_print(ACS_PRINT_WARN, L" Total Slots/Sockets 0x%x\n", SmbiosTable->slot_count);
-        acs_print(ACS_PRINT_WARN, L"\n Number of SMBIOS Slots greater than %d",
+        acs_print(ACS_PRINT_WARN, L" Number of SMBIOS Slots greater than %d\n",
                         MAX_NUM_OF_SMBIOS_SLOTS_SUPPORTED);
+        SmbiosTable->slot_count = MAX_NUM_OF_SMBIOS_SLOTS_SUPPORTED;
         return;
       }
     }
@@ -254,7 +257,8 @@ VOID
 PalAllocateSecondaryStack(UINT64 mpidr)
 {
   EFI_STATUS Status;
-  UINT32 NumPe, Aff0, Aff1, Aff2, Aff3;
+  UINT8 *Buffer;
+  UINT32 NumPe, Aff0, Aff1, Aff2, Aff3, StackSize;
 
   Aff0 = ((mpidr & 0x00000000ff) >>  0);
   Aff1 = ((mpidr & 0x000000ff00) >>  8);
@@ -264,13 +268,31 @@ PalAllocateSecondaryStack(UINT64 mpidr)
   NumPe = ((Aff3+1) * (Aff2+1) * (Aff1+1) * (Aff0+1));
 
   if (gSecondaryPeStack == NULL) {
+      // AllocatePool guarantees 8b alignment, but stack pointers must be 16b
+      // aligned for aarch64. Pad the size with an extra 8b so that we can
+      // force-align the returned buffer to 16b. We store the original address
+      // returned if we do have to align we still have the proper address to
+      // free.
+
+      StackSize = (NumPe * SIZE_STACK_SECONDARY_PE) + CPU_STACK_ALIGNMENT;
       Status = gBS->AllocatePool ( EfiBootServicesData,
-                    (NumPe * SIZE_STACK_SECONDARY_PE),
-                    (VOID **) &gSecondaryPeStack);
+                    StackSize,
+                    (VOID **) &Buffer);
       if (EFI_ERROR(Status)) {
           acs_print(ACS_PRINT_ERR, L"\n FATAL - Allocation for Seconday stack failed %x\n", Status);
       }
-      pal_pe_data_cache_ops_by_va((UINT64)&gSecondaryPeStack, CLEAN_AND_INVALIDATE);
+      pal_pe_data_cache_ops_by_va((UINT64)&Buffer, CLEAN_AND_INVALIDATE);
+
+      // Check if we need alignment
+      if ((UINT8*)(((UINTN) Buffer) & (0xFll))) {
+        // Needs alignment, so just store the original address and return +1
+        ((UINTN*)Buffer)[0] = (UINTN)Buffer;
+        gSecondaryPeStack = (UINT8*)(((UINTN*)Buffer)+1);
+      } else {
+        // None needed. Just store the address with padding and return.
+        ((UINTN*)Buffer)[1] = (UINTN)Buffer;
+        gSecondaryPeStack = (UINT8*)(((UINTN*)Buffer)+2);
+      }
   }
 
 }
@@ -297,6 +319,7 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
     acs_print(ACS_PRINT_ERR, L" Input PE Table Pointer is NULL. Cannot create PE INFO\n");
     return;
   }
+  PeTable->header.num_of_pe = 0;
   pal_pe_create_info_table_dt(PeTable);
   return;
 
