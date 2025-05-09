@@ -30,7 +30,6 @@
 #include "bsa/include/pal_dt.h"
 #include "bsa/include/pal_dt_spec.h"
 
-static   EFI_ACPI_6_1_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER *gMadtHdr;
 UINT8   *gSecondaryPeStack;
 UINT64  gMpidrMax;
 static UINT32 g_num_pe;
@@ -309,13 +308,6 @@ PalAllocateSecondaryStack(UINT64 mpidr)
 VOID
 pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
 {
-  EFI_ACPI_6_1_GIC_STRUCTURE    *Entry = NULL;
-  PE_INFO_ENTRY                 *Ptr = NULL;
-  UINT32                        TableLength = 0;
-  UINT32                        Length = 0;
-  UINT64                        MpidrAff0Max = 0, MpidrAff1Max = 0, MpidrAff2Max = 0, MpidrAff3Max = 0;
-
-
   if (PeTable == NULL) {
     acs_print(ACS_PRINT_ERR, L" Input PE Table Pointer is NULL. Cannot create PE INFO\n");
     return;
@@ -323,49 +315,6 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
   PeTable->header.num_of_pe = 0;
   pal_pe_create_info_table_dt(PeTable);
   return;
-
-  gMadtHdr = (EFI_ACPI_6_1_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER *) pal_get_madt_ptr();
-
-  if (gMadtHdr != NULL) {
-    TableLength =  gMadtHdr->Header.Length;
-    acs_print(ACS_PRINT_INFO, L"  MADT is at %x and length is %x\n", gMadtHdr, TableLength);
-  }
-
-  PeTable->header.num_of_pe = 0;
-
-  Entry = (EFI_ACPI_6_1_GIC_STRUCTURE *) (gMadtHdr + 1);
-  Length = sizeof (EFI_ACPI_6_1_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER);
-  Ptr = PeTable->pe_info;
-
-  do {
-
-    if (Entry->Type == EFI_ACPI_6_1_GIC) {
-      //Fill in the cpu num and the mpidr in pe info table
-      Ptr->mpidr    = Entry->MPIDR;
-      Ptr->pe_num   = PeTable->header.num_of_pe;
-      Ptr->pmu_gsiv = Entry->PerformanceInterruptGsiv;
-      acs_print(ACS_PRINT_DEBUG, L"  MPIDR %x PE num %d\n", Ptr->mpidr, Ptr->pe_num);
-      pal_pe_data_cache_ops_by_va((UINT64)Ptr, CLEAN_AND_INVALIDATE);
-      Ptr++;
-      PeTable->header.num_of_pe++;
-
-      MpidrAff0Max = UPDATE_AFF_MAX(MpidrAff0Max, Entry->MPIDR, 0x000000ff);
-      MpidrAff1Max = UPDATE_AFF_MAX(MpidrAff1Max, Entry->MPIDR, 0x0000ff00);
-      MpidrAff2Max = UPDATE_AFF_MAX(MpidrAff2Max, Entry->MPIDR, 0x00ff0000);
-      MpidrAff3Max = UPDATE_AFF_MAX(MpidrAff3Max, Entry->MPIDR, 0xff00000000);
-    }
-
-    Length += Entry->Length;
-    Entry = (EFI_ACPI_6_1_GIC_STRUCTURE *) ((UINT8 *)Entry + (Entry->Length));
-
-  }while(Length < TableLength);
-
-  gMpidrMax = MpidrAff0Max | MpidrAff1Max | MpidrAff2Max | MpidrAff3Max;
-  g_num_pe = PeTable->header.num_of_pe;
-  pal_pe_data_cache_ops_by_va((UINT64)PeTable, CLEAN_AND_INVALIDATE);
-  pal_pe_data_cache_ops_by_va((UINT64)&gMpidrMax, CLEAN_AND_INVALIDATE);
-  PalAllocateSecondaryStack(gMpidrMax);
-
 }
 
 /**
