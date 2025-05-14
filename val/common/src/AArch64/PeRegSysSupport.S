@@ -647,10 +647,10 @@ ASM_PFX(AA64EnableTRBUTrace):
     isb
 
     /* Program TRBLIMITR_EL1 */
+    add x1, x1, #0x1000  // Set 4KB trace buffer limit for Current PE
     add x1, x1, x2
     orr x1, x1, #(3<<1)  // TRBLIMITR_EL1.FM_CIRCULAR_BUFFER_MODE
     orr x1, x1, #(3<<3)  // TRBLIMITR_EL1_TM_IGNORE_TRIGGER
-    orr x1, x1, #(1<<60)  // TRBLIMITR_EL1.LIMIT
     msr TRBLIMITR_EL1, x1
     isb
 
