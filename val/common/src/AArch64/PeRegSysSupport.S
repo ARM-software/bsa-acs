@@ -688,7 +688,9 @@ ASM_PFX(AA64DisableTRBUTrace):
     isb
 
     /* TRBLIMITR_EL1 Disable TRBU */
-    msr TRBLIMITR_EL1, xzr
+    mrs x1, TRBLIMITR_EL1
+    bic x1, x1, #(1<<0) // TRBLIMITR_EL1.E = 0b0
+    msr TRBLIMITR_EL1, x1
     isb
     ret
 
