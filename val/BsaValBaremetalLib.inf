@@ -1,5 +1,5 @@
 ## @file
-#  Copyright (c) 2023, Arm Limited or its affiliates. All rights reserved.
+#  Copyright (c) 2023, 2025, Arm Limited or its affiliates. All rights reserved.
 #  SPDX-License-Identifier : Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@
 [Defines]
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = BsaValBaremetalLib
-  FILE_GUID                      = cdd4fb8f-06c5-4a28-8cb8-7f5b664e278c
+  FILE_GUID                      = d73b2945-c40d-4908-9bb7-50c2d0c7c035
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = BsaValLib|UEFI_APPLICATION UEFI_DRIVER

@@ -18,7 +18,7 @@
 [Defines]
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = SbsaValNistLib
-  FILE_GUID                      = cdd4fb8f-06c5-4a28-8cb8-7f5b664e278c
+  FILE_GUID                      = adf37fbd-45d2-40f7-8462-98ff5410786d
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = SbsaValNistLib|UEFI_APPLICATION UEFI_DRIVER

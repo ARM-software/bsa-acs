@@ -19,7 +19,7 @@
 [Defines]
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = BsaPalLib
-  FILE_GUID                      = 7f2093fb-2e69-46eb-af52-ba1df42f6195
+  FILE_GUID                      = 4ace3bc0-1f9a-4018-a454-35fe58753cae
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = BsaPalLib|UEFI_APPLICATION UEFI_DRIVER

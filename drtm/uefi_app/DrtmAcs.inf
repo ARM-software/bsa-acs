@@ -19,7 +19,7 @@
 [Defines]
   INF_VERSION                    = 0x00010006
   BASE_NAME                      = Drtm
-  FILE_GUID                      = a9f21198-7f0e-4803-b908-b75708b6ec83
+  FILE_GUID                      = 5729dc48-6f42-4870-b8c6-f99f40423fa5
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 0.1
   ENTRY_POINT                    = ShellCEntryLib

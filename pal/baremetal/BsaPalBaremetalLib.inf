@@ -19,7 +19,7 @@
 [Defines]
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = BsaPalBaremetalLib
-  FILE_GUID                      = 7f2093fb-2e69-46eb-af52-ba1df42f6195
+  FILE_GUID                      = 0842b6a3-cf48-4225-b9ba-4c6b37524058
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = BsaPalBaremetalLib|UEFI_APPLICATION UEFI_DRIVER
