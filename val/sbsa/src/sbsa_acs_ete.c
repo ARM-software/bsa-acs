@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,15 +28,29 @@ uint64_t val_ete_get_trace_timestamp(uint64_t buffer_address)
   uint64_t timestamp = 0;
   uint64_t ts_value = 0;
   uint32_t ts_start_byte = 0, ts_continue = 0;
+  uint32_t tr_addr_start_byte_num = 0;
+  uint32_t trace_info_len = TR_TRACE_INFO_V1_LEN;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
   val_memcpy(trace_bytes, (void *)buffer_address, 100);
 
+  /* Calculate trace info length */
+  if (VAL_EXTRACT_BITS(trace_bytes[TR_ALIGN_SYNC_PKT_LEN + TR_TRACE_INFO_V1_LEN - 1], 0, 1))
+    trace_info_len = trace_info_len + TR_TRACE_INFO_INFO_LEN;
+
+  if (VAL_EXTRACT_BITS(trace_bytes[TR_ALIGN_SYNC_PKT_LEN + TR_TRACE_INFO_V1_LEN - 1], 2, 3))
+    trace_info_len = trace_info_len + TR_TRACE_INFO_SPEC_LEN;
+
+  if (VAL_EXTRACT_BITS(trace_bytes[TR_ALIGN_SYNC_PKT_LEN + TR_TRACE_INFO_V1_LEN - 1], 3, 4))
+    trace_info_len = trace_info_len + TR_TRACE_INFO_CYCT_LEN;
+
+  tr_addr_start_byte_num = TR_ALIGN_SYNC_PKT_LEN + trace_info_len + TR_TRACE_ON_LEN;
+
   /* Calculate length of Trace Address Packet */
-  switch (trace_bytes[TR_ADDR_START_BYTE_NUM]) {
+  switch (trace_bytes[tr_addr_start_byte_num]) {
   case TR_I_ADDR_CTXT_L_32IS0:
   case TR_I_ADDR_CTXT_L_32IS1:
-    data = VAL_EXTRACT_BITS(trace_bytes[TR_ADDR_START_BYTE_NUM + TR_ADDR_CTXT_L_32_MID], 6, 7);
+    data = VAL_EXTRACT_BITS(trace_bytes[tr_addr_start_byte_num + TR_ADDR_CTXT_L_32_MID], 6, 7);
     switch (data) {
     case 0:
       trace_addr_len = TR_ADDR_CTXT_L_32_V1_LEN;
@@ -57,7 +71,7 @@ uint64_t val_ete_get_trace_timestamp(uint64_t buffer_address)
     break;
   case TR_I_ADDR_CTXT_L_64IS0:
   case TR_I_ADDR_CTXT_L_64IS1:
-    data = VAL_EXTRACT_BITS(trace_bytes[TR_ADDR_START_BYTE_NUM + TR_ADDR_CTXT_L_64_MID], 6, 7);
+    data = VAL_EXTRACT_BITS(trace_bytes[tr_addr_start_byte_num + TR_ADDR_CTXT_L_64_MID], 6, 7);
     switch (data) {
     case 0:
       trace_addr_len = TR_ADDR_CTXT_L_64_V1_LEN;
@@ -96,7 +110,7 @@ uint64_t val_ete_get_trace_timestamp(uint64_t buffer_address)
   }
 
   /* Timestamp Packet Parsing */
-  ts_start_byte = TR_ADDR_START_BYTE_NUM + trace_addr_len;
+  ts_start_byte = tr_addr_start_byte_num + trace_addr_len;
   if (trace_bytes[ts_start_byte] == TR_I_TS_MARKER)
       ts_start_byte++;
 

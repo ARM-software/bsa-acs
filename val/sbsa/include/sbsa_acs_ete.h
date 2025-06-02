@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +37,22 @@
 #define TR_I_ADDR_L_64IS0       0x9C
 #define TR_I_ADDR_L_64IS1       0x9D
 
-#define TR_ADDR_START_BYTE_NUM      15
+/* Alignment Sync Packet */
+#define TR_ALIGN_SYNC_PKT_LEN   12
+
+/* Trace Info Packet */
+#define TR_TRACE_INFO_V1_LEN    2
+
+#define TR_TRACE_INFO_INFO_LEN  1
+
+#define TR_TRACE_INFO_SPEC_LEN  5
+
+#define TR_TRACE_INFO_CYCT_LEN  2
+
+/* Trace On Packet */
+#define TR_TRACE_ON_LEN         1
+
+#define TR_ADDR_START_BYTE_NUM      15 /* Alignment Synchronization Packet + Trace Info + On */
 
 #define TR_ADDR_CTXT_L_32_MID       5
 #define TR_ADDR_CTXT_L_32_V1_LEN    6
