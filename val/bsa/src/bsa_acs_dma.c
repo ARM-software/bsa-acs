@@ -188,6 +188,10 @@ val_dma_device_get_dma_addr(uint32_t ctrl_index, uint64_t *dma_addr, uint32_t *c
 #ifdef TARGET_LINUX
   *dma_addr = g_dma_info_table->info[ctrl_index].dma_sg_address;
   *cpu_len =  g_dma_info_table->info[ctrl_index].dma_sg_length;
+#else
+ (void)ctrl_index;
+ (void)dma_addr;
+ (void)cpu_len;
 #endif
 
 }
