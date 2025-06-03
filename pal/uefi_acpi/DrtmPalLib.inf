@@ -1,5 +1,5 @@
 ## @file
-# Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@
 [Defines]
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = DrtmPalLib
-  FILE_GUID                      = 7f2093fb-2e69-46eb-af52-ba1df42f6195
+  FILE_GUID                      = c5dfa152-98b1-452a-8601-e09dd66bdc6b
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = DrtmPalLib|UEFI_APPLICATION UEFI_DRIVER

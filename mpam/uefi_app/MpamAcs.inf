@@ -19,7 +19,7 @@
 [Defines]
   INF_VERSION                    = 0x00010006
   BASE_NAME                      = Mpam
-  FILE_GUID                      = a912f198-7f0e-4803-b908-b757b806ec83
+  FILE_GUID                      = 19d2bd20-5bc4-4792-ba3e-daf4b185c392
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 0.5
   ENTRY_POINT                    = ShellCEntryLib
