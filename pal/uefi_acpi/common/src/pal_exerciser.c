@@ -237,6 +237,7 @@ UINT32 pal_exerciser_set_param (
   UINT64 Base;
   UINT64 Ecam;
   UINT32 bdf;
+  UINT32 Lower_Range, Upper_Range;
 
   Base = pal_exerciser_get_ecsr_base(Bdf,0);
   Ecam = pal_pcie_get_mcfg_ecam(Bdf); // Getting the ECAM address
@@ -250,8 +251,14 @@ UINT32 pal_exerciser_set_param (
           return 0;
 
       case DMA_ATTRIBUTES:
-          pal_mmio_write(Base + DMA_BUS_ADDR,Value1);// wrting into the DMA Control Register 2
-          pal_mmio_write(Base + DMA_LEN,Value2);// writing into the DMA Control Register 3
+          /* writing into the DMA Control Register 2 */
+          Lower_Range = (UINT32)(Value1 & 0xFFFFFFFF);
+          Upper_Range = (UINT32)((Value1 >> 32) & 0xFFFFFFFF);
+          pal_mmio_write(Base + DMA_BUS_ADDR, Lower_Range);
+          pal_mmio_write(Base + DMA_BUS_ADDR + 4, Upper_Range);
+
+          /* writing into the DMA Control Register 3 */
+          pal_mmio_write(Base + DMA_LEN, (UINT32)Value2);
           return 0;
 
       case P2P_ATTRIBUTES:
@@ -375,6 +382,7 @@ pal_exerciser_get_param (
   UINT32 addr_high = 0;
   UINT32 data_low = 0;
   UINT32 data_high = 0;
+  UINT32 Upper_Range, Lower_Range;
 
   Base = pal_exerciser_get_ecsr_base(Bdf,0);
   switch (Type) {
@@ -385,8 +393,12 @@ pal_exerciser_get_param (
           *Value1 = pal_mmio_read(Base + INTXCTL);
           return pal_mmio_read(Base + INTXCTL) | MASK_BIT ;
       case DMA_ATTRIBUTES:
-          *Value1 = pal_mmio_read(Base + DMA_BUS_ADDR); // Reading the data from DMA Control Register 2
-          *Value2 = pal_mmio_read(Base + DMA_LEN); // Reading the data from DMA Control Register 3
+          /* Reading the data from DMA Control Register 2 */
+          Lower_Range = pal_mmio_read(Base + DMA_BUS_ADDR);
+          Upper_Range = pal_mmio_read(Base + DMA_BUS_ADDR + 4);
+          *Value1 = ((UINT64)Upper_Range << 32) | Lower_Range;
+          /* Reading the data from DMA Control Register 3 */
+          *Value2 = pal_mmio_read(Base + DMA_LEN);
           Temp = pal_mmio_read(Base + DMASTATUS);
           Status = Temp & MASK_BIT;// returning the DMA status
           return Status;
@@ -399,7 +411,9 @@ pal_exerciser_get_param (
           *Value1 = pal_mmio_read(Base + MSICTL);
           return pal_mmio_read(Base + MSICTL) | MASK_BIT;
       case ATS_RES_ATTRIBUTES:
-          *Value1 = pal_mmio_read(Base + ATS_ADDR);
+          Lower_Range = pal_mmio_read(Base + ATS_ADDR);
+          Upper_Range = pal_mmio_read(Base + ATS_ADDR + 4);
+          *Value1 = ((UINT64)Upper_Range << 32) | Lower_Range;
           return 0;
       case CFG_TXN_ATTRIBUTES:
       case TRANSACTION_TYPE:
@@ -497,6 +511,7 @@ pal_exerciser_ops (
   UINT64 Ecam;
   UINT32 CapabilityOffset = 0;
   UINT32 data;
+  UINT32 Upper_Range, Lower_Range;
 
   Base = pal_exerciser_get_ecsr_base(Bdf,0);
   Ecam = pal_pcie_get_mcfg_ecam(Bdf); // Getting the ECAM address
@@ -571,7 +586,10 @@ pal_exerciser_ops (
         return 0;
 
     case ATS_TXN_REQ:
-        pal_mmio_write(Base + DMA_BUS_ADDR, Param);
+        Lower_Range = (UINT32)(Param & 0xFFFFFFFF);
+        Upper_Range = (UINT32)((Param >> 32) & 0xFFFFFFFF);
+        pal_mmio_write(Base + DMA_BUS_ADDR, Lower_Range);
+        pal_mmio_write(Base + DMA_BUS_ADDR + 4, Upper_Range);
         pal_mmio_write(Base + ATSCTL, ATS_TRIGGER);
         return !(pal_mmio_read(Base + ATSCTL) & ATS_STATUS);
 
