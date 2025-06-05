@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021,2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021,2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -101,6 +101,8 @@ payload(void)
   }
   if (!status)
       val_set_status(index, RESULT_PASS(TEST_NUM, 0));
+  else
+      val_set_status(index, RESULT_FAIL(TEST_NUM, 3));
 }
 
 

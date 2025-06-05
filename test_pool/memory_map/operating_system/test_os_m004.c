@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2021, 2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2021, 2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,6 +35,7 @@ payload (void)
   uint32_t data;
   uint32_t dev_type;
   uint32_t dev_bdf;
+  uint32_t p_cap, cid_offset;
   uint32_t test_run = 0;
 
   index = val_pe_get_index_mpid (val_pe_get_mpid());
@@ -45,6 +46,10 @@ payload (void)
      val_set_status(index, RESULT_SKIP (TEST_NUM, 1));
      return;
   }
+
+  val_print(ACS_PRINT_DEBUG, "\n PE index: %d", index);
+  val_print(ACS_PRINT_DEBUG, "\n Peripherals count: : %d", count);
+
 
   while (count) {
       count--;
@@ -67,6 +72,15 @@ payload (void)
           val_print(ACS_PRINT_DEBUG, "\n Driver not present for bdf 0x%x", dev_bdf);
           continue;
       }
+
+      /* Skip if the device is a PCI legacy device */
+      p_cap = val_pcie_find_capability(dev_bdf, PCIE_CAP, CID_PCIECS, &cid_offset);
+      if (p_cap != PCIE_SUCCESS) {
+        val_print(ACS_PRINT_DEBUG, " \nBDF 0x%x PCI Express capability not present...Skipping\n",
+                                                                             dev_bdf);
+        continue;
+      }
+
       test_run = 1;
 
       data = val_pcie_is_devicedma_64bit(dev_bdf);
