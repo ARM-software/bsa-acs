@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018-2021,2023-2024, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2018-2021,2023-2025, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,11 +71,11 @@ uint32_t test_sequence2(void *dram_buf1_virt, void *dram_buf1_phys, uint32_t ins
   val_pe_cache_clean_invalidate_range((uint64_t)dram_buf2_virt, (uint64_t)dma_len);
 
   /* Perform DMA OUT to copy contents of dram_buf2 to exerciser memory */
-  val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf2_phys, dma_len, instance);
+  val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf2_phys, (uint64_t)dma_len, instance);
   val_exerciser_ops(START_DMA, EDMA_TO_DEVICE, instance);
 
   /* Perform DMA IN to copy content back from exerciser memory to dram_buf1 */
-  val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf1_phys, dma_len, instance);
+  val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf1_phys, (uint64_t)dma_len, instance);
   val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, instance);
 
   /* Invalidate dram_buf1 and dram_buf2 contents present in CPU caches */
@@ -110,11 +110,11 @@ uint32_t test_sequence1(void *dram_buf1_virt, void *dram_buf1_phys, uint32_t ins
   val_memory_set(dram_buf1_virt, dma_len, NEW_DATA);
 
   /* Perform DMA OUT to copy contents of dram_buf1 to exerciser memory */
-  val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf1_phys, dma_len, instance);
+  val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf1_phys, (uint64_t)dma_len, instance);
   val_exerciser_ops(START_DMA, EDMA_TO_DEVICE, instance);
 
   /* Perform DMA IN to copy the content from exerciser memory to dram_buf1 */
-  val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf1_phys, dma_len, instance);
+  val_exerciser_set_param(DMA_ATTRIBUTES, (uint64_t)dram_buf1_phys, (uint64_t)dma_len, instance);
   val_exerciser_ops(START_DMA, EDMA_FROM_DEVICE, instance);
 
   /* Write dram_buf2 with NEW_DATA to compare dram_buf1 content */
