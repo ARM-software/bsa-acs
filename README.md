@@ -182,7 +182,7 @@ This section lists the porting and build steps for the kernel module.
 The patch for the kernel tree and the Linux PAL are hosted separately on [linux-acs](https://git.gitlab.arm.com/linux-arm/linux-acs.git) repo
 
 #### Prerequisites
-ACS build requires that the following requirements are met, Please skip this if you are using [Linux Build Script](https://gitlab.arm.com/linux-arm/linux-acs/-/blob/linux_porting/acs-drv/files/build.sh?ref_type=heads)
+ACS build requires that the following requirements are met, Please skip this if you are using [Linux Build Script](https://gitlab.arm.com/linux-arm/linux-acs/-/blob/master/acs-drv/files/build.sh?ref_type=heads)
 - Linux kernel source version 5.11, 5.13, 5.15, 6.0, 6.4, 6.7, 6.8
 - Install GCC-ARM 13.2 [toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads).
 - Build environment for AArch64 Linux kernel.<br />
@@ -199,7 +199,7 @@ The build.sh script supports both native builds and cross-compilation.
 
 ##### Linux Build Steps (Script)
 
-1. wget https://gitlab.arm.com/linux-arm/linux-acs/-/raw/linux_porting/acs-drv/files/build.sh
+1. wget https://gitlab.arm.com/linux-arm/linux-acs/-/raw/master/acs-drv/files/build.sh
 2. chmod +x build.sh
 3. source build.sh
 
@@ -245,7 +245,7 @@ Successful completion of above steps will generate executable file bsa
 #### 2.1 Loading the kernel module
 Before the BSA ACS Linux application can be run, load the BSA ACS kernel module using the insmod command.
 ```sh
-shell> insmod bsa_acs.ko
+shell>sudo insmod bsa_acs.ko
 ```
 
 #### 2.2 Running BSA ACS
