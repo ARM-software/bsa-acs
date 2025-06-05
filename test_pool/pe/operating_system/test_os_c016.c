@@ -37,8 +37,11 @@ payload()
   uint64_t data;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
   sve_reg_details *tmp_reg_data;
+  uint64_t buffer_ptr, addr;
 
-  tmp_reg_data = g_sve_reg_info + index;
+  val_get_test_data(index, &addr, &buffer_ptr);
+  tmp_reg_data = (sve_reg_details *)buffer_ptr;
+  tmp_reg_data = tmp_reg_data + index;
 
   /* Get PE family for each PE index*/
   pe_family = val_get_pe_architecture(index);
@@ -98,7 +101,8 @@ os_c016_entry(uint32_t num_pe)
       return ACS_STATUS_FAIL;
     }
 
-    val_run_test_payload(TEST_NUM, num_pe, payload, 0);
+    val_set_test_data(index, (uint64_t)payload, (uint64_t)g_sve_reg_info);
+    val_run_test_payload(TEST_NUM, num_pe, payload, (uint64_t)g_sve_reg_info);
 
     for (i = 0; i < num_pe; i++) {
       reg_buffer = g_sve_reg_info + i;
