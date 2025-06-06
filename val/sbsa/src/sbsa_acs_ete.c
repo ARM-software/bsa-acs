@@ -35,13 +35,13 @@ uint64_t val_ete_get_trace_timestamp(uint64_t buffer_address)
   val_memcpy(trace_bytes, (void *)buffer_address, 100);
 
   /* Calculate trace info length */
-  if (VAL_EXTRACT_BITS(trace_bytes[TR_ALIGN_SYNC_PKT_LEN + TR_TRACE_INFO_V1_LEN - 1], 0, 1))
+  if (VAL_EXTRACT_BITS(trace_bytes[TR_ALIGN_SYNC_PKT_LEN + TR_TRACE_INFO_V1_LEN - 1], 0, 0))
     trace_info_len = trace_info_len + TR_TRACE_INFO_INFO_LEN;
 
-  if (VAL_EXTRACT_BITS(trace_bytes[TR_ALIGN_SYNC_PKT_LEN + TR_TRACE_INFO_V1_LEN - 1], 2, 3))
+  if (VAL_EXTRACT_BITS(trace_bytes[TR_ALIGN_SYNC_PKT_LEN + TR_TRACE_INFO_V1_LEN - 1], 2, 2))
     trace_info_len = trace_info_len + TR_TRACE_INFO_SPEC_LEN;
 
-  if (VAL_EXTRACT_BITS(trace_bytes[TR_ALIGN_SYNC_PKT_LEN + TR_TRACE_INFO_V1_LEN - 1], 3, 4))
+  if (VAL_EXTRACT_BITS(trace_bytes[TR_ALIGN_SYNC_PKT_LEN + TR_TRACE_INFO_V1_LEN - 1], 3, 3))
     trace_info_len = trace_info_len + TR_TRACE_INFO_CYCT_LEN;
 
   tr_addr_start_byte_num = TR_ALIGN_SYNC_PKT_LEN + trace_info_len + TR_TRACE_ON_LEN;
