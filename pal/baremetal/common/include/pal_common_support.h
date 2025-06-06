@@ -598,7 +598,7 @@ typedef union {
   ID_MAP map;
 }NODE_DATA_MAP;
 
-#define MAX_NAMED_COMP_LENGTH 256
+#define MAX_NAMED_COMP_LENGTH 150
 
 typedef struct {
   uint64_t smmu_base;                  /* SMMU base to which component is attached, else NULL */
