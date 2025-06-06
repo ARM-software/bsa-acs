@@ -97,7 +97,7 @@ typedef struct {
   uint32_t node_ref;
 } PLATFORM_OVERRIDE_IOVIRT_PMCG_INFO_BLOCK;
 
-#define MAX_NAMED_COMP_LENGTH 256
+#define MAX_NAMED_COMP_LENGTH 150
 typedef struct {
         uint32_t its_count;
         uint32_t identifiers[1];     /* GIC ITS identifier arrary */
