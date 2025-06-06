@@ -20,6 +20,30 @@
 #include "common/include/acs_common.h"
 
 /**
+  @brief This API is used to get the effective HCR_EL2.E2H
+**/
+uint8_t get_effective_e2h()
+{
+  uint32_t effective_E2H;
+  uint32_t hcr_e2h = VAL_EXTRACT_BITS(ArmReadHcrEl2(), 34, 34);
+  uint32_t feat_vhe = VAL_EXTRACT_BITS(ArmReadAA64MMFR1EL1(), 8, 11);
+  uint32_t e2h0 = VAL_EXTRACT_BITS(ArmReadAA64MMFR4EL1(), 24, 27);
+
+  val_print(ACS_PRINT_DEBUG, "\n       hcr_e2h   : 0x%x", hcr_e2h);
+  val_print(ACS_PRINT_DEBUG, "\n       feat_vhe  : 0x%x", feat_vhe);
+  val_print(ACS_PRINT_DEBUG, "\n       e2h0 : 0x%x", e2h0);
+
+  if (feat_vhe == 0x0) //ID_AA64MMFR1_EL1.VH
+    effective_E2H = 0;
+  else if (e2h0 != 0x0) //E2H0 = 0 means implemented
+    effective_E2H = 1;
+  else
+    effective_E2H = hcr_e2h;
+
+  return effective_E2H;
+}
+
+/**
   @brief   This API is used to read Timer related registers
 
   @param   Reg  Register to be read
@@ -31,6 +55,9 @@ ArmArchTimerReadReg (
     ARM_ARCH_TIMER_REGS   Reg
   )
 {
+    static uint8_t effective_e2h = 0xFF;
+    if (effective_e2h == 0xFF)
+      effective_e2h = get_effective_e2h();
 
     switch (Reg) {
 
@@ -44,10 +71,12 @@ ArmArchTimerReadReg (
       return ArmReadCntkCtl();
 
     case CntpTval:
-      return ArmReadCntpTval();
+      /* Add Check For E2H, If EL2 Host then access to cntp_tval_el02 */
+      return effective_e2h ? ArmReadCntpTval02() : ArmReadCntpTval();
 
     case CntpCtl:
-      return ArmReadCntpCtl();
+      /* Add Check For E2H, If EL2 Host then access to cntp_ctl_el02 */
+      return effective_e2h ? ArmReadCntpCtl02() : ArmReadCntpCtl();
 
     case CntvTval:
       return ArmReadCntvTval();
@@ -103,6 +132,10 @@ ArmArchTimerWriteReg (
   )
 {
 
+    static uint8_t effective_e2h = 0xFF;
+    if (effective_e2h == 0xFF)
+      effective_e2h = get_effective_e2h();
+
     switch(Reg) {
 
     case CntPct:
@@ -114,11 +147,19 @@ ArmArchTimerWriteReg (
       break;
 
     case CntpTval:
-      ArmWriteCntpTval(*data_buf);
+      /* Add Check For E2H, If EL2 Host then access to cntp_tval_el02 */
+      if (effective_e2h)
+        ArmWriteCntpTval02(*data_buf);
+      else
+        ArmWriteCntpTval(*data_buf);
       break;
 
     case CntpCtl:
-      ArmWriteCntpCtl(*data_buf);
+      /* Add Check For E2H, If EL2 Host then access to cntp_ctl_el02 */
+      if (effective_e2h)
+        ArmWriteCntpCtl02(*data_buf);
+      else
+        ArmWriteCntpCtl(*data_buf);
       break;
 
     case CntvTval:

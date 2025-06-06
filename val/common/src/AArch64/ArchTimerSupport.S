@@ -39,13 +39,19 @@
 .text
 .align 2
 
+GCC_ASM_EXPORT(ArmReadHcrEl2)
+GCC_ASM_EXPORT(ArmReadAA64MMFR1EL1)
+GCC_ASM_EXPORT(ArmReadAA64MMFR4EL1)
 GCC_ASM_EXPORT(ArmReadCntFrq)
 GCC_ASM_EXPORT(ArmReadCntPct)
 GCC_ASM_EXPORT(ArmReadCntkCtl)
 GCC_ASM_EXPORT(ArmWriteCntkCtl)
 GCC_ASM_EXPORT(ArmReadCntpTval)
 GCC_ASM_EXPORT(ArmWriteCntpTval)
+GCC_ASM_EXPORT(ArmReadCntpTval02)
+GCC_ASM_EXPORT(ArmWriteCntpTval02)
 GCC_ASM_EXPORT(ArmReadCntpCtl)
+GCC_ASM_EXPORT(ArmReadCntpCtl02)
 GCC_ASM_EXPORT(ArmReadCntvTval)
 GCC_ASM_EXPORT(ArmWriteCntvTval)
 GCC_ASM_EXPORT(ArmReadCntvCtl)
@@ -66,6 +72,20 @@ GCC_ASM_EXPORT(ArmWriteCnthvCtl)
 GCC_ASM_EXPORT(ArmReadCnthvTval)
 GCC_ASM_EXPORT(ArmWriteCnthvTval)
 GCC_ASM_EXPORT(ArmWriteCntpCtl)
+GCC_ASM_EXPORT(ArmWriteCntpCtl02)
+
+ASM_PFX(ArmReadHcrEl2):
+  mrs   x0, hcr_el2           // Read HCR_EL2
+  ret
+
+ASM_PFX(ArmReadAA64MMFR1EL1):
+  mrs   x0, id_aa64mmfr1_el1  // Read ID_AA64MMFR1_EL1
+  ret
+
+ASM_PFX(ArmReadAA64MMFR4EL1):
+  //mrs   x0, id_aa64mmfr4_el1  // Read ID_AA64MMFR4_EL1
+  mrs	x0, s3_0_c0_c7_4
+  ret
 
 ASM_PFX(ArmReadCntFrq):
   mrs   x0, cntfrq_el0           // Read CNTFRQ
@@ -89,7 +109,11 @@ ASM_PFX(ArmWriteCntkCtl):
 
 
 ASM_PFX(ArmReadCntpTval):
-  mrs   x0, cntp_tval_el0        // Read CNTP_TVAL (PL1 physical timer value register)
+  mrs   x0, cntp_tval_el0     // Read CNTP_TVAL (PL1 physical timer value register)
+  ret
+
+ASM_PFX(ArmReadCntpTval02):
+  mrs   x0, cntp_tval_el02    // Read CNTP_TVAL (PL1 physical timer value register) when EL2 Host
   ret
 
 ASM_PFX(ArmWriteCntpTval):
@@ -97,17 +121,29 @@ ASM_PFX(ArmWriteCntpTval):
   isb
   ret
 
+ASM_PFX(ArmWriteCntpTval02):
+  msr   cntp_tval_el02, x0   // Write to CNTP_TVAL (PL1 physical timer value register) EL2 Host
+  isb
+  ret
 
 ASM_PFX(ArmReadCntpCtl):
-  mrs   x0, cntp_ctl_el0         // Read CNTP_CTL (PL1 Physical Timer Control Register)
+  mrs   x0, cntp_ctl_el0     // Read CNTP_CTL (PL1 Physical Timer Control Register)
+  ret
+
+ASM_PFX(ArmReadCntpCtl02):
+  mrs   x0, cntp_ctl_el02    // Read CNTP_CTL (PL1 Physical Timer Control Register) when EL2 Host
   ret
 
 
 ASM_PFX(ArmWriteCntpCtl):
-  msr   cntp_ctl_el0, x0         // Write to  CNTP_CTL (PL1 Physical Timer Control Register)
+  msr   cntp_ctl_el0, x0     // Write CNTP_CTL (PL1 Physical Timer Control Register)
   isb
   ret
 
+ASM_PFX(ArmWriteCntpCtl02):
+  msr   cntp_ctl_el02, x0    // Write CNTP_CTL (PL1 Physical Timer Control Register) when EL2 Host
+  isb
+  ret
 
 ASM_PFX(ArmReadCntvTval):
   mrs   x0, cntv_tval_el0        // Read CNTV_TVAL (Virtual Timer Value register)

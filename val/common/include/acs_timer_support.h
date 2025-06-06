@@ -57,6 +57,14 @@ ArmArchTimerWriteReg (
     uint64_t              *data_buf
   );
 
+uint64_t ArmReadHcrEl2(void);
+uint64_t ArmReadAA64MMFR1EL1(void);
+uint64_t ArmReadAA64MMFR4EL1(void);
+uint64_t ArmReadCntpCtl02(void);
+uint64_t ArmReadCntpTval02(void);
+void     ArmWriteCntpCtl02(uint64_t val);
+void     ArmWriteCntpTval02(uint64_t val);
+
 uint64_t
 ArmReadCntFrq (
   void
