@@ -108,6 +108,7 @@ pal_smbios_create_info_table(PE_SMBIOS_PROCESSOR_INFO_TABLE *SmbiosTable)
   /* Get SMBIOS Protocol Handler */
   Status = gBS->LocateProtocol(&gEfiSmbiosProtocolGuid, NULL, (VOID **)&SmbiosProtocol);
   if (EFI_ERROR(Status)) {
+    SmbiosTable->slot_count = 0;
     return;
   }
 
