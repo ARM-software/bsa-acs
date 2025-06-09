@@ -373,6 +373,13 @@
 #define PCIE_PCI (1 << 0b0111)
 #define PCIe_ALL (iEP_RP | iEP_EP | RP | EP | RCEC | RCiEP)
 
+/*MSI Capabilities */
+#define MSI_ENABLE_SHIFT                16
+#define MSI_ADDR_SHIFT                  32
+#define MSI_MSG_TBL_LOWER_ADDR_OFFSET   0x4
+#define MSI_MSG_TBL_HIGHER_ADDR_OFFSET  0x8
+#define MSI_MSG_TBL_DATA_OFFSET         0xC
+
 /* MSI-X Capabilities */
 #define MSI_X_ENABLE_SHIFT          31
 
