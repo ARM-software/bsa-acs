@@ -53,9 +53,13 @@ GCC_ASM_EXPORT(ArmWriteCntpTval02)
 GCC_ASM_EXPORT(ArmReadCntpCtl)
 GCC_ASM_EXPORT(ArmReadCntpCtl02)
 GCC_ASM_EXPORT(ArmReadCntvTval)
+GCC_ASM_EXPORT(ArmReadCntvTval02)
 GCC_ASM_EXPORT(ArmWriteCntvTval)
+GCC_ASM_EXPORT(ArmWriteCntvTval02)
 GCC_ASM_EXPORT(ArmReadCntvCtl)
+GCC_ASM_EXPORT(ArmReadCntvCtl02)
 GCC_ASM_EXPORT(ArmWriteCntvCtl)
+GCC_ASM_EXPORT(ArmWriteCntvCtl02)
 GCC_ASM_EXPORT(ArmReadCntvCt)
 GCC_ASM_EXPORT(ArmReadCntpCval)
 GCC_ASM_EXPORT(ArmWriteCntpCval)
@@ -107,7 +111,6 @@ ASM_PFX(ArmWriteCntkCtl):
   isb
   ret
 
-
 ASM_PFX(ArmReadCntpTval):
   mrs   x0, cntp_tval_el0     // Read CNTP_TVAL (PL1 physical timer value register)
   ret
@@ -149,23 +152,37 @@ ASM_PFX(ArmReadCntvTval):
   mrs   x0, cntv_tval_el0        // Read CNTV_TVAL (Virtual Timer Value register)
   ret
 
+ASM_PFX(ArmReadCntvTval02):
+  mrs   x0, cntv_tval_el02    // Read CNTV_TVAL (Virtual Timer value register) when EL2 Host
+  ret
 
 ASM_PFX(ArmWriteCntvTval):
   msr   cntv_tval_el0, x0        // Write to CNTV_TVAL (Virtual Timer Value register)
   isb
   ret
 
+ASM_PFX(ArmWriteCntvTval02):
+  msr   cntv_tval_el02, x0   // Write to CNTV_TVAL (Virtual Timer value register) EL2 Host
+  isb
+  ret
 
 ASM_PFX(ArmReadCntvCtl):
   mrs   x0, cntv_ctl_el0         // Read CNTV_CTL (Virtual Timer Control Register)
   ret
 
+ASM_PFX(ArmReadCntvCtl02):
+  mrs   x0, cntv_ctl_el02    // Read CNTV_CTL (Virtual Timer Control Register) when EL2 Host
+  ret
 
 ASM_PFX(ArmWriteCntvCtl):
   msr   cntv_ctl_el0, x0         // Write to CNTV_CTL (Virtual Timer Control Register)
   isb
   ret
 
+ASM_PFX(ArmWriteCntvCtl02):
+  msr   cntv_ctl_el02, x0    // Write CNTV_CTL (Virtual Timer Control Register) when EL2 Host
+  isb
+  ret
 
 ASM_PFX(ArmReadCntvCt):
   mrs  x0, cntvct_el0            // Read CNTVCT  (Virtual Count Register)

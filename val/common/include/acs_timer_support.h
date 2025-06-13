@@ -64,6 +64,10 @@ uint64_t ArmReadCntpCtl02(void);
 uint64_t ArmReadCntpTval02(void);
 void     ArmWriteCntpCtl02(uint64_t val);
 void     ArmWriteCntpTval02(uint64_t val);
+uint64_t ArmReadCntvCtl02(void);
+uint64_t ArmReadCntvTval02(void);
+void     ArmWriteCntvCtl02(uint64_t val);
+void     ArmWriteCntvTval02(uint64_t val);
 
 uint64_t
 ArmReadCntFrq (

@@ -79,10 +79,10 @@ ArmArchTimerReadReg (
       return effective_e2h ? ArmReadCntpCtl02() : ArmReadCntpCtl();
 
     case CntvTval:
-      return ArmReadCntvTval();
+      return effective_e2h ? ArmReadCntvTval02() : ArmReadCntvTval();
 
     case CntvCtl:
-      return ArmReadCntvCtl();
+      return effective_e2h ? ArmReadCntvCtl02() : ArmReadCntvCtl();
 
     case CntvCt:
       return ArmReadCntvCt();
@@ -163,11 +163,19 @@ ArmArchTimerWriteReg (
       break;
 
     case CntvTval:
-      ArmWriteCntvTval(*data_buf);
+      if (effective_e2h) {
+        ArmWriteCntvTval02(*data_buf);
+      } else {
+        ArmWriteCntvTval(*data_buf);
+      }
       break;
 
     case CntvCtl:
-      ArmWriteCntvCtl(*data_buf);
+      if (effective_e2h) {
+        ArmWriteCntvCtl02(*data_buf);
+      } else {
+        ArmWriteCntvCtl(*data_buf);
+      }
       break;
 
     case CntvCt:
