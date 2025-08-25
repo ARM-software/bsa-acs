@@ -5,7 +5,7 @@ This repository previously hosted prebuilt images for the **BSA ACS** suite.
 ---
 
 ## Latest Prebuilt Images
-The latest **BSA ACS prebuilt images** are now published under the [`sysarch-acs`](https://github.com/ARM-software/sysarch-acs) repository:
+The latest **BSA, MPAM, MemTest ACS prebuilt images** are now published under the [`sysarch-acs`](https://github.com/ARM-software/sysarch-acs) repository:
 
 👉 [sysarch-acs/prebuilt_images](https://github.com/ARM-software/sysarch-acs/tree/main/prebuilt_images)
 
@@ -14,7 +14,7 @@ Partners and users are encouraged to use the unified `sysarch-acs` prebuilt imag
 ---
 
 ## Legacy BSA Prebuilt Images
-Older prebuilt images for BSA are still preserved here for reference and backward compatibility:
+Older prebuilt images for BSA, MPAM, MemTest are still preserved here for reference and backward compatibility:
 
 👉 [prebuilt_images](./prebuilt_images)
 
