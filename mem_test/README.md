@@ -1,3 +1,21 @@
+### 📢 Repository Notice — Project Restructure
+
+> **Status Update (June 2025)**
+> The **BSA-ACS** and **SBSA-ACS** repositories are now ***read-only***.
+
+> Development has moved to the consolidated **[`sysarch-acs`](https://github.com/ARM-software/sysarch-acs)** repository, which hosts the test suites for BSA, SBSA, **MemTest**and future system-standard compliance suites.
+
+| What changed?                      | Where to contribute now?                               |
+| ---------------------------------- | ------------------------------------------------------ |
+| **Code updates**                   | Open pull requests in **`sysarch-acs`**                |
+| **Bug reports / feature requests** | Create GitHub issues in **`sysarch-acs`**              |
+| **Open PRs & issues here**         | The ACS team will migrate or close them as appropriate |
+
+We appreciate your cooperation as we streamline our codebase.
+For questions, please contact the ACS maintainers or open an issue in **`sysarch-acs`**.
+
+-------------------------------------------------------------------------------------------------------------------
+
 # Memory model consistency tests
 Memory model consistency tests (litmus tests) are small parallel programs designed to evaluate the correctness and
 consistency of a computer system's memory model, particularly in the context of concurrent or parallel programming.
